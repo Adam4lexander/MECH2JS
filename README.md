@@ -36,8 +36,13 @@ Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
   nearest enemy, `x` / Shift+`x` zoom the radar, F1..F12 the cockpit displays
   (F2 radar mode, F3 map, F4 target display, F5 damage display, F11 HUD, F12
   objectives - the browser keeps some F-keys for itself), `l` infrared,
-  `w` enhanced vision, Alt+P or Pause to pause. Click the view to give the game
-  the mouse (MOUSE.DLL: it steers the torso like a centring joystick).
+  `w` enhanced vision, Alt+P or Pause to pause. The game's own menus: Esc the
+  main menu (it pauses the game - Abort Mission, Device Calibration with the
+  monitor brightness, Audio Ctrl, Combat Variables, Flee to DOS), `u` the
+  systems status toggles, `b` / Ctrl+F1..F3 the lance's command computer;
+  digits pick an item, Esc backs out. Click the view to give the game
+  the mouse (MOUSE.DLL: it steers the torso like a centring joystick); while
+  it has the mouse, the browser takes Esc to release it.
   The cockpit HUD is the game's own: its widgets, radar, tapes and reticle
   draw into the game's 640x480 indexed window, which is laid over the 3D view
   through the palette. The 3D views the game draws mid-frame - the target

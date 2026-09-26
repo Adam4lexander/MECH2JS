@@ -6,7 +6,7 @@ Every ported function carries `@mw2 <name> <address>`; this file is built from t
 against `decompiled/mw2/listing/functions.csv`, so a function renamed upstream fails the build rather
 than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 
-**Game functions:** 1159  |  **ported exact:** 780  |  **partial:** 64  |  **stub:** 2  |  library functions ported: 33
+**Game functions:** 1159  |  **ported exact:** 851  |  **partial:** 65  |  **stub:** 3  |  library functions ported: 33
 
 ## By original module
 
@@ -14,14 +14,14 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 |---|---|---:|---:|---:|---:|---:|
 | ai_combat | ai | 31 | 31 | 0 | 0 | 0 |
 | ai_debug | ai | 2 | 0 | 0 | 0 | 2 |
-| ai_group | ai | 98 | 94 | 2 | 0 | 2 |
+| ai_group | ai | 98 | 95 | 2 | 0 | 1 |
 | ai_state | ai | 17 | 17 | 0 | 0 | 0 |
 | game_boot | boot | 18 | 8 | 2 | 0 | 8 |
 | main | boot | 15 | 10 | 2 | 0 | 3 |
-| geom_luma | geometry | 67 | 53 | 1 | 0 | 13 |
+| geom_luma | geometry | 67 | 57 | 1 | 0 | 9 |
 | geom_poly | geometry | 20 | 18 | 1 | 0 | 1 |
 | geom_table | geometry | 46 | 24 | 3 | 0 | 19 |
-| input | input | 27 | 16 | 1 | 0 | 10 |
+| input | input | 27 | 17 | 1 | 0 | 9 |
 | mission_config | mission | 5 | 4 | 1 | 0 | 0 |
 | mission_log | mission | 28 | 24 | 2 | 0 | 2 |
 | mission_result | mission | 7 | 7 | 0 | 0 | 0 |
@@ -29,9 +29,9 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | netplay | netplay | 13 | 1 | 1 | 0 | 11 |
 | project_entry | project | 31 | 27 | 2 | 0 | 2 |
 | project_file | project | 34 | 14 | 4 | 0 | 16 |
-| project_tables | project | 39 | 9 | 1 | 0 | 29 |
+| project_tables | project | 39 | 32 | 0 | 1 | 6 |
 | stream_seen | project | 3 | 3 | 0 | 0 | 0 |
-| render_asm | render | 74 | 36 | 11 | 0 | 27 |
+| render_asm | render | 74 | 38 | 11 | 0 | 25 |
 | res_cache | resource | 25 | 0 | 1 | 2 | 22 |
 | res_loaders | resource | 9 | 4 | 1 | 0 | 4 |
 | cockpit | sim | 12 | 10 | 2 | 0 | 0 |
@@ -41,16 +41,16 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | weapons | sim | 15 | 14 | 0 | 0 | 1 |
 | sound_config | sound | 11 | 7 | 3 | 0 | 1 |
 | sound_res | sound | 14 | 13 | 1 | 0 | 0 |
-| sound_seq | sound | 59 | 24 | 8 | 0 | 27 |
-| sound_sfx | sound | 15 | 14 | 0 | 0 | 1 |
-| terrain | terrain | 103 | 94 | 0 | 0 | 9 |
+| sound_seq | sound | 59 | 30 | 9 | 0 | 20 |
+| sound_sfx | sound | 15 | 15 | 0 | 0 | 0 |
+| terrain | terrain | 103 | 96 | 0 | 0 | 7 |
 | cheats | ui | 14 | 0 | 3 | 0 | 11 |
 | hud_debug | ui | 15 | 0 | 0 | 0 | 15 |
 | target_ui | ui | 2 | 1 | 0 | 0 | 1 |
-| ui_callbacks | ui | 33 | 0 | 0 | 0 | 33 |
+| ui_callbacks | ui | 33 | 29 | 0 | 0 | 4 |
 | screenshot | util | 3 | 1 | 0 | 0 | 2 |
 | time_format | util | 3 | 3 | 0 | 0 | 0 |
-| vfx_font | vfx | 47 | 38 | 1 | 0 | 8 |
+| vfx_font | vfx | 47 | 40 | 2 | 0 | 5 |
 | vfx_lib | vfx | 42 | 15 | 1 | 0 | 26 |
 | vfx_video | vfx | 51 | 41 | 5 | 0 | 5 |
 
@@ -63,7 +63,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x000103c0 | vfx_video_sub_0103c0 | vfx_video | exact | `vfxVideoSub0103c0` src/sim/world/viewScene.ts:46 |
 | 0x00010490 | vfx_video_sub_010490 | vfx_video | partial | `vfxVideoSub010490` src/sim/display/mainView.ts:44 |
 | 0x000106c0 | viewport_select_main | vfx_video | exact | `vfxVideoSub0106c0` src/sim/cockpit/radar.ts:1224 |
-| 0x000106d0 | vfx_video_sub_0106d0 | vfx_video | partial | `vfxVideoSub0106d0` src/mission/mainLoop.ts:84 |
+| 0x000106d0 | vfx_video_sub_0106d0 | vfx_video | partial | `vfxVideoSub0106d0` src/mission/mainLoop.ts:85 |
 | 0x00010b50 | frame_prj_add | vfx_video | exact | `framePrjAdd` src/sim/world/framePrj.ts:48 |
 | 0x00010bd0 | frame_prj_reset | vfx_video | exact | `framePrjReset` src/sim/world/framePrj.ts:69 |
 | 0x00010c10 | frame_prj_slot_clear | vfx_video | exact | `framePrjSlotClear` src/sim/world/framePrj.ts:82 |
@@ -120,6 +120,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x000137a0 | layout_pane_scale_about_centre | vfx_font | exact | `layoutPaneScaleAboutCentre` src/sim/display/layout.ts:155 |
 | 0x00013860 | layout_pane_fit_shape | vfx_font | exact | `layoutPaneFitShape` src/sim/display/layout.ts:177 |
 | 0x00013960 | vfx_pane_frame | vfx_font | exact | `vfxPaneFrame` src/sim/display/layout.ts:192 |
+| 0x000139f0 | pane_rule_under_text | vfx_font | exact | `paneRuleUnderTextDraw` src/sim/ui/menus.ts:231 |
 | 0x00013a40 | hud_text_underline | vfx_font | exact | `vfxFontSub013a40` src/sim/cockpit/objectivesHud.ts:96 |
 | 0x00013ad0 | vfx_text_box_draw | vfx_font | exact | `vfxFontSub013ad0` src/sim/cockpit/targetDisplay.ts:265 |
 | 0x00014020 | vfx_font_sub_014020 | vfx_font | exact | `vfxFontSub014020` src/sim/display/layout.ts:211 |
@@ -138,6 +139,8 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00014ae0 | pane_lerp | vfx_font | exact | `paneLerp` src/sim/cockpit/hud.ts:261 |
 | 0x00014b80 | pane_transition_step | vfx_font | exact | `paneTransitionStep` src/sim/cockpit/hud.ts:289 |
 | 0x00014c50 | pane_transition_step_split | vfx_font | exact | `paneTransitionStepSplit` src/sim/cockpit/hud.ts:323 |
+| 0x00014d90 | brightness_tables_build | vfx_font | exact | `brightnessTablesBuild` src/sim/world/brightness.ts:49 |
+| 0x00014e70 | palette_apply_brightness | vfx_font | partial | `paletteApplyBrightness` src/sim/world/brightness.ts:70 |
 | 0x00014ee0 | day_cycle_init | vfx_font | exact | `dayCycleInit` src/sim/world/dayCycle.ts:57 |
 | 0x00014f80 | day_cycle_tick | vfx_font | exact | `dayCycleTick` src/sim/world/dayCycle.ts:78 |
 | 0x00015070 | day_cycle_set_phase | vfx_font | exact | `dayCycleSetPhase` src/sim/world/dayCycle.ts:111 |
@@ -147,7 +150,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00015760 | sim_clock_step | game_boot | exact | `simClockStep` src/engine/clock.ts:132 |
 | 0x00015980 | sim_stopwatch_elapsed | game_boot | exact | `simStopwatchElapsed` src/engine/clock.ts:101 |
 | 0x000159e0 | sim_clock_reset | game_boot | exact | `simClockReset` src/engine/clock.ts:111 |
-| 0x00015e90 | game_update_pause | game_boot | exact | `gameUpdatePause` src/sim/ui/uiContext.ts:114 |
+| 0x00015e90 | game_update_pause | game_boot | exact | `gameUpdatePause` src/sim/ui/uiContext.ts:91 |
 | 0x00015f00 | game_boot_sub_015f00 | game_boot | exact | `gameBootSub015f00` src/mission/results.ts:128 |
 | 0x00015f60 | objective_table_start | game_boot | partial | `objectiveTableStart` src/mission/objectives.ts:154 |
 | 0x00016030 | objective_target_destroyed | game_boot | exact | `objectiveTargetDestroyed` src/mission/results.ts:54 |
@@ -171,10 +174,62 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00017450 | task_list_notify_rebuilt | project_tables | exact | `taskListNotifyRebuilt` src/engine/tasks/taskList.ts:102 |
 | 0x00017490 | task_data | project_tables | exact | `taskData` src/engine/tasks/taskList.ts:144 |
 | 0x000174a0 | task_list_run | project_tables | exact | `taskListRun` src/engine/tasks/taskList.ts:112 |
-| 0x00017570 | ui_context_register | project_tables | exact | `uiContextRegister` src/sim/ui/uiContext.ts:79 |
-| 0x00017cd0 | menu_poll_key | project_tables | exact | `menuPollKey` src/sim/ui/uiContext.ts:135 |
-| 0x00017ea0 | project_tables_sub_017ea0 | project_tables | partial | `projectTablesSub017ea0` src/sim/ui/uiContext.ts:196 |
-| 0x00018690 | ui_context_active | project_tables | exact | `uiContextActive` src/sim/ui/uiContext.ts:102 |
+| 0x00017570 | ui_context_register | project_tables | exact | `uiContextRegister` src/sim/ui/uiContext.ts:62 |
+| 0x000175d0 | ui_context_request_open | project_tables | exact | `uiContextRequestOpen` src/sim/ui/menus.ts:36 |
+| 0x00017610 | ui_context_toggle | project_tables | exact | `uiContextToggle` src/sim/ui/menus.ts:52 |
+| 0x000176e0 | ui_context_clear_all | project_tables | exact | `uiContextClearAll` src/sim/ui/menus.ts:164 |
+| 0x00017710 | menu_resolve_callbacks | project_tables | exact | `menuResolveCallbacks` src/sim/ui/menuLoad.ts:207 |
+| 0x00017810 | menu_load | project_tables | exact | `menuLoad` src/sim/ui/menuLoad.ts:296 |
+| 0x000178b0 | menu_layout | project_tables | exact | `menuLayout` src/sim/ui/menuLoad.ts:245 |
+| 0x00017aa0 | menu_load_art | project_tables | exact | `menuLoadArt` src/sim/ui/menus.ts:174 |
+| 0x00017b40 | menu_open | project_tables | exact | `menuOpen` src/sim/ui/menus.ts:116 |
+| 0x00017be0 | menu_close | project_tables | exact | `menuClose` src/sim/ui/menus.ts:135 |
+| 0x00017ca0 | ui_context_clear_request | project_tables | exact | `uiContextClearRequest` src/sim/ui/menuCallbacks.ts:82 |
+| 0x00017cd0 | menu_poll_key | project_tables | exact | `menuPollKey` src/sim/ui/uiContext.ts:112 |
+| 0x00017ea0 | ui_context_dispatch | project_tables | exact | `uiContextDispatch` src/sim/ui/menus.ts:89 |
+| 0x00017f30 | menu_frame | project_tables | exact | `menuFrame` src/sim/ui/menus.ts:186 |
+| 0x00017fd0 | menu_key_action | project_tables | exact | `menuKeyAction` src/sim/ui/menus.ts:207 |
+| 0x00018040 | menu_draw | project_tables | exact | `menuDraw` src/sim/ui/menus.ts:248 |
+| 0x00018560 | ui_context_find | project_tables | exact | `uiContextFindNode` src/sim/ui/menus.ts:73 |
+| 0x00018690 | ui_context_active | project_tables | exact | `uiContextActive` src/sim/ui/uiContext.ts:78 |
+| 0x000186e0 | menu_item_slider | project_tables | exact | `menuItemSlider` src/sim/ui/menus.ts:483 |
+| 0x00018ac0 | menu_item_choice | project_tables | exact | `menuItemChoice` src/sim/ui/menus.ts:379 |
+| 0x00018d00 | menu_item_toggle | project_tables | exact | `menuItemToggle` src/sim/ui/menus.ts:429 |
+| 0x000191a0 | menu_calibration_onload | project_tables | exact | `menuCalibrationOnload` src/sim/ui/menuCallbacks.ts:502 |
+| 0x000192d0 | menu_item_calibrate | project_tables | stub | `menuItemCalibrate` src/sim/ui/menuCallbacks.ts:545 |
+| 0x00019560 | brightness_get | project_tables | exact | `brightnessGet` src/sim/world/brightness.ts:94 |
+| 0x000195a0 | brightness_preview | project_tables | exact | `brightnessPreview` src/sim/world/brightness.ts:108 |
+| 0x000195d0 | brightness_commit | project_tables | exact | `brightnessCommit` src/sim/world/brightness.ts:120 |
+| 0x00019600 | brightness_revert | project_tables | exact | `brightnessRevert` src/sim/world/brightness.ts:132 |
+| 0x000196b0 | lance_menu_onload | ui_callbacks | exact | `lanceMenuOnload` src/sim/ui/menuCallbacks.ts:96 |
+| 0x00019790 | lance_point_menu_onload | ui_callbacks | exact | `lancePointMenuOnload` src/sim/ui/menuCallbacks.ts:128 |
+| 0x00019830 | lance_order_selected | ui_callbacks | exact | `lanceOrderSelected` src/sim/ui/menuCallbacks.ts:150 |
+| 0x00019850 | lance_get_formation | ui_callbacks | exact | `lanceGetFormation` src/sim/ui/menuCallbacks.ts:160 |
+| 0x00019860 | lance_set_formation | ui_callbacks | exact | `lanceSetFormation` src/sim/ui/menuCallbacks.ts:166 |
+| 0x00019890 | lance_slot_ai_state | ui_callbacks | exact | `lanceSlotAiState` src/sim/ui/menuCallbacks.ts:178 |
+| 0x000198c0 | lance_control_slot_init | ui_callbacks | exact | `lanceControlSlotInit` src/sim/ui/menuCallbacks.ts:197 |
+| 0x000198e0 | lance_status_init | ui_callbacks | exact | `lanceStatusInit` src/sim/ui/menuCallbacks.ts:235 |
+| 0x00019900 | lance_order_target | ui_callbacks | exact | `lanceOrderTarget` src/sim/ui/menuCallbacks.ts:251 |
+| 0x00019930 | lance_order_attack | ui_callbacks | exact | `lanceOrderAttack` src/sim/ui/menuCallbacks.ts:257 |
+| 0x00019960 | lance_order_follow | ui_callbacks | exact | `lanceOrderFollow` src/sim/ui/menuCallbacks.ts:263 |
+| 0x00019990 | lance_order_patrol | ui_callbacks | exact | `lanceOrderPatrol` src/sim/ui/menuCallbacks.ts:269 |
+| 0x000199c0 | lance_order_godirect | ui_callbacks | exact | `lanceOrderGodirect` src/sim/ui/menuCallbacks.ts:275 |
+| 0x000199f0 | lance_order_shutdown | ui_callbacks | exact | `lanceOrderShutdown` src/sim/ui/menuCallbacks.ts:281 |
+| 0x00019a20 | lance_slot_target_name | ui_callbacks | exact | `lanceSlotTargetName` src/sim/ui/menuCallbacks.ts:209 |
+| 0x00019ab0 | user_option_get | ui_callbacks | exact | `userOptionGet` src/sim/ui/menuCallbacks.ts:289 |
+| 0x00019b20 | user_option_set | ui_callbacks | exact | `userOptionSet` src/sim/ui/menuCallbacks.ts:310 |
+| 0x00019ba0 | detail_options_apply_thunk | ui_callbacks | exact | `detailOptionsApplyThunk` src/sim/ui/menuCallbacks.ts:369 |
+| 0x00019bb0 | detail_options_apply | ui_callbacks | exact | `detailOptionsApply` src/sim/ui/menuCallbacks.ts:348 |
+| 0x00019c50 | detail_object_textures_get | ui_callbacks | exact | `detailObjectTexturesGet` src/sim/ui/menuCallbacks.ts:377 |
+| 0x00019c80 | detail_object_textures_set | ui_callbacks | exact | `detailObjectTexturesSet` src/sim/ui/menuCallbacks.ts:385 |
+| 0x00019cb0 | detail_terrain_textures_get | ui_callbacks | exact | `detailTerrainTexturesGet` src/sim/ui/menuCallbacks.ts:395 |
+| 0x00019ce0 | detail_terrain_textures_set | ui_callbacks | exact | `detailTerrainTexturesSet` src/sim/ui/menuCallbacks.ts:403 |
+| 0x00019d10 | detail_display_get | ui_callbacks | exact | `detailDisplayGet` src/sim/ui/menuCallbacks.ts:413 |
+| 0x00019d40 | detail_display_set | ui_callbacks | exact | `detailDisplaySet` src/sim/ui/menuCallbacks.ts:419 |
+| 0x00019d70 | detail_density_get | ui_callbacks | exact | `detailDensityGet` src/sim/ui/menuCallbacks.ts:429 |
+| 0x00019d80 | detail_density_set | ui_callbacks | exact | `detailDensitySet` src/sim/ui/menuCallbacks.ts:435 |
+| 0x00019da0 | menu_item_abort_mission | ui_callbacks | exact | `menuItemAbortMission` src/sim/ui/menuCallbacks.ts:457 |
+| 0x00019e10 | menu_item_flee_to_dos | ui_callbacks | exact | `menuItemFleeToDos` src/sim/ui/menuCallbacks.ts:475 |
 | 0x0001a9b0 | dev_dir_load_sfl | project_entry | partial | `devDirLoadSfl` src/mission/results.ts:149 |
 | 0x0001aad0 | anim_player_step | project_entry | exact | `animPlayerStep` src/sim/mech/animTask.ts:332 |
 | 0x0001b190 | anim_scale_by_gait | project_entry | exact | `animScaleByGait` src/sim/mech/animTask.ts:80 |
@@ -276,6 +331,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0001f0c0 | mesh_raycast_all | terrain | exact | `meshRaycastAll` src/sim/world/collision.ts:314 |
 | 0x0001f120 | scrounge_install | terrain | exact | `scroungeInstall` src/sim/world/scrounge.ts:68 |
 | 0x0001f270 | scrounge_follow_viewer | terrain | exact | `scroungeFollowViewer` src/sim/world/scrounge.ts:123 |
+| 0x0001f400 | scrounge_detach | terrain | exact | `scroungeDetach` src/sim/world/scrounge.ts:170 |
 | 0x0001f440 | terrain_table_reset | terrain | exact | `terrainTableReset` src/sim/mech/animTask.ts:70 |
 | 0x0001f460 | mech_anim_init | terrain | exact | `mechAnimInit` src/sim/mech/create.ts:27 |
 | 0x0001f490 | mech_anim_clear_request | terrain | exact | `mechAnimClearRequest` src/sim/mech/animTask.ts:346 |
@@ -291,6 +347,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0001fa90 | object_move_to_world_list | terrain | exact | `objectMoveToWorldList` src/engine/scene/objectLists.ts:194 |
 | 0x0001fb90 | object_list_unlink | terrain | exact | `objectListUnlink` src/engine/scene/objectLists.ts:209 |
 | 0x0001fbd0 | object_list_insert_after | terrain | exact | `objectListInsertAfter` src/engine/scene/objectLists.ts:217 |
+| 0x0001fbf0 | scenery_c0_set_visible | terrain | exact | `sceneryC0SetVisible` src/engine/scene/objectLists.ts:246 |
 | 0x0001fca0 | mech_move_step | terrain | exact | `mechMoveStep` src/sim/world/collision.ts:833 |
 | 0x000200d0 | mech_collide_mechs | terrain | exact | `mechCollideMechs` src/sim/world/collision.ts:718 |
 | 0x00020570 | mech_collide_obstacles | terrain | exact | `mechCollideObstacles` src/sim/world/collision.ts:763 |
@@ -409,7 +466,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00029c90 | tracked_object_create | ai_group | exact | `trackedObjectCreate` src/sim/ai/tracked.ts:38 |
 | 0x00029d10 | tracked_object_remove | ai_group | exact | `trackedObjectRemove` src/sim/ai/tracked.ts:68 |
 | 0x00029e90 | ai_cycle_target | ai_group | exact | `aiCycleTarget` src/sim/ai/targeting.ts:192 |
-| 0x0002a080 | target_marker_hide | ai_group | exact | `aiGroupSub02a080` src/sim/ui/commands.ts:404 |
+| 0x0002a080 | target_marker_hide | ai_group | exact | `aiGroupSub02a080` src/sim/ui/commands.ts:412 |
 | 0x0002a0a0 | ai_validate_tracked | ai_group | exact | `aiValidateTracked` src/sim/ai/targeting.ts:75 |
 | 0x0002a210 | ai_validate_target | ai_group | exact | `aiValidateTarget` src/sim/ai/targeting.ts:109 |
 | 0x0002a460 | ai_validate_gamething | ai_group | exact | `aiValidateGamething` src/sim/ai/targeting.ts:151 |
@@ -424,6 +481,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0002acf0 | ai_target_nearest_enemy | ai_group | exact | `aiTargetNearestEnemy` src/sim/ai/targeting.ts:432 |
 | 0x0002ade0 | group_reset | ai_group | exact | `groupReset` src/sim/groups/groups.ts:23 |
 | 0x0002ae30 | group_set_formation_by_name | ai_group | exact | `groupSetFormationByName` src/sim/groups/formations.ts:69 |
+| 0x0002aeb0 | group_get_formation | ai_group | exact | `groupGetFormation` src/sim/groups/formations.ts:177 |
 | 0x0002aed0 | group_set_formation | ai_group | exact | `groupSetFormation` src/sim/groups/formations.ts:90 |
 | 0x0002af20 | mech_set_star_slot | ai_group | exact | `mechSetStarSlot` src/sim/groups/groups.ts:90 |
 | 0x0002af50 | group_set_leader | ai_group | exact | `groupSetLeader` src/sim/groups/groups.ts:62 |
@@ -627,6 +685,10 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00038a20 | object_destroy | geom_luma | exact | `objectDestroy` src/engine/scene/worldObject.ts:463 |
 | 0x00038ae0 | polygon_resolve_colour | geom_luma | exact | `polygonResolveColour` src/render/shading/polygonColour.ts:110 |
 | 0x00038ee0 | light_shade_level | geom_luma | exact | `lightShadeLevel` src/render/shading/polygonColour.ts:93 |
+| 0x00038f60 | texture_type_enabled | geom_luma | exact | `textureTypeEnabled` src/sim/display/renderState.ts:228 |
+| 0x00038f80 | texture_type_set_enabled | geom_luma | exact | `textureTypeSetEnabled` src/sim/display/renderState.ts:217 |
+| 0x00038fb0 | texture_perspective_enabled | geom_luma | exact | `texturePerspectiveEnabled` src/sim/display/renderState.ts:246 |
+| 0x00038fd0 | texture_perspective_set | geom_luma | exact | `texturePerspectiveSet` src/sim/display/renderState.ts:238 |
 | 0x00038ff0 | camera_init | geom_luma | exact | `cameraInit` src/sim/camera/cameraUpdate.ts:689 |
 | 0x00039190 | camera_update | geom_luma | exact | `cameraUpdate` src/sim/camera/cameraUpdate.ts:731 |
 | 0x00039400 | camera_set_mode | geom_luma | exact | `cameraSetMode` src/sim/mech/mechTickAi.ts:69 |
@@ -690,6 +752,8 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0003f230 | viewer_build_transform | render_asm | exact | `viewerBuildTransform` src/sim/camera/projection.ts:90 |
 | 0x0003f320 | viewer_project_point | render_asm | exact | `viewerProjectPoint` src/sim/camera/projection.ts:117 |
 | 0x0003f500 | object_cull_main_view | code label, no Ghidra function | partial | `objectCullMainView` src/render/pipeline/drawPipeline.ts:42 |
+| 0x0003f990 | lod_quality_is_high | render_asm | exact | `lodQualityIsHigh` src/sim/camera/projection.ts:158 |
+| 0x0003f9b0 | lod_quality_set | render_asm | exact | `lodQualitySet` src/sim/camera/projection.ts:150 |
 | 0x0003fa50 | vec3_normalise | render_asm | exact | `vec3Normalise` src/engine/collision/ray.ts:227 |
 | 0x0003fbc0 | camera_keys_init | render_asm | exact | `cameraKeysInit` src/sim/camera/cameraUpdate.ts:158 |
 | 0x0003fc00 | camera_keys_update | render_asm | exact | `cameraKeysUpdate` src/sim/camera/cameraUpdate.ts:272 |
@@ -698,25 +762,26 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0003ff00 | camera_keys_clear | render_asm | exact | `cameraKeysClear` src/sim/camera/cameraUpdate.ts:166 |
 | 0x0003ff40 | camera_key_add | render_asm | exact | `cameraKeyAdd` src/sim/camera/cameraUpdate.ts:189 |
 | 0x0003ffb0 | camera_keys_active | render_asm | exact | `cameraKeysActive` src/sim/camera/cameraUpdate.ts:179 |
-| 0x0003ffc0 | sound_sample_open | sound_sfx | exact | `soundSampleOpen` src/sim/sound/mixer.ts:226 |
-| 0x00040460 | sound_sample_eos | sound_sfx | exact | `soundSampleEos` src/sim/sound/mixer.ts:314 |
-| 0x000405c0 | sound_init | sound_sfx | exact | `soundInit` src/sim/sound/mixer.ts:157 |
-| 0x00040740 | sound_shutdown | sound_sfx | exact | `soundShutdown` src/sim/sound/mixer.ts:192 |
-| 0x000407b0 | sound_refill_buffers | sound_sfx | exact | `soundRefillBuffers` src/sim/sound/mixer.ts:358 |
-| 0x000409b0 | sound_channel_start | sound_sfx | exact | `soundChannelStart` src/sim/sound/mixer.ts:399 |
-| 0x00040b50 | sound_sfx_sub_040b50 | sound_sfx | exact | `soundSfxSub040b50` src/sim/sound/mixer.ts:452 |
-| 0x00040bc0 | sound_play_positional | sound_sfx | exact | `soundPlayPositional` src/sim/sound/mixer.ts:499 |
-| 0x00040c50 | sound_play | sound_sfx | exact | `soundPlay` src/sim/sound/mixer.ts:441 |
-| 0x00040c90 | sound_play_delayed | sound_sfx | exact | `soundPlayDelayed` src/sim/sound/mixer.ts:484 |
-| 0x00040cf0 | sound_play_at | sound_sfx | exact | `soundPlayAt` src/sim/sound/mixer.ts:521 |
-| 0x00040d10 | sound_pan_from_bearing | sound_sfx | exact | `soundPanFromBearing` src/sim/sound/mixer.ts:532 |
-| 0x00040d50 | sound_random_rate | sound_sfx | exact | `soundRandomRate` src/sim/sound/mixer.ts:473 |
-| 0x00040d70 | sound_stop_channels | sound_sfx | exact | `soundStopChannels` src/sim/sound/mixer.ts:545 |
+| 0x0003ffc0 | sound_sample_open | sound_sfx | exact | `soundSampleOpen` src/sim/sound/mixer.ts:233 |
+| 0x00040460 | sound_sample_eos | sound_sfx | exact | `soundSampleEos` src/sim/sound/mixer.ts:321 |
+| 0x000405c0 | sound_init | sound_sfx | exact | `soundInit` src/sim/sound/mixer.ts:164 |
+| 0x00040740 | sound_shutdown | sound_sfx | exact | `soundShutdown` src/sim/sound/mixer.ts:199 |
+| 0x000407b0 | sound_refill_buffers | sound_sfx | exact | `soundRefillBuffers` src/sim/sound/mixer.ts:365 |
+| 0x000409b0 | sound_channel_start | sound_sfx | exact | `soundChannelStart` src/sim/sound/mixer.ts:406 |
+| 0x00040b10 | sound_preview_sfx | sound_sfx | exact | `soundPreviewSfx` src/sim/sound/options.ts:40 |
+| 0x00040b50 | sound_sfx_sub_040b50 | sound_sfx | exact | `soundSfxSub040b50` src/sim/sound/mixer.ts:459 |
+| 0x00040bc0 | sound_play_positional | sound_sfx | exact | `soundPlayPositional` src/sim/sound/mixer.ts:506 |
+| 0x00040c50 | sound_play | sound_sfx | exact | `soundPlay` src/sim/sound/mixer.ts:448 |
+| 0x00040c90 | sound_play_delayed | sound_sfx | exact | `soundPlayDelayed` src/sim/sound/mixer.ts:491 |
+| 0x00040cf0 | sound_play_at | sound_sfx | exact | `soundPlayAt` src/sim/sound/mixer.ts:528 |
+| 0x00040d10 | sound_pan_from_bearing | sound_sfx | exact | `soundPanFromBearing` src/sim/sound/mixer.ts:539 |
+| 0x00040d50 | sound_random_rate | sound_sfx | exact | `soundRandomRate` src/sim/sound/mixer.ts:480 |
+| 0x00040d70 | sound_stop_channels | sound_sfx | exact | `soundStopChannels` src/sim/sound/mixer.ts:552 |
 | 0x00040df0 | sound_emitter_update | sound_seq | exact | `soundEmitterUpdate` src/sim/sound/emitter.ts:59 |
 | 0x00041070 | sound_emitter_stop | sound_seq | exact | `soundEmitterStop` src/sim/sound/emitter.ts:129 |
 | 0x00041260 | midi_open | sound_seq | partial | `midiOpen` src/sim/sound/engineNote.ts:58 |
 | 0x00041440 | midi_close | sound_seq | partial | `midiClose` src/sim/sound/engineNote.ts:74 |
-| 0x00041560 | sound_seq_sub_041560 | sound_seq | exact | `soundSeqSub041560` src/sim/sound/mixer.ts:462 |
+| 0x00041560 | sound_seq_sub_041560 | sound_seq | exact | `soundSeqSub041560` src/sim/sound/mixer.ts:469 |
 | 0x00041570 | engine_note_start | sound_seq | exact | `engineNoteStart` src/sim/sound/engineNote.ts:89 |
 | 0x000416b0 | engine_note_update | sound_seq | exact | `engineNoteUpdate` src/sim/sound/engineNote.ts:115 |
 | 0x00041760 | engine_note_stop | sound_seq | exact | `engineNoteStop` src/sim/sound/engineNote.ts:132 |
@@ -727,6 +792,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00041b30 | sound_seq_queue_message | sound_seq | exact | `soundSeqQueueMessage` src/sim/sound/voice.ts:98 |
 | 0x00041dd0 | voice_queue_advance | sound_seq | exact | `voiceQueueAdvance` src/sim/sound/voice.ts:237 |
 | 0x00041e50 | voice_line_start | sound_seq | exact | `voiceLineStart` src/sim/sound/voice.ts:186 |
+| 0x00042020 | sound_preview_voice | sound_seq | exact | `soundPreviewVoice` src/sim/sound/options.ts:52 |
 | 0x00042080 | voice_queue_close | sound_seq | exact | `voiceQueueClose` src/sim/sound/voice.ts:272 |
 | 0x000421c0 | voice_queue_pause | sound_seq | exact | `voiceQueuePause` src/sim/sound/voice.ts:304 |
 | 0x00042230 | voice_resume | sound_seq | exact | `voiceResume` src/sim/sound/voice.ts:320 |
@@ -735,28 +801,34 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00042340 | sound_cue_play | sound_seq | exact | `soundCuePlay` src/sim/sound/voice.ts:348 |
 | 0x00042390 | damage_callout_play | sound_seq | exact | `damageCalloutPlay` src/sim/sound/voice.ts:383 |
 | 0x000423d0 | voice_queue_announcement | sound_seq | exact | `voiceQueueAnnouncement` src/sim/sound/voice.ts:337 |
-| 0x00042800 | cd_audio_init | sound_seq | partial | `cdAudioInit` src/sim/sound/music.ts:108 |
-| 0x00042910 | cd_audio_status | sound_seq | partial | `cdAudioStatus` src/sim/sound/music.ts:75 |
-| 0x00042980 | cd_status_update | sound_seq | exact | `cdStatusUpdate` src/sim/sound/music.ts:130 |
-| 0x000429d0 | cd_pause_toggle | sound_seq | partial | `cdPauseToggle` src/sim/sound/music.ts:174 |
-| 0x00042c30 | cd_stop | sound_seq | partial | `cdStop` src/sim/sound/music.ts:190 |
-| 0x00042d70 | cd_status_changed | sound_seq | partial | `cdStatusChanged` src/sim/sound/music.ts:141 |
-| 0x00042f70 | cd_play_track | sound_seq | partial | `cdPlayTrack` src/sim/sound/music.ts:156 |
-| 0x000435f0 | cd_audio_ready | sound_seq | exact | `cdAudioReadyGet` src/sim/sound/music.ts:89 |
-| 0x00043600 | cd_track_in_range | sound_seq | exact | `cdTrackInRange` src/sim/sound/music.ts:97 |
-| 0x00043c10 | music_start_mission_track | sound_config | exact | `musicStartMissionTrack` src/sim/sound/music.ts:206 |
-| 0x00043dd0 | music_update | sound_config | exact | `musicUpdate` src/sim/sound/music.ts:244 |
-| 0x00043e10 | sound_init_all | sound_config | exact | `soundInitAll` src/sim/sound/music.ts:260 |
-| 0x00043e50 | sound_frame_update | sound_config | exact | `soundFrameUpdate` src/sim/sound/mixer.ts:564 |
-| 0x00043f20 | sound_save_config | sound_config | partial | `soundSaveConfig` src/sim/sound/music.ts:276 |
-| 0x00043f70 | sound_pause | sound_config | exact | `soundPause` src/sim/sound/music.ts:291 |
-| 0x00043fd0 | sound_resume | sound_config | exact | `soundResume` src/sim/sound/music.ts:308 |
-| 0x00044020 | sound_install_dig_driver | sound_config | partial | `soundInstallDigDriver` src/sim/sound/mixer.ts:144 |
+| 0x00042800 | cd_audio_init | sound_seq | partial | `cdAudioInit` src/sim/sound/music.ts:115 |
+| 0x00042910 | cd_audio_status | sound_seq | partial | `cdAudioStatus` src/sim/sound/music.ts:81 |
+| 0x00042980 | cd_status_update | sound_seq | exact | `cdStatusUpdate` src/sim/sound/music.ts:165 |
+| 0x000429d0 | cd_pause_toggle | sound_seq | partial | `cdPauseToggle` src/sim/sound/music.ts:209 |
+| 0x00042c30 | cd_stop | sound_seq | partial | `cdStop` src/sim/sound/music.ts:225 |
+| 0x00042d70 | cd_status_changed | sound_seq | partial | `cdStatusChanged` src/sim/sound/music.ts:176 |
+| 0x00042f70 | cd_play_track | sound_seq | partial | `cdPlayTrack` src/sim/sound/music.ts:191 |
+| 0x000435f0 | cd_audio_ready | sound_seq | exact | `cdAudioReadyGet` src/sim/sound/music.ts:95 |
+| 0x00043600 | cd_track_in_range | sound_seq | exact | `cdTrackInRange` src/sim/sound/music.ts:103 |
+| 0x00043650 | cd_set_volume | sound_seq | partial | `cdSetVolume` src/sim/sound/music.ts:140 |
+| 0x000436d0 | cd_volume_apply | sound_seq | exact | `cdVolumeApply` src/sim/sound/music.ts:156 |
+| 0x00043720 | sound_option_get | sound_seq | exact | `soundOptionGet` src/sim/sound/options.ts:65 |
+| 0x000437f0 | sound_option_preview | sound_seq | exact | `soundOptionPreview` src/sim/sound/options.ts:97 |
+| 0x000439a0 | sound_option_commit | sound_seq | exact | `soundOptionCommit` src/sim/sound/options.ts:142 |
+| 0x00043b10 | sound_option_revert | sound_seq | exact | `soundOptionRevert` src/sim/sound/options.ts:185 |
+| 0x00043c10 | music_start_mission_track | sound_config | exact | `musicStartMissionTrack` src/sim/sound/music.ts:241 |
+| 0x00043dd0 | music_update | sound_config | exact | `musicUpdate` src/sim/sound/music.ts:279 |
+| 0x00043e10 | sound_init_all | sound_config | exact | `soundInitAll` src/sim/sound/music.ts:295 |
+| 0x00043e50 | sound_frame_update | sound_config | exact | `soundFrameUpdate` src/sim/sound/mixer.ts:571 |
+| 0x00043f20 | sound_save_config | sound_config | partial | `soundSaveConfig` src/sim/sound/music.ts:311 |
+| 0x00043f70 | sound_pause | sound_config | exact | `soundPause` src/sim/sound/music.ts:326 |
+| 0x00043fd0 | sound_resume | sound_config | exact | `soundResume` src/sim/sound/music.ts:343 |
+| 0x00044020 | sound_install_dig_driver | sound_config | partial | `soundInstallDigDriver` src/sim/sound/mixer.ts:151 |
 | 0x00044030 | sound_install_mdi_driver | sound_config | partial | `soundInstallMdiDriver` src/sim/sound/engineNote.ts:46 |
-| 0x000441b0 | sound_settings_init | sound_config | exact | `soundSettingsInit` src/sim/sound/mixer.ts:121 |
+| 0x000441b0 | sound_settings_init | sound_config | exact | `soundSettingsInit` src/sim/sound/mixer.ts:128 |
 | 0x00044720 | netplay_frame_exchange | netplay | partial | `netplayFrameExchange` src/sim/net/netplay.ts:28 |
 | 0x00045720 | cheat_match | netplay | exact | `cheatMatch` src/data/exe/tables/cheats.ts:47 |
-| 0x00045d80 | key_command_update | cheats | partial | `keyCommandUpdate` src/sim/ui/uiContext.ts:218 |
+| 0x00045d80 | key_command_update | cheats | partial | `keyCommandUpdate` src/sim/ui/uiContext.ts:173 |
 | 0x00046060 | command_execute | cheats | partial | `commandExecute` src/sim/ui/commands.ts:127 |
 | 0x00046ac0 | cheats_sub_046ac0 | cheats | partial | `cheatsSub046ac0` src/sim/ui/commands.ts:89 |
 | 0x00047650 | input_torso_tilt | target_ui | exact | `inputTorsoTilt` src/data/exe/tables/controlChannels.ts:94 |
@@ -777,6 +849,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00048c50 | input_sub_048c50 | input | exact | `inputSub048c50` src/sim/controls/input.ts:770 |
 | 0x00048c60 | input_sub_048c60 | input | exact | `inputSub048c60` src/sim/controls/input.ts:778 |
 | 0x00048ca0 | input_sub_048ca0 | input | exact | `inputSub048ca0` src/sim/controls/input.ts:762 |
+| 0x00048cb0 | input_sub_048cb0 | input | exact | `inputSub048cb0` src/sim/ui/menuCallbacks.ts:489 |
 | 0x00049b40 | ramp_start | main | exact | `rampStart` src/core/ramp.ts:39 |
 | 0x00049b80 | ramp_step | main | exact | `rampStep` src/core/ramp.ts:51 |
 | 0x00049be0 | ramp_angle_start | main | exact | `rampAngleStart` src/core/ramp.ts:64 |
@@ -838,7 +911,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0004e540 | thing_node_queue_pop | sim_objects | exact | `thingNodeQueuePop` src/sim/mech/spawn.ts:45 |
 | 0x0004e570 | gamething_alloc | sim_objects | exact | `gamethingAlloc` src/sim/things/gameThings.ts:52 |
 | 0x0004e5d0 | project_chunk_exec | sim_objects | exact | `projectChunkExec` src/mission/vm/chunkExec.ts:110 |
-| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:53 |
+| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:55 |
 | 0x0004fde0 | poly_resolve_code | sim_objects | exact | `polyResolveCode` src/engine/scene/wtboLoader.ts:80 |
 | 0x0004fe80 | poly_set_vertex_offset | sim_objects | exact | `polySetVertexOffset` src/engine/scene/wtboLoader.ts:99 |
 | 0x0004fea0 | poly_set_vertex_scale | sim_objects | exact | `polySetVertexScale` src/engine/scene/wtboLoader.ts:109 |
@@ -1024,10 +1097,10 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/mission/end.ts:61 - palette_fade_used_colours' blocking 0x5a-tick DAC fade and palette_apply_slot's upload are the host's; the port makes the slot the current one, which is what the host draws the screen in
 - src/mission/end.ts:78 - the port never writes the game's cfg files: the block is returned to the host instead
 - src/mission/end.ts:94 - the record is returned to the host rather than written to mw2msn.cfg
-- src/mission/load.ts:114 - static_arena_init: no arena pre-pass; tables are allocated on demand
-- src/mission/load.ts:129 - sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)
-- src/mission/mainLoop.ts:86 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
-- src/mission/mainLoop.ts:90 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
+- src/mission/load.ts:117 - static_arena_init: no arena pre-pass; tables are allocated on demand
+- src/mission/load.ts:133 - sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)
+- src/mission/mainLoop.ts:87 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
+- src/mission/mainLoop.ts:91 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
 - src/mission/objectives.ts:62 - ${what} longer than its ${destSize}-byte field; the original overruns into the next field
 - src/mission/objectives.ts:78 - a record index past the 48 Objective slots is not written (the original writes into the next table); MW2.PRJ has none
 - src/mission/objectives.ts:96 - MTBL table ${group} has ${n} records, past the 48 objective slots
@@ -1112,22 +1185,26 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/sound/engineNote.ts:48 - no mdi.ini is read: the port's Miles layer has its one driver
 - src/sim/sound/engineNote.ts:60 - sound_seq_sub_0414e0 (the sequences' volume, none of which exist yet) is not ported
 - src/sim/sound/engineNote.ts:76 - sound_release_sequences has nothing to release (no sequence is ever loaded in a mission)
-- src/sim/sound/mixer.ts:146 - no dig.ini is read: the port's Miles layer has its one driver
-- src/sim/sound/music.ts:77 - the IOCTL request goes to the port's CD drive interface
-- src/sim/sound/music.ts:110 - the drive search, IOCTLs and track table are the port's CD drive interface
-- src/sim/sound/music.ts:143 - the track table's free and re-read on a not-ready drive are the drive interface's
-- src/sim/sound/music.ts:158 - the MSCDEX play request (from the track's start sector, length computed from the table) is the drive interface's play(n)
-- src/sim/sound/music.ts:176 - a paused drive at the very start of the first track is replayed rather than resumed in the original; the port resumes
-- src/sim/sound/music.ts:192 - one stop request to the drive interface
-- src/sim/sound/music.ts:278 - the port never writes the game's cfg files: mw2snd.cfg is left as it was; sound_release_sequences has no sequence to release
+- src/sim/sound/mixer.ts:153 - no dig.ini is read: the port's Miles layer has its one driver
+- src/sim/sound/music.ts:83 - the IOCTL request goes to the port's CD drive interface
+- src/sim/sound/music.ts:117 - the drive search, IOCTLs and track table are the port's CD drive interface
+- src/sim/sound/music.ts:142 - the IOCTLs are the port's CD drive interface: no drive is a failed read
+- src/sim/sound/music.ts:178 - the track table's free and re-read on a not-ready drive are the drive interface's
+- src/sim/sound/music.ts:193 - the MSCDEX play request (from the track's start sector, length computed from the table) is the drive interface's play(n)
+- src/sim/sound/music.ts:211 - a paused drive at the very start of the first track is replayed rather than resumed in the original; the port resumes
+- src/sim/sound/music.ts:227 - one stop request to the drive interface
+- src/sim/sound/music.ts:313 - the port never writes the game's cfg files: mw2snd.cfg is left as it was; sound_release_sequences has no sequence to release
 - src/sim/things/gameThingDamage.ts:93 - the original sets 0x200 on worldRecords[geomIndex] before testing geomIndex for -1, and reads gameThings[-1] for a replacement with no gamething; the port skips both out-of-table accesses (the first cannot happen - a thing with geomIndex -1 already has flags 4)
 - src/sim/ui/commands.ts:91 - the wait is split across host frames (keyPauseActive) instead of a blocking loop
-- src/sim/ui/commands.ts:129 - the menu (0x33..0x37) and screenshot (0x52) commands are reported, not run; debug commands (hangAround) are not ported
+- src/sim/ui/commands.ts:129 - the screenshot (0x52) command is reported, not run; debug commands (hangAround) are not ported
 - src/sim/ui/commands.ts:136 - command 0x${cmd.toString(16)} (${what}) is not ported yet
-- src/sim/ui/uiContext.ts:81 - the node is a JS object rather than malloc(0x12)
-- src/sim/ui/uiContext.ts:198 - Phase 4 (menus): no context is ever requested, so the handlers (project_tables_sub_017b40, project_tables_font_handler_2, project_tables_sub_017f30) are not ported; a request is reported and dropped
-- src/sim/ui/uiContext.ts:207 - an active ui context gets no frame: the menu frame (project_tables_sub_017f30) is not ported
-- src/sim/ui/uiContext.ts:220 - cheat_handle_command (the cheat-code decoder) is not ported
+- src/sim/ui/menuCallbacks.ts:504 - the device record's +0xc (name) and +0x24 are not modelled: neither shipped GIDDI driver's init writes them, so they stay 0 and no device is listed
+- src/sim/ui/menuCallbacks.ts:547 - the calibration loop (input_sub_048cd0 / _048ce0 / _048d90) is not ported
+- src/sim/ui/menuLoad.ts:209 - the indices are held beside the records (MenuModule.indices) rather than in the callback fields they are replaced in
+- src/sim/ui/menuLoad.ts:298 - the module is read into objects (readModule); a failed load leaves node.record and node.module set, as the original does
+- src/sim/ui/menus.ts:137 - the loaded block is dropped rather than freed
+- src/sim/ui/uiContext.ts:64 - the node is a JS object rather than malloc(0x12)
+- src/sim/ui/uiContext.ts:175 - cheat_handle_command (the cheat-code decoder) is not ported
 - src/sim/weapons/projectiles.ts:227 - the original faults (idiv by zero) when the round is exactly on the target's origin; the port stops after the proximity bit instead
 - src/sim/weapons/projectiles.ts:266 - projectile_home: the round is on its target; the original divides by zero here and faults
 - src/sim/weapons/weapons.ts:748 - returns nothing: the C's return is whatever EAX last held, and both callers discard it
@@ -1135,6 +1212,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/world/anim2d.ts:102 - a play-once animation that finishes without bit 1 leaves the frame variable unset in the original; nothing is drawn in that state, so it is never read
 - src/sim/world/bitmap3d.ts:67 - ${fn}: slot ${slot} is outside bitmap3dTable; the original reads/writes past the table
 - src/sim/world/bitmap3d.ts:181 - the CEL pointers are dropped without release, as in the original (the port's cache has nothing to release)
+- src/sim/world/brightness.ts:72 - the port has no DAC: the level is recorded over the current slot for the host to apply (dacBrightness)
 - src/sim/world/detailRecords.ts:48 - nodes are JS objects rather than one static_malloc'd pool
 - src/sim/world/detailRecords.ts:180 - no cache purge-and-retry loop: the in-memory container cannot run out
 - src/sim/world/groundQuadtree.ts:21 - a JS object; the 'Not enough memory' path cannot happen
@@ -1181,11 +1259,12 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/mech/mechTickAi.ts:435 - reset_target clears previous_target, not itself
 - src/sim/mech/mechTickAi.ts:529 - the turn-rate cosine takes the forward speed in km/h as an angle in degrees
 - src/sim/mech/tickHooks.ts:252 - door_tick_ai: within a step of the nav point the ramps aim at a step-long offset from the world origin
-- src/sim/sound/mixer.ts:326 - sound_sample_eos: a caller-buffer sound (id -1) decrements the high half of enemyLockWarnTick
+- src/sim/sound/mixer.ts:333 - sound_sample_eos: a caller-buffer sound (id -1) decrements the high half of enemyLockWarnTick
 - src/sim/sound/voice.ts:75 - voice: static record 0x${addr.toString(16)} has a buffer word; the port reads it as none
 - src/sim/sound/voice.ts:154 - sound_seq_queue_message: a dropped duplicate keeps its VoiceLine marked in use
 - src/sim/sound/voice.ts:165 - sound_seq_queue_message: a dropped duplicate keeps its VoiceLine marked in use
 - src/sim/sound/voice.ts:246 - voice_queue_advance: a posted text line is dropped while its endTick is still ahead
+- src/sim/ui/menus.ts:308 - menu_draw: a digit on a menu\
 - src/sim/weapons/weapons.ts:78 - weapons[-1].fireGroup: reads the loadout dword at +0xb2 (throttleScale >> 16 | weaponCycleLock << 16)
 - src/sim/weapons/weapons.ts:565 - player_weapon_set_fire_group with no weapon selected writes loadout +0xb2 (throttleScale high word, weaponCycleLock low word)
 - src/sim/world/objectTasks.ts:336 - task_object_sound: INIT never sets the gate, so a chunk without it leaves the heap\
@@ -1241,13 +1320,20 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/mech/resourceRef.ts:51 - resource_load_ref: loose-file fallback for a reference given by id uses an uninitialised name
 - src/sim/mech/tickHooks.ts:207 - door_tick_ai: the group has no current objective and the C reads objectives[-1]
 - src/sim/net/netplay.ts:34 - a network session is running, and netplay is not ported
-- src/sim/sound/music.ts:220 - music_start_mission_track: MUS resource not "%d %d"; sscanf would leave the fields as they were
+- src/sim/sound/music.ts:255 - music_start_mission_track: MUS resource not "%d %d"; sscanf would leave the fields as they were
+- src/sim/sound/options.ts:26 - ${what}: an XMIDI sequence is loaded, and the port has no sequencer
 - src/sim/things/gameThingDamage.ts:38 - gamething_apply_damage: object index ${i} is past the 254 gamethings
 - src/sim/things/gameThingDamage.ts:46 - gamething_apply_damage: the destroyed thing has no world object (the original reads its type through a null pointer)
 - src/sim/things/gameThingDamage.ts:104 - gamething_destroy_world_record: replacement record ${record} has no gamething; the original tests the word before gameThings (0xf4a80)
 - src/sim/things/gameThingDamage.ts:125 - gamething_allegiance: affiliation ${a} is past the 8-entry table
-- src/sim/ui/uiContext.ts:203 - ui context ${c.id} requested ${c.request}: the menu handlers are not ported
-- src/sim/ui/uiContext.ts:230 - cheat codes (cheat_handle_command) are not ported
+- src/sim/ui/menuCallbacks.ts:141 - lance_point_menu_onload: no item record after the list
+- src/sim/ui/menuCallbacks.ts:155 - lance_order_selected: a negative slot reads before the table
+- src/sim/ui/menuCallbacks.ts:187 - lance_slot_ai_state: an empty mechTable slot, read through a null pointer
+- src/sim/ui/menuCallbacks.ts:550 - menu_item_calibrate: a device calibration was started, and it is not ported
+- src/sim/ui/menuLoad.ts:122 - menu control data: a list with a suffix callback in the module
+- src/sim/ui/menuLoad.ts:197 - ${MENU_TABLES[kind].label}[${index}] (0x${address.toString(16)}) is not ported
+- src/sim/ui/menus.ts:324 - menu_draw: a menu without a title underlines at uninitialised coordinates
+- src/sim/ui/uiContext.ts:185 - cheat codes (cheat_handle_command) are not ported
 - src/sim/weapons/weapons.ts:181 - mech_weapons_tick: weapons[${next}] is past the ten slots (the C reads the sections that follow)
 - src/sim/weapons/weapons.ts:307 - mech_weapon_fire: a weapon with ammo has no bin (the C would dereference null)
 - src/sim/weapons/weapons.ts:315 - mech_weapon_fire: the next ammo bin is past the loadout\

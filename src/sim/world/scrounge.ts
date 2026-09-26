@@ -161,3 +161,20 @@ export function scroungeFollowViewer(): void {
   s.dat000f43b4 = 0;
   s.dat000f43b0 = cellX;
 }
+
+/**
+ * The detail option's switch: the scrounge patch's subtree into the world
+ * list (on) or the alt list (off), walked, and scroungeActive = on (EDX,
+ * which scene_node_walk preserves - the C lost it).
+ *
+ * @mw2 scrounge_detach 0x0001f400
+ * @fidelity exact
+ */
+export function scroungeDetach(on: number): void {
+  const s = scrounge;
+  if (!s.scroungeNode) return;
+  if (on !== 0) sceneSubtreeMoveToWorldList(s.scroungeNode);
+  else sceneSubtreeMoveToAltList(s.scroungeNode);
+  sceneNodeWalk(s.scroungeNode);
+  s.scroungeActive = on;
+}

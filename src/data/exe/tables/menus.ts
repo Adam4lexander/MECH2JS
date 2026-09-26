@@ -1,6 +1,6 @@
 /**
  * The in-game menus. Their layout lives in MW2.PRJ as MENU resources - each
- * an MZ-stub + LX executable that project_tables_menu_handler (0x17810) loads
+ * an MZ-stub + LX executable that menu_load (0x17810) loads
  * with lx_module_load(resource, 5, 0) - and their behaviour in MW2.EXE as
  * seven tables of code pointers that menu_resolve_callbacks (0x17710) indexes
  * with the numbers the module stores. Index 0 of every table is null (no
@@ -195,7 +195,7 @@ export interface MenuModule {
  * where the loader wrote a relocation - never by what a dword looks like.
  * A menu reached twice, or a control shared by two items, is the same object.
  *
- * @portOnly the data half of project_tables_menu_handler + menu_resolve_callbacks; no callback is called
+ * @portOnly the data half of menu_load + menu_resolve_callbacks, for the listing; no callback is called (the live menus: sim/ui/menuLoad.ts)
  */
 export function readMenuModule(prj: ProjectFile, id: number): MenuModule | null {
   const src = prj.readResource('MENU', id);

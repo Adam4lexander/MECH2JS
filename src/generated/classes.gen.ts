@@ -182,6 +182,21 @@ export class Ramp {
   duration: number = 0;
 }
 
+/** MenuItem - 17 (0x11) bytes. */
+export class MenuItem {
+  static readonly schema = STRUCTS.MenuItem;
+  /** +0x000 byte */
+  type: number = 0;
+  /** +0x001 char * */
+  label: string | null = null;
+  /** +0x005 void * */
+  draw: CodeFn | null = null;
+  /** +0x009 MenuControl * */
+  control: MenuControl | null = null;
+  /** +0x00d Menu * */
+  submenu: Menu | null = null;
+}
+
 /** Destructible - 17 (0x11) bytes. */
 export class Destructible {
   static readonly schema = STRUCTS.Destructible;
@@ -195,6 +210,23 @@ export class Destructible {
   hitPoints: number = 0;
   /** +0x00d void * */
   onRelease: CodeFn | null = null;
+}
+
+/** UiContext - 18 (0x12) bytes. */
+export class UiContext {
+  static readonly schema = STRUCTS.UiContext;
+  /** +0x000 int */
+  id: number = 0;
+  /** +0x004 byte */
+  active: number = 0;
+  /** +0x005 byte */
+  request: number = 0;
+  /** +0x006 MenuContext * */
+  record: MenuContext | null = null;
+  /** +0x00a void * */
+  module: unknown = null;
+  /** +0x00e UiContext * */
+  next: UiContext | null = null;
 }
 
 /** BehaviourTransition - 18 (0x12) bytes. */
@@ -505,6 +537,29 @@ export class SimSlot {
   typeIndex: number = 0;
 }
 
+/** MenuControl - 36 (0x24) bytes. */
+export class MenuControl {
+  static readonly schema = STRUCTS.MenuControl;
+  /** +0x000 byte */
+  flags: number = 0;
+  /** +0x004 int */
+  value: number = 0;
+  /** +0x008 void * */
+  data: unknown = null;
+  /** +0x00c int */
+  selector: number = 0;
+  /** +0x010 void * */
+  init: CodeFn | null = null;
+  /** +0x014 void * */
+  get: CodeFn | null = null;
+  /** +0x018 void * */
+  preview: CodeFn | null = null;
+  /** +0x01c void * */
+  commit: CodeFn | null = null;
+  /** +0x020 void * */
+  revert: CodeFn | null = null;
+}
+
 /** MessageSlot - 36 (0x24) bytes. */
 export class MessageSlot {
   static readonly schema = STRUCTS.MessageSlot;
@@ -568,6 +623,25 @@ export class ProjectHeader {
   typeCount: number = 0;
   /** +0x00e ProjectTypeEntry */
   types: ProjectTypeEntry[] = [];
+}
+
+/** Menu - 38 (0x26) bytes. */
+export class Menu {
+  static readonly schema = STRUCTS.Menu;
+  /** +0x000 byte */
+  state: number = 0;
+  /** +0x001 char * */
+  title: string | null = null;
+  /** +0x005 int */
+  slot: number = 0;
+  /** +0x009 int */
+  count: number = 0;
+  /** +0x00d int */
+  selected: number = 0;
+  /** +0x011 void * */
+  onLoad: CodeFn | null = null;
+  /** +0x015 MenuItem */
+  items: MenuItem[] = [];
 }
 
 /** MechGroup - 38 (0x26) bytes. */
@@ -1028,6 +1102,65 @@ export class MechWeapon {
   binCursor: number = 0;
   /** +0x064 struct MechAmmoBin * */
   bin: MechAmmoBin | null = null;
+}
+
+/** MenuContext - 105 (0x69) bytes. */
+export class MenuContext {
+  static readonly schema = STRUCTS.MenuContext;
+  /** +0x000 ViewWindow * */
+  pane: ViewWindow | null = null;
+  /** +0x004 byte */
+  flags: number = 0;
+  /** +0x005 Menu * * */
+  stack: (Menu | null)[] | null = null;
+  /** +0x009 int */
+  depth: number = 0;
+  /** +0x00d int */
+  backShpId: number = 0;
+  /** +0x011 void * */
+  backShp: Uint8Array | null = null;
+  /** +0x015 ViewWindow * */
+  backPane: ViewWindow | null = null;
+  /** +0x019 int */
+  cursorShpId: number = 0;
+  /** +0x01d void * */
+  cursorShp: Uint8Array | null = null;
+  /** +0x021 int */
+  enterSound: number = 0;
+  /** +0x025 int */
+  moveSound: number = 0;
+  /** +0x029 int */
+  fontId: number = 0;
+  /** +0x02d void * */
+  font: Uint8Array | null = null;
+  /** +0x031 int */
+  ink: number = 0;
+  /** +0x035 int */
+  selectedInk: number = 0;
+  /** +0x039 int */
+  rows: number = 0;
+  /** +0x03d int */
+  rowX: number = 0;
+  /** +0x041 int */
+  rowHeight: number = 0;
+  /** +0x045 int */
+  titleX: number = 0;
+  /** +0x049 int */
+  titleY: number = 0;
+  /** +0x04d int */
+  cursorX: number = 0;
+  /** +0x051 int */
+  cursorY: number = 0;
+  /** +0x055 int */
+  textX: number = 0;
+  /** +0x059 int */
+  textY: number = 0;
+  /** +0x05d int */
+  widgetX: number = 0;
+  /** +0x061 int */
+  widgetY: number = 0;
+  /** +0x065 Menu * */
+  topMenu: Menu | null = null;
 }
 
 /** SceneNode - 124 (0x7c) bytes. */

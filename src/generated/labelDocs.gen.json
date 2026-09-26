@@ -114,6 +114,16 @@
   "kind": "raw",
   "doc": "3 x {width - 1, height - 1}: (319,199), (639,479), (1023,767). Only screen_select_asset_variant reads it, looping 0..2 at stride 8 and comparing [0] with screenModeInfo[0] - 1 and [1] with screenModeInfo[1] - 1; the index of the nearest becomes assetVariant"
  },
+ "brightness": {
+  "address": "0x95780",
+  "kind": "int",
+  "doc": "the monitor brightness 0..15: main takes it from mw2snd.cfg +0x28, brightness_commit changes it"
+ },
+ "brightnessShown": {
+  "address": "0x95784",
+  "kind": "int",
+  "doc": "the brightness table palette_apply_brightness was last asked for: brightness_preview's level, set back to brightness by commit and revert"
+ },
  "dayPhasePaletteSlot": {
   "address": "0x95788",
   "kind": "raw",
@@ -275,6 +285,11 @@
   "kind": "int",
   "doc": "the task node task_list_run is ticking right now, republished before every callback so a callback can find itself - task_current hands it back and task_data reaches its record. Node layout, all six dwords used by the driver: [0] callback and liveness flag, [1] data, freed on removal, [2] period, [3] last-run tick, [4] next-due tick, [5] next node. task_remove and task_create set it too, so it names the node being created or destroyed as well as the one being ticked. The callback protocol is four messages in the first argument: 0 init from task_create, 1 tick from task_list_run, 2 destroy from task_remove, and -1 rebuilt from task_list_notify_rebuilt, which world_record_replace sends when it rebuilds the tasks' object (this note said three messages until -1's sender was found). Returning 0 from init or from a tick removes the task"
  },
+ "menuRepeatStopwatch": {
+  "address": "0x958a4",
+  "kind": "int",
+  "doc": "-1 in the image; menu_open creates the stopwatch (family 0x100) on first use and resets it; menu_poll_key times the analog axes' repeats with it"
+ },
  "menuControlInitFns": {
   "address": "0x958a8",
   "kind": "raw",
@@ -310,10 +325,20 @@
   "kind": "raw",
   "doc": "item +5: called for each item as the menu is drawn, as (pane, control, index, item, x, y, menu); [3] is menu_item_slider, [8] lance_slot_target_name. 9 entries, [0] null. Bounds are the run of code pointers up to the next table, NOT a limit any code checks. "
  },
+ "lanceTargetNameFn": {
+  "address": "0x95988",
+  "kind": "raw",
+  "doc": "a pointer to lance_slot_target_name, which lance_status_init stores as the Status line's suffix callback"
+ },
  "menuOnLoadFns": {
   "address": "0x9598c",
   "kind": "raw",
   "doc": "menu +0x11: called once by menu_resolve_callbacks after the menu's indices are resolved, as (ctx, menu); bit 0 of the result is ANDed into the load's success. ui_callbacks_sub_0196b0 ([2]) rewrites the menu's own item records, so these customise a menu to the game state. 5 entries, [0] null; [5] onward are small integers (1, 7, 7 ...), not code. The run of code pointers ends there; no code checks an index limit"
+ },
+ "calibrateDrawToggle": {
+  "address": "0x959a0",
+  "kind": "int",
+  "doc": "menu_item_calibrate runs its calibration on every other call: it flips this between 0 and 1"
  },
  "lanceOrderSelected": {
   "address": "0x959a4",
@@ -1740,6 +1765,11 @@
   "kind": "raw",
   "doc": "which resolution's 2D art to load: 0 = 320x200 (the plain SHP/FONT name), 1 = 640x480 (name + '6'), 2 = 1024x768 (name + 'K'). Every reader adds it to an SHP or FONT resource id - a base id whose next two directory slots are the '6' and 'K' versions, true of all 91 SHP triplets and the FONT one in MW2.PRJ. Written only by screen_select_asset_variant (the one store, mov [0xa4dc0], bl at 0x1492d); 0 in the image, so 320x200 art when no mode matches"
  },
+ "brightnessTables": {
+  "address": "0xa4ed0",
+  "kind": "raw",
+  "doc": "16 tables of 64 bytes (6-bit colour in, 6-bit out) built by brightness_tables_build; palette_apply_brightness maps the palette through one"
+ },
  "paletteDac": {
   "address": "0xa52d0",
   "kind": "raw",
@@ -1835,10 +1865,20 @@
   "kind": "int",
   "doc": "head of the ui context list ui_context_register builds. Every walker in project_tables starts here and follows the next link at +0xe"
  },
+ "menuOpenCount": {
+  "address": "0xd4048",
+  "kind": "int",
+  "doc": "menus open: menu_open increments it, menu_close decrements it; ui_context_request_open and ui_context_toggle only open a menu while it is 0"
+ },
  "menuKeyPending": {
   "address": "0xd404c",
   "kind": "int",
   "doc": "the key code menu_poll_key leaves for the menu code to consume - 0x0d from menu_enter, 0x1b from menu_abort, 0x96/0x97 and 0x99/0x20 from the two analog menu axes, or a raw keystroke passed through from playerControls +0x14"
+ },
+ "fleeToDos": {
+  "address": "0xd407c",
+  "kind": "int",
+  "doc": "set by menu_item_flee_to_dos; main then exits with code 0xff instead of 0"
  },
  "devDirEntries": {
   "address": "0xd4084",

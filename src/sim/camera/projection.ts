@@ -143,3 +143,21 @@ export function viewerProjectPoint(v: Viewer, p: number[]): number {
   if (rejected || p[0] < v.left || v.right < p[0] || p[1] < v.top || v.bottom < p[1]) return 0;
   return 1;
 }
+
+/**
+ * lodQuality = 2 (low) for 0, 1 (high) otherwise.
+ *
+ * @mw2 lod_quality_set 0x0003f9b0
+ * @fidelity exact
+ */
+export function lodQualitySet(_unused: number, on: number): void {
+  projectionGlobals.lodQuality = on === 0 ? 2 : 1;
+}
+
+/**
+ * @mw2 lod_quality_is_high 0x0003f990
+ * @fidelity exact
+ */
+export function lodQualityIsHigh(): boolean {
+  return projectionGlobals.lodQuality === 1;
+}

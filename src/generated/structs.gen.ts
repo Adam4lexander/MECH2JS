@@ -161,6 +161,20 @@ export interface RawRamp {
   duration: number;
 }
 
+/** MenuItem - 17 (0x11) bytes, as read raw from memory (pointers are addresses). */
+export interface RawMenuItem {
+  /** +0x000 byte */
+  type: number;
+  /** +0x001 char * */
+  label: number;
+  /** +0x005 void * */
+  draw: number;
+  /** +0x009 MenuControl * */
+  control: number;
+  /** +0x00d Menu * */
+  submenu: number;
+}
+
 /** Destructible - 17 (0x11) bytes, as read raw from memory (pointers are addresses). */
 export interface RawDestructible {
   /** +0x000 byte */
@@ -173,6 +187,22 @@ export interface RawDestructible {
   hitPoints: number;
   /** +0x00d void * */
   onRelease: number;
+}
+
+/** UiContext - 18 (0x12) bytes, as read raw from memory (pointers are addresses). */
+export interface RawUiContext {
+  /** +0x000 int */
+  id: number;
+  /** +0x004 byte */
+  active: number;
+  /** +0x005 byte */
+  request: number;
+  /** +0x006 MenuContext * */
+  record: number;
+  /** +0x00a void * */
+  module: number;
+  /** +0x00e UiContext * */
+  next: number;
 }
 
 /** BehaviourTransition - 18 (0x12) bytes, as read raw from memory (pointers are addresses). */
@@ -465,6 +495,28 @@ export interface RawSimSlot {
   typeIndex: number;
 }
 
+/** MenuControl - 36 (0x24) bytes, as read raw from memory (pointers are addresses). */
+export interface RawMenuControl {
+  /** +0x000 byte */
+  flags: number;
+  /** +0x004 int */
+  value: number;
+  /** +0x008 void * */
+  data: number;
+  /** +0x00c int */
+  selector: number;
+  /** +0x010 void * */
+  init: number;
+  /** +0x014 void * */
+  get: number;
+  /** +0x018 void * */
+  preview: number;
+  /** +0x01c void * */
+  commit: number;
+  /** +0x020 void * */
+  revert: number;
+}
+
 /** MessageSlot - 36 (0x24) bytes, as read raw from memory (pointers are addresses). */
 export interface RawMessageSlot {
   /** +0x000 char * */
@@ -523,6 +575,24 @@ export interface RawProjectHeader {
   typeCount: number;
   /** +0x00e ProjectTypeEntry */
   types: RawProjectTypeEntry;
+}
+
+/** Menu - 38 (0x26) bytes, as read raw from memory (pointers are addresses). */
+export interface RawMenu {
+  /** +0x000 byte */
+  state: number;
+  /** +0x001 char * */
+  title: number;
+  /** +0x005 int */
+  slot: number;
+  /** +0x009 int */
+  count: number;
+  /** +0x00d int */
+  selected: number;
+  /** +0x011 void * */
+  onLoad: number;
+  /** +0x015 MenuItem */
+  items: RawMenuItem;
 }
 
 /** MechGroup - 38 (0x26) bytes, as read raw from memory (pointers are addresses). */
@@ -965,6 +1035,64 @@ export interface RawMechWeapon {
   binCursor: number;
   /** +0x064 struct MechAmmoBin * */
   bin: number;
+}
+
+/** MenuContext - 105 (0x69) bytes, as read raw from memory (pointers are addresses). */
+export interface RawMenuContext {
+  /** +0x000 ViewWindow * */
+  pane: number;
+  /** +0x004 byte */
+  flags: number;
+  /** +0x005 Menu * * */
+  stack: number;
+  /** +0x009 int */
+  depth: number;
+  /** +0x00d int */
+  backShpId: number;
+  /** +0x011 void * */
+  backShp: number;
+  /** +0x015 ViewWindow * */
+  backPane: number;
+  /** +0x019 int */
+  cursorShpId: number;
+  /** +0x01d void * */
+  cursorShp: number;
+  /** +0x021 int */
+  enterSound: number;
+  /** +0x025 int */
+  moveSound: number;
+  /** +0x029 int */
+  fontId: number;
+  /** +0x02d void * */
+  font: number;
+  /** +0x031 int */
+  ink: number;
+  /** +0x035 int */
+  selectedInk: number;
+  /** +0x039 int */
+  rows: number;
+  /** +0x03d int */
+  rowX: number;
+  /** +0x041 int */
+  rowHeight: number;
+  /** +0x045 int */
+  titleX: number;
+  /** +0x049 int */
+  titleY: number;
+  /** +0x04d int */
+  cursorX: number;
+  /** +0x051 int */
+  cursorY: number;
+  /** +0x055 int */
+  textX: number;
+  /** +0x059 int */
+  textY: number;
+  /** +0x05d int */
+  widgetX: number;
+  /** +0x061 int */
+  widgetY: number;
+  /** +0x065 Menu * */
+  topMenu: number;
 }
 
 /** SceneNode - 124 (0x7c) bytes, as read raw from memory (pointers are addresses). */
@@ -2000,6 +2128,17 @@ export const STRUCTS = {
       { name: 'duration', offset: 0xc, size: 4, count: 1, ctype: "int", kind: 'int' },
     ],
   },
+  MenuItem: {
+    name: 'MenuItem',
+    size: 0x11,
+    fields: [
+      { name: 'type', offset: 0x0, size: 1, count: 1, ctype: "byte", kind: 'byte' },
+      { name: 'label', offset: 0x1, size: 4, count: 1, ctype: "char *", kind: 'ptr' },
+      { name: 'draw', offset: 0x5, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'control', offset: 0x9, size: 4, count: 1, ctype: "MenuControl *", kind: 'ptr', target: 'MenuControl' },
+      { name: 'submenu', offset: 0xd, size: 4, count: 1, ctype: "Menu *", kind: 'ptr', target: 'Menu' },
+    ],
+  },
   Destructible: {
     name: 'Destructible',
     size: 0x11,
@@ -2009,6 +2148,18 @@ export const STRUCTS = {
       { name: 'registeredTick', offset: 0x5, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'hitPoints', offset: 0x9, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'onRelease', offset: 0xd, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+    ],
+  },
+  UiContext: {
+    name: 'UiContext',
+    size: 0x12,
+    fields: [
+      { name: 'id', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'active', offset: 0x4, size: 1, count: 1, ctype: "byte", kind: 'byte' },
+      { name: 'request', offset: 0x5, size: 1, count: 1, ctype: "byte", kind: 'byte' },
+      { name: 'record', offset: 0x6, size: 4, count: 1, ctype: "MenuContext *", kind: 'ptr', target: 'MenuContext' },
+      { name: 'module', offset: 0xa, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'next', offset: 0xe, size: 4, count: 1, ctype: "UiContext *", kind: 'ptr', target: 'UiContext' },
     ],
   },
   BehaviourTransition: {
@@ -2230,6 +2381,22 @@ export const STRUCTS = {
       { name: 'typeIndex', offset: 0x20, size: 4, count: 1, ctype: "int", kind: 'int' },
     ],
   },
+  MenuControl: {
+    name: 'MenuControl',
+    size: 0x24,
+    fields: [
+      { name: 'flags', offset: 0x0, size: 1, count: 1, ctype: "byte", kind: 'byte' },
+      { name: 'pad_001', offset: 0x1, size: 1, count: 3, ctype: "uint8_t", kind: 'pad' },
+      { name: 'value', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'data', offset: 0x8, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'selector', offset: 0xc, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'init', offset: 0x10, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'get', offset: 0x14, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'preview', offset: 0x18, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'commit', offset: 0x1c, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'revert', offset: 0x20, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+    ],
+  },
   MessageSlot: {
     name: 'MessageSlot',
     size: 0x24,
@@ -2270,6 +2437,19 @@ export const STRUCTS = {
       { name: 'field_0x8', offset: 0x8, size: 4, count: 1, ctype: "int", kind: 'int', unestablished: true },
       { name: 'typeCount', offset: 0xc, size: 2, count: 1, ctype: "ushort", kind: 'ushort' },
       { name: 'types', offset: 0xe, size: 24, count: 1, ctype: "ProjectTypeEntry", kind: 'struct', target: 'ProjectTypeEntry' },
+    ],
+  },
+  Menu: {
+    name: 'Menu',
+    size: 0x26,
+    fields: [
+      { name: 'state', offset: 0x0, size: 1, count: 1, ctype: "byte", kind: 'byte' },
+      { name: 'title', offset: 0x1, size: 4, count: 1, ctype: "char *", kind: 'ptr' },
+      { name: 'slot', offset: 0x5, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'count', offset: 0x9, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'selected', offset: 0xd, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'onLoad', offset: 0x11, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'items', offset: 0x15, size: 17, count: 1, ctype: "MenuItem", kind: 'struct', target: 'MenuItem' },
     ],
   },
   MechGroup: {
@@ -2558,6 +2738,39 @@ export const STRUCTS = {
       { name: 'originalIndex', offset: 0x5c, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'binCursor', offset: 0x60, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'bin', offset: 0x64, size: 4, count: 1, ctype: "struct MechAmmoBin *", kind: 'ptr', target: 'MechAmmoBin' },
+    ],
+  },
+  MenuContext: {
+    name: 'MenuContext',
+    size: 0x69,
+    fields: [
+      { name: 'pane', offset: 0x0, size: 4, count: 1, ctype: "ViewWindow *", kind: 'ptr', target: 'ViewWindow' },
+      { name: 'flags', offset: 0x4, size: 1, count: 1, ctype: "byte", kind: 'byte' },
+      { name: 'stack', offset: 0x5, size: 4, count: 1, ctype: "Menu * *", kind: 'ptr', target: 'Menu' },
+      { name: 'depth', offset: 0x9, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'backShpId', offset: 0xd, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'backShp', offset: 0x11, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'backPane', offset: 0x15, size: 4, count: 1, ctype: "ViewWindow *", kind: 'ptr', target: 'ViewWindow' },
+      { name: 'cursorShpId', offset: 0x19, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'cursorShp', offset: 0x1d, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'enterSound', offset: 0x21, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'moveSound', offset: 0x25, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'fontId', offset: 0x29, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'font', offset: 0x2d, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'ink', offset: 0x31, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'selectedInk', offset: 0x35, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'rows', offset: 0x39, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'rowX', offset: 0x3d, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'rowHeight', offset: 0x41, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'titleX', offset: 0x45, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'titleY', offset: 0x49, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'cursorX', offset: 0x4d, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'cursorY', offset: 0x51, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'textX', offset: 0x55, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'textY', offset: 0x59, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'widgetX', offset: 0x5d, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'widgetY', offset: 0x61, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'topMenu', offset: 0x65, size: 4, count: 1, ctype: "Menu *", kind: 'ptr', target: 'Menu' },
     ],
   },
   SceneNode: {

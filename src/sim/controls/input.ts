@@ -609,7 +609,7 @@ export function inputLoadGamekeys(): number {
  *
  * @mw2 input_init 0x00048870
  * @fidelity partial
- * @divergence a driver asking for calibration (install returns 4) would open the calibration screen (project_tables_sub_018f90), which is not ported
+ * @divergence a driver asking for calibration (install returns 4) would open the calibration screen (calibration_menu_run), which is not ported
  */
 export function inputInit(): number {
   inputLoadMap();

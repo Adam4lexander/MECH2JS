@@ -170,3 +170,13 @@ export function formationTableLoad(c: Chunk): number {
   }
   return 0;
 }
+
+/**
+ * groupTable[group].formation, or 0 past the sixteen groups.
+ *
+ * @mw2 group_get_formation 0x0002aeb0
+ * @fidelity exact
+ */
+export function groupGetFormation(group: number): number {
+  return 0xf < group ? 0 : mechs.groupTable[group]!.formation;
+}

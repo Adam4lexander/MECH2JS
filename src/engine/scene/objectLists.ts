@@ -235,3 +235,43 @@ export function* worldChain(): Generator<WorldObject> {
 }
 
 objectListsReset();
+
+/**
+ * A detail option: family 0xc0 objects (the LIGHT and *SPRS* meshes) put
+ * back into the world from altRootNode's list, or - visible 0 - each one on
+ * the world chain flagged 0x1000 and moved onto altRootNode's list (when
+ * not already flagged and it has a previous link) and taken out of the
+ * world.
+ *
+ * @mw2 scenery_c0_set_visible 0x0001fbf0
+ * @fidelity exact
+ */
+export function sceneryC0SetVisible(visible: number): void {
+  if (visible !== 0) {
+    let o = altRootNode.listNext;
+    while (o) {
+      const next = o.listNext;
+      if ((o.type & 0xf0) === 0xc0) {
+        objectMoveToWorldList(o);
+        objectAddToWorld(o);
+      }
+      o = next;
+    }
+    return;
+  }
+  let o = worldRootNode.listNext;
+  while (o) {
+    const next = o.listNext;
+    if ((o.type & 0xf0) === 0xc0) {
+      if ((o.flags & 0x1000) === 0) {
+        o.flags |= 0x1000;
+        if (o.listPrev) {
+          objectListUnlink(o);
+          objectListInsertAfter(o, altRootNode);
+        }
+      }
+      objectRemoveFromWorld(o);
+    }
+    o = next;
+  }
+}

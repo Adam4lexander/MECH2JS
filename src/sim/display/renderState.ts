@@ -209,3 +209,43 @@ export function renderBlockRestore(from: RenderBlock): void {
   r.polygonDrawHook = w[24]!;
   r.polygonFillHook = w[25]!;
 }
+
+/**
+ * Textures on (on != 0: the bits cleared from textureOffTypeMask) or off for
+ * a class of object - the detail options' setter.
+ *
+ * @mw2 texture_type_set_enabled 0x00038f80
+ * @fidelity exact
+ */
+export function textureTypeSetEnabled(bits: number, on: number): void {
+  const r = renderOptions;
+  r.textureOffTypeMask = on !== 0 ? r.textureOffTypeMask & ~bits : r.textureOffTypeMask | bits;
+}
+
+/**
+ * 1 when none of `bits` is set in textureOffTypeMask.
+ *
+ * @mw2 texture_type_enabled 0x00038f60
+ * @fidelity exact
+ */
+export function textureTypeEnabled(bits: number): number {
+  return (renderOptions.textureOffTypeMask & bits) === 0 ? 1 : 0;
+}
+
+/**
+ * textureAffine = (on == 0); on arrives in EDX.
+ *
+ * @mw2 texture_perspective_set 0x00038fd0
+ * @fidelity exact
+ */
+export function texturePerspectiveSet(_unused: number, on: number): void {
+  renderOptions.textureAffine = on === 0 ? 1 : 0;
+}
+
+/**
+ * @mw2 texture_perspective_enabled 0x00038fb0
+ * @fidelity exact
+ */
+export function texturePerspectiveEnabled(): number {
+  return renderOptions.textureAffine === 0 ? 1 : 0;
+}

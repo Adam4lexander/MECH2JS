@@ -72,6 +72,12 @@ export const sound = registerGlobals(
      * 4 XMIDI music, 8 CD music)
      */
     soundConfig: bootSoundConfig(),
+    /**
+     * 0x97e3c: mw2snd.cfg's 15 dwords as loaded - the committed settings the
+     * options menu writes to and reverts from (+0x14..+0x24 the detail
+     * options, +0x28 the brightness); null until main loads it
+     */
+    soundConfigBuffer: null as Int32Array | null,
     /** 0x15036c: the enemy-lock warning's next check */
     enemyLockWarnTick: 0,
     /** 0x97de0: the voice line's HSAMPLE while one plays (voice.ts) */
@@ -83,6 +89,7 @@ export const sound = registerGlobals(
     sound.soundMixer = null;
     sound.soundSettings.fill(0);
     sound.soundConfig = bootSoundConfig();
+    sound.soundConfigBuffer = null;
     sound.enemyLockWarnTick = 0;
     sound.voiceSample = 0;
     sound.sflxBuffers = new SflxBuffers();

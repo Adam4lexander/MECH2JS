@@ -40,10 +40,24 @@ export const POINTER_TYPES: Record<string, string> = {
   // a caller's malloc'd sound (the mission-result lines)
   'VoiceLine.buffer': 'Uint8Array',
   'VoiceLine.bodyBuffer': 'Uint8Array',
+  // Menu ** - eight menu pointers, the open menu and those under it (menu_open, menu_draw)
+  'MenuContext.stack': '(Menu | null)[]',
+  // loaded by menu_load_art every frame
+  'MenuContext.backShp': 'Uint8Array',
+  'MenuContext.cursorShp': 'Uint8Array',
+  'MenuContext.font': 'Uint8Array',
+  // indices into the EXE's menu callback tables, resolved by menu_resolve_callbacks
+  'Menu.onLoad': 'CodeFn',
+  'MenuItem.draw': 'CodeFn',
+  'MenuControl.init': 'CodeFn',
+  'MenuControl.get': 'CodeFn',
+  'MenuControl.preview': 'CodeFn',
+  'MenuControl.commit': 'CodeFn',
+  'MenuControl.revert': 'CodeFn',
 };
 
 /** Fields declared [1] in C whose real length is set at allocation. */
-export const VARIABLE_ARRAYS = new Set<string>(['MeshBlock.vertices', 'QuadtreeNode.polys', 'ProjectHeader.types']);
+export const VARIABLE_ARRAYS = new Set<string>(['MeshBlock.vertices', 'QuadtreeNode.polys', 'ProjectHeader.types', 'Menu.items']);
 
 /** Port-only fields appended to a class: name -> [TS type, initialiser, doc]. */
 export const EXTRA_FIELDS: Record<string, Array<[string, string, string, string]>> = {

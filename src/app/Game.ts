@@ -14,6 +14,7 @@ import type { GameData } from './gameData.ts';
 import { parseLuma } from '../data/formats/image.ts';
 import { cacheLoadResource } from '../engine/resources/cache.ts';
 import { palettes, paletteSlotRgb } from '../sim/world/palettes.ts';
+import { brightnessRemap } from '../sim/world/brightness.ts';
 import { lighting } from '../sim/world/environment.ts';
 import { dayCycle } from '../sim/world/dayCycle.ts';
 import type { SceneRenderer } from '../render/SceneRenderer.ts';
@@ -87,7 +88,9 @@ export class Game {
         slot = dayCycle.dayPhasePaletteSlot[phase]!;
       }
     }
-    return paletteSlotRgb(slot) ?? paletteSlotRgb(p.paletteCurrentSlot);
+    const rgb = paletteSlotRgb(slot) ?? paletteSlotRgb(p.paletteCurrentSlot);
+    // the Monitor Brightness slider's DAC remap, while its palette is still the one showing
+    return rgb && this.mode !== 'edit' ? brightnessRemap(rgb, slot) : rgb;
   }
 
   /** The mission's LUMA shade table (lumaTableId, set by LTBL). */

@@ -10,6 +10,7 @@
  * port keeps their logic over engine/miles/cdDrive.ts, which the host backs
  * with the install's CD image.
  */
+import { cdiv } from '../../core/int/cint.ts';
 import { unestablished } from '../../core/provenance.ts';
 import { systemError } from '../../core/systemError.ts';
 import { cdDrive } from '../../engine/miles/cdDrive.ts';
@@ -56,16 +57,21 @@ export const music = registerGlobals(
 
 /**
  * main's res_load_named_config("mw2snd.cfg"): the file's 15 dwords become
- * 0x97e00..0x97e38, or, when there is none, the image's stay. (main then
- * takes a video driver name from it too, which the port has no use for.)
+ * soundConfigBuffer and are copied to 0x97e00..0x97e38; when there is none,
+ * the image's are copied into a new buffer instead. (main then takes a
+ * video driver name from it too, which the port has no use for.)
  *
  * @portOnly the mw2snd.cfg half of main (0x15a30); the file is never written back
  */
 export function soundConfigLoad(): void {
   const f = dosFileLoad('mw2snd.cfg');
-  if (!f || f.length < 0x3c) return;
+  if (!f || f.length < 0x3c) {
+    sound.soundConfigBuffer = sound.soundConfig.slice();
+    return;
+  }
   const dv = new DataView(f.buffer, f.byteOffset, f.byteLength);
-  for (let i = 0; i < 15; i++) sound.soundConfig[i] = dv.getInt32(i * 4, true);
+  sound.soundConfigBuffer = Int32Array.from({ length: 15 }, (_, i) => dv.getInt32(i * 4, true));
+  sound.soundConfig.set(sound.soundConfigBuffer);
 }
 
 /**
@@ -103,7 +109,8 @@ export function cdTrackInRange(track: number): number {
 
 /**
  * Finds the drive, sets cdAudioReady, records its status, reads the disc's
- * track range (status 2..4) and sets the CD volume to cdVolumeScale * 255.
+ * track range (status 2..4) and sets the CD volume (cd_volume_apply's
+ * computation, inlined: cdVolumeScale * 255 through cd_set_volume).
  *
  * @mw2 cd_audio_init 0x00042800
  * @fidelity partial
@@ -121,9 +128,37 @@ export function cdAudioInit(): number {
       music.cdTrackLast = r.last;
     }
   }
-  const p = BigInt(cdVolumeScale()) * 255n;
-  d.setVolume(Number(BigInt.asIntN(32, (p >> 16n) + ((p >> 15n) & 1n))));
+  cdVolumeApply();
   return 1;
+}
+
+/**
+ * The CD's volume from v (0..255) on a square law - v * v * 255 / 0xfe01,
+ * clamped to 255 - into all four audio channels (MSCDEX audio channel
+ * control: read, modified, written). Returns 1, or 0 when an IOCTL fails.
+ *
+ * @mw2 cd_set_volume 0x00043650
+ * @fidelity partial
+ * @divergence the IOCTLs are the port's CD drive interface: no drive is a failed read
+ */
+export function cdSetVolume(v: number): number {
+  const d = cdDrive.drive;
+  if (!d || music.cdAudioReady === 0) return 0;
+  let vol = cdiv(Math.imul(Math.imul(v, v), 255), 0xfe01);
+  if (vol >= 0xff) vol = 0xff;
+  d.setVolume(vol & 0xff);
+  return 1;
+}
+
+/**
+ * cd_set_volume(cdVolumeScale * 255, 16.16 rounded).
+ *
+ * @mw2 cd_volume_apply 0x000436d0
+ * @fidelity exact
+ */
+export function cdVolumeApply(): number {
+  const p = BigInt(cdVolumeScale()) * 255n;
+  return cdSetVolume(Number(BigInt.asIntN(32, (p >> 16n) + ((p >> 15n) & 1n))));
 }
 
 /**

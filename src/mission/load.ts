@@ -42,6 +42,8 @@ import { projectMapsAlloc, projectMapsFree, projectSetMangle } from '../sim/worl
 import { worldRecordsAllDefined, worldRecordsBuildAll, worldRecordsTick } from '../sim/world/worldRecords.ts';
 import { objectiveTableStart } from './objectives.ts';
 import { vfxVideoSub0103c0 } from '../sim/world/viewScene.ts';
+import { brightnessLoad, brightnessTablesBuild } from '../sim/world/brightness.ts';
+import { detailOptionsApplyThunk } from '../sim/ui/menuCallbacks.ts';
 import { missionTables, missionTablesFree } from './tables/missionTables.ts';
 import { projectChunkExec } from './vm/chunkExec.ts';
 import { projectItemRelease, projectOpenStream, setLooseFiles } from './vm/streams.ts';
@@ -107,12 +109,14 @@ export function bootMission(opts: MissionBootOptions): boolean {
   setDosFiles(opts.looseFiles ?? new Map());
   // main reads mw2snd.cfg before anything else it brings up
   soundConfigLoad();
+  brightnessLoad();
   // sim_options_load happens before this in main; the timer comes up here
   audioTimerInit();
   videoInit();
   // static_arena_init: the DTBL pre-pass sizes arenas; the port allocates on demand
   divergence('static_arena_init: no arena pre-pass; tables are allocated on demand', 'main');
   randomTablesInit(opts.randomSeed);
+  brightnessTablesBuild();
   soundInitAll();
   vfxVideoSub010320();
   simTablesReset();
@@ -135,10 +139,11 @@ export function bootMission(opts: MissionBootOptions): boolean {
   for (let i = 0; i < missionTables.missionTableCount; i++) objectiveTableStart(i);
   mechDispatchHook0();
   groupsStartMission();
-  // netplay_start (single player: nothing), ui_callbacks_sub_0196a0: later phases
+  // netplay_start (single player: nothing); ui_callbacks_sub_0196a0 is an empty function
   musicStartMissionTrack();
   simClockReset();
   worldRecordsTick();
   vfxVideoSub0103c0();
+  detailOptionsApplyThunk();
   return ok;
 }

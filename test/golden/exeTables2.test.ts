@@ -436,7 +436,7 @@ describe.runIf(hasGameData && hasDecompiled)('EXE tables 2', () => {
           const v = new DataView(m.module.block.buffer).getUint32(m.root + 0x65, true);
           out.push(
             `  root @${pyHex(m.root)}, but the dword at root+0x65 is ${pyHex(v)} and not relocated: no top menu. ` +
-              'Through project_tables_menu_handler this module would fail to load (menu_resolve_callbacks(root, 0) returns 0); how it is used is NOT established',
+              'Through menu_load this module would fail to load (menu_resolve_callbacks(root, 0) returns 0); how it is used is NOT established',
             '',
           );
           continue;

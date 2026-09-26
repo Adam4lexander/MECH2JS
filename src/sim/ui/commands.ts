@@ -1,9 +1,8 @@
 /**
  * The player's keyboard commands: command_execute switches on the command
  * id GAMEKEY.MAP bound to the key pressed (commandNames, listing/commands.txt).
- * Most set a control latch or a request the tick hooks answer; the ones
- * that belong to the HUD, radar and menus are reported and
- * dropped until their phases.
+ * Most set a control latch or a request the tick hooks answer; the menu
+ * commands (0x33..0x37) request or toggle a ui context (sim/ui/menus.ts).
  */
 import { divergence } from '../../core/provenance.ts';
 import { ViewWindow } from '../../generated/classes.gen.ts';
@@ -36,6 +35,7 @@ import { damageDisplayModeCycle } from '../cockpit/damageDisplay.ts';
 import { objectivesHud } from '../cockpit/objectivesHud.ts';
 import { vfxVideoSub012330, vfxVideoSub012370, vfxVideoSub012390, vfxVideoSub0123d0, vfxVideoSub012410 } from '../cockpit/radar.ts';
 import { ui, uiContextActive } from './uiContext.ts';
+import { uiContextRequestOpen, uiContextToggle } from './menus.ts';
 
 export const commandGlobals = registerGlobals(
   'commands',
@@ -126,7 +126,7 @@ export function keyPauseEnd(): void {
  *
  * @mw2 command_execute 0x00046060
  * @fidelity partial
- * @divergence the menu (0x33..0x37) and screenshot (0x52) commands are reported, not run; debug commands (hangAround) are not ported
+ * @divergence the screenshot (0x52) command is reported, not run; debug commands (hangAround) are not ported
  */
 export function commandExecute(cmd: number): void {
   const pc = mechs.playerControls;
@@ -350,11 +350,19 @@ export function commandExecute(cmd: number): void {
       vfxVideoSub0123d0();
       break;
     case 0x33:
+      uiContextRequestOpen(4);
+      break;
     case 0x34:
+      uiContextToggle(5);
+      break;
     case 0x35:
+      uiContextToggle(6);
+      break;
     case 0x36:
+      uiContextToggle(7);
+      break;
     case 0x37:
-      later('menus, Phase 4');
+      uiContextToggle(8);
       break;
     case 0x41:
       // DISPLAY_OBJECTIVES

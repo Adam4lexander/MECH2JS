@@ -13,7 +13,7 @@
  *     mech_dispatch_hook3();      mech_dispatch_hook2();
  *     destructibles_update();     world_records_tick();  bitmap3d_animate();
  *     (*DAT_00097074)(0);         mech_dispatch_hook4();
- *     project_tables_sub_017ea0(); vfx_video_sub_0106d0();
+ *     ui_context_dispatch(); vfx_video_sub_0106d0();
  *     sound_frame_update();       voice_queue_advance();
  *     day_cycle_tick();           mission_results_update();
  *     music_update();             game_update_pause();
@@ -31,7 +31,8 @@ import { inputGlobals } from '../sim/controls/inputGlobals.ts';
 import { commandGlobals, keyPauseEnd } from '../sim/ui/commands.ts';
 import { mechDispatchHook1, mechDispatchHook2, mechDispatchHook3, mechDispatchHook4 } from '../sim/mech/hooks.ts';
 import { netplayFrameExchange } from '../sim/net/netplay.ts';
-import { gameUpdatePause, keyCommandUpdate, menuPollKey, projectTablesSub017ea0, ui } from '../sim/ui/uiContext.ts';
+import { gameUpdatePause, keyCommandUpdate, menuPollKey, ui } from '../sim/ui/uiContext.ts';
+import { uiContextDispatch } from '../sim/ui/menus.ts';
 import { bitmap3dAnimate } from '../sim/world/bitmap3d.ts';
 import { dayCycleTick } from '../sim/world/dayCycle.ts';
 import { paletteApplyPending, paletteFadeStep } from '../sim/world/palettes.ts';
@@ -117,7 +118,7 @@ export function mainLoopFrame(): void {
   bitmap3dAnimate();
   mainLoop.renderHook?.();
   mechDispatchHook4();
-  projectTablesSub017ea0();
+  uiContextDispatch();
   vfxVideoSub0106d0();
   soundFrameUpdate();
   voiceQueueAdvance();

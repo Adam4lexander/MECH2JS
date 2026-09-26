@@ -123,6 +123,16 @@
    "duration": "divisor setting the rate; larger is slower. It is a TIME CONSTANT, in 182 Hz ticks (ramp_start stores trunc(seconds * 182)), not a travel time: ramp_step closes (target - current) * elapsed / duration and then re-stamps lastTick, so each step removes that fraction of the REMAINING gap - an exponential approach, about 63 percent of the way after one duration and 95 after three, snapping to target once one step's elapsed time reaches duration. A port that makes these linear ramps will feel noticeably different"
   }
  },
+ "MenuItem": {
+  "doc": "",
+  "fields": {
+   "type": "0 opens its submenu on Enter; 1 a value, Enter does nothing; 2 accept (Enter commits every control and pops the menu) - with 6 the menu's exit item, numbered 0 and drawn on the last row; 3 information, not numbered and skipped by the cursor; 4 a value committed on every step; 5 a value committed by its hotkey, and Enter backs out; 6 exit (Enter backs out)",
+   "label": "the text drawn after the item's number; 0 draws none",
+   "draw": "menuItemDrawFns[index]: (ctx, control, index, item, x, y, menu) - the widget drawn at the widget point, which also drives the control",
+   "control": "the item's control, or 0",
+   "submenu": "pushed by menu_draw on Enter over a type 0 item"
+  }
+ },
  "Destructible": {
   "doc": "",
   "fields": {
@@ -131,6 +141,17 @@
    "registeredTick": "simTick when destructible_register claimed the slot. Its one reader is destructibles_update: when simTick - registeredTick exceeds 0xe38 - 3640 ticks, 20 seconds at 182 Hz - the slot is retired quietly (no effect, no explosion), unless the flag at 0x9620c (playerOut (formerly playerEjectedDone)) is set. So wreckage lasts twenty seconds.",
    "hitPoints": "16.16, registered at 0x100000 = 16 points, and destroyed (destructible_destroy) the moment it goes NEGATIVE, so exactly 16 points of damage does not do it. Two consumers subtract: destructible_apply_damage, which projectile_update hands Projectile.damage << 16, and destructibles_blast_damage, which subtracts (rate * tickDelta) >> 16 - see that function's note on why blasts all but never destroy scenery.",
    "onRelease": "a function called with the node whenever the slot gives its object up, for ANY reason: destructible_destroy after the explosion, destructibles_update on the 20-second expiry (0x2b7b3), and destructibles_reset (called once, in main's startup sequence beside gamething_table_reset); destructible_register also calls it at once when it cannot take a slot at all. Every caller tests it for null first. The two values passed in are debris_teardown (world-record debris) and 0x377e0 (mech wreckage - mech_detach_section_geometry and mech_crash_to_ground pass it). CORRECTION: the destructibles note called this 'a callback run when it dies'. Destruction is one of four paths into it; it is the object's cleanup, not a death handler."
+  }
+ },
+ "UiContext": {
+  "doc": "",
+  "fields": {
+   "id": "the context's id, which is also the MENU resource it opens (menu_load): main registers 4 (the main menu, and the pause gate game_update_pause watches), 5 (the user menu), 6, 7, 8 (the lance menus) and 3 (the credits, which nothing requests); calibration_menu_run registers 2",
+   "active": "1 while the menu is open (ui_context_dispatch)",
+   "request": "1 asks ui_context_dispatch to open the menu, 0 to close it",
+   "record": "the loaded module's MenuContext (menu_load); 0 once closed",
+   "module": "the LX block lx_module_load returned, freed by menu_close",
+   "next": "the next context in the list"
   }
  },
  "BehaviourTransition": {
@@ -330,6 +351,20 @@
    "typeIndex": "initialised to -1; an index into effectTypes - what the slot is currently showing. effect_spawn only ever reuses a slot whose typeIndex already matches the effect it is about to spawn, and counts how many nearby slots carry the same index to decide whether to spawn at all. CORRECTION: this was recorded as indexing 'a table of 28-byte descriptors at 0x0009f918'. The stride was right and the base was not: 0x9f918 is field +0x18 of the record, the one field sim_slots_update happens to read. The table starts at 0x9f900. The comparison against 0x16 is the split between world-placed effects and the mount-attached ones from 0x17 up."
   }
  },
+ "MenuControl": {
+  "doc": "",
+  "fields": {
+   "flags": "bit 0: the widgets read the value through get every frame (else the cached +4); bit 3: set by menu_resolve_callbacks once the five indices below are code pointers, so a control shared by two items is resolved once. Bit 1 is set on every control in the shipped MENUs; no reader found",
+   "value": "the value the widget last showed; a widget writes it back every frame",
+   "data": "the widget's own record, read by the item's draw callback: menu_item_choice and menu_item_toggle {suffix callback, count, strings[count]}, menu_item_slider four SHP ids at [0], [2], [4], [6], menu_item_text_box {pane, text}",
+   "selector": "the argument every get/preview/commit/revert receives: a lance slot, a player command number (user_option_get), an Audio Ctrl selector (sound_option_get), a device index",
+   "init": "menuControlInitFns[index]: (menu, control) on the menu's first frame (state 1)",
+   "get": "menuControlGetFns[index]: (selector) -> value",
+   "preview": "menuControlPreviewFns[index]: (selector, value) every frame the item is selected",
+   "commit": "menuControlCommitFns[index]: (selector, value) on accept (state 4), and on a step (type 4) or the item's hotkey (type 5)",
+   "revert": "menuControlRevertFns[index]: (selector) when the menu backs out (state 5)"
+  }
+ },
  "MessageSlot": {
   "doc": "",
   "fields": {
@@ -364,6 +399,18 @@
    "field_0x8": "not read by the game.",
    "typeCount": "how many type entries follow; project_find_type and project_load_directories both bound their loops on it. 22 in MW2.PRJ.",
    "types": "typeCount entries of 0x18 bytes. Declared [1]; the index a caller uses is project_find_type's result."
+  }
+ },
+ "Menu": {
+  "doc": "",
+  "fields": {
+   "state": "0 not yet drawn, 1 its first frame (the widgets run init), 2 idle, 3 enter the selected item's submenu, 4 accept (commit) and pop, 5 back out (revert) and pop - menu_key_action sets 3..5, menu_draw acts on them after the widgets have seen them",
+   "title": "drawn at the title point and underlined; 0 draws none",
+   "slot": "the lancemate a lance order menu commands (lance_point_menu_onload, lance_control_slot_init); no other reader",
+   "count": "items in use; the onload callbacks rewrite it, and keep spare item records after it",
+   "selected": "the item under the cursor",
+   "onLoad": "menuOnLoadFns[index]: (ctx, menu) once when the MENU loads; may rewrite the items",
+   "items": "the first of count records of 0x11 bytes (the list continues past this declaration)"
   }
  },
  "MechGroup": {
@@ -610,6 +657,38 @@
    "originalIndex": "the weapon's slot in chassis order, 0..9. loadout_regroup_weapons stamps weapons[i].originalIndex = i and THEN reorders the array, so this is the only record of where a weapon started. Its consumer is the network code: whenever the player's weapon fires, mech_weapons_tick sets byte originalIndex of the ten-byte table at 0x1593f0, and netplay_build_state (formerly netplay_sub_044b70) packs those flags into bits 5..14 of the state packet and clears them. So a remote machine is told which weapon fired in chassis order, regardless of the local reordering. The loadout reset writes 0 before the stamp",
    "binCursor": "which of this weapon's bins is currently feeding it, counted from 0. The cockpit firing path is the only thing that moves it: after decrementing ammo it reads the current bin's rounds, and when those are already 0 it advances this and the bin pointer together - bin by the 0x14 stride, this by one - unless doing so would reach numBins, in which case it undoes the increment and leaves both where they were.",
    "bin": "the bin currently feeding this weapon. mech_config points it at the start of MechLoadout.ammo when the loadout is built, and the firing path walks it forward by one MechAmmoBin as each bin empties. Typed from its use rather than its assignment: the firing path reads +2 off it as a short and decrements it, and +2 is MechAmmoBin.rounds. The 0x14 it advances by is that struct's stride, which MechLoadout.ammo already records."
+  }
+ },
+ "MenuContext": {
+  "doc": "",
+  "fields": {
+   "pane": "where the menu is drawn: 16.16 fractions of the screen in the module, pixels after menu_layout",
+   "flags": "bit 0 the menu takes keys (menu_poll_key; input_sub_048c50/_048c60 around it); bit 1 no frame during a map transition; bit 2 the pane framed and the title ruled across the pane; bit 3 the exit item not moved to the last row; bit 4 the back pane aligned to the pane's left; bit 5 the pane wiped to 0 each frame",
+   "stack": "8 menu pointers, the open menu and those under it",
+   "depth": "menus on the stack; the context closes at 0",
+   "backShpId": "SHP id (plus assetVariant) drawn at the back pane's origin each frame; -1 none",
+   "backShp": "loaded by menu_load_art",
+   "backPane": "the background shape's pane, sized to the shape by menu_layout",
+   "cursorShpId": "SHP id drawn at the cursor point of the selected item; -1 none",
+   "cursorShp": "loaded by menu_load_art",
+   "enterSound": "SNDS played entering a submenu; -1 none",
+   "moveSound": "SNDS played when the selection moves; -1 none",
+   "fontId": "FONT id (plus assetVariant) of every text",
+   "font": "loaded by menu_load_art; no font draws nothing",
+   "ink": "its low byte goes to the text colour table's ink (0xa4dd2) for the title and items",
+   "selectedInk": "the ink of the selected item",
+   "rows": "rows the pane is divided into: the row step is 1 / (rows + 2)",
+   "rowX": "the x of the row step point, 0",
+   "rowHeight": "pixels between items (menu_layout)",
+   "titleX": "the title point, a fraction of the pane in the module",
+   "titleY": "half a row step, set by menu_layout",
+   "cursorX": "the cursor shape's point (first item)",
+   "cursorY": "two row steps; menu_draw adds half the font height",
+   "textX": "where the item numbers and labels are drawn",
+   "textY": "two row steps",
+   "widgetX": "the widget point handed to the item draw callbacks",
+   "widgetY": "two row steps",
+   "topMenu": "pushed by menu_open"
   }
  },
  "SceneNode": {

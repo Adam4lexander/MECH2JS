@@ -1,16 +1,13 @@
 /**
- * The ui context list (project_tables): 18-byte nodes main registers with
- * ids 4, 5, 6, 7, 8 and 3, walked every frame by menu_poll_key and
- * project_tables_sub_017ea0. Id 4 is the pause context: game_update_pause
- * stops the sim clock while it is active.
- *
- * Node layout, as its consumers read it (ui_context_register's notes):
- *   +0 id, +4 active (menu_poll_key tests it for 1), +5 a request the owner
- *   sets and the dispatcher clears, +6 the context's record, +0xa four bytes
- *   nothing read so far touches, +0xe next.
+ * The ui context list (project_tables): the UiContext nodes main registers
+ * with ids 4, 5, 6, 7, 8 and 3 - each id the MENU it opens - walked every
+ * frame by menu_poll_key and ui_context_dispatch (sim/ui/menus.ts). Id 4 is
+ * also the pause context: game_update_pause stops the sim clock while it is
+ * active.
  */
 import { soundPause, soundResume } from '../sound/music.ts';
-import { divergence, unestablished } from '../../core/provenance.ts';
+import { unestablished } from '../../core/provenance.ts';
+import { UiContext, type MenuContext } from '../../generated/classes.gen.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import { registerGlobals } from '../../engine/globals.ts';
 import { imageI32 } from '../../engine/image.ts';
@@ -19,26 +16,6 @@ import { mechs } from '../mech/mechGlobals.ts';
 import { inputGlobals } from '../controls/inputGlobals.ts';
 import { inputSub048ca0 } from '../controls/input.ts';
 import { commandExecute } from './commands.ts';
-
-/** A context's record (+6). Only its byte at +4 is read here: bit 0 lets menu_poll_key produce keys. */
-export interface UiContextRecord {
-  flags: number;
-}
-
-export class UiContext {
-  /** +0x0 */
-  id = 0;
-  /** +0x4: 1 while the context is active */
-  active = 0;
-  /** +0x5: the request the owner sets; project_tables_sub_017ea0 moves it into active */
-  request = 0;
-  /** +0x6 */
-  record: UiContextRecord | null = null;
-  /** +0xa: not established */
-  field_0xa = 0;
-  /** +0xe */
-  next: UiContext | null = null;
-}
 
 export const ui = registerGlobals(
   'ui',
@@ -49,8 +26,12 @@ export const ui = registerGlobals(
     uiContextTail: null as UiContext | null,
     /** 0xd404c: the key code menu_poll_key leaves for the menus */
     menuKeyPending: 0,
-    /** 0x958a4: the stopwatch menu_poll_key times its axis repeats with; which call creates it is not established here */
-    dat000958a4: 0,
+    /** 0x958a4 menuRepeatStopwatch: -1 until menu_open creates it; menu_poll_key times the axis repeats with it */
+    dat000958a4: -1,
+    /** 0xd4048: menus open (menu_open / menu_close) */
+    menuOpenCount: 0,
+    /** 0xd407c: set by 'Flee to DOS'; main exits with 0xff */
+    fleeToDos: 0,
     /** 0x982f4: set once 'Press any key to exit...' is posted */
     exitPromptShown: 0,
     /** 0x95860 */
@@ -65,7 +46,9 @@ export const ui = registerGlobals(
     u.uiContextHead = null;
     u.uiContextTail = null;
     u.menuKeyPending = imageI32(LABEL.menuKeyPending, 0);
-    u.dat000958a4 = imageI32(0x958a4, 0);
+    u.dat000958a4 = imageI32(LABEL.menuRepeatStopwatch, -1);
+    u.menuOpenCount = imageI32(LABEL.menuOpenCount, 0);
+    u.fleeToDos = imageI32(LABEL.fleeToDos, 0);
     u.exitPromptShown = imageI32(LABEL.exitPromptShown, 0);
     u.quitRequested = imageI32(LABEL.quitRequested, 0);
     u.quitCountdown = imageI32(LABEL.quitCountdown, 0);
@@ -89,13 +72,6 @@ export function uiContextRegister(id: number): UiContext {
   return c;
 }
 
-/** @portOnly the node with this id, or null (the walk ui_context_active makes) */
-export function uiContextFind(id: number): UiContext | null {
-  let c = ui.uiContextHead;
-  while (c && c.id !== id) c = c.next;
-  return c;
-}
-
 /**
  * The active byte of the context with this id, or 0 if there is none.
  *
@@ -103,7 +79,8 @@ export function uiContextFind(id: number): UiContext | null {
  * @fidelity exact
  */
 export function uiContextActive(id: number): number {
-  const c = uiContextFind(id);
+  let c = ui.uiContextHead;
+  while (c && c.id !== id) c = c.next;
   return c ? c.active & 0xff : 0;
 }
 
@@ -140,7 +117,7 @@ export function menuPollKey(): void {
   const pc = mechs.playerControls;
   const inp = inputGlobals;
   u.menuKeyPending = 0;
-  let record: UiContextRecord | null = null;
+  let record: MenuContext | null = null;
   for (let c = u.uiContextHead; c; c = c.next) {
     if ((c.active & 0xff) === 1) {
       record = c.record;
@@ -185,28 +162,6 @@ export function menuPollKey(): void {
     stopwatchReset(u.dat000958a4);
     pc.menu_item_reset = 1;
     pc.menu_value_reset = 1;
-  }
-}
-
-/**
- * The ui dispatcher: for each context whose request differs from its active
- * byte, runs the context's open or close handler, and gives the first
- * active one its frame.
- *
- * @mw2 project_tables_sub_017ea0 0x00017ea0
- * @fidelity partial
- * @divergence Phase 4 (menus): no context is ever requested, so the handlers (project_tables_sub_017b40, project_tables_font_handler_2, project_tables_sub_017f30) are not ported; a request is reported and dropped
- */
-export function projectTablesSub017ea0(): void {
-  for (let c = ui.uiContextHead; c; c = c.next) {
-    if ((c.active & 0xff) !== (c.request & 0xff)) {
-      unestablished(`ui context ${c.id} requested ${c.request}: the menu handlers are not ported`, 'project_tables_sub_017ea0');
-      c.request = c.active;
-    }
-    if ((c.active & 0xff) === 1) {
-      divergence('an active ui context gets no frame: the menu frame (project_tables_sub_017f30) is not ported', 'project_tables_sub_017ea0');
-      break;
-    }
   }
 }
 
