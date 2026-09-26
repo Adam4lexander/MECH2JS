@@ -9,6 +9,7 @@
  *   sets and the dispatcher clears, +6 the context's record, +0xa four bytes
  *   nothing read so far touches, +0xe next.
  */
+import { soundPause, soundResume } from '../sound/music.ts';
 import { divergence, unestablished } from '../../core/provenance.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import { registerGlobals } from '../../engine/globals.ts';
@@ -111,17 +112,18 @@ export function uiContextActive(id: number): number {
  * becomes active, resumes them on the frame it clears.
  *
  * @mw2 game_update_pause 0x00015e90
- * @fidelity partial
- * @divergence the sound pause and resume (sound_config_sub_043f70 / _043fd0) are Phase 7
+ * @fidelity exact
  */
 export function gameUpdatePause(): void {
   if (uiContextActive(4) === 0) {
     if (ui.gamePaused !== 0) {
       timerSetPaused(0x80, 0);
+      soundResume();
       ui.gamePaused = 0;
     }
   } else if (ui.gamePaused === 0) {
     timerSetPaused(0x80, 1);
+    soundPause();
     ui.gamePaused = 1;
   }
 }

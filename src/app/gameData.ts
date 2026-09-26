@@ -15,6 +15,8 @@ export interface GameData {
   ini: IniFile;
   /** loose files by upper-case name ('USERSTAR.BWD', 'MEK/MDG00USR.MEK') */
   loose: Map<string, Uint8Array>;
+  /** the game CD's cue sheet, when its image is in the install (the music) */
+  cue: { name: string; text: string } | null;
 }
 
 export interface MissionEntry {
@@ -47,7 +49,7 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
   }
   const loose = new Map<string, Uint8Array>();
   const names = [
-    ...(await listDir('')).filter((n) => /\.(BWD|MAP)$/i.test(n)),
+    ...(await listDir('')).filter((n) => /\.(BWD|MAP)$/i.test(n) || /^MW2SND\.CFG$/i.test(n)),
     ...(await listDir('MEK')),
     ...(await listDir('GIDDI')),
   ];
@@ -55,7 +57,10 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
     progress(n);
     loose.set(n.toUpperCase(), await src.read(n));
   }
-  return { prj, exe, ini, loose };
+  let cue: GameData['cue'] = null;
+  const cueName = (await listDir('')).find((n) => /\.CUE$/i.test(n));
+  if (cueName) cue = { name: cueName, text: new TextDecoder().decode(await src.read(cueName)) };
+  return { prj, exe, ini, loose, cue };
 }
 
 /** Every mission: the BWD streams whose name ends SCN1, from BWDTABLE. */

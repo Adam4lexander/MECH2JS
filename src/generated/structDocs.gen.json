@@ -521,6 +521,20 @@
    "missileCam": "1 while the missile camera follows this projectile. Only missile_cam_follow_last sets it, on the player's last missile. While it is set, every projectile_update step writes the projectile's position and heading into missileCamPose and sets missileCamProjectile to the slot. projectile_destroy drops the follow (missileCamProjectile = -1) when a flagged projectile dies, and projectile_clear zeroes it"
   }
  },
+ "VoiceLine": {
+  "doc": "",
+  "fields": {
+   "inUse": "1 from sound_seq_queue_message until the line is dropped or finished",
+   "soundId": "the first record's SNDS id (the prefix when there are two)",
+   "bodySoundId": "the second record's SNDS id, played after the first by sound_sample_eos's chaining",
+   "buffer": "the first record's field 2: a caller's malloc'd sound played instead of a resource, freed when the line is dropped (the mission-result lines)",
+   "bodyBuffer": "the second record's field 2 - always 0, since sound_seq_queue_message drops a second record that has one; freed like buffer",
+   "endTick": "0 while the line plays as sound; simTick + 0x71c when voice_line_start posted it as text",
+   "priority": "the queue is kept in descending order of it; the caller's, or soundSettings[soundId]'s",
+   "text": "first text, a separator, second text and a terminator, bounded at 0x33 bytes",
+   "next": "the next line in the queue"
+  }
+ },
  "TrackedObject": {
   "doc": "",
   "fields": {
@@ -1007,6 +1021,30 @@
    "targetDistanceAtDecision": "snapshot of targetDistance taken when a behaviour is entered",
    "aiCapabilities": "a bitmask of the AI moves this mech's pilot is allowed to make, DERIVED FROM aiSkillLevel by ai_behaviour_init (level 1 best): bit 0 and bit 1 for levels 1-3, bit 2 for levels 1-2, bit 3 for any mech in gamepieceClass 1, bit 4 always, bit 5 for level 1 in gamepieceClass 1 only, bit 6 always. WHAT THE BITS GATE: bit 0 (1) lets ai_update_jumpjets switch the jump jets on to reposition when the target is outside the torso arc; bit 1 (2) permits the jump evade, the sole extra condition on requesting behaviour 4 'ajmpin' (also in weapon_fire_alert_target, on the mech being shot at); bit 2 (4), tested on the SHOOTER, lets weapon_fire_alert_target warn its target of incoming guided or PPC fire on a 2-in-3 roll, which can make the target sprint or jump away (CORRECTION: this said the bit 'is about choosing a weapon' - the 0x58-stride read is WeaponType.guided of the weapon being fired); bit 4 (0x10) guards a call to ai_has_line_of_fire (formerly ai_group_sub_02bf20) taken only after ai_decide_fire (formerly ai_aim_torso) succeeds - the line-of-fire test: with the bit set the AI holds fire unless its torso faces the target and a ray to it is clear (it is set for every skill level); bit 5 (0x20) is what lets a disarmed mech pick behaviour 6 'kama' in ai_behaviour_tick's out-of-weapons rule. So only the best pilots go kamikaze. No test of bits 3 or 6 has been found. CORRECTION: this note said 'Nothing in the decompiled code writes it - all five accesses are tests - so it arrives with the mech from loaded data', and that bit 3 and everything above bit 4 are never tested. Both were wrong. The writer, ai_behaviour_init, stores through a pointer the decompiler did not tie to the entity, so a search for the field name missed it; and bit 5's test sits in ai_behaviour_tick as a raw byte access. The bit meanings above are still described by what they gate, not by a trait name from the game.",
    "behindSectorClaims": "how many AI mechs are currently using each of the eight 45-degree sectors around THIS mech, sector 0 in front of it and 4 behind, for behaviour 1 'behind'. Consumer: ai_behind_pick_sector reads the target's counts and picks the first free sector on the flank or rear. Writers: ai_behaviour_tick's behaviour-1 branch increments the target's byte at aiDirection / 2 when it commits and decrements the old one first; ai_exit_behaviour decrements the held one when behaviour 1 ends, if targetSecondary is a mech handle (0x200). The behaviour-state reset (ai_behaviour_init (formerly ai_group_sub_02c5f0)) memsets all 8 to 0. It ends exactly at the entity's end, 0x1a4. This is the +0x19c the stateStack note warned renders as stateStack + 0x78"
+  }
+ },
+ "SoundMixer": {
+  "doc": "",
+  "fields": {
+   "digDriver": "the Miles DIG driver sound_install_dig_driver (formerly sound_config_sub_044020) returned; sound_init frees the block and fails when it is 0",
+   "sampleHandles": "HSAMPLE per channel: sound_init allocates channelCount of them; channels 8..15 are filled by sound_emitter_update with AIL_allocate_file_sample and zeroed by sound_emitter_stop. voice_line_start copies the voice channel's into voiceSample",
+   "channelCount": "sound_init's argument clamped to 16 (sound_init_all passes 8), lowered to the number of handles and buffers actually allocated; sound_sample_open and sound_refill_buffers scan only these",
+   "inUse": "1 while the channel is playing: set by sound_channel_start and sound_emitter_update, cleared by sound_sample_eos, by a steal in sound_sample_open and by sound_stop_channels. sound_sample_open's default user-data 0 points here, so the EOS callback's final store clears it too",
+   "headers": "the 14-byte SFLX header per channel (stride 14): 'SFLX', an unread size, the block count at +8 and samples per block at +0xc; sound_sample_open copies it and compares the tag",
+   "blocksLeft": "blocks not yet decoded; sound_refill_buffers subtracts each chunk and loads a 0-length buffer (end of stream) once it is 0",
+   "blockLen": "samples per block, the header's +0xc",
+   "blocksPerHalf": "0x2000 / blockLen - the blocks one half buffer holds",
+   "chunkBlocks": "min(blocksPerHalf, the header's block count): what each refill decodes while more remain",
+   "halfBytes": "blockLen * blocksPerHalf: the second half buffer starts this far into the 0x4000-byte allocation, and a full refill loads this many bytes",
+   "halfBuffers": "two pointers per channel (stride 8): [0] the malloc(0x4000) from sound_init, [1] = [0] + halfBytes, set by sound_sample_open",
+   "predictor": "sflx_decode_blocks' predictor, zeroed by sound_sample_open",
+   "data": "read pointer into the SNDS resource (or caller buffer), past the header; advanced by each decode, and 0 when there is none",
+   "startTick": "simTick at sound_channel_start plus its delay when that exceeds tickDelta; sound_refill_buffers leaves the channel alone until simTick reaches it",
+   "bearing": "the source azimuth sound_channel_start stored; used for the pan when pan is -1",
+   "pan": "Miles pan 0..0x7f (0x40 centre), or -1: sound_refill_buffers then takes sound_pan_from_bearing(bearing) at every refill",
+   "volume": "volume * scale (16.16, rounded) from sound_channel_start; voice_resume rewrites the voice channel's; set on the sample at every refill",
+   "soundId": "the SNDS id playing (-1 for a caller buffer), compared by sound_sample_open's 0x200/0x400 rules; cleared by sound_sample_eos and sound_emitter_stop",
+   "flags": "low byte the priority (a busy channel is stolen by a request whose whole 16-bit flags word exceeds it, so any request with a high-byte flag outranks every priority); high byte: 0x100 RESERVED - never free or stolen, and a second 0x100 request is refused (the voice channel, 0x150); 0x200 a new request for the same id ends and reuses this channel; 0x400 a new request for the same id is refused; 0x1000 set by the emitters (looping file sample), and makes sound_sample_eos repeat a chained id"
   }
  },
  "ProjectPath": {

@@ -11,7 +11,7 @@ import { mainLoopFrame } from '../../src/mission/mainLoop.ts';
 import { mechs } from '../../src/sim/mech/mechGlobals.ts';
 import { input } from '../../src/sim/controls/input.ts';
 import { KeyboardDriver } from '../../src/sim/controls/giddi.ts';
-import { timerInterrupt } from '../../src/engine/timer.ts';
+import { ailTimerService } from '../../src/engine/miles/ail.ts';
 import { clock } from '../../src/engine/clock.ts';
 import { objectsOnList, worldRootNode } from '../../src/engine/scene/objectLists.ts';
 import { sceneNodeSetEuler, sceneNodeSetOrigin, sceneNodeWalk } from '../../src/engine/scene/sceneGraph.ts';
@@ -30,7 +30,7 @@ function boot(mission: string) {
 
 /** one pass of main's loop after `ticks` timer interrupts */
 function frame(ticks = 7) {
-  for (let i = 0; i < ticks; i++) timerInterrupt();
+  for (let i = 0; i < ticks; i++) ailTimerService();
   mainLoopFrame();
 }
 

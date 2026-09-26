@@ -18,9 +18,12 @@
  *
  * The world sweeps walk the world chain (worldRoot.worldNext ...).
  */
+import { sceneNodeGetWorldPos } from '../../engine/scene/sceneGraph.ts';
+import { cameraGlobals } from '../camera/viewer.ts';
+import { soundPlayAt } from '../sound/mixer.ts';
 import { Ray } from '../../generated/classes.gen.ts';
 import type { MechEntity, MechLoadout, MeshBlock, QuadtreeNode, WorldObject } from '../../generated/classes.gen.ts';
-import { divergence } from '../../core/provenance.ts';
+
 import { sdivShl } from '../../core/int/i64.ts';
 import { registerCode, resolveCode, type CodeFn } from '../../engine/codePtr.ts';
 import { imageI32 } from '../../engine/image.ts';
@@ -758,8 +761,7 @@ export function mechCollideMechs(loadout: MechLoadout, pos: { x: number; y: numb
  * twice its velocity). The sweep ends at the first 0x50 object touched.
  *
  * @mw2 mech_collide_obstacles 0x00020570
- * @fidelity partial
- * @divergence the knock-over sound (0xb5 at the object) is Phase 7
+ * @fidelity exact
  */
 export function mechCollideObstacles(loadout: MechLoadout, pos: { x: number; y: number; z: number }, outHitObject: Out<WorldObject | null>): number {
   const root = objectLists.worldRoot;
@@ -799,7 +801,9 @@ export function mechCollideObstacles(loadout: MechLoadout, pos: { x: number; y: 
       const slot = fallingObjectAttach(o.node, 1);
       if (-1 < slot) {
         fallingObjectPush(slot, Math.imul(loadout.velocityX, 2), Math.imul(loadout.velocityY, 2), Math.imul(loadout.velocityZ, 2));
-        divergence('mech_collide_obstacles: the knock-over sound 0xb5 is not played', 'mech_collide_obstacles');
+        const [wx, wy, wz] = sceneNodeGetWorldPos(o.node!);
+        const v = cameraGlobals.viewerPosition!;
+        soundPlayAt((wx - v.posX) | 0, (wy - v.posY) | 0, (wz - v.posZ) | 0, 0xb5, cameraGlobals.cockpitViewActive);
         return 0;
       }
     }

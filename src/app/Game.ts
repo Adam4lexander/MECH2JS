@@ -19,7 +19,8 @@ import { dayCycle } from '../sim/world/dayCycle.ts';
 import type { SceneRenderer } from '../render/SceneRenderer.ts';
 import { BitmapAtlas } from '../render/textures/bitmapAtlas.ts';
 import { clock } from '../engine/clock.ts';
-import { timerInterrupt } from '../engine/timer.ts';
+import { ailTimerService } from '../engine/miles/ail.ts';
+import { AudioHost } from '../audio/AudioHost.ts';
 import { mainLoopRunning, mainLoopStep } from '../mission/mainLoop.ts';
 import { missionEnd, type MissionResults } from '../mission/end.ts';
 
@@ -32,9 +33,16 @@ export class Game {
   /** main's results once its loop has ended (the debriefing's data), else null */
   results: MissionResults | null = null;
 
-  constructor(readonly data: GameData) {}
+  /** the browser's sound: off until the first Play (a user gesture), then the toolbar's toggle */
+  readonly audio: AudioHost;
+  private audioChosen = false;
+
+  constructor(readonly data: GameData) {
+    this.audio = new AudioHost(data.cue);
+  }
 
   loadMission(stream: string): boolean {
+    this.audio.pause();
     this.mission = stream;
     this.loadError = null;
     this.results = null;
@@ -109,6 +117,11 @@ export class Game {
   }
 
   setMode(m: Mode): void {
+    if (m === 'play' && !this.audioChosen) {
+      this.audioChosen = true;
+      this.audio.enable();
+    }
+    if (m !== 'play') this.audio.pause();
     if (m === 'play') {
       // leave the fixed-step mode Step uses; the next frame steps its last 12 ticks and hands back to real time
       clock.dat00095828 = 0;
@@ -131,10 +144,12 @@ export class Game {
   playFrame(ms: number): boolean {
     this.pending = Math.min(this.pending + (ms * 182) / 1000, Game.MAX_TICKS_PER_FRAME);
     while (this.pending >= 1) {
-      timerInterrupt();
+      ailTimerService();
       this.pending -= 1;
     }
-    return this.runFrame();
+    const ok = this.runFrame();
+    this.audio.pump();
+    return ok;
   }
 
   /**

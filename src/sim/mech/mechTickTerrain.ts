@@ -96,8 +96,7 @@ function jetDrag(l: MechLoadout, vx: number, vz: number): [number, number] {
  * Hook slot 1: the movement tick.
  *
  * @mw2 mech_std_tick_terrain 0x00026990
- * @fidelity partial
- * @divergence collision and fall damage are Phase 3 stubs and the sounds Phase 7; the motion itself is the original's
+ * @fidelity exact
  */
 export const mechStdTickTerrain = registerCode('mech_std_tick_terrain', 0x26990, (l: MechLoadout | null, _index: number): void => {
   if (!l) return;

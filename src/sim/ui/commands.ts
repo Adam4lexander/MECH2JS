@@ -21,6 +21,8 @@ import { mechRuntime } from '../mech/mechRuntime.ts';
 import { missileCamFollowLast } from '../weapons/projectiles.ts';
 import { playerWeaponSetFireGroup } from '../weapons/weapons.ts';
 import { net } from '../net/netplay.ts';
+import { soundRandomRate, soundSfxSub040b50 } from '../sound/mixer.ts';
+import { soundPause, soundResume } from '../sound/music.ts';
 import { soundCuePlay, soundPlay } from '../sound/sound.ts';
 import { dayCycle, vfxFontSub0150f0 } from '../world/dayCycle.ts';
 import { renderOptions } from '../display/renderState.ts';
@@ -64,11 +66,13 @@ export const commandGlobals = registerGlobals(
  *
  * @mw2 cheats_sub_046ac0 0x00046ac0
  * @fidelity partial
- * @divergence the wait is split across host frames (keyPauseActive) instead of a blocking loop; the PAUSED shape is not drawn and the sounds are Phase 7
+ * @divergence the wait is split across host frames (keyPauseActive) instead of a blocking loop; the PAUSED shape is not drawn
  */
 export function cheatsSub046ac0(): void {
   if (uiContextActive(4) === 0 && net.netRole === 0) {
     timerSetPaused(0x80, 1);
+    soundPause();
+    soundSfxSub040b50(0xc6, 100, 0x40, soundRandomRate());
     commandGlobals.keyPauseActive = 1;
   }
 }
@@ -76,7 +80,11 @@ export function cheatsSub046ac0(): void {
 /** @portOnly the end of cheats_sub_046ac0's wait: a key arrived */
 export function keyPauseEnd(): void {
   commandGlobals.keyPauseActive = 0;
-  if (net.netRole === 0) timerSetPaused(0x80, 0);
+  soundSfxSub040b50(0xf1, 0x32, 0x40, soundRandomRate());
+  if (net.netRole === 0) {
+    timerSetPaused(0x80, 0);
+    soundResume();
+  }
 }
 
 /**

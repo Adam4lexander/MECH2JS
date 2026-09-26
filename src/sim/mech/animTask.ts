@@ -25,6 +25,8 @@
  * Units: ticks of the 182 Hz clock; track values are added to the node's
  * translation (cm) or Euler angles (16.16 degrees) spread over a frame.
  */
+import { cameraGlobals } from '../camera/viewer.ts';
+import { soundPlayAt } from '../sound/mixer.ts';
 import type { MechEntity, SceneNode } from '../../generated/classes.gen.ts';
 import { AnimTask } from '../../generated/classes.gen.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
@@ -368,8 +370,7 @@ function transitionSound(index: number): number {
  * vector either way.
  *
  * @mw2 mech_play_anim_transition_sound 0x0001f630
- * @fidelity partial
- * @divergence sound_play_at is Phase 7: the sound is chosen and the bookkeeping kept, but nothing plays
+ * @fidelity exact
  */
 export function mechPlayAnimTransitionSound(e: MechEntity): void {
   const last = animPlayer.mechLastAnimState;
@@ -378,7 +379,10 @@ export function mechPlayAnimTransitionSound(e: MechEntity): void {
   const fire = (e.animTarget !== e.animState && e.animState !== prev) || (e.animState === e.animTarget && prev !== -2);
   if (!fire) return;
   const id = e.animState === 0 && prev === 2 ? transitionSound(1) : transitionSound(5 + e.animState * 4 + e.animTarget);
-  if (id !== -1) divergence('mech_play_anim_transition_sound: sound_play_at is Phase 7; the transition sound does not play', 'mech_play_anim_transition_sound');
+  if (id !== -1) {
+    const v = cameraGlobals.viewerPosition!;
+    soundPlayAt((v.posX - e.posX) | 0, (v.posY - e.posY) | 0, (v.posZ - e.posZ) | 0, id, cameraGlobals.cockpitViewActive);
+  }
   last[i] = e.animState === e.animTarget ? -2 : e.animState;
 }
 
@@ -391,8 +395,7 @@ export function mechPlayAnimTransitionSound(e: MechEntity): void {
  * target. Then the step sound and, for the player, the transition sound.
  *
  * @mw2 mech_anim_select_gait 0x0001f4f0
- * @fidelity partial
- * @divergence sound_play_at is Phase 7: the step sound's flag is consumed but nothing plays
+ * @fidelity exact
  */
 export function mechAnimSelectGait(e: MechEntity): void {
   const v0 = e.loadout!.ramps[4]!.current;
@@ -415,7 +418,8 @@ export function mechAnimSelectGait(e: MechEntity): void {
   }
   if (e.animSoundId !== -1 && e.motionFlags & 8) {
     e.motionFlags &= 0xf7;
-    divergence('mech_anim_select_gait: sound_play_at is Phase 7; the step sound does not play', 'mech_anim_select_gait');
+    const v = cameraGlobals.viewerPosition!;
+    soundPlayAt((v.posX - e.posX) | 0, (v.posY - e.posY) | 0, (v.posZ - e.posZ) | 0, e.animSoundId, cameraGlobals.cockpitViewActive);
   }
   if (mechs.playerMechIndex === e.index) mechPlayAnimTransitionSound(e);
 }

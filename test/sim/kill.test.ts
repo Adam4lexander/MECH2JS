@@ -11,7 +11,7 @@ import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
 import { fixedAtan2, fixedCos, fixedSin } from '../../src/core/angle/trig.ts';
 import { mulr16 } from '../../src/core/int/fx16.ts';
 import type { MechEntity } from '../../src/generated/classes.gen.ts';
-import { timerInterrupt } from '../../src/engine/timer.ts';
+import { ailTimerService } from '../../src/engine/miles/ail.ts';
 import { sceneNodeSetEuler, sceneNodeSetOrigin, sceneNodeWalk } from '../../src/engine/scene/sceneGraph.ts';
 import { bootMission } from '../../src/mission/load.ts';
 import { mainLoopFrame } from '../../src/mission/mainLoop.ts';
@@ -28,7 +28,7 @@ let prj: ProjectFile;
 let files: Map<string, Uint8Array>;
 
 function frame(ticks = 7) {
-  for (let i = 0; i < ticks; i++) timerInterrupt();
+  for (let i = 0; i < ticks; i++) ailTimerService();
   mainLoopFrame();
 }
 

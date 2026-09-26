@@ -34,6 +34,12 @@ export const POINTER_TYPES: Record<string, string> = {
   'MechEntity.ruleSet': '(AiRule | null)[]',
   'HudWidget.methods': 'CodeFn',
   'HudWidget.hooks': 'CodeFn',
+  // the two halves of the channel's malloc(0x4000), and its read pointer into the SNDS data
+  'SoundMixer.halfBuffers': 'SampleBuffer',
+  'SoundMixer.data': 'SampleBuffer',
+  // a caller's malloc'd sound (the mission-result lines)
+  'VoiceLine.buffer': 'Uint8Array',
+  'VoiceLine.bodyBuffer': 'Uint8Array',
 };
 
 /** Fields declared [1] in C whose real length is set at allocation. */

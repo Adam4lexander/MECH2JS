@@ -11,6 +11,7 @@
  * come back to the host as a MissionResults, and the host shows the
  * debriefing (src/app).
  */
+import { soundSaveConfig } from '../sim/sound/music.ts';
 import { cacheLoadResource, cacheUnlock } from '../engine/resources/cache.ts';
 import { imageU8 } from '../engine/image.ts';
 import { mechDispatchHook5 } from '../sim/mech/hooks.ts';
@@ -151,8 +152,10 @@ export function missionEnd(): MissionResults {
   paletteFadeScreenToPreset(missionEndCode() & 4);
   const career = cockpitSaveConfig();
   mechDispatchHook5();
-  // netplay_shutdown, sound_save_config, ui_context_clear_all, project_shutdown, vfx_video_sub_010780,
-  // game_boot_sub_0158e0 and input_sub_048c20 tear down the network, sound, UI, project, video and input;
+  // netplay_shutdown: single player, nothing to shut
+  soundSaveConfig();
+  // ui_context_clear_all, project_shutdown, vfx_video_sub_010780, game_boot_sub_0158e0 and
+  // input_sub_048c20 tear down the UI, project, video and input;
   // the port's next mission load resets every table instead (resetAllGlobals)
   missionClockUpdate();
   const r = missionSaveResults();

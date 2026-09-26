@@ -7,6 +7,7 @@
  * checkable against game_boot.c (main @ 0x15a30, lines ~540-590 of the
  * export).
  */
+import { musicStartMissionTrack, soundConfigLoad, soundInitAll } from '../sim/sound/music.ts';
 import { randomTablesInit } from '../core/random.ts';
 import { audioTimerInit, simClockReset } from '../engine/clock.ts';
 import { uiContextRegister } from '../sim/ui/uiContext.ts';
@@ -104,12 +105,15 @@ export function bootMission(opts: MissionBootOptions): boolean {
   setLooseFiles(opts.looseFiles ?? new Map());
   setMekSource(opts.looseFiles ?? new Map());
   setDosFiles(opts.looseFiles ?? new Map());
+  // main reads mw2snd.cfg before anything else it brings up
+  soundConfigLoad();
   // sim_options_load happens before this in main; the timer comes up here
   audioTimerInit();
   videoInit();
   // static_arena_init: the DTBL pre-pass sizes arenas; the port allocates on demand
   divergence('static_arena_init: no arena pre-pass; tables are allocated on demand', 'main');
   randomTablesInit(opts.randomSeed);
+  soundInitAll();
   vfxVideoSub010320();
   simTablesReset();
   gamethingTableReset();
@@ -131,7 +135,8 @@ export function bootMission(opts: MissionBootOptions): boolean {
   for (let i = 0; i < missionTables.missionTableCount; i++) objectiveTableStart(i);
   mechDispatchHook0();
   groupsStartMission();
-  // netplay_start (single player: nothing), ui_callbacks_sub_0196a0, music_start_mission_track: later phases
+  // netplay_start (single player: nothing), ui_callbacks_sub_0196a0: later phases
+  musicStartMissionTrack();
   simClockReset();
   worldRecordsTick();
   vfxVideoSub0103c0();

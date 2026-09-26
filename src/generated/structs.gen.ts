@@ -813,6 +813,28 @@ export interface RawProjectile {
   missileCam: number;
 }
 
+/** VoiceLine - 83 (0x53) bytes, as read raw from memory (pointers are addresses). */
+export interface RawVoiceLine {
+  /** +0x000 int */
+  inUse: number;
+  /** +0x004 int */
+  soundId: number;
+  /** +0x008 int */
+  bodySoundId: number;
+  /** +0x00c void * */
+  buffer: number;
+  /** +0x010 void * */
+  bodyBuffer: number;
+  /** +0x014 int */
+  endTick: number;
+  /** +0x018 int */
+  priority: number;
+  /** +0x01c char[51] */
+  text: string;
+  /** +0x04f VoiceLine * */
+  next: number;
+}
+
 /** TrackedObject - 84 (0x54) bytes, as read raw from memory (pointers are addresses). */
 export interface RawTrackedObject {
   /** +0x000 int */
@@ -1735,6 +1757,48 @@ export interface RawMechEntity {
   behindSectorClaims: number[];
 }
 
+/** SoundMixer - 1288 (0x508) bytes, as read raw from memory (pointers are addresses). */
+export interface RawSoundMixer {
+  /** +0x000 int */
+  digDriver: number;
+  /** +0x004 int[16] */
+  sampleHandles: number[];
+  /** +0x044 int */
+  channelCount: number;
+  /** +0x048 int[16] */
+  inUse: number[];
+  /** +0x088 byte[224] */
+  headers: number[];
+  /** +0x168 int[16] */
+  blocksLeft: number[];
+  /** +0x1a8 int[16] */
+  blockLen: number[];
+  /** +0x1e8 int[16] */
+  blocksPerHalf: number[];
+  /** +0x228 int[16] */
+  chunkBlocks: number[];
+  /** +0x268 int[16] */
+  halfBytes: number[];
+  /** +0x2a8 void *[32] */
+  halfBuffers: number[];
+  /** +0x328 int[16] */
+  predictor: number[];
+  /** +0x368 void *[16] */
+  data: number[];
+  /** +0x3a8 int[16] */
+  startTick: number[];
+  /** +0x3e8 int[16] */
+  bearing: number[];
+  /** +0x428 int[16] */
+  pan: number[];
+  /** +0x468 int[16] */
+  volume: number[];
+  /** +0x4a8 int[16] */
+  soundId: number[];
+  /** +0x4e8 short[16] */
+  flags: number[];
+}
+
 /** ProjectPath - 1860 (0x744) bytes, as read raw from memory (pointers are addresses). */
 export interface RawProjectPath {
   /** +0x000 char[64] */
@@ -2376,6 +2440,21 @@ export const STRUCTS = {
       { name: 'missileCam', offset: 0x4c, size: 4, count: 1, ctype: "int", kind: 'int' },
     ],
   },
+  VoiceLine: {
+    name: 'VoiceLine',
+    size: 0x53,
+    fields: [
+      { name: 'inUse', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'soundId', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'bodySoundId', offset: 0x8, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'buffer', offset: 0xc, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'bodyBuffer', offset: 0x10, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'endTick', offset: 0x14, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'priority', offset: 0x18, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'text', offset: 0x1c, size: 1, count: 51, ctype: "char", kind: 'char' },
+      { name: 'next', offset: 0x4f, size: 4, count: 1, ctype: "VoiceLine *", kind: 'ptr', target: 'VoiceLine' },
+    ],
+  },
   TrackedObject: {
     name: 'TrackedObject',
     size: 0x54,
@@ -2926,6 +3005,31 @@ export const STRUCTS = {
       { name: 'targetDistanceAtDecision', offset: 0x194, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'aiCapabilities', offset: 0x198, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'behindSectorClaims', offset: 0x19c, size: 1, count: 8, ctype: "byte", kind: 'byte' },
+    ],
+  },
+  SoundMixer: {
+    name: 'SoundMixer',
+    size: 0x508,
+    fields: [
+      { name: 'digDriver', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'sampleHandles', offset: 0x4, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'channelCount', offset: 0x44, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'inUse', offset: 0x48, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'headers', offset: 0x88, size: 1, count: 224, ctype: "byte", kind: 'byte' },
+      { name: 'blocksLeft', offset: 0x168, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'blockLen', offset: 0x1a8, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'blocksPerHalf', offset: 0x1e8, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'chunkBlocks', offset: 0x228, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'halfBytes', offset: 0x268, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'halfBuffers', offset: 0x2a8, size: 4, count: 32, ctype: "void *", kind: 'ptr' },
+      { name: 'predictor', offset: 0x328, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'data', offset: 0x368, size: 4, count: 16, ctype: "void *", kind: 'ptr' },
+      { name: 'startTick', offset: 0x3a8, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'bearing', offset: 0x3e8, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'pan', offset: 0x428, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'volume', offset: 0x468, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'soundId', offset: 0x4a8, size: 4, count: 16, ctype: "int", kind: 'int' },
+      { name: 'flags', offset: 0x4e8, size: 2, count: 16, ctype: "short", kind: 'short' },
     ],
   },
   ProjectPath: {

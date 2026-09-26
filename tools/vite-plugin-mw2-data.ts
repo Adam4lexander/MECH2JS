@@ -24,6 +24,8 @@ const GAME_WHITELIST = [
   /^MW2\.INI$/i,
   /^MEK\/[A-Z0-9_]+\.MEK$/i,
   /^GIDDI\/[A-Z0-9_]+\.(DLL|STD|CAL)$/i,
+  // the game CD's image: its audio tracks are the mission music (read by byte range)
+  /^[A-Z0-9_]+\.(CUE|BIN)$/i,
 ];
 
 const REF_WHITELIST = [/^mw2\/src\/.+\.[ch]$/i, /^mw2\/include\/.+\.h$/i, /^mw2\/listing\/[^/]+\.(txt|csv)$/i];

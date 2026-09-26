@@ -391,8 +391,7 @@ export function autopilotDrive(l: MechLoadout): void {
  * Hook slot 2: the control tick. See the upstream annotation.
  *
  * @mw2 mech_std_tick_ai 0x00027780
- * @fidelity partial
- * @divergence its sound callees are Phase 7 stubs; the order of every call is the original's
+ * @fidelity exact
  */
 export const mechStdTickAi = registerCode('mech_std_tick_ai', 0x27780, (l: MechLoadout, _index: number): void => {
   const r = mechRuntime;
@@ -699,8 +698,7 @@ function alignLegsStep(l: MechLoadout): void {
  * timer.
  *
  * @mw2 mech_std_tick_player 0x00028320
- * @fidelity partial
- * @divergence weapon cycling and jettison are Phase 3 stubs; sounds and cues are Phase 7
+ * @fidelity exact
  */
 export const mechStdTickPlayer = registerCode('mech_std_tick_player', 0x28320, (l: MechLoadout | null): void => {
   const r = mechRuntime;

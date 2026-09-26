@@ -267,6 +267,7 @@ export function emitClasses(structs: GenStruct[]): string {
   out.push("// are the decompilation's; pointers are object references; see");
   out.push('// tools/struct-overrides.ts for the representation choices.');
   out.push('');
+  out.push("import type { SampleBuffer } from '../engine/miles/ail.ts';");
   out.push("import type { CodeFn, CodePtr } from '../engine/codePtr.ts';");
   out.push("import { STRUCTS } from './structs.gen.ts';");
   out.push('');

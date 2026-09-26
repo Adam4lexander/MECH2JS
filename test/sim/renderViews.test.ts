@@ -9,7 +9,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
 import type { SceneNode, WorldObject } from '../../src/generated/classes.gen.ts';
-import { timerInterrupt } from '../../src/engine/timer.ts';
+import { ailTimerService } from '../../src/engine/miles/ail.ts';
 import { worldRootNode } from '../../src/engine/scene/objectLists.ts';
 import { bootMission } from '../../src/mission/load.ts';
 import { mainLoop, mainLoopFrame } from '../../src/mission/mainLoop.ts';
@@ -84,7 +84,7 @@ function recorder(): { calls: Call[]; port: RenderPort } {
 }
 
 function frame(ticks = 7) {
-  for (let i = 0; i < ticks; i++) timerInterrupt();
+  for (let i = 0; i < ticks; i++) ailTimerService();
   mainLoopFrame();
 }
 

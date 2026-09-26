@@ -3,6 +3,7 @@
  * name, and the per-group copy in formationTable that a group flies. GRP and
  * STAR chunks give each group a formation by name.
  */
+import { radioFormationChange } from '../sound/voice.ts';
 import { StarFormation } from '../../generated/classes.gen.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import type { Chunk } from '../../data/bwd/stream.ts';
@@ -87,12 +88,11 @@ export function groupSetFormationByName(group: number, name: string): number {
  * the wingmen are first told over the radio.
  *
  * @mw2 group_set_formation 0x0002aed0
- * @fidelity partial
- * @divergence radio_formation_change (the spoken 'Formation change to ...') is not ported: audio is a later phase
+ * @fidelity exact
  */
 export function groupSetFormation(group: number, index: number): void {
   if (group < GROUP_COUNT && index < FORMATION_PRESET_COUNT) {
-    // if (group === playerGroupIndex) radio_formation_change(index) - audio, later phase
+    if (group === mechs.playerGroupIndex) radioFormationChange(index);
     mechs.groupTable[group]!.formation = index;
     starFormationCopy(formations.formationPresets[index]!, mechs.formationTable[group]!);
   }

@@ -5,6 +5,7 @@
 // are the decompilation's; pointers are object references; see
 // tools/struct-overrides.ts for the representation choices.
 
+import type { SampleBuffer } from '../engine/miles/ail.ts';
 import type { CodeFn, CodePtr } from '../engine/codePtr.ts';
 import { STRUCTS } from './structs.gen.ts';
 
@@ -868,6 +869,29 @@ export class Projectile {
   heatOnHit: number = 0;
   /** +0x04c int */
   missileCam: number = 0;
+}
+
+/** VoiceLine - 83 (0x53) bytes. */
+export class VoiceLine {
+  static readonly schema = STRUCTS.VoiceLine;
+  /** +0x000 int */
+  inUse: number = 0;
+  /** +0x004 int */
+  soundId: number = 0;
+  /** +0x008 int */
+  bodySoundId: number = 0;
+  /** +0x00c void * */
+  buffer: Uint8Array | null = null;
+  /** +0x010 void * */
+  bodyBuffer: Uint8Array | null = null;
+  /** +0x014 int */
+  endTick: number = 0;
+  /** +0x018 int */
+  priority: number = 0;
+  /** +0x01c char[51] */
+  text: string = '';
+  /** +0x04f VoiceLine * */
+  next: VoiceLine | null = null;
 }
 
 /** TrackedObject - 84 (0x54) bytes. */
@@ -1814,6 +1838,49 @@ export class MechEntity {
   aiCapabilities: number = 0;
   /** +0x19c byte[8] */
   behindSectorClaims: Uint8Array = new Uint8Array(8);
+}
+
+/** SoundMixer - 1288 (0x508) bytes. */
+export class SoundMixer {
+  static readonly schema = STRUCTS.SoundMixer;
+  /** +0x000 int */
+  digDriver: number = 0;
+  /** +0x004 int[16] */
+  sampleHandles: Int32Array = new Int32Array(16);
+  /** +0x044 int */
+  channelCount: number = 0;
+  /** +0x048 int[16] */
+  inUse: Int32Array = new Int32Array(16);
+  /** +0x088 byte[224] */
+  headers: Uint8Array = new Uint8Array(224);
+  /** +0x168 int[16] */
+  blocksLeft: Int32Array = new Int32Array(16);
+  /** +0x1a8 int[16] */
+  blockLen: Int32Array = new Int32Array(16);
+  /** +0x1e8 int[16] */
+  blocksPerHalf: Int32Array = new Int32Array(16);
+  /** +0x228 int[16] */
+  chunkBlocks: Int32Array = new Int32Array(16);
+  /** +0x268 int[16] */
+  halfBytes: Int32Array = new Int32Array(16);
+  /** +0x2a8 void *[32] */
+  halfBuffers: (SampleBuffer | null)[] = new Array<SampleBuffer | null>(32).fill(null);
+  /** +0x328 int[16] */
+  predictor: Int32Array = new Int32Array(16);
+  /** +0x368 void *[16] */
+  data: (SampleBuffer | null)[] = new Array<SampleBuffer | null>(16).fill(null);
+  /** +0x3a8 int[16] */
+  startTick: Int32Array = new Int32Array(16);
+  /** +0x3e8 int[16] */
+  bearing: Int32Array = new Int32Array(16);
+  /** +0x428 int[16] */
+  pan: Int32Array = new Int32Array(16);
+  /** +0x468 int[16] */
+  volume: Int32Array = new Int32Array(16);
+  /** +0x4a8 int[16] */
+  soundId: Int32Array = new Int32Array(16);
+  /** +0x4e8 short[16] */
+  flags: Int16Array = new Int16Array(16);
 }
 
 /** ProjectPath - 1860 (0x744) bytes. */

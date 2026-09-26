@@ -730,7 +730,7 @@ export function playerCockpitFrame(l: MechLoadout): void {
       radarDisplayRunning(h.playerStatusCopy);
       for (let i = 0; i < HUD_WIDGET_COUNT; i++) w[i]!.hooks[1]?.(w[i]);
       hudOverlayDraw(l, h.legsHeadingDeg, h.torsoTwistDeg, bearing, bearingTorso, cmod((pitch + tilt) | 0, 0x1680000), range, cam.dat00096ef0);
-      engineNoteUpdate();
+      engineNoteUpdate(l.ramps[4]!.current);
       break;
     default:
       radarDisplayOther(h.playerStatusCopy);

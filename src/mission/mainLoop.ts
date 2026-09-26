@@ -14,9 +14,9 @@
  *     destructibles_update();     world_records_tick();  bitmap3d_animate();
  *     (*DAT_00097074)(0);         mech_dispatch_hook4();
  *     project_tables_sub_017ea0(); vfx_video_sub_0106d0();
- *     sound_config_sub_043e50();  sound_seq_sub_041dd0();
+ *     sound_frame_update();       voice_queue_advance();
  *     day_cycle_tick();           mission_results_update();
- *     sound_config_sub_043dd0();  game_update_pause();
+ *     music_update();             game_update_pause();
  *     if (quitRequested && !local_2c[2]) { quitCountdown++; local_2c[2] = 1; }
  *   }
  *
@@ -42,7 +42,9 @@ import { simSlotsUpdate } from '../sim/effects/effects.ts';
 import { destructiblesUpdate } from '../sim/things/destructibles.ts';
 import { projectilesUpdateAll } from '../sim/weapons/projectiles.ts';
 import { radarFlipRestore } from '../sim/cockpit/radar.ts';
-import { soundConfigSub043dd0, soundConfigSub043e50, soundSeqSub041dd0 } from './laterPhases.ts';
+import { soundFrameUpdate } from '../sim/sound/mixer.ts';
+import { musicUpdate } from '../sim/sound/music.ts';
+import { voiceQueueAdvance } from '../sim/sound/voice.ts';
 import { missionResultsUpdate } from './results.ts';
 
 /**
@@ -115,11 +117,11 @@ export function mainLoopFrame(): void {
   mechDispatchHook4();
   projectTablesSub017ea0();
   vfxVideoSub0106d0();
-  soundConfigSub043e50();
-  soundSeqSub041dd0();
+  soundFrameUpdate();
+  voiceQueueAdvance();
   dayCycleTick();
   missionResultsUpdate();
-  soundConfigSub043dd0();
+  musicUpdate();
   gameUpdatePause();
   if (ui.quitRequested !== 0 && mainLoop.quitCounted === 0) {
     ui.quitCountdown = (ui.quitCountdown + 1) | 0;
@@ -138,7 +140,7 @@ export function mainLoopFrame(): void {
 export function mainLoopStep(): void {
   if (commandGlobals.keyPauseActive !== 0) {
     inputPollControls();
-    soundConfigSub043e50();
+    soundFrameUpdate();
     if ((inputGlobals.controlKey & 0xffff) !== 0) {
       inputGlobals.controlKey = 0;
       keyPauseEnd();

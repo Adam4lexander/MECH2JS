@@ -323,7 +323,7 @@ export const taskObjectDrive = registerCode('task_object_drive', 0x1b5e0, (messa
 export const taskObjectSound = registerCode('task_object_sound', 0x1b810, (message: number, arg: unknown): number => {
   if (message === 0) {
     const text = typeof arg === 'string' ? arg : '';
-    const e: SoundEmitter = { cutoff: 0, channel: -1, resource: 0, slot: null, node: null, gate: 0, skipFirst: 1, soundId: 0 };
+    const e: SoundEmitter = { cutoff: 0, channel: -1, resource: null, slot: null, node: null, gate: 0, skipFirst: 1, soundId: 0 };
     taskData(taskCurrent()!).value = e;
     let name = '';
     const t = tail(text);

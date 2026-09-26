@@ -27,6 +27,16 @@ export function Toolbar({ game, onBack }: { game: Game; onBack: () => void }) {
       <button title="Step: one pass of main's loop in the clock's fixed-step mode (12 ticks)" onClick={() => game.step()}>
         ▷| Step
       </button>
+      <button
+        className={game.audio.enabled ? 'active' : ''}
+        title="Sound: the game's mixer, voice and engine note, and the CD music from the install's CD image"
+        onClick={() => {
+          game.audio.toggle();
+          engineStore.bump();
+        }}
+      >
+        {game.audio.enabled ? '🔊 Sound' : '🔈 Sound off'}
+      </button>
       <span className="tb-sep" />
       <span className="tb-stat">simTick {clock.simTick}</span>
       <span className="tb-stat">tickDelta {clock.tickDelta}</span>

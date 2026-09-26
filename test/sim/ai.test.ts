@@ -12,7 +12,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile, readNameTable, TABL } from '../../src/data/prj/ProjectFile.ts';
-import { timerInterrupt } from '../../src/engine/timer.ts';
+import { ailTimerService } from '../../src/engine/miles/ail.ts';
 import { bootMission } from '../../src/mission/load.ts';
 import { mainLoopFrame } from '../../src/mission/mainLoop.ts';
 import { objectives } from '../../src/mission/objectives.ts';
@@ -26,7 +26,7 @@ let prj: ProjectFile;
 let files: Map<string, Uint8Array>;
 
 function frame(ticks = 7) {
-  for (let i = 0; i < ticks; i++) timerInterrupt();
+  for (let i = 0; i < ticks; i++) ailTimerService();
   mainLoopFrame();
 }
 

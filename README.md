@@ -35,7 +35,8 @@ Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
   a group, `k` jettisons its ammo, `t` / `e` cycle targets / pick the
   nearest enemy, `x` / Shift+`x` zoom the radar, F1..F12 the cockpit displays
   (F2 radar mode, F3 map, F4 target display, F5 damage display, F11 HUD, F12
-  objectives - the browser keeps some F-keys for itself), Alt+P or Pause to pause. Click the view to give the game
+  objectives - the browser keeps some F-keys for itself), `l` infrared,
+  `w` enhanced vision, Alt+P or Pause to pause. Click the view to give the game
   the mouse (MOUSE.DLL: it steers the torso like a centring joystick).
   The cockpit HUD is the game's own: its widgets, radar, tapes and reticle
   draw into the game's 640x480 indexed window, which is laid over the 3D view
@@ -55,6 +56,17 @@ Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
   would have left in mw2msn.cfg (the port never writes the game's cfg
   files). The objects mission scripts animate - spinning, blinking,
   driving and path-following - run their scheduled tasks.
+  Sound is the game's own sound code (src/sim/sound): the eight streaming
+  SFLX channels with their priorities and stealing, positional one-shots
+  delayed at the speed of sound, the voice queue (cockpit cues, lancemate
+  radio, damage callouts, the result announcements), the looping ambient
+  emitters, and the mission's CD music track, which plays from the install's
+  CD image (MECH2_16B.BIN/.CUE) when it is there. The Miles library under it
+  is the port's own (src/engine/miles), following the semantics read from
+  Miles' code in MW2.EXE; the browser plays its 11025 Hz mix. Sound comes on
+  with the first Play; the toolbar's Sound button toggles it. The engine hum
+  is a MIDI note on the player's sound card in the original - its pitch and
+  level follow the game here, its timbre is a stand-in.
 - **Edit** - no frame runs and time stands still; the editor shows the scene
   hierarchy, the game's tables, an inspector over every struct field with its
   offset and C type, a free camera, the asset browser and the console. Step

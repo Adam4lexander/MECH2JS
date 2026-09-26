@@ -30,13 +30,15 @@ export function mainProject(): ProjectFile {
 }
 
 /**
- * The payload of (type, id), or null with system_error for a missing one.
+ * The payload of (type, id): null, silently, for a negative id (an
+ * unresolved name); null with system_error for a missing one.
  *
  * @mw2 cache_load_resource 0x00033ba0
  * @fidelity partial
  * @divergence no cache items, purge list or memory accounting - a view into the in-memory container
  */
 export function cacheLoadResource(id: number, type: string): Uint8Array | null {
+  if (id < 0) return null;
   const prj = mainProject();
   if (prj.resourceSize(type, id) < 1) {
     systemError(0x20, `Non existant resource: type=${type} id=${id}`);

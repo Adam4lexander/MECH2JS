@@ -1152,6 +1152,12 @@
   "kind": "raw",
   "doc": "ten playback rates in Hz: 9922, 10143, 10364, 10584, 10804, 11025, 11246, 11466, 11686, 11907. sound_channel_start uses entry 5 (0x970e4), 11025, for every one-shot; sound_emitter_update picks one at random (random_range(10)) on each volume update of a looping ambient emitter, so those wander in pitch between -10 and +8 percent"
  },
+ "soundMixer": {
+  "address": "0x970f8",
+  "kind": "ptr",
+  "type": "SoundMixer",
+  "doc": "the mixer block sound_init mallocs; 0 without a DIG driver, which every sound path tests"
+ },
  "engineChannel": {
   "address": "0x970fc",
   "kind": "raw",
@@ -1197,6 +1203,22 @@
   "kind": "raw",
   "doc": "the voice callouts damage_callout_play plays, 0x28 entries of 12 bytes: +0 a sound id, +4 a pointer to the message text, +8 zero. The names below are read through those POINTERS, not by scanning the string area. 0 weapon destroyed, 1 internal ammo explosion detected, 2 NARC missle probe (sic), 3 anti-missle suite, 4 jump-jet exhaust port, 5 heat-sink, 6 life-support, 7 engine, 8 gyro, 9 sensors, 10 leg, 11 hip, 12 arm, 13 torso, 14..21 left leg, right leg, left arm, right arm, left torso, right torso, center torso, head, 22..35 the weapon families from LRM to small pulse laser, 36 autopilot, 37 ECM suite, 38 MASC; entry 39 is all zero. Every caller is mech_damage_slot, which is what turns this into the equipment-code table recorded there"
  },
+ "voiceQueueHead": {
+  "address": "0x97ddc",
+  "kind": "ptr",
+  "type": "VoiceLine",
+  "doc": "the voice line playing (or posted) now, head of a list in descending priority; voice_queue_advance moves it on"
+ },
+ "voiceSample": {
+  "address": "0x97de0",
+  "kind": "int",
+  "doc": "the HSAMPLE of the voice line playing, 0 when none: voice_line_start sets it and passes its address as the channel's user-data 0, so sound_sample_eos zeroes it when the line (with any chained body) ends"
+ },
+ "voiceQueueClosed": {
+  "address": "0x97de4",
+  "kind": "int",
+  "doc": "set by voice_queue_close once the mission is decided; sound_seq_queue_message then queues nothing more"
+ },
  "cdAudioReady": {
   "address": "0x97df0",
   "kind": "int",
@@ -1206,6 +1228,41 @@
   "address": "0x97df8",
   "kind": "int",
   "doc": "the CD audio track the mission plays, the first number of the MUS resource; -1 for none (the image default) or after the play failed. It is the Redbook track number itself: cd_track_in_range checks it against the disc's cdTrackFirst..cdTrackLast, and the play routine indexes the per-track table at 0x15035c by (track - cdTrackFirst). FOR A PORT: mission music = CD track N, where N comes from MUSI -> MUS 'TRACKN'. The second number, into 0x97dfc, is 0 in every MUS resource. sound_seq_sub_043720 starts it through sound_seq_sub_0411c0 under bit 4 of 0x97e10 instead of bit 8. What it selects is not established"
+ },
+ "soundConfig": {
+  "address": "0x97e00",
+  "kind": "int",
+  "doc": "the first of the 15 dwords main copies from mw2snd.cfg (or, when the file is missing, into a new one); read and written by the options menu handlers 0x43720..0x43b10, whose purpose was not read"
+ },
+ "sfxVolumeScale": {
+  "address": "0x97e04",
+  "kind": "int",
+  "doc": "16.16 scale on every effect's volume (sound_play, sound_play_delayed, the emitters); 1.0 in the image, cfg dword 1"
+ },
+ "voiceVolumeScale": {
+  "address": "0x97e08",
+  "kind": "int",
+  "doc": "16.16 scale on the voice lines' volume (voice_line_start, voice_resume); cfg dword 2"
+ },
+ "cdVolumeScale": {
+  "address": "0x97e0c",
+  "kind": "int",
+  "doc": "16.16; cd_audio_init sets the CD volume to it * 255; cfg dword 3"
+ },
+ "soundFlags": {
+  "address": "0x97e10",
+  "kind": "int",
+  "doc": "cfg dword 4 (0xb in the image, 0xf in a shipped MW2SND.CFG): 2 speech - clear, voice_line_start posts the line's text instead; 4 XMIDI music; 8 CD music"
+ },
+ "soundConfigBuffer": {
+  "address": "0x97e3c",
+  "kind": "int",
+  "doc": "the 0x3c-byte mw2snd.cfg image res_load_named_config returned; sound_save_config writes it back and frees it"
+ },
+ "soundPaused": {
+  "address": "0x97e40",
+  "kind": "int",
+  "doc": "1 between sound_pause and sound_resume (formerly sound_config_sub_043f70 / _043fd0); music_update restarts no track while it is set"
  },
  "musicTrackLoaded": {
   "address": "0x97e44",
@@ -2215,6 +2272,11 @@
   "kind": "int",
   "doc": "ticks spent in the current keyframe: camera_keys_update adds tickDelta each frame and resets it to 0 on advancing. READING NOTE: midi_open (formerly sound_seq_sub_041260) renders as (&cameraKeyElapsed)[i] = -1 for i = 1..8. That is not this variable - the instruction is mov [eax*4 + 0x15006c] with eax starting at 1, so it writes 0x150070..0x15008c, a separate eight-entry sound table whose one-based index the compiler folded into the displacement"
  },
+ "voiceLines": {
+  "address": "0x1500a0",
+  "kind": "raw",
+  "doc": "the eight VoiceLine records sound_seq_queue_message allocates from"
+ },
  "cdTrackFirst": {
   "address": "0x150354",
   "kind": "int",
@@ -2224,6 +2286,11 @@
   "address": "0x150358",
   "kind": "int",
   "doc": "the highest track number cd_track_in_range accepts; see cdTrackFirst"
+ },
+ "enemyLockWarnTick": {
+  "address": "0x15036c",
+  "kind": "int",
+  "doc": "sound_frame_update's next check, every 0x38e ticks (5 s): SNDS 0x100 plays when an enemy in aiState 2 or 3 has the player as targetSecondary within 0x249f0 cm"
  },
  "soundSettings": {
   "address": "0x150370",

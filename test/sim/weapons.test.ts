@@ -10,7 +10,7 @@ import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
 import { octLength, vec3Normalise } from '../../src/engine/collision/ray.ts';
 import { clock } from '../../src/engine/clock.ts';
-import { timerInterrupt } from '../../src/engine/timer.ts';
+import { ailTimerService } from '../../src/engine/miles/ail.ts';
 import { mulr16 } from '../../src/core/int/fx16.ts';
 import type { MechEntity, MechLoadout, MechWeapon, Projectile } from '../../src/generated/classes.gen.ts';
 import { bootMission } from '../../src/mission/load.ts';
@@ -41,7 +41,7 @@ function boot(mission = 'AMY_SCN1'): KeyboardDriver {
 }
 
 function frame(ticks = DT) {
-  for (let i = 0; i < ticks; i++) timerInterrupt();
+  for (let i = 0; i < ticks; i++) ailTimerService();
   mainLoopFrame();
 }
 

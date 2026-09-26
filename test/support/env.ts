@@ -27,7 +27,7 @@ export function installFiles(): Map<string, Uint8Array> {
     if (!fs.existsSync(d)) return;
     for (const f of fs.readdirSync(d)) if (re.test(f)) m.set((dir ? dir + '/' : '') + f.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(d, f))));
   };
-  add('', /\.(BWD|MAP)$/i);
+  add('', /\.(BWD|MAP)$|^MW2SND\.CFG$/i);
   add('MEK', /\.MEK$/i);
   add('GIDDI', /\.(DLL|STD|CAL)$/i);
   return m;

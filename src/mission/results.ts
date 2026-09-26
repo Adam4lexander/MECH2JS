@@ -23,7 +23,7 @@ import { messagePost } from '../sim/cockpit/messages.ts';
 import { groupObjectiveChanged } from '../sim/groups/orders.ts';
 import { mechs } from '../sim/mech/mechGlobals.ts';
 import { mechRuntime } from '../sim/mech/mechRuntime.ts';
-import { soundPlay, soundSeq, soundSeqSub042080, soundSeqSub0423d0 } from '../sim/sound/sound.ts';
+import { soundPlay, voice, voiceQueueAnnouncement, voiceQueueClose } from '../sim/sound/sound.ts';
 import { things } from '../sim/things/gameThings.ts';
 import { ui } from '../sim/ui/uiContext.ts';
 import { commandGlobals } from '../sim/ui/commands.ts';
@@ -181,7 +181,7 @@ export function missionResultFormat(table: number, record: number, state: number
     sfl = devDirLoadSfl(o.failureSoundName);
   }
   const shown = text[0] === ' ' || o.listed === 0 ? '' : text;
-  soundSeqSub0423d0({ sound, text: gameBootSub015f00(shown), sfl });
+  voiceQueueAnnouncement({ soundId: sound, text: gameBootSub015f00(shown), buffer: sfl });
   results.objectiveAnnounced[record] = 1;
   return 1;
 }
@@ -216,7 +216,7 @@ export function missionResultText(table: number, result: number): number {
     // the C queues its uninitialised stack block here; no caller passes another result
     return 1;
   }
-  soundSeqSub0423d0({ sound, text, sfl });
+  voiceQueueAnnouncement({ soundId: sound, text, buffer: sfl });
   return 1;
 }
 
@@ -415,9 +415,9 @@ export function missionResultsUpdate(): void {
         T.decidedAt = missionClock.missionSeconds;
       }
     } else if (table === mechs.playerGroupIndex && commandGlobals.hangAround === 0) {
-      soundSeqSub042080(1);
+      voiceQueueClose(1);
       const since = (missionClock.missionSeconds - T.decidedAt) | 0;
-      if (soundSeq.currentMessage === null) {
+      if (voice.voiceQueueHead === null) {
         if (ui.exitPromptShown === 0 && 3 < since) {
           messagePost('Press any key to exit...', 1, 0x1554);
           ui.exitPromptShown = 1;
