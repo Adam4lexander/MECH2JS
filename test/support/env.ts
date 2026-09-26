@@ -15,6 +15,24 @@ export const hasDecompiled = fs.existsSync(path.join(MW2_DECOMPILED, 'mw2', 'lis
 
 export const gameSource = (): NodeFsSource => new NodeFsSource(MW2_ROOT);
 
+/**
+ * The install's loose files as the port reads them (upper-case keys, '/'
+ * separators): the star BWDs, MEK\ variants, the input maps and the GIDDI
+ * drivers - what app/gameData.ts fetches.
+ */
+export function installFiles(): Map<string, Uint8Array> {
+  const m = new Map<string, Uint8Array>();
+  const add = (dir: string, re: RegExp) => {
+    const d = path.join(MW2_ROOT, dir);
+    if (!fs.existsSync(d)) return;
+    for (const f of fs.readdirSync(d)) if (re.test(f)) m.set((dir ? dir + '/' : '') + f.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(d, f))));
+  };
+  add('', /\.(BWD|MAP)$/i);
+  add('MEK', /\.MEK$/i);
+  add('GIDDI', /\.(DLL|STD|CAL)$/i);
+  return m;
+}
+
 export function listingPath(name: string): string {
   return path.join(MW2_DECOMPILED, 'mw2', 'listing', name);
 }

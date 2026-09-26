@@ -115,3 +115,54 @@ export function fallingObjectFind(node: SceneNode | null): number {
   for (let i = 0; i < FALLING_COUNT; i++) if (falling.fallingObjects[i]!.node === node) return i;
   return -1;
 }
+
+/**
+ * Pushes a falling object: sets it tumbling, cuts any existing velocity
+ * longer than twice the push down to that length (same direction), then
+ * adds the push. Lengths are octagonal. Nothing for an empty slot or a zero
+ * push.
+ *
+ * @mw2 falling_object_push 0x0002bbb0
+ * @fidelity exact
+ */
+export function fallingObjectPush(slot: number, dx: number, dy: number, dz: number): void {
+  const s = falling.fallingObjects[slot]!;
+  if (!s.node) return;
+  const oct = (a: number, b: number, c: number) => {
+    a = Math.abs(a) | 0;
+    b = Math.abs(b) | 0;
+    c = Math.abs(c) | 0;
+    let hi = a;
+    let lo = b;
+    if (a < b) {
+      hi = b;
+      lo = a;
+    }
+    let top = hi;
+    let mid = c;
+    if (hi < c) {
+      top = c;
+      mid = hi;
+    }
+    return ((Math.imul(top, 4) + lo + mid) | 0) >> 2;
+  };
+  let p = oct(dx, dy, dz);
+  if (p === 0) return;
+  fallingObjectRandomiseMotion(slot);
+  const v = oct(s.velX, s.velY, s.velZ);
+  if (p < v) {
+    // (2p << 16) / v, 16.16
+    p = Number(BigInt.asIntN(32, (BigInt(Math.imul(p, 2)) << 16n) / BigInt(v)));
+    const r16 = (a: number) => {
+      imul64(a, p);
+      const l = regLo();
+      return (((l >>> 16) | (regHi() << 16)) + ((l >>> 15) & 1)) | 0;
+    };
+    s.velX = r16(s.velX);
+    s.velY = r16(s.velY);
+    s.velZ = r16(s.velZ);
+  }
+  s.velX = (s.velX + dx) | 0;
+  s.velY = (s.velY + dy) | 0;
+  s.velZ = (s.velZ + dz) | 0;
+}

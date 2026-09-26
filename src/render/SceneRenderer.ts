@@ -5,7 +5,10 @@
  * under backdropNode (render_scene_tree_sorted, far clip lifted), into
  * backdropScene, which the caller renders before clearing the depth buffer -
  * so the world always paints over it, as it does when drawn after; then the
- * objects on worldRootNode's list (render_object_list). The alt list holds
+ * objects on worldRootNode's list (render_object_list); then, in the cockpit
+ * view, cockpitHeadNode's tree - the player's own head, the cockpit shell -
+ * into cockpitScene, which the caller renders last after clearing the depth
+ * buffer, since the original paints it after (so over) the whole world. The alt list holds
  * hidden objects and the aux list objects set aside. For each object the level-of-detail mesh is chosen
  * as object_draw_lod_mesh chooses it from the object's view depth
  * (object_cull_main_view), and each polygon's draw word comes from the ported
@@ -41,6 +44,8 @@
 import * as THREE from 'three';
 import type { MeshBlock, MeshVertex, SceneNode, Viewer, WorldObject } from '../generated/classes.gen.ts';
 import { viewScene } from '../sim/world/viewScene.ts';
+import { cameraGlobals } from '../sim/camera/viewer.ts';
+import { quirk } from '../core/provenance.ts';
 import { objectsOnList, worldRootNode } from '../engine/scene/objectLists.ts';
 import { objectRefreshMesh } from '../engine/scene/worldObject.ts';
 import { blockToMatrix4, CM_TO_UNITS } from './bridge/space.ts';
@@ -96,13 +101,21 @@ export class SceneRenderer {
   readonly uniforms: IndexedUniforms = makeUniforms();
   private readonly material = makeIndexedMaterial(this.uniforms);
   private readonly behindMaterial = makeIndexedMaterial(this.uniforms, { behind: true });
+  /**
+   * drawn last, over everything, with the depth buffer cleared before it: in
+   * the cockpit view, cockpitHeadNode's tree (see sync)
+   */
+  readonly cockpitScene = new THREE.Scene();
   private readonly entries = new Map<WorldObject, ObjEntry>();
+  /** the cockpit pass draws objects the world pass may draw too, so they get their own meshes */
+  private readonly cockpitEntries = new Map<WorldObject, ObjEntry>();
   private readonly byMesh = new Map<THREE.Object3D, WorldObject>();
   readonly stats: FrameStats = { objects: 0, polygons: 0 };
 
   constructor() {
     this.scene.matrixAutoUpdate = false;
     this.backdropScene.matrixAutoUpdate = false;
+    this.cockpitScene.matrixAutoUpdate = false;
   }
 
   setPalette(rgb: Uint8Array): void {
@@ -131,6 +144,8 @@ export class SceneRenderer {
   clear(): void {
     for (const e of this.entries.values()) this.dispose(e);
     this.entries.clear();
+    for (const e of this.cockpitEntries.values()) this.dispose(e);
+    this.cockpitEntries.clear();
     this.byMesh.clear();
   }
 
@@ -272,6 +287,31 @@ export class SceneRenderer {
       renderView.polySortFlags = obj.flags & 0xffff;
       polys += this.drawObject(obj, e, L);
     }
+    // the cockpit shell: while cockpitViewActive, after the world, cockpitHeadNode's tree with
+    // the near clip at 8 (viewer_set_near_clip) and the cull hook at 0x3f970, which rejects an
+    // object with flags bit 0x1000 and nothing else - no depth, far or side test, and it does
+    // not write objectViewDepth, so the LOD walk reads the view depth of the last object the
+    // world pass culled, and polySortFlags is the last world object's (both quirks, kept)
+    for (const e of this.cockpitEntries.values()) e.group.visible = false;
+    if (cameraGlobals.cockpitViewActive !== 0 && viewScene.cockpitHeadNode) {
+      quirk('the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled', 'vfx_video_sub_010490');
+      const near = [viewer.nearClip, renderView.viewNearClip, renderView.viewNearClipScaled] as const;
+      viewer.nearClip = 8;
+      renderView.viewNearClip = 8;
+      renderView.viewNearClipScaled = 8 * 4;
+      const walk = (n: SceneNode) => {
+        const obj = n.userData;
+        if (obj && (obj.flags & 0x1000) === 0) {
+          const e = this.entry(obj, this.cockpitScene, this.cockpitEntries);
+          e.group.visible = true;
+          drawn++;
+          polys += this.drawObject(obj, e, L);
+        }
+        for (let c = n.firstChild; c; c = c.nextSibling) walk(c);
+      };
+      walk(viewScene.cockpitHeadNode);
+      [viewer.nearClip, renderView.viewNearClip, renderView.viewNearClipScaled] = near;
+    }
     for (const [obj, e] of this.entries) {
       if (!seen.has(obj)) {
         this.dispose(e);
@@ -282,15 +322,15 @@ export class SceneRenderer {
     this.stats.polygons = polys;
   }
 
-  private entry(obj: WorldObject, into: THREE.Scene): ObjEntry {
-    let e = this.entries.get(obj);
+  private entry(obj: WorldObject, into: THREE.Scene, entries = this.entries): ObjEntry {
+    let e = entries.get(obj);
     if (e && e.group.parent !== into) {
       this.dispose(e);
       e = undefined;
     }
     if (!e) {
       e = this.build(obj, into);
-      this.entries.set(obj, e);
+      entries.set(obj, e);
     }
     if (obj.node) blockToMatrix4(obj.node.worldBlock, e.group.matrix);
     else e.group.matrix.identity();

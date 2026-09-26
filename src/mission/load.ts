@@ -8,6 +8,12 @@
  * export).
  */
 import { randomTablesInit } from '../core/random.ts';
+import { audioTimerInit, simClockReset } from '../engine/clock.ts';
+import { uiContextRegister } from '../sim/ui/uiContext.ts';
+import { setDosFiles } from '../engine/dosFiles.ts';
+import { inputInit } from '../sim/controls/input.ts';
+import { cameraInit } from '../sim/camera/cameraUpdate.ts';
+import { terrainTableReset } from '../sim/mech/animTask.ts';
 import { resetProvenanceSeen, divergence } from '../core/provenance.ts';
 import type { IniFile } from '../data/config/ini.ts';
 import type { ExeImage } from '../data/exe/ExeImage.ts';
@@ -71,7 +77,10 @@ export interface MissionBootOptions {
   exe: ExeImage;
   prj: ProjectFile;
   ini?: IniFile | null;
-  /** loose files beside MW2.PRJ (USERSTAR.BWD, EN0?STAR.BWD, ...), upper-case names */
+  /**
+   * the install's loose files (USERSTAR.BWD, EN0?STAR.BWD, MEK/*.MEK,
+   * INPUT.MAP, GAMEKEY.MAP, GIDDI/*.DLL ...), upper-case keys with '/'
+   */
   looseFiles?: Map<string, Uint8Array>;
   /** the mission stream to load, e.g. 'AMY_SCN1' */
   mission: string;
@@ -93,6 +102,9 @@ export function bootMission(opts: MissionBootOptions): boolean {
   setMainProject(opts.prj);
   setLooseFiles(opts.looseFiles ?? new Map());
   setMekSource(opts.looseFiles ?? new Map());
+  setDosFiles(opts.looseFiles ?? new Map());
+  // sim_options_load happens before this in main; the timer comes up here
+  audioTimerInit();
   // static_arena_init: the DTBL pre-pass sizes arenas; the port allocates on demand
   divergence('static_arena_init: no arena pre-pass; tables are allocated on demand', 'main');
   randomTablesInit(opts.randomSeed);
@@ -108,11 +120,18 @@ export function bootMission(opts: MissionBootOptions): boolean {
   // the frame renderer runs viewer_update_projection before drawing; done once here so lodScale is set for the editor
   viewerUpdateProjection(cameraGlobals.mainViewer);
   // sim_count_mechs_by_status, terrain_table_reset, camera_init, input_init: Phase 2
-  divergence('camera_init, input_init and the mech status count run in Phase 2', 'main');
+  // sim_count_mechs_by_status: the allegiance tallies (0xa5668..) feed the results screen, Phase 6
+  divergence('sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)', 'main');
+  terrainTableReset();
+  cameraInit();
+  // game_boot_sub_015670 re-hooks the keyboard interrupt: the host's
+  inputInit();
+  for (const id of [4, 5, 6, 7, 8, 3]) uiContextRegister(id);
   for (let i = 0; i < missionTables.missionTableCount; i++) objectiveTableStart(i);
   mechDispatchHook0();
   groupsStartMission();
-  // netplay_start, music_start_mission_track, sim_clock_reset: later phases
+  // netplay_start (single player: nothing), ui_callbacks_sub_0196a0, music_start_mission_track: later phases
+  simClockReset();
   worldRecordsTick();
   vfxVideoSub0103c0();
   return ok;

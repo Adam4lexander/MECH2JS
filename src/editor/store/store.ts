@@ -23,6 +23,16 @@ export class Store {
     this.revision++;
     for (const l of this.listeners) l();
   }
+
+  private lastThrottled = 0;
+
+  /** bump() at most ten times a second - Play's per-frame changes, so the panels stay live cheaply */
+  bumpThrottled(): void {
+    const now = performance.now();
+    if (now - this.lastThrottled < 100) return;
+    this.lastThrottled = now;
+    this.bump();
+  }
 }
 
 /** Engine state: bumped per frame (throttled by the host in Play) and per edit. */

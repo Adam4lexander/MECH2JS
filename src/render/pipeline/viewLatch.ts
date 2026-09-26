@@ -8,9 +8,7 @@
  * every frame's draw.
  */
 import type { Viewer } from '../../generated/classes.gen.ts';
-import { LABEL } from '../../generated/labels.gen.ts';
 import { registerGlobals } from '../../engine/globals.ts';
-import { imageI32 } from '../../engine/image.ts';
 import type { LightLatch } from '../shading/polygonColour.ts';
 
 export const renderView = registerGlobals(
@@ -42,15 +40,8 @@ export const renderView = registerGlobals(
     objectViewDepth: 0,
     /** 0x14fcc0: the flags word of the object being drawn; bits 0-2 pick each polygon's depth key */
     polySortFlags: 0,
-    /**
-     * 0x96ef4: set while the view is the cockpit; object_cull_main_view then
-     * skips every object of type family 0xa0.
-     */
-    cockpitViewActive: 0,
   },
-  () => {
-    renderView.cockpitViewActive = imageI32(LABEL.cockpitViewActive, 0);
-  },
+  () => {},
 );
 
 /**

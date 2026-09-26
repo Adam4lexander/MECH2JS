@@ -18,6 +18,9 @@ import { lighting } from '../sim/world/environment.ts';
 import { dayCycle } from '../sim/world/dayCycle.ts';
 import type { SceneRenderer } from '../render/SceneRenderer.ts';
 import { BitmapAtlas } from '../render/textures/bitmapAtlas.ts';
+import { clock } from '../engine/clock.ts';
+import { timerInterrupt } from '../engine/timer.ts';
+import { mainLoopRunning, mainLoopStep } from '../mission/mainLoop.ts';
 
 export type Mode = 'edit' | 'play';
 
@@ -102,7 +105,61 @@ export class Game {
   }
 
   setMode(m: Mode): void {
+    if (m === 'play') {
+      // leave the fixed-step mode Step uses; the next frame steps its last 12 ticks and hands back to real time
+      clock.dat00095828 = 0;
+      this.pending = 0;
+    }
     this.mode = m;
     engineStore.bump();
+  }
+
+  /** timer interrupts owed to the game for real time elapsed, fractional */
+  private pending = 0;
+  /** the most real time one display frame may feed the game (a hidden tab resumes without a burst) */
+  private static readonly MAX_TICKS_PER_FRAME = 45;
+
+  /**
+   * Play: feeds the 182 Hz timer for `ms` of real time, then runs one pass of
+   * main's loop (the original runs as fast as it can; the port runs one pass
+   * per display frame). Returns false once the loop has ended (quit).
+   */
+  playFrame(ms: number): boolean {
+    this.pending = Math.min(this.pending + (ms * 182) / 1000, Game.MAX_TICKS_PER_FRAME);
+    while (this.pending >= 1) {
+      timerInterrupt();
+      this.pending -= 1;
+    }
+    return this.runFrame();
+  }
+
+  /**
+   * Step: one pass of the loop in the clock's fixed-step mode (simClockMode
+   * 3, +12 ticks a frame, the timer frozen) - the original's own mechanism,
+   * requested through the flag at 0x95828. The first Step from real time
+   * enters the mode with the ticks already due, so it runs two passes.
+   */
+  step(): boolean {
+    this.mode = 'edit';
+    const entering = clock.simClockMode !== 3;
+    clock.dat00095828 = 1;
+    if (entering && !this.runFrame()) return false;
+    const ok = this.runFrame();
+    engineStore.bump();
+    return ok;
+  }
+
+  private runFrame(): boolean {
+    if (!mainLoopRunning()) return false;
+    try {
+      mainLoopStep();
+    } catch (e) {
+      this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
+      logError('frame', this.loadError);
+      this.mode = 'edit';
+      engineStore.bump();
+      return false;
+    }
+    return mainLoopRunning();
   }
 }

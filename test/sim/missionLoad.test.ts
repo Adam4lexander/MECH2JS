@@ -14,15 +14,7 @@ import { world } from '../../src/sim/world/worldRecords.ts';
 import { things } from '../../src/sim/things/gameThings.ts';
 import { altRootNode, objectsOnList, worldRootNode } from '../../src/engine/scene/objectLists.ts';
 import { viewScene } from '../../src/sim/world/viewScene.ts';
-import { MW2_ROOT, gameSource, hasGameData } from '../support/env.ts';
-
-function looseFiles(): Map<string, Uint8Array> {
-  const m = new Map<string, Uint8Array>();
-  for (const f of fs.readdirSync(MW2_ROOT)) if (/\.BWD$/i.test(f)) m.set(f.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(MW2_ROOT, f))));
-  const mek = path.join(MW2_ROOT, 'MEK');
-  if (fs.existsSync(mek)) for (const f of fs.readdirSync(mek)) m.set(`MEK/${f}`.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(mek, f))));
-  return m;
-}
+import { gameSource, hasGameData, installFiles } from '../support/env.ts';
 
 describe.runIf(hasGameData)('mission load', () => {
   let exe: ExeImage;
@@ -35,7 +27,7 @@ describe.runIf(hasGameData)('mission load', () => {
     exe = ExeImage.fromExe(await src.read('MW2.EXE'));
     prj = new ProjectFile(await src.read('MW2.PRJ'));
     ini = new IniFile(await src.read('MW2.INI'));
-    loose = looseFiles();
+    loose = installFiles();
     missions = readNameTable(prj, TABL.BWD)
       .map((e) => e.name.toUpperCase())
       .filter((n) => /SCN1$/.test(n))

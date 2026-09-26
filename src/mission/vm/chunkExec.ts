@@ -30,6 +30,8 @@ import { idByName } from '../../engine/resources/cache.ts';
 import { sceneNodeGetWorldEuler, sceneNodeRemoveSubtreeFromWorld, sceneNodeSetEuler, sceneNodeSetOrigin, sceneNodeWalk, sceneSubtreeMoveToAltList, sceneSubtreeSetObjectType } from '../../engine/scene/sceneGraph.ts';
 import { polySetVertexOffset } from '../../engine/scene/wtboLoader.ts';
 import { taskCreate, taskGlobals } from '../../engine/tasks/taskList.ts';
+// registers anim_player_step (TSK type 3) so taskHandler resolves it
+import '../../sim/mech/animTask.ts';
 import { cameraGlobals } from '../../sim/camera/viewer.ts';
 import { resLoadCockpit, resLoadHdi } from '../../sim/cockpit/resources.ts';
 import { simTables } from '../../sim/effects/simTables.ts';
@@ -106,7 +108,7 @@ function mulRound16(a: number, b: number): number {
  *
  * @mw2 project_chunk_exec 0x0004e5d0
  * @fidelity partial
- * @divergence TSK handlers are not ported yet (Phase 6); tasks are created with whatever the code registry resolves, possibly nothing
+ * @divergence of the TSK handlers only anim_player_step (type 3) is ported; the others (Phase 6) create tasks with no callback
  */
 export function projectChunkExec(item: ProjectItem): number {
   let result = 1;

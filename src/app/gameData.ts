@@ -1,7 +1,8 @@
 /**
  * Everything the port reads from the install, fetched once: MW2.PRJ, MW2.EXE,
  * MW2.INI and the loose files beside them (the per-star BWD files the shell
- * writes, and the user mech variants in MEK\).
+ * writes, the user mech variants in MEK\, the input maps and the GIDDI
+ * input drivers).
  */
 import { ExeImage } from '../data/exe/ExeImage.ts';
 import { IniFile } from '../data/config/ini.ts';
@@ -45,7 +46,11 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
     /* the INI only supplies error texts */
   }
   const loose = new Map<string, Uint8Array>();
-  const names = [...(await listDir('')).filter((n) => /\.BWD$/i.test(n)), ...(await listDir('MEK'))];
+  const names = [
+    ...(await listDir('')).filter((n) => /\.(BWD|MAP)$/i.test(n)),
+    ...(await listDir('MEK')),
+    ...(await listDir('GIDDI')),
+  ];
   for (const n of names) {
     progress(n);
     loose.set(n.toUpperCase(), await src.read(n));

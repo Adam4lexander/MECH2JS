@@ -9,33 +9,9 @@
  */
 import type { MechLoadout } from '../../generated/classes.gen.ts';
 import { registerCode } from '../../engine/codePtr.ts';
-
-/**
- * Hook 1 of the standard classes: the movement tick.
- *
- * @mw2 mech_std_tick_terrain 0x00026990
- * @fidelity stub
- * @divergence Phase 2: does nothing
- */
-export const mechStdTickTerrain = registerCode('mech_std_tick_terrain', 0x26990, (_l: MechLoadout, _index: number): void => {});
-
-/**
- * Hook 2 of the standard classes: the control tick.
- *
- * @mw2 mech_std_tick_ai 0x00027780
- * @fidelity stub
- * @divergence Phase 2: does nothing
- */
-export const mechStdTickAi = registerCode('mech_std_tick_ai', 0x27780, (_l: MechLoadout, _index: number): void => {});
-
-/**
- * Hook 3 of the standard classes (the player's mech only): the player tick.
- *
- * @mw2 mech_std_tick_player 0x00028320
- * @fidelity stub
- * @divergence Phase 2: does nothing
- */
-export const mechStdTickPlayer = registerCode('mech_std_tick_player', 0x28320, (_l: MechLoadout): void => {});
+// hook slots 1, 2 and 3 of the standard class live with their bodies
+import './mechTickAi.ts';
+import './mechTickTerrain.ts';
 
 /**
  * Hook 4 of the standard classes (the player's mech only): player_cockpit_frame

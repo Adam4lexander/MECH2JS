@@ -17,7 +17,11 @@ import { SceneNode as SceneNodeClass, Viewer } from '../../generated/classes.gen
 import type { Game } from '../../app/Game.ts';
 import { SceneRenderer } from '../../render/SceneRenderer.ts';
 import { fromThree, toThree, CM_TO_UNITS } from '../../render/bridge/space.ts';
-import { viewerFromCamera } from '../../render/bridge/cameraViewer.ts';
+import { cameraFromViewer, viewerFromCamera } from '../../render/bridge/cameraViewer.ts';
+import { attachHostInput } from '../../app/hostInput.ts';
+import { mainLoop } from '../../mission/mainLoop.ts';
+import { cam } from '../../sim/camera/cameraUpdate.ts';
+import { viewerBuildTransform, viewerUpdateProjection } from '../../sim/camera/projection.ts';
 import { sceneNodeSetOrigin, sceneNodeWalk } from '../../engine/scene/sceneGraph.ts';
 import { cameraGlobals, viewer } from '../../sim/camera/viewer.ts';
 import { mechLodUpdate } from '../../sim/world/detailRecords.ts';
@@ -151,14 +155,35 @@ export function Viewport({ game }: { game: Game }) {
     };
     renderer.domElement.addEventListener('click', onClick);
 
+    // Play: the PC's keyboard and mouse feed the game's GIDDI drivers
+    const detachInput = attachHostInput(renderer.domElement, () => game.mode === 'play');
+    // DAT_00097074, the frame's render call inside main's loop: its sim half
+    // (vfx_video_sub_010490's projection refresh and viewer_build_transform);
+    // the drawing itself happens once the loop pass returns
+    mainLoop.renderHook = () => {
+      const v = viewer();
+      if (cam.dat000954ec !== 0) {
+        viewerUpdateProjection(v);
+        cam.dat000954ec = 0;
+      }
+      if (cam.dat00097020 === 0) viewerBuildTransform(v);
+    };
+
     let raf = 0;
     let last = performance.now();
     let lastInfo = 0;
     const frame = (now: number) => {
       const dt = Math.min(0.1, (now - last) / 1000);
+      const elapsedMs = now - last;
       last = now;
-      fly.update(dt);
-      if (game.mode === 'edit') editorViewUpdate(camera);
+      const playing = game.mode === 'play';
+      if (playing) {
+        if (!game.playFrame(elapsedMs)) game.setMode('edit');
+        engineStore.bumpThrottled();
+      } else {
+        fly.update(dt);
+        editorViewUpdate(camera);
+      }
       if (paletteDirty.current) {
         paletteDirty.current = false;
         const p = game.paletteRgb();
@@ -181,10 +206,13 @@ export function Viewport({ game }: { game: Game }) {
         camera.aspect = w / h;
       }
       camera.updateProjectionMatrix();
+      if (playing) cameraFromViewer(viewer(), camera, camera.aspect);
       const eye = fromThree(camera.position.x, camera.position.y, camera.position.z);
       game.updateTextures(sr);
       // the game's viewer, standing at the editor camera: the cull, LOD and clipper see what three.js draws
-      sr.sync(viewerFromCamera(camera, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer));
+      // Edit: the game's viewer, standing at the editor camera, so the cull, LOD
+      // and clipper see what three.js draws. Play: the game's own viewer.
+      sr.sync(playing ? viewer() : viewerFromCamera(camera, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer));
       renderer.getDrawingBufferSize(drawSize);
       skyGround.update(camera, drawSize.x, drawSize.y, {
         sky: lighting.skyColour,
@@ -200,6 +228,15 @@ export function Viewport({ game }: { game: Game }) {
       renderer.render(sr.backdropScene, camera);
       renderer.clearDepth();
       renderer.render(sr.scene, camera);
+      // the cockpit shell, painted over the world (empty outside the cockpit view). Its near clip
+      // is 8 cm, inside three's 50 cm near plane, so the pass runs with the plane pulled in
+      renderer.clearDepth();
+      const near = camera.near;
+      camera.near = 0.04;
+      camera.updateProjectionMatrix();
+      renderer.render(sr.cockpitScene, camera);
+      camera.near = near;
+      camera.updateProjectionMatrix();
       if (now - lastInfo > 250) {
         lastInfo = now;
         setInfo(`${sr.stats.objects} objects · ${sr.stats.polygons} polygons · eye ${eye.map((c) => (c * CM_TO_UNITS).toFixed(0)).join(', ')} m`);
@@ -213,6 +250,8 @@ export function Viewport({ game }: { game: Game }) {
       unsubEngine();
       window.removeEventListener('keydown', onKey);
       renderer.domElement.removeEventListener('click', onClick);
+      detachInput();
+      mainLoop.renderHook = null;
       gizmo.dispose();
       fly.dispose();
       sr.clear();
@@ -225,7 +264,11 @@ export function Viewport({ game }: { game: Game }) {
     <div className="viewport" ref={host}>
       <div className="viewport-overlay">
         {game.mode === 'edit' ? 'EDIT' : 'PLAY'} · {info}
-        <div className="hint">right-drag look · WASD/QE fly · wheel speed · click select · F frame</div>
+        <div className="hint">
+          {game.mode === 'edit'
+            ? 'right-drag look · WASD/QE fly · wheel speed · click select · F frame'
+            : 'the game has the keyboard (INPUT.MAP / GAMEKEY.MAP) · click to capture the mouse · Edit to leave'}
+        </div>
       </div>
       <div className="viewport-bar">
         <select

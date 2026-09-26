@@ -8,6 +8,7 @@
  *   mech_alt_create  class 3 (the artillery turrets)
  *   door_create      class 7 (doors)
  */
+import { cameraGlobals } from '../camera/viewer.ts';
 import type { MechEntity, MechLoadout } from '../../generated/classes.gen.ts';
 import { sdivShl } from '../../core/int/i64.ts';
 import { divergence } from '../../core/provenance.ts';
@@ -40,11 +41,13 @@ export function mechAnimInit(e: MechEntity): void {
  * offset and torso pan.
  *
  * @mw2 hud_widgets_install 0x00032a70
- * @fidelity stub
- * @divergence Phase 2 (HUD): nothing is built, and the player's weapons stay in chassis order - loadout_regroup_weapons, which reorders them, is driven by the widgets
+ * @fidelity partial
+ * @divergence Phase 4 (HUD): only the last two stores are made - playerEyeOffsetY = &loadout->eyeOffsetY (the cockpit camera's eye height) and the torso pan pointer; no widget is built and the player's weapons stay in chassis order (loadout_regroup_weapons is driven by the widgets)
  */
-export function hudWidgetsInstall(_entity: MechEntity, _playerIndex: number): void {
-  divergence('hud_widgets_install is Phase 2 (HUD): the player weapons are not regrouped', 'hud_widgets_install');
+export function hudWidgetsInstall(entity: MechEntity, _playerIndex: number): void {
+  divergence('hud_widgets_install is Phase 4 (HUD): no widgets, and the player weapons are not regrouped', 'hud_widgets_install');
+  cameraGlobals.playerEyeOffsetY = entity.loadout;
+  cameraGlobals.playerTorsoPanPtr = entity.loadout;
 }
 
 /** Lift by rideHeight, walk, read the pose back into the entity, zero the torso angles - the part all three create hooks share. */

@@ -6,45 +6,45 @@ Every ported function carries `@mw2 <name> <address>`; this file is built from t
 against `decompiled/mw2/listing/functions.csv`, so a function renamed upstream fails the build rather
 than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 
-**Game functions:** 1130  |  **ported exact:** 271  |  **partial:** 38  |  **stub:** 14  |  library functions ported: 2
+**Game functions:** 1130  |  **ported exact:** 382  |  **partial:** 59  |  **stub:** 44  |  library functions ported: 8
 
 ## By original module
 
 | module | group | functions | exact | partial | stub | not started |
 |---|---|---:|---:|---:|---:|---:|
-| ai_combat | ai | 31 | 12 | 1 | 1 | 17 |
+| ai_combat | ai | 31 | 14 | 2 | 3 | 12 |
 | ai_debug | ai | 2 | 0 | 0 | 0 | 2 |
-| ai_group | ai | 98 | 23 | 3 | 5 | 67 |
+| ai_group | ai | 98 | 29 | 6 | 15 | 48 |
 | ai_state | ai | 17 | 0 | 1 | 0 | 16 |
-| game_boot | boot | 18 | 0 | 1 | 0 | 17 |
+| game_boot | boot | 18 | 2 | 3 | 0 | 13 |
 | main | boot | 15 | 10 | 1 | 0 | 4 |
-| geom_luma | geometry | 67 | 34 | 0 | 0 | 33 |
+| geom_luma | geometry | 67 | 48 | 2 | 0 | 17 |
 | geom_poly | geometry | 20 | 18 | 1 | 0 | 1 |
 | geom_table | geometry | 46 | 23 | 3 | 0 | 20 |
-| input | input | 27 | 0 | 0 | 0 | 27 |
+| input | input | 27 | 16 | 1 | 0 | 10 |
 | mission_config | mission | 5 | 1 | 0 | 0 | 4 |
-| mission_log | mission | 28 | 1 | 3 | 0 | 24 |
-| mission_result | mission | 7 | 1 | 0 | 0 | 6 |
+| mission_log | mission | 28 | 1 | 4 | 1 | 22 |
+| mission_result | mission | 7 | 1 | 0 | 1 | 5 |
 | objectives | mission | 2 | 0 | 0 | 0 | 2 |
-| netplay | netplay | 13 | 1 | 0 | 0 | 12 |
-| project_entry | project | 31 | 3 | 0 | 1 | 27 |
+| netplay | netplay | 13 | 1 | 1 | 0 | 11 |
+| project_entry | project | 31 | 22 | 0 | 0 | 9 |
 | project_file | project | 34 | 13 | 5 | 0 | 16 |
-| project_tables | project | 39 | 5 | 0 | 0 | 34 |
+| project_tables | project | 39 | 8 | 1 | 0 | 30 |
 | stream_seen | project | 3 | 3 | 0 | 0 | 0 |
-| render_asm | render | 74 | 24 | 10 | 0 | 40 |
+| render_asm | render | 74 | 33 | 10 | 0 | 31 |
 | res_cache | resource | 25 | 0 | 1 | 2 | 22 |
 | res_loaders | resource | 9 | 4 | 1 | 0 | 4 |
-| cockpit | sim | 12 | 0 | 0 | 0 | 12 |
+| cockpit | sim | 12 | 0 | 1 | 2 | 9 |
 | damage | sim | 35 | 2 | 1 | 2 | 30 |
 | mech_config | sim | 20 | 17 | 1 | 0 | 2 |
-| sim_objects | sim | 29 | 11 | 2 | 0 | 16 |
-| weapons | sim | 15 | 1 | 0 | 0 | 14 |
-| sound_config | sound | 11 | 0 | 0 | 0 | 11 |
-| sound_res | sound | 14 | 3 | 1 | 3 | 7 |
-| sound_seq | sound | 59 | 3 | 0 | 0 | 56 |
-| sound_sfx | sound | 14 | 0 | 0 | 0 | 14 |
-| terrain | terrain | 103 | 49 | 0 | 0 | 54 |
-| cheats | ui | 14 | 0 | 0 | 0 | 14 |
+| sim_objects | sim | 29 | 11 | 2 | 4 | 12 |
+| weapons | sim | 15 | 5 | 0 | 3 | 7 |
+| sound_config | sound | 11 | 0 | 0 | 2 | 9 |
+| sound_res | sound | 14 | 3 | 2 | 2 | 7 |
+| sound_seq | sound | 59 | 3 | 0 | 2 | 54 |
+| sound_sfx | sound | 14 | 0 | 0 | 2 | 12 |
+| terrain | terrain | 103 | 85 | 3 | 2 | 13 |
+| cheats | ui | 14 | 0 | 3 | 0 | 11 |
 | hud_debug | ui | 15 | 0 | 0 | 0 | 15 |
 | target_ui | ui | 2 | 1 | 0 | 0 | 1 |
 | ui_callbacks | ui | 33 | 0 | 0 | 0 | 33 |
@@ -52,21 +52,28 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | time_format | util | 3 | 0 | 0 | 0 | 3 |
 | vfx_font | vfx | 46 | 2 | 1 | 0 | 43 |
 | vfx_lib | vfx | 42 | 0 | 0 | 0 | 42 |
-| vfx_video | vfx | 49 | 5 | 0 | 0 | 44 |
+| vfx_video | vfx | 49 | 5 | 1 | 1 | 42 |
 
 ## Ported functions
 
 | address | original | module | fidelity | port |
 |---|---|---|---|---|
 | 0x000103c0 | vfx_video_sub_0103c0 | vfx_video | exact | `vfxVideoSub0103c0` src/sim/world/viewScene.ts:46 |
+| 0x000106d0 | vfx_video_sub_0106d0 | vfx_video | partial | `vfxVideoSub0106d0` src/mission/mainLoop.ts:84 |
 | 0x00010b50 | frame_prj_add | vfx_video | exact | `framePrjAdd` src/sim/world/framePrj.ts:48 |
 | 0x00010bd0 | frame_prj_reset | vfx_video | exact | `framePrjReset` src/sim/world/framePrj.ts:69 |
 | 0x00010c10 | frame_prj_slot_clear | vfx_video | exact | `framePrjSlotClear` src/sim/world/framePrj.ts:82 |
 | 0x00010c30 | anim2d_add | vfx_video | exact | `anim2dAdd` src/sim/world/anim2d.ts:38 |
+| 0x00011020 | message_post | vfx_video | stub | `messagePost` src/sim/cockpit/messages.ts:8 |
 | 0x00014ee0 | day_cycle_init | vfx_font | exact | `dayCycleInit` src/sim/world/dayCycle.ts:56 |
 | 0x00014f80 | day_cycle_tick | vfx_font | partial | `dayCycleTick` src/sim/world/dayCycle.ts:77 |
 | 0x00015070 | day_cycle_set_phase | vfx_font | exact | `dayCycleSetPhase` src/sim/world/dayCycle.ts:106 |
+| 0x00015690 | audio_timer_init | game_boot | partial | `audioTimerInit` src/engine/clock.ts:76 |
+| 0x00015760 | sim_clock_step | game_boot | exact | `simClockStep` src/engine/clock.ts:119 |
+| 0x000159e0 | sim_clock_reset | game_boot | exact | `simClockReset` src/engine/clock.ts:98 |
+| 0x00015e90 | game_update_pause | game_boot | partial | `gameUpdatePause` src/sim/ui/uiContext.ts:113 |
 | 0x00015f60 | objective_table_start | game_boot | partial | `objectiveTableStart` src/mission/objectives.ts:154 |
+| 0x00016e80 | mission_results_update | mission_result | stub | `missionResultsUpdate` src/mission/laterPhases.ts:42 |
 | 0x000170c0 | mission_clock_update | mission_result | exact | `missionClockUpdate` src/mission/missionClock.ts:25 |
 | 0x00017290 | mission_stub_true | mission_config | exact | `missionStubTrue` src/mission/tables/missionTables.ts:182 |
 | 0x00017310 | task_create | project_tables | exact | `taskCreate` src/engine/tasks/taskList.ts:51 |
@@ -74,10 +81,48 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00017400 | task_list_clear | project_tables | exact | `taskListClear` src/engine/tasks/taskList.ts:90 |
 | 0x00017450 | task_list_notify_rebuilt | project_tables | exact | `taskListNotifyRebuilt` src/engine/tasks/taskList.ts:102 |
 | 0x000174a0 | task_list_run | project_tables | exact | `taskListRun` src/engine/tasks/taskList.ts:112 |
+| 0x00017570 | ui_context_register | project_tables | exact | `uiContextRegister` src/sim/ui/uiContext.ts:78 |
+| 0x00017cd0 | menu_poll_key | project_tables | exact | `menuPollKey` src/sim/ui/uiContext.ts:133 |
+| 0x00017ea0 | project_tables_sub_017ea0 | project_tables | partial | `projectTablesSub017ea0` src/sim/ui/uiContext.ts:194 |
+| 0x00018690 | ui_context_active | project_tables | exact | `uiContextActive` src/sim/ui/uiContext.ts:101 |
+| 0x0001aad0 | anim_player_step | project_entry | exact | `animPlayerStep` src/sim/mech/animTask.ts:330 |
+| 0x0001b190 | anim_scale_by_gait | project_entry | exact | `animScaleByGait` src/sim/mech/animTask.ts:78 |
 | 0x0001b1c0 | anim_ensure_loaded | project_entry | exact | `animEnsureLoaded` src/sim/mech/anim.ts:72 |
 | 0x0001b250 | anim_track_base | project_entry | exact | `animTrackBase` src/sim/mech/anim.ts:96 |
 | 0x0001c070 | object_set_class | project_entry | exact | `objectSetClass` src/engine/scene/worldObject.ts:431 |
-| 0x0001cf10 | object_build_ground_quadtree | project_entry | stub | `objectBuildGroundQuadtree` src/sim/world/groundQuadtree.ts:11 |
+| 0x0001c090 | poly_surface_height | project_entry | exact | `polySurfaceHeight` src/sim/world/meshQueries.ts:141 |
+| 0x0001c120 | world_ground_height_near | project_entry | exact | `worldGroundHeightNear` src/sim/world/collision.ts:341 |
+| 0x0001c240 | world_find_highest_hit | project_entry | exact | `worldFindHighestHit` src/sim/world/collision.ts:380 |
+| 0x0001c310 | world_point_query | project_entry | exact | `worldPointQuery` src/sim/world/collision.ts:472 |
+| 0x0001c360 | world_nearest_object_at | project_entry | exact | `worldNearestObjectAt` src/sim/world/collision.ts:440 |
+| 0x0001c3b0 | object_contains_point | project_entry | exact | `objectContainsPoint` src/sim/world/collision.ts:460 |
+| 0x0001c3f0 | world_raycast | project_entry | exact | `worldRaycast` src/sim/world/collision.ts:587 |
+| 0x0001c510 | world_raycast_no_mechs | project_entry | exact | `worldRaycastNoMechs` src/sim/world/collision.ts:627 |
+| 0x0001c600 | world_object_raycast | project_entry | exact | `worldObjectRaycast` src/sim/world/collision.ts:547 |
+| 0x0001c720 | object_hit_normal_from_centre | project_entry | exact | `objectHitNormalFromCentre` src/sim/world/collision.ts:488 |
+| 0x0001c7a0 | ray_hit_polygon | project_entry | exact | `rayHitPolygon` src/sim/world/meshQueries.ts:158 |
+| 0x0001c970 | polygon_contains_point | project_entry | exact | `polygonContainsPoint` src/sim/world/meshQueries.ts:111 |
+| 0x0001ca00 | polygon_contains_point_xz | project_entry | exact | `polygonContainsPointXz` src/sim/world/meshQueries.ts:84 |
+| 0x0001cbb0 | polygon_contains_point_xy | project_entry | exact | `polygonContainsPointXy` src/sim/world/meshQueries.ts:92 |
+| 0x0001cd60 | polygon_contains_point_yz | project_entry | exact | `polygonContainsPointYz` src/sim/world/meshQueries.ts:100 |
+| 0x0001cf10 | object_build_ground_quadtree | project_entry | exact | `objectBuildGroundQuadtree` src/sim/world/groundQuadtree.ts:135 |
+| 0x0001cfe0 | quadtree_build_quadrant | project_entry | exact | `quadtreeBuildQuadrant` src/sim/world/groundQuadtree.ts:70 |
+| 0x0001d1e0 | terrain_alloc_quadtrees | terrain | exact | `terrainAllocQuadtrees` src/sim/world/groundQuadtree.ts:19 |
+| 0x0001d270 | quadtree_free | terrain | exact | `quadtreeFree` src/sim/world/groundQuadtree.ts:271 |
+| 0x0001d2a0 | poly_overlaps_cell_xz | terrain | exact | `polyOverlapsCellXz` src/sim/world/groundQuadtree.ts:40 |
+| 0x0001d370 | quadtree_point_below | terrain | exact | `quadtreePointBelow` src/sim/world/groundQuadtree.ts:186 |
+| 0x0001d4d0 | quadtree_raycast | terrain | exact | `quadtreeRaycast` src/sim/world/groundQuadtree.ts:217 |
+| 0x0001d610 | quadtree_raycast_children | terrain | exact | `quadtreeRaycastChildren` src/sim/world/groundQuadtree.ts:245 |
+| 0x0001d6b0 | quadtree_ground_height | terrain | exact | `quadtreeGroundHeight` src/sim/world/groundQuadtree.ts:161 |
+| 0x0001d840 | ray_set_points | terrain | exact | `raySetPoints` src/engine/collision/ray.ts:42 |
+| 0x0001d8a0 | ray_set_from_direction | terrain | exact | `raySetFromDirection` src/engine/collision/ray.ts:192 |
+| 0x0001d940 | ray_length | terrain | exact | `rayLength` src/engine/collision/ray.ts:61 |
+| 0x0001d960 | ray_normalise | terrain | exact | `rayNormalise` src/engine/collision/ray.ts:73 |
+| 0x0001d9f0 | ray_normalise_exact | terrain | exact | `rayNormaliseExact` src/engine/collision/ray.ts:94 |
+| 0x0001daa0 | ray_set_length | terrain | exact | `raySetLength` src/engine/collision/ray.ts:122 |
+| 0x0001dbd0 | ray_set_end | terrain | exact | `raySetEnd` src/engine/collision/ray.ts:141 |
+| 0x0001dc70 | ray_copy | terrain | exact | `rayCopy` src/engine/collision/ray.ts:168 |
+| 0x0001dca0 | ray_slab_intersect | terrain | exact | `raySlabIntersect` src/engine/collision/ray.ts:231 |
 | 0x0001dd60 | scene_node_create | terrain | exact | `sceneNodeCreate` src/engine/scene/sceneGraph.ts:43 |
 | 0x0001de60 | scene_node_init_in_place | terrain | exact | `sceneNodeInitInPlace` src/engine/scene/sceneGraph.ts:83 |
 | 0x0001def0 | scene_node_set_userdata | terrain | exact | `sceneNodeSetUserdata` src/engine/scene/sceneGraph.ts:105 |
@@ -113,10 +158,29 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0001e750 | scene_node_child_from_last | terrain | exact | `sceneNodeChildFromLast` src/engine/scene/sceneGraph.ts:427 |
 | 0x0001e7a0 | scene_subtree_find_location | terrain | exact | `sceneSubtreeFindLocation` src/engine/scene/sceneGraph.ts:444 |
 | 0x0001e8b0 | scene_node_size | terrain | exact | `sceneNodeSize` src/engine/scene/sceneGraph.ts:457 |
+| 0x0001e900 | object_ensure_bounds | terrain | exact | `objectEnsureBounds` src/sim/world/collision.ts:93 |
+| 0x0001ea20 | object_compute_bounds | terrain | exact | `objectComputeBounds` src/sim/world/collision.ts:61 |
 | 0x0001eb00 | object_free_bounds | terrain | exact | `objectFreeBounds` src/engine/scene/worldObject.ts:441 |
+| 0x0001eb80 | box_point_inside | terrain | exact | `boxPointInside` src/sim/world/collision.ts:139 |
+| 0x0001eba0 | box_ground_height | terrain | exact | `boxGroundHeight` src/sim/world/collision.ts:147 |
+| 0x0001ebf0 | object_box_query | terrain | exact | `objectBoxQuery` src/sim/world/collision.ts:119 |
+| 0x0001ec60 | ray_hit_object_box | terrain | exact | `rayHitObjectBox` src/sim/world/collision.ts:166 |
+| 0x0001ee20 | column_point_inside | terrain | exact | `columnPointInside` src/sim/world/collision.ts:218 |
+| 0x0001ee60 | null_point_inside | terrain | exact | `nullPointInside` src/sim/world/collision.ts:229 |
+| 0x0001ee70 | null_raycast | terrain | exact | `nullRaycast` src/sim/world/collision.ts:235 |
+| 0x0001ee80 | walkmesh_point_below_scan | terrain | exact | `walkmeshPointBelowScan` src/sim/world/collision.ts:244 |
+| 0x0001ef40 | walkmesh_point_inside | terrain | exact | `walkmeshPointInside` src/sim/world/collision.ts:260 |
+| 0x0001ef70 | walkmesh_raycast | terrain | exact | `walkmeshRaycast` src/sim/world/collision.ts:269 |
+| 0x0001ef90 | walkmesh_ground_height | terrain | exact | `walkmeshGroundHeight` src/sim/world/collision.ts:275 |
+| 0x0001efb0 | downface_point_inside | terrain | exact | `downfacePointInside` src/sim/world/collision.ts:286 |
+| 0x0001f0c0 | mesh_raycast_all | terrain | exact | `meshRaycastAll` src/sim/world/collision.ts:311 |
 | 0x0001f120 | scrounge_install | terrain | exact | `scroungeInstall` src/sim/world/scrounge.ts:68 |
 | 0x0001f270 | scrounge_follow_viewer | terrain | exact | `scroungeFollowViewer` src/sim/world/scrounge.ts:123 |
-| 0x0001f460 | mech_anim_init | terrain | exact | `mechAnimInit` src/sim/mech/create.ts:27 |
+| 0x0001f440 | terrain_table_reset | terrain | exact | `terrainTableReset` src/sim/mech/animTask.ts:68 |
+| 0x0001f460 | mech_anim_init | terrain | exact | `mechAnimInit` src/sim/mech/create.ts:28 |
+| 0x0001f490 | mech_anim_clear_request | terrain | exact | `mechAnimClearRequest` src/sim/mech/animTask.ts:344 |
+| 0x0001f4f0 | mech_anim_select_gait | terrain | partial | `mechAnimSelectGait` src/sim/mech/animTask.ts:393 |
+| 0x0001f630 | mech_play_anim_transition_sound | terrain | partial | `mechPlayAnimTransitionSound` src/sim/mech/animTask.ts:370 |
 | 0x0001f730 | object_lists_reset | terrain | exact | `objectListsReset` src/engine/scene/objectLists.ts:71 |
 | 0x0001f7c0 | object_link | terrain | exact | `objectLink` src/engine/scene/objectLists.ts:88 |
 | 0x0001f860 | object_unlink | terrain | exact | `objectUnlink` src/engine/scene/objectLists.ts:108 |
@@ -127,14 +191,24 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0001fa90 | object_move_to_world_list | terrain | exact | `objectMoveToWorldList` src/engine/scene/objectLists.ts:194 |
 | 0x0001fb90 | object_list_unlink | terrain | exact | `objectListUnlink` src/engine/scene/objectLists.ts:209 |
 | 0x0001fbd0 | object_list_insert_after | terrain | exact | `objectListInsertAfter` src/engine/scene/objectLists.ts:217 |
+| 0x0001fca0 | mech_move_step | terrain | exact | `mechMoveStep` src/sim/world/collision.ts:817 |
+| 0x000200d0 | mech_collide_mechs | terrain | exact | `mechCollideMechs` src/sim/world/collision.ts:703 |
+| 0x00020570 | mech_collide_obstacles | terrain | partial | `mechCollideObstacles` src/sim/world/collision.ts:748 |
+| 0x00020890 | mech_collision_damage | terrain | stub | `mechCollisionDamage` src/sim/mech/laterPhases.ts:80 |
+| 0x00020a50 | obstacle_collision_damage | terrain | stub | `obstacleCollisionDamage` src/sim/mech/laterPhases.ts:89 |
+| 0x00020b10 | mech_crash_to_ground | terrain | exact | `mechCrashToGround` src/sim/mech/mechTickAi.ts:98 |
+| 0x00021510 | mech_ai_think | mission_log | partial | `mechAiThink` src/sim/mech/mechTickAi.ts:301 |
+| 0x000215f0 | ai_rules_run | mission_log | stub | `aiRulesRun` src/sim/mech/laterPhases.ts:197 |
 | 0x000218d0 | groups_start_mission | mission_log | partial | `groupsStartMission` src/sim/groups/groups.ts:272 |
 | 0x00021920 | mech_ai_setup | mission_log | partial | `mechAiSetup` src/sim/mech/aiSetup.ts:131 |
 | 0x00021a80 | mech_ai_reset | mission_log | partial | `mechAiReset` src/sim/mech/aiSetup.ts:69 |
 | 0x00021c70 | group_elect_leader | mission_log | exact | `groupElectLeader` src/sim/groups/groups.ts:146 |
 | 0x00022a90 | ai_run_combat_state | ai_state | partial | `aiRunCombatState` src/sim/mech/aiSetup.ts:25 |
+| 0x00023650 | ai_log_attack | ai_combat | partial | `aiLogAttack` src/sim/mech/mechTickAi.ts:277 |
 | 0x00023d50 | ai_set_state_rule_block | ai_combat | partial | `aiSetStateRuleBlock` src/sim/mech/aiSetup.ts:51 |
 | 0x00023f50 | group_collect_members | ai_combat | exact | `groupCollectMembers` src/sim/groups/groups.ts:116 |
 | 0x00023fc0 | group_handle_request | ai_combat | stub | `groupHandleRequest` src/sim/groups/groups.ts:261 |
+| 0x00024250 | group_assign_objective_task | ai_combat | stub | `groupAssignObjectiveTask` src/sim/mech/laterPhases.ts:188 |
 | 0x000247c0 | mech_dispatch_hook0 | ai_combat | exact | `mechDispatchHook0` src/sim/mech/hooks.ts:20 |
 | 0x00024810 | mech_dispatch_hook1 | ai_combat | exact | `mechDispatchHook1` src/sim/mech/hooks.ts:33 |
 | 0x00024860 | mech_dispatch_hook2 | ai_combat | exact | `mechDispatchHook2` src/sim/mech/hooks.ts:47 |
@@ -146,17 +220,37 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x000249f0 | mech_spawn | ai_combat | exact | `mechSpawn` src/sim/mech/spawn.ts:145 |
 | 0x00024a80 | mech_entity_alloc | ai_combat | exact | `mechEntityAlloc` src/sim/mech/spawn.ts:69 |
 | 0x00024ac0 | mech_entity_reset | ai_combat | exact | `mechEntityReset` src/sim/mech/spawn.ts:84 |
-| 0x000266e0 | mech_std_create | ai_group | partial | `mechStdCreate` src/sim/mech/create.ts:75 |
-| 0x00026990 | mech_std_tick_terrain | ai_group | stub | `mechStdTickTerrain` src/sim/mech/tickHooks.ts:16 |
-| 0x00027780 | mech_std_tick_ai | ai_group | stub | `mechStdTickAi` src/sim/mech/tickHooks.ts:25 |
-| 0x00028320 | mech_std_tick_player | ai_group | stub | `mechStdTickPlayer` src/sim/mech/tickHooks.ts:34 |
-| 0x00028660 | mech_std_cockpit | ai_group | stub | `mechStdCockpit` src/sim/mech/tickHooks.ts:44 |
-| 0x00028670 | mech_std_cockpit_release | ai_group | stub | `mechStdCockpitRelease` src/sim/mech/tickHooks.ts:54 |
+| 0x00024ca0 | autopilot_drive | ai_combat | stub | `autopilotDrive` src/sim/mech/mechTickAi.ts:324 |
+| 0x00024ec0 | mech_heat_meltdown | ai_combat | exact | `mechHeatMeltdown` src/sim/mech/mechTickAi.ts:183 |
+| 0x00024f90 | mech_heat_update | ai_combat | exact | `mechHeatUpdate` src/sim/mech/mechTickAi.ts:210 |
+| 0x00025340 | mech_on_destroyed | ai_group | stub | `mechOnDestroyed` src/sim/mech/laterPhases.ts:98 |
+| 0x00025960 | mech_damage_slot | ai_group | stub | `mechDamageSlot` src/sim/mech/laterPhases.ts:62 |
+| 0x00026270 | mech_apply_damage | ai_group | stub | `mechApplyDamage` src/sim/mech/laterPhases.ts:71 |
+| 0x000265f0 | mech_eject | ai_group | stub | `mechEject` src/sim/mech/laterPhases.ts:107 |
+| 0x000266e0 | mech_std_create | ai_group | partial | `mechStdCreate` src/sim/mech/create.ts:78 |
+| 0x00026990 | mech_std_tick_terrain | ai_group | partial | `mechStdTickTerrain` src/sim/mech/mechTickTerrain.ts:98 |
+| 0x00027780 | mech_std_tick_ai | ai_group | partial | `mechStdTickAi` src/sim/mech/mechTickAi.ts:335 |
+| 0x00028320 | mech_std_tick_player | ai_group | partial | `mechStdTickPlayer` src/sim/mech/mechTickAi.ts:643 |
+| 0x00028660 | mech_std_cockpit | ai_group | stub | `mechStdCockpit` src/sim/mech/tickHooks.ts:20 |
+| 0x00028670 | mech_std_cockpit_release | ai_group | stub | `mechStdCockpitRelease` src/sim/mech/tickHooks.ts:30 |
 | 0x00028690 | mech_std_create_loadout | ai_group | exact | `mechStdCreateLoadout` src/sim/mech/loadout.ts:91 |
 | 0x000287b0 | mech_loadout_size | ai_group | exact | `mechLoadoutSize` src/sim/mech/loadout.ts:79 |
+| 0x00028910 | death_flash | ai_group | exact | `deathFlash` src/sim/mech/mechTickAi.ts:87 |
+| 0x000289f0 | mech_death_update | ai_group | exact | `mechDeathUpdate` src/sim/mech/mechTickAi.ts:157 |
+| 0x00028ae0 | mech_jump_jet_effects | ai_group | exact | `mechJumpJetEffects` src/sim/mech/mechTickAi.ts:128 |
+| 0x00028be0 | mech_play_landing | ai_group | exact | `mechPlayLanding` src/sim/mech/mechTickTerrain.ts:50 |
+| 0x00028c70 | view_shake_impulse | ai_group | exact | `viewShakeImpulse` src/sim/camera/cameraUpdate.ts:301 |
 | 0x00029c90 | tracked_object_create | ai_group | exact | `trackedObjectCreate` src/sim/ai/tracked.ts:38 |
 | 0x00029d10 | tracked_object_remove | ai_group | exact | `trackedObjectRemove` src/sim/ai/tracked.ts:68 |
+| 0x00029e90 | ai_cycle_target | ai_group | stub | `aiCycleTarget` src/sim/mech/laterPhases.ts:125 |
+| 0x0002a670 | ai_validate_current_target | ai_group | stub | `aiValidateCurrentTarget` src/sim/mech/laterPhases.ts:179 |
+| 0x0002aa40 | player_target_reticle | ai_group | stub | `playerTargetReticle` src/sim/mech/laterPhases.ts:170 |
 | 0x0002ab60 | vec_to_range_bearing | ai_group | exact | `vecToRangeBearing` src/core/math/vec.ts:23 |
+| 0x0002ac10 | ai_cycle_navpoint | ai_group | stub | `aiCycleNavpoint` src/sim/mech/laterPhases.ts:116 |
+| 0x0002ac30 | ai_cycle_gamething | ai_group | stub | `aiCycleGamething` src/sim/mech/laterPhases.ts:152 |
+| 0x0002ac60 | ai_cycle_gamepiece | ai_group | stub | `aiCycleGamepiece` src/sim/mech/laterPhases.ts:161 |
+| 0x0002ac90 | ai_cycle_friendly | ai_group | stub | `aiCycleFriendly` src/sim/mech/laterPhases.ts:143 |
+| 0x0002acf0 | ai_target_nearest_enemy | ai_group | stub | `aiTargetNearestEnemy` src/sim/mech/laterPhases.ts:134 |
 | 0x0002ade0 | group_reset | ai_group | exact | `groupReset` src/sim/groups/groups.ts:24 |
 | 0x0002ae30 | group_set_formation_by_name | ai_group | exact | `groupSetFormationByName` src/sim/groups/formations.ts:68 |
 | 0x0002aed0 | group_set_formation | ai_group | partial | `groupSetFormation` src/sim/groups/formations.ts:89 |
@@ -172,22 +266,24 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0002b3f0 | falling_object_randomise_motion | ai_group | exact | `fallingObjectRandomiseMotion` src/sim/things/fallingObjects.ts:83 |
 | 0x0002b500 | destructible_register | ai_group | exact | `destructibleRegister` src/sim/things/destructibles.ts:57 |
 | 0x0002b640 | destructibles_register_subtree | ai_group | exact | `destructiblesRegisterSubtree` src/sim/things/destructibles.ts:100 |
+| 0x0002b740 | destructibles_update | ai_group | stub | `destructiblesUpdate` src/mission/laterPhases.ts:33 |
+| 0x0002bbb0 | falling_object_push | ai_group | exact | `fallingObjectPush` src/sim/things/fallingObjects.ts:125 |
 | 0x0002bcd0 | destructibles_reset | ai_group | exact | `destructiblesReset` src/sim/things/destructibles.ts:116 |
 | 0x0002bd70 | falling_object_clear | ai_group | exact | `fallingObjectClear` src/sim/things/fallingObjects.ts:98 |
 | 0x0002bdc0 | falling_object_find | ai_group | exact | `fallingObjectFind` src/sim/things/fallingObjects.ts:111 |
 | 0x0002bf00 | scene_node_detach_from_world | ai_group | exact | `sceneNodeDetachFromWorld` src/sim/things/destructibles.ts:41 |
 | 0x0002c5f0 | ai_behaviour_init | ai_group | partial | `aiBehaviourInit` src/sim/mech/aiSetup.ts:96 |
-| 0x0002eb00 | mech_alt_create | damage | partial | `mechAltCreate` src/sim/mech/create.ts:142 |
-| 0x0002ec80 | mech_alt_tick_terrain | damage | stub | `mechAltTickTerrain` src/sim/mech/tickHooks.ts:63 |
-| 0x0002ed20 | mech_alt_tick_ai | damage | stub | `mechAltTickAi` src/sim/mech/tickHooks.ts:72 |
-| 0x0002ef20 | mech_alt_hook5 | damage | exact | `mechAltHook5` src/sim/mech/tickHooks.ts:82 |
+| 0x0002eb00 | mech_alt_create | damage | partial | `mechAltCreate` src/sim/mech/create.ts:145 |
+| 0x0002ec80 | mech_alt_tick_terrain | damage | stub | `mechAltTickTerrain` src/sim/mech/tickHooks.ts:39 |
+| 0x0002ed20 | mech_alt_tick_ai | damage | stub | `mechAltTickAi` src/sim/mech/tickHooks.ts:48 |
+| 0x0002ef20 | mech_alt_hook5 | damage | exact | `mechAltHook5` src/sim/mech/tickHooks.ts:58 |
 | 0x0002ef30 | mech_alt_create_loadout | damage | exact | `mechAltCreateLoadout` src/sim/mech/loadout.ts:160 |
 | 0x00032530 | sound_preload_fixed | sound_res | exact | `soundPreloadFixed` src/engine/resources/preload.ts:83 |
-| 0x00032a70 | hud_widgets_install | sound_res | stub | `hudWidgetsInstall` src/sim/mech/create.ts:42 |
-| 0x00033140 | door_create | sound_res | partial | `doorCreate` src/sim/mech/create.ts:189 |
-| 0x000332f0 | door_tick_move | sound_res | stub | `doorTickMove` src/sim/mech/tickHooks.ts:90 |
-| 0x000333c0 | door_tick_ai | sound_res | stub | `doorTickAi` src/sim/mech/tickHooks.ts:99 |
-| 0x00033620 | door_hook5_nop | sound_res | exact | `doorHook5Nop` src/sim/mech/tickHooks.ts:108 |
+| 0x00032a70 | hud_widgets_install | sound_res | partial | `hudWidgetsInstall` src/sim/mech/create.ts:43 |
+| 0x00033140 | door_create | sound_res | partial | `doorCreate` src/sim/mech/create.ts:192 |
+| 0x000332f0 | door_tick_move | sound_res | stub | `doorTickMove` src/sim/mech/tickHooks.ts:66 |
+| 0x000333c0 | door_tick_ai | sound_res | stub | `doorTickAi` src/sim/mech/tickHooks.ts:75 |
+| 0x00033620 | door_hook5_nop | sound_res | exact | `doorHook5Nop` src/sim/mech/tickHooks.ts:84 |
 | 0x00033630 | door_create_loadout | sound_res | exact | `doorCreateLoadout` src/sim/mech/loadout.ts:171 |
 | 0x00033b40 | cache_unlock | res_cache | stub | `cacheUnlock` src/engine/resources/cache.ts:49 |
 | 0x00033ba0 | cache_load_resource | res_cache | partial | `cacheLoadResource` src/engine/resources/cache.ts:35 |
@@ -266,11 +362,27 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00038a20 | object_destroy | geom_luma | exact | `objectDestroy` src/engine/scene/worldObject.ts:463 |
 | 0x00038ae0 | polygon_resolve_colour | geom_luma | exact | `polygonResolveColour` src/render/shading/polygonColour.ts:139 |
 | 0x00038ee0 | light_shade_level | geom_luma | exact | `lightShadeLevel` src/render/shading/polygonColour.ts:122 |
-| 0x00039430 | camera_get_mode | geom_luma | exact | `cameraGetMode` src/sim/camera/viewer.ts:35 |
+| 0x00038ff0 | camera_init | geom_luma | exact | `cameraInit` src/sim/camera/cameraUpdate.ts:676 |
+| 0x00039190 | camera_update | geom_luma | exact | `cameraUpdate` src/sim/camera/cameraUpdate.ts:718 |
+| 0x00039400 | camera_set_mode | geom_luma | exact | `cameraSetMode` src/sim/mech/mechTickAi.ts:69 |
+| 0x00039430 | camera_get_mode | geom_luma | exact | `cameraGetMode` src/sim/camera/viewer.ts:55 |
+| 0x00039440 | camera_apply_zoom | geom_luma | exact | `cameraApplyZoom` src/sim/camera/cameraUpdate.ts:323 |
+| 0x00039560 | camera_track_cycle | geom_luma | exact | `cameraTrackCycle` src/sim/camera/cameraUpdate.ts:631 |
+| 0x000395d0 | camera_subject_eye_pose | geom_luma | exact | `cameraSubjectEyePose` src/sim/camera/cameraUpdate.ts:354 |
+| 0x000396b0 | camera_missile_view | geom_luma | partial | `cameraMissileView` src/sim/camera/cameraUpdate.ts:594 |
+| 0x00039800 | camera_orbit_update | geom_luma | exact | `cameraOrbitUpdate` src/sim/camera/cameraUpdate.ts:457 |
+| 0x00039b30 | camera_cockpit_view | geom_luma | exact | `cameraCockpitView` src/sim/camera/cameraUpdate.ts:417 |
+| 0x00039c50 | camera_pilot_view_pose | geom_luma | exact | `cameraPilotViewPose` src/sim/camera/cameraUpdate.ts:394 |
+| 0x00039cc0 | camera_eject_view | geom_luma | exact | `cameraEjectView` src/sim/camera/cameraUpdate.ts:565 |
+| 0x00039d90 | camera_free_fly | geom_luma | exact | `cameraFreeFly` src/sim/camera/cameraUpdate.ts:524 |
+| 0x00039fa0 | billboards_face_viewer | geom_luma | partial | `billboardsFaceViewer` src/sim/camera/cameraUpdate.ts:655 |
 | 0x0003a188 | mesh_transform_to_world | geom_luma | exact | `meshTransformToWorld` src/engine/scene/worldObject.ts:476 |
 | 0x0003a2d4 | object_update_world_pos | geom_luma | exact | `objectUpdateWorldPos` src/engine/scene/worldObject.ts:498 |
 | 0x0003a375 | object_transform_now | geom_luma | exact | `objectTransformNow` src/engine/scene/worldObject.ts:513 |
+| 0x0003a3aa | plane_solve | geom_luma | exact | `planeSolve` src/sim/world/meshQueries.ts:128 |
+| 0x0003a3d8 | object_sphere_distance | geom_luma | exact | `objectSphereDistance` src/sim/world/collision.ts:415 |
 | 0x0003a4b9 | triangle_normal | geom_luma | exact | `triangleNormal` src/engine/scene/worldObject.ts:168 |
+| 0x0003a745 | ray_bound_sphere_distance | geom_luma | exact | `rayBoundSphereDistance` src/sim/world/collision.ts:515 |
 | 0x0003a838 | fixed_sin | render_asm | exact | `fixedSin` src/core/angle/trig.ts:56 |
 | 0x0003a8a8 | fixed_cos | render_asm | exact | `fixedCos` src/core/angle/trig.ts:80 |
 | 0x0003a8b7 | fixed_asin | render_asm | exact | `fixedAsin` src/core/angle/trig.ts:96 |
@@ -292,10 +404,10 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0003b522 | matrix_from_euler | render_asm | exact | `matrixFromEuler` src/core/math/matrix.ts:180 |
 | 0x0003b88b | matrix_from_euler_order0 | render_asm | exact | `matrixFromEulerOrder0` src/core/math/matrix.ts:259 |
 | 0x0003b8af | matrix_to_euler | render_asm | exact | `matrixToEuler` src/core/math/matrix.ts:317 |
-| 0x0003b990 | render_asm_sub_03b990 | render_asm | partial | `spriteVertices` src/render/pipeline/drawPipeline.ts:293 |
-| 0x0003cda0 | object_draw_lod_mesh | render_asm | partial | `objectSelectLodMesh` src/render/pipeline/drawPipeline.ts:95 |
+| 0x0003b990 | render_asm_sub_03b990 | render_asm | partial | `spriteVertices` src/render/pipeline/drawPipeline.ts:294 |
+| 0x0003cda0 | object_draw_lod_mesh | render_asm | partial | `objectSelectLodMesh` src/render/pipeline/drawPipeline.ts:96 |
 | 0x0003e086 | poly_light_intensity | render_asm | exact | `polyLightIntensity` src/render/shading/polygonColour.ts:83 |
-| 0x0003e1de | poly_clip_and_queue | render_asm | partial | `polyDepthKey` src/render/pipeline/drawPipeline.ts:209 |
+| 0x0003e1de | poly_clip_and_queue | render_asm | partial | `polyDepthKey` src/render/pipeline/drawPipeline.ts:210 |
 | 0x0003e6d0 | palette_apply_pending | render_asm | partial | `paletteApplyPending` src/sim/world/palettes.ts:157 |
 | 0x0003e760 | palette_fade_step | render_asm | partial | `paletteFadeStep` src/sim/world/palettes.ts:138 |
 | 0x0003e7d0 | palette_start_fade | render_asm | partial | `paletteStartFade` src/sim/world/palettes.ts:90 |
@@ -303,14 +415,50 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0003eaa0 | palette_slot_set_resource | render_asm | exact | `paletteSlotSetResource` src/sim/world/palettes.ts:64 |
 | 0x0003eae0 | palette_fade_to_new_base | render_asm | exact | `paletteFadeToNewBase` src/sim/world/palettes.ts:183 |
 | 0x0003ecd0 | palette_fade_steps_left | render_asm | exact | `paletteFadeStepsLeft` src/sim/world/palettes.ts:193 |
-| 0x0003ece0 | viewer_latch_globals | render_asm | partial | `viewerLatchGlobals` src/render/pipeline/viewLatch.ts:61 |
-| 0x0003ef30 | viewer_update_projection | render_asm | partial | `viewerUpdateProjection` src/sim/camera/projection.ts:44 |
-| 0x0003f500 | object_cull_main_view | code label, no Ghidra function | partial | `objectCullMainView` src/render/pipeline/drawPipeline.ts:36 |
+| 0x0003ece0 | viewer_latch_globals | render_asm | partial | `viewerLatchGlobals` src/render/pipeline/viewLatch.ts:52 |
+| 0x0003ef30 | viewer_update_projection | render_asm | partial | `viewerUpdateProjection` src/sim/camera/projection.ts:45 |
+| 0x0003f230 | viewer_build_transform | render_asm | exact | `viewerBuildTransform` src/sim/camera/projection.ts:88 |
+| 0x0003f500 | object_cull_main_view | code label, no Ghidra function | partial | `objectCullMainView` src/render/pipeline/drawPipeline.ts:37 |
+| 0x0003fa50 | vec3_normalise | render_asm | exact | `vec3Normalise` src/engine/collision/ray.ts:216 |
+| 0x0003fbc0 | camera_keys_init | render_asm | exact | `cameraKeysInit` src/sim/camera/cameraUpdate.ts:158 |
+| 0x0003fc00 | camera_keys_update | render_asm | exact | `cameraKeysUpdate` src/sim/camera/cameraUpdate.ts:272 |
+| 0x0003fd50 | camera_keys_start | render_asm | exact | `cameraKeysStart` src/sim/camera/cameraUpdate.ts:256 |
+| 0x0003fd90 | camera_key_begin | render_asm | exact | `cameraKeyBegin` src/sim/camera/cameraUpdate.ts:219 |
+| 0x0003ff00 | camera_keys_clear | render_asm | exact | `cameraKeysClear` src/sim/camera/cameraUpdate.ts:166 |
+| 0x0003ff40 | camera_key_add | render_asm | exact | `cameraKeyAdd` src/sim/camera/cameraUpdate.ts:189 |
+| 0x0003ffb0 | camera_keys_active | render_asm | exact | `cameraKeysActive` src/sim/camera/cameraUpdate.ts:179 |
+| 0x00040c50 | sound_play | sound_sfx | stub | `soundPlay` src/sim/sound/sound.ts:9 |
+| 0x00040cf0 | sound_play_at | sound_sfx | stub | `soundPlayAt` src/sim/sound/sound.ts:18 |
 | 0x00041854 | sflx_decode_blocks | sound_seq | exact | `sflxDecodeBlocks` src/data/formats/sflx.ts:171 |
 | 0x00041a93 | sflx_upsample_x4 | sound_seq | exact | `sflxUpsampleX4` src/data/formats/sflx.ts:123 |
 | 0x00041aeb | sflx_upsample_x2 | sound_seq | exact | `sflxUpsampleX2` src/data/formats/sflx.ts:97 |
+| 0x00041dd0 | sound_seq_sub_041dd0 | sound_seq | stub | `soundSeqSub041dd0` src/mission/laterPhases.ts:63 |
+| 0x00042340 | sound_cue_play | sound_seq | stub | `soundCuePlay` src/sim/sound/sound.ts:27 |
+| 0x00043dd0 | sound_config_sub_043dd0 | sound_config | stub | `soundConfigSub043dd0` src/mission/laterPhases.ts:72 |
+| 0x00043e50 | sound_config_sub_043e50 | sound_config | stub | `soundConfigSub043e50` src/mission/laterPhases.ts:54 |
+| 0x00044720 | netplay_frame_exchange | netplay | partial | `netplayFrameExchange` src/sim/net/netplay.ts:28 |
 | 0x00045720 | cheat_match | netplay | exact | `cheatMatch` src/data/exe/tables/cheats.ts:47 |
+| 0x00045d80 | key_command_update | cheats | partial | `keyCommandUpdate` src/sim/ui/uiContext.ts:216 |
+| 0x00046060 | command_execute | cheats | partial | `commandExecute` src/sim/ui/commands.ts:77 |
+| 0x00046ac0 | cheats_sub_046ac0 | cheats | partial | `cheatsSub046ac0` src/sim/ui/commands.ts:57 |
 | 0x00047650 | input_torso_tilt | target_ui | exact | `inputTorsoTilt` src/data/exe/tables/controlChannels.ts:94 |
+| 0x000476a0 | input_open_device | input | exact | `inputOpenDevice` src/sim/controls/input.ts:263 |
+| 0x000478a0 | input_bind_channel | input | exact | `inputBindChannel` src/sim/controls/input.ts:296 |
+| 0x00047950 | input_bind_channel_2 | input | exact | `inputBindChannel2` src/sim/controls/input.ts:306 |
+| 0x00047a00 | input_sub_047a00 | input | exact | `inputSub047a00` src/sim/controls/input.ts:238 |
+| 0x00047a80 | input_add_analog_sink | input | exact | `inputAddAnalogSink` src/sim/controls/input.ts:357 |
+| 0x00047d80 | input_add_analog_control | input | exact | `inputAddAnalogControl` src/sim/controls/input.ts:398 |
+| 0x00047ed0 | input_parse_chord | input | exact | `inputParseChord` src/sim/controls/input.ts:330 |
+| 0x00048030 | input_sub_048030 | input | exact | `inputSub048030` src/sim/controls/input.ts:632 |
+| 0x00048090 | input_add_discrete | input | exact | `inputAddDiscrete` src/sim/controls/input.ts:436 |
+| 0x000483b0 | input_load_map | input | exact | `inputLoadMap` src/sim/controls/input.ts:507 |
+| 0x000484e0 | input_load_gamekeys | input | exact | `inputLoadGamekeys` src/sim/controls/input.ts:544 |
+| 0x000486e0 | input_step_analog | input | exact | `inputStepAnalog` src/sim/controls/input.ts:655 |
+| 0x00048870 | input_init | input | partial | `inputInit` src/sim/controls/input.ts:610 |
+| 0x00048970 | input_poll_controls | input | exact | `inputPollControls` src/sim/controls/input.ts:704 |
+| 0x00048c50 | input_sub_048c50 | input | exact | `inputSub048c50` src/sim/controls/input.ts:770 |
+| 0x00048c60 | input_sub_048c60 | input | exact | `inputSub048c60` src/sim/controls/input.ts:778 |
+| 0x00048ca0 | input_sub_048ca0 | input | exact | `inputSub048ca0` src/sim/controls/input.ts:762 |
 | 0x00049b40 | ramp_start | main | exact | `rampStart` src/core/ramp.ts:39 |
 | 0x00049b80 | ramp_step | main | exact | `rampStep` src/core/ramp.ts:51 |
 | 0x00049be0 | ramp_angle_start | main | exact | `rampAngleStart` src/core/ramp.ts:64 |
@@ -370,8 +518,8 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0004e130 | project_obj_exec | sim_objects | partial | `projectObjExec` src/mission/vm/objExec.ts:29 |
 | 0x0004e540 | thing_node_queue_pop | sim_objects | exact | `thingNodeQueuePop` src/sim/mech/spawn.ts:45 |
 | 0x0004e570 | gamething_alloc | sim_objects | exact | `gamethingAlloc` src/sim/things/gameThings.ts:52 |
-| 0x0004e5d0 | project_chunk_exec | sim_objects | partial | `projectChunkExec` src/mission/vm/chunkExec.ts:107 |
-| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:45 |
+| 0x0004e5d0 | project_chunk_exec | sim_objects | partial | `projectChunkExec` src/mission/vm/chunkExec.ts:109 |
+| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:51 |
 | 0x0004fde0 | poly_resolve_code | sim_objects | exact | `polyResolveCode` src/engine/scene/wtboLoader.ts:80 |
 | 0x0004fe80 | poly_set_vertex_offset | sim_objects | exact | `polySetVertexOffset` src/engine/scene/wtboLoader.ts:99 |
 | 0x0004fea0 | poly_set_vertex_scale | sim_objects | exact | `polySetVertexScale` src/engine/scene/wtboLoader.ts:109 |
@@ -380,7 +528,27 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x000504a0 | poly_load_wtbo_block | sim_objects | exact | `polyLoadWtboBlock` src/engine/scene/wtboLoader.ts:245 |
 | 0x00050540 | sim_tables_reset | sim_objects | exact | `simTablesReset` src/sim/effects/simTables.ts:54 |
 | 0x00050660 | projectile_clear | sim_objects | exact | `projectileClear` src/sim/effects/simTables.ts:85 |
+| 0x000506f0 | projectiles_update_all | sim_objects | stub | `projectilesUpdateAll` src/mission/laterPhases.ts:15 |
+| 0x00050fa0 | effect_spawn_at | sim_objects | stub | `effectSpawnAt` src/sim/effects/effects.ts:10 |
+| 0x00051000 | effect_spawn_on_mount | sim_objects | stub | `effectSpawnOnMount` src/sim/effects/effects.ts:19 |
+| 0x000515c0 | sim_slots_update | sim_objects | stub | `simSlotsUpdate` src/mission/laterPhases.ts:24 |
+| 0x00052020 | mech_weapons_cancel_bursts | cockpit | partial | `mechWeaponsCancelBursts` src/sim/mech/mechTickAi.ts:113 |
+| 0x00052080 | mech_weapons_tick | cockpit | stub | `mechWeaponsTick` src/sim/mech/laterPhases.ts:17 |
+| 0x00052950 | weapon_cycle_next | cockpit | stub | `weaponCycleNext` src/sim/mech/laterPhases.ts:35 |
+| 0x00052b20 | weapon_jettison_ammo | weapons | stub | `weaponJettisonAmmo` src/sim/mech/laterPhases.ts:53 |
 | 0x00052be0 | weapons_preload_sounds | weapons | exact | `weaponsPreloadSounds` src/engine/resources/preload.ts:67 |
+| 0x00052c90 | weapon_cycle_group | weapons | stub | `weaponCycleGroup` src/sim/mech/laterPhases.ts:44 |
+| 0x00052ea0 | mech_update_missile_lock | weapons | stub | `mechUpdateMissileLock` src/sim/mech/laterPhases.ts:26 |
+| 0x00053190 | mech_update_aim_range | weapons | exact | `mechUpdateAimRange` src/sim/weapons/aim.ts:69 |
+| 0x00053240 | mech_aim_range | weapons | exact | `mechAimRange` src/sim/weapons/aim.ts:89 |
+| 0x000532c0 | weapon_build_fire_ray | weapons | exact | `weaponBuildFireRay` src/sim/weapons/aim.ts:50 |
+| 0x00053330 | weapon_get_aim_direction | weapons | exact | `weaponGetAimDirection` src/sim/weapons/aim.ts:34 |
+| 0x00061e28 | stopwatch_create | clib_start | exact | `stopwatchCreate` src/engine/timer.ts:69 |
+| 0x00061eb3 | stopwatch_elapsed | clib_start | exact | `stopwatchElapsed` src/engine/timer.ts:88 |
+| 0x00061ef3 | stopwatch_reset | clib_start | exact | `stopwatchReset` src/engine/timer.ts:97 |
+| 0x00061f33 | stopwatch_set | clib_start | exact | `stopwatchSet` src/engine/timer.ts:106 |
+| 0x00061f76 | stopwatch_free | clib_start | exact | `stopwatchFree` src/engine/timer.ts:115 |
+| 0x00061fb0 | timer_set_paused | clib_start | exact | `timerSetPaused` src/engine/timer.ts:128 |
 | 0x0007617f | miles_driver_sub_07617f | miles_driver | exact | `milesRand` src/core/random.ts:32 |
 | 0x000761a3 | miles_driver_sub_0761a3 | miles_driver | exact | `milesSrand` src/core/random.ts:24 |
 
@@ -438,6 +606,8 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/data/formats/sflx.ts:173 - a read past the end of src throws; the original reads whatever memory follows the resource
 - src/data/prj/ProjectFile.ts:47 - reads from an in-memory buffer; only mode 0 (the one project_open uses)
 - src/data/prj/ProjectFile.ts:124 - returns a view instead of copying into a caller's buffer
+- src/engine/clock.ts:78 - the AIL calls are not made; the host drives timerInterrupt instead of a Miles timer
+- src/engine/collision/ray.ts:96 - the x87 works in 80-bit extended precision and the port in doubles; a value within an extended ulp of an integer could truncate differently
 - src/engine/resources/cache.ts:37 - no cache items, purge list or memory accounting - a view into the in-memory container
 - src/engine/resources/cache.ts:51 - nothing is locked
 - src/engine/resources/cache.ts:58 - nothing is cached
@@ -452,34 +622,56 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/engine/scene/wtboLoader.ts:138 - a failed checksum returns -1 before building, where the original has already added the vertices and polygons to the object (only matters for corrupt data; every shipped record passes)
 - src/engine/systemErrors.ts:31 - a FATAL code throws SystemErrorFatal instead of tearing the game down and exiting
 - src/engine/tasks/taskList.ts:53 - the node is a JS object rather than static_malloc(0x18) from the TLIS arena
-- src/mission/load.ts:97 - static_arena_init: no arena pre-pass; tables are allocated on demand
-- src/mission/load.ts:111 - camera_init, input_init and the mech status count run in Phase 2
+- src/engine/timer.ts:71 - the scan stops at the table's 64 entries; the original scans on for a zero or -1 word, which only matters past 64 live stopwatches
+- src/mission/laterPhases.ts:11 - ${name} is not ported yet (${phase}); the step does nothing
+- src/mission/laterPhases.ts:17 - Phase 3 (weapons): projectiles do not age or move
+- src/mission/laterPhases.ts:26 - Phase 3 (effects)
+- src/mission/laterPhases.ts:35 - Phase 3 (destruction): falling objects do not fall and debris does not expire
+- src/mission/laterPhases.ts:44 - Phase 6 (mission runtime)
+- src/mission/laterPhases.ts:56 - Phase 7 (audio)
+- src/mission/laterPhases.ts:65 - Phase 7 (audio): the sound sequence queue does not advance
+- src/mission/laterPhases.ts:74 - Phase 7 (audio): CD music is not restarted
+- src/mission/load.ts:109 - static_arena_init: no arena pre-pass; tables are allocated on demand
+- src/mission/load.ts:124 - sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)
+- src/mission/mainLoop.ts:86 - vfx_video_font_handler_2, input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; only the palette steps run here
+- src/mission/mainLoop.ts:89 - the page flip and font/input housekeeping of vfx_video_sub_0106d0 are the host renderer\
 - src/mission/objectives.ts:62 - ${what} longer than its ${destSize}-byte field; the original overruns into the next field
 - src/mission/objectives.ts:78 - a record index past the 48 Objective slots is not written (the original writes into the next table); MW2.PRJ has none
 - src/mission/objectives.ts:96 - MTBL table ${group} has ${n} records, past the 48 objective slots
 - src/mission/objectives.ts:156 - takes the table index alone (main passes objectiveTables + i * 0x2e8a and i)
 - src/mission/tables/missionTables.ts:98 - a slot outside 0..15 is refused (the original writes outside the array); MW2.PRJ has none
 - src/mission/tables/missionTables.ts:104 - MTBL slot ${slot} outside the 16 missionTables slots; not installed
-- src/mission/vm/chunkExec.ts:109 - TSK handlers are not ported yet (Phase 6); tasks are created with whatever the code registry resolves, possibly nothing
+- src/mission/vm/chunkExec.ts:111 - of the TSK handlers only anim_player_step (type 3) is ported; the others (Phase 6) create tasks with no callback
 - src/mission/vm/objExec.ts:31 - the loose-file path for an OBJ with no POLY id (poly -1) is not ported; no shipped OBJ uses it
 - src/mission/vm/projectWalk.ts:182 - mech_loadout_size (0x287b0) and task_node_size (0x17520) are not ported in their own modules yet; their constant answers, 0x852 and 0x18, are used here
 - src/mission/vm/streams.ts:121 - loose files are read from a map pre-loaded before the load (setLooseFiles), not from disk
 - src/mission/vm/streams.ts:137 - goes to the log sink (channel 'mw2debug') instead of the file and hud_debug_sub_0499c0's overlay
 - src/mission/vm/streams.ts:177 - the item is allocated here instead of being the caller's 28-byte local; the 0x2b message names the item (projectItemFromStream) rather than the reference
 - src/mission/vm/streams.ts:347 - the optional third output (the (size - 0x10) / 4 dwords from +0x10) is not offered: all three callers pass null for it, so the copy never runs in this build
-- src/render/pipeline/drawPipeline.ts:38 - the lateral tests after 0x3f62a (against rotation rows 0 and 1) are not read upstream; objects to the side of the view are returned 0 and left to the GPU's frustum clip, which does not change what is visible
-- src/render/pipeline/drawPipeline.ts:67 - the lateral tests after 0x3f835 are not read; objects to the side are left to the GPU's frustum clip
-- src/render/pipeline/drawPipeline.ts:97 - split in two: this is the selection half; meshResetClipState and polyDepthKey are the draw half, run by SceneRenderer per polygon; the frameHasRoom / draw-list budget is not modelled
-- src/render/pipeline/drawPipeline.ts:211 - the key, the rejects and the near-plane clip records (clipRecords, which SceneRenderer draws in place of the polygon when it crosses the near plane); projection, the screen-edge reject (all records off one screen edge) and the draw list are the GPU's
-- src/render/pipeline/drawPipeline.ts:295 - the vertex reading only, over the mesh vertices rather than the clipped screen records (a sprite crossing the near plane is not drawn); the square itself is built in the vertex shader (render/materials/indexedMaterial.ts) and the map view's variant (last argument 1) is not ported
-- src/render/pipeline/viewLatch.ts:63 - only the fields the object cull, clipper and shading read are latched: the projection (rows 0-1 premultiplied by projScale, centre, viewport bounds) is done by the GPU from the same viewer; viewerPosition itself is left to the caller, so the editor can draw from its own viewer without handing it to the simulation
-- src/sim/camera/projection.ts:46 - the fields +0xa8 and +0xac (secant terms from the atan tables) are not computed
+- src/render/pipeline/drawPipeline.ts:39 - the lateral tests after 0x3f62a (against rotation rows 0 and 1) are not read upstream; objects to the side of the view are returned 0 and left to the GPU's frustum clip, which does not change what is visible
+- src/render/pipeline/drawPipeline.ts:68 - the lateral tests after 0x3f835 are not read; objects to the side are left to the GPU's frustum clip
+- src/render/pipeline/drawPipeline.ts:98 - split in two: this is the selection half; meshResetClipState and polyDepthKey are the draw half, run by SceneRenderer per polygon; the frameHasRoom / draw-list budget is not modelled
+- src/render/pipeline/drawPipeline.ts:212 - the key, the rejects and the near-plane clip records (clipRecords, which SceneRenderer draws in place of the polygon when it crosses the near plane); projection, the screen-edge reject (all records off one screen edge) and the draw list are the GPU's
+- src/render/pipeline/drawPipeline.ts:296 - the vertex reading only, over the mesh vertices rather than the clipped screen records (a sprite crossing the near plane is not drawn); the square itself is built in the vertex shader (render/materials/indexedMaterial.ts) and the map view's variant (last argument 1) is not ported
+- src/render/pipeline/viewLatch.ts:54 - only the fields the object cull, clipper and shading read are latched: the projection (rows 0-1 premultiplied by projScale, centre, viewport bounds) is done by the GPU from the same viewer; viewerPosition itself is left to the caller, so the editor can draw from its own viewer without handing it to the simulation
+- src/sim/camera/cameraUpdate.ts:596 - missile_cam_pose is Phase 3: there is never a missile, so the view returns at once to the mode it came from
+- src/sim/camera/cameraUpdate.ts:608 - missile_cam_pose is Phase 3; the missile camera ends at once
+- src/sim/camera/cameraUpdate.ts:657 - the video-state-4 case (vfx_video_sub_012370: a fixed yaw of 180 and pitch of -45) is not reproduced; the port is never in that state
+- src/sim/camera/projection.ts:47 - the fields +0xa8 and +0xac (secant terms from the atan tables) are not computed
+- src/sim/cockpit/messages.ts:10 - Phase 4 (HUD): the text is logged, not shown
 - src/sim/cockpit/resources.ts:98 - the 'Couldn't load' line appended to symlog.txt is not written
 - src/sim/cockpit/resources.ts:103 - res_load_cockpit: couldn't load ${ref.name} (symlog.txt not written)
 - src/sim/cockpit/resources.ts:107 - res_load_cockpit: CPIT shorter than 164 bytes; the original reads past it
 - src/sim/cockpit/resources.ts:136 - the 'Couldn't load' line appended to symlog.txt is not written
 - src/sim/cockpit/resources.ts:141 - res_load_hdi: couldn't load ${ref.name} (symlog.txt not written)
 - src/sim/cockpit/resources.ts:145 - res_load_hdi: HUD shorter than 292 bytes; the original reads past it
+- src/sim/controls/input.ts:265 - the driver's methods are the port's implementations of the shipped DLL (sim/controls/giddi.ts), bound to the loaded module; a device without one fails as a module that will not load
+- src/sim/controls/input.ts:612 - a driver asking for calibration (install returns 4) would open the calibration screen (project_tables_sub_018f90), which is not ported
+- src/sim/controls/input.ts:751 - no keyboard device is open, so no keystroke is read
+- src/sim/effects/effects.ts:12 - Phase 3 (effects)
+- src/sim/effects/effects.ts:15 - effect_spawn_at: effects are not ported (effect 0x${id.toString(16)})
+- src/sim/effects/effects.ts:21 - Phase 3 (effects)
+- src/sim/effects/effects.ts:24 - effect_spawn_on_mount: effects are not ported (effect 0x${id.toString(16)})
 - src/sim/effects/simTables.ts:87 - the dword at +0x28 (pad_028, zeroed here) has no field in the live Projectile class
 - src/sim/groups/formations.ts:91 - radio_formation_change (the spoken 'Formation change to ...') is not ported: audio is a later phase
 - src/sim/groups/groups.ts:263 - Phase 2 (AI): group_apply_objective and group_dispatch_responder are not ported, so the group's AI members are not re-tasked
@@ -498,39 +690,92 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/mech/anim.ts:128 - res_load_anim: resource shorter than its header; the original reads past it
 - src/sim/mech/anim.ts:138 - res_load_anim: track past the end of the resource; the original reads past it
 - src/sim/mech/anim.ts:150 - res_load_anim: negative track index writes before animTracks in the original; skipped
+- src/sim/mech/animTask.ts:150 - anim_player_step: a track index outside animTracks reads past the table in the original; the port binds no track
+- src/sim/mech/animTask.ts:158 - anim_player_step: an anim task with no ";" leaves frame, times and lastTick as static_malloc left them; the port has them 0
+- src/sim/mech/animTask.ts:206 - anim_player_step: a task with no track dereferences 0 in the original; the port stops the task
+- src/sim/mech/animTask.ts:332 - the task record is a JS object (static_malloc(0x28) in the original); a missing track or an out-of-range track index stops the task instead of reading stray memory
+- src/sim/mech/animTask.ts:372 - sound_play_at is Phase 7: the sound is chosen and the bookkeeping kept, but nothing plays
+- src/sim/mech/animTask.ts:381 - mech_play_anim_transition_sound: sound_play_at is Phase 7; the transition sound does not play
+- src/sim/mech/animTask.ts:395 - sound_play_at is Phase 7: the step sound's flag is consumed but nothing plays
+- src/sim/mech/animTask.ts:418 - mech_anim_select_gait: sound_play_at is Phase 7; the step sound does not play
 - src/sim/mech/config.ts:163 - a record that cannot be loaded returns false after system_error 0x21 (the C carries on through an unset pointer); the resource's numWeapons is clamped in the parse, not written back into MW2.PRJ's bytes
 - src/sim/mech/config.ts:194 - mech_load_config: no MEK record - returns failure where the C reads an unset pointer
 - src/sim/mech/config.ts:367 - the failure line goes to the log channel 'symlog' rather than symlog.txt
-- src/sim/mech/create.ts:44 - Phase 2 (HUD): nothing is built, and the player's weapons stay in chassis order - loadout_regroup_weapons, which reorders them, is driven by the widgets
-- src/sim/mech/create.ts:47 - hud_widgets_install is Phase 2 (HUD): the player weapons are not regrouped
-- src/sim/mech/create.ts:77 - hud_widgets_install and mech_ai_setup's rule tables are Phase 2 stubs; the loadout dwords at +0x90 and +0xf0 (header padding, no port fields) are zeroed in the original
-- src/sim/mech/create.ts:144 - mech_ai_setup's rule tables are Phase 2; the loadout dword at +0xf0 (no port field) is zeroed in the original
-- src/sim/mech/create.ts:191 - mech_ai_setup's rule tables are Phase 2; the loadout dword at +0xf0 (no port field) is zeroed in the original
+- src/sim/mech/create.ts:45 - Phase 4 (HUD): only the last two stores are made - playerEyeOffsetY = &loadout->eyeOffsetY (the cockpit camera's eye height) and the torso pan pointer; no widget is built and the player's weapons stay in chassis order (loadout_regroup_weapons is driven by the widgets)
+- src/sim/mech/create.ts:48 - hud_widgets_install is Phase 4 (HUD): no widgets, and the player weapons are not regrouped
+- src/sim/mech/create.ts:80 - hud_widgets_install and mech_ai_setup's rule tables are Phase 2 stubs; the loadout dwords at +0x90 and +0xf0 (header padding, no port fields) are zeroed in the original
+- src/sim/mech/create.ts:147 - mech_ai_setup's rule tables are Phase 2; the loadout dword at +0xf0 (no port field) is zeroed in the original
+- src/sim/mech/create.ts:194 - mech_ai_setup's rule tables are Phase 2; the loadout dword at +0xf0 (no port field) is zeroed in the original
+- src/sim/mech/laterPhases.ts:13 - ${name} is not ported yet (${phase}); the call does nothing
+- src/sim/mech/laterPhases.ts:19 - Phase 3 (weapons): no weapon fires or recycles
+- src/sim/mech/laterPhases.ts:28 - Phase 3 (weapons): no missile lock; it would also move stateTimer (see mech_heat_update's note)
+- src/sim/mech/laterPhases.ts:37 - Phase 3 (weapons)
+- src/sim/mech/laterPhases.ts:46 - Phase 3 (weapons)
+- src/sim/mech/laterPhases.ts:55 - Phase 3 (weapons)
+- src/sim/mech/laterPhases.ts:64 - Phase 3 (damage)
+- src/sim/mech/laterPhases.ts:73 - Phase 3 (damage): fall damage is not applied
+- src/sim/mech/laterPhases.ts:82 - Phase 3 (damage): walking into a mech does no damage
+- src/sim/mech/laterPhases.ts:91 - Phase 3 (damage): walking into scenery does no damage
+- src/sim/mech/laterPhases.ts:100 - Phase 3 (destruction)
+- src/sim/mech/laterPhases.ts:109 - Phase 3 (destruction): self-destruct and ejection do nothing
+- src/sim/mech/laterPhases.ts:118 - Phase 4 (navigation and targeting)
+- src/sim/mech/laterPhases.ts:127 - Phase 4 (targeting)
+- src/sim/mech/laterPhases.ts:136 - Phase 4 (targeting)
+- src/sim/mech/laterPhases.ts:145 - Phase 4 (targeting)
+- src/sim/mech/laterPhases.ts:154 - Phase 4 (targeting)
+- src/sim/mech/laterPhases.ts:163 - Phase 4 (targeting)
+- src/sim/mech/laterPhases.ts:172 - Phase 4 (targeting)
+- src/sim/mech/laterPhases.ts:181 - Phase 4 (targeting)
+- src/sim/mech/laterPhases.ts:190 - Phase 5 (AI)
+- src/sim/mech/laterPhases.ts:199 - Phase 5 (AI): no rule fires, so the state handler runs
 - src/sim/mech/loadout.ts:60 - the port's records start zeroed; the original's hold whatever the arena did (static_malloc does not clear)
 - src/sim/mech/loadout.ts:93 - MechEntity +0x24 (pad_024 in the header, no port field) is written 0x10e; nothing reads it
 - src/sim/mech/loadout.ts:162 - MechEntity +0x24 (no port field) is written 0x10e; nothing reads it
 - src/sim/mech/loadout.ts:173 - MechEntity +0x24 (no port field) is written 0x10e; nothing reads it
 - src/sim/mech/looseFiles.ts:77 - no file handle is returned or closed, and no arena: the caller gets the bytes; the failure line goes to the log channel 'symlog' rather than symlog.txt
+- src/sim/mech/mechTickAi.ts:115 - the two netplay weapon-fired arrays it zeroes are not kept by the port
+- src/sim/mech/mechTickAi.ts:279 - the AI log line is not written
+- src/sim/mech/mechTickAi.ts:303 - the AI debug log (mission_log_sub_0214a0) and the per-pass global at 0xf4ab4 are not kept; the AI itself is Phase 5 (the rules and state handlers are stubs)
+- src/sim/mech/mechTickAi.ts:312 - aiStateHandlers[${e.aiState}] is not ported (Phase 5)
+- src/sim/mech/mechTickAi.ts:326 - Phase 4/5: it steers with the AI's ai_steer_heading and ai_handle_blocked and cycles nav points; while engaged the port only reports it
+- src/sim/mech/mechTickAi.ts:337 - its AI, weapons, targeting, damage, effects and sound callees are later-phase stubs (sim/mech/laterPhases.ts, sound, effects); the order of every call is the original's
+- src/sim/mech/mechTickAi.ts:645 - weapon cycling and jettison are Phase 3 stubs; sounds and cues are Phase 7
+- src/sim/mech/mechTickTerrain.ts:100 - collision and fall damage are Phase 3 stubs and the sounds Phase 7; the motion itself is the original's
 - src/sim/mech/resourceRef.ts:30 - no static-arena copy (arenaTag): the port's buffers need no arena, so the arenaTag path returns the bytes it loaded
 - src/sim/mech/spawn.ts:71 - cannot fail (the original returns 0 when static_malloc does)
 - src/sim/mech/spawn.ts:86 - the dwords at +0x24, +0xe0 and +0xe4 (padding in the header, no port fields) are zeroed in the original
-- src/sim/mech/tickHooks.ts:18 - Phase 2: does nothing
-- src/sim/mech/tickHooks.ts:27 - Phase 2: does nothing
-- src/sim/mech/tickHooks.ts:36 - Phase 2: does nothing
-- src/sim/mech/tickHooks.ts:46 - Phase 2 (HUD): player_cockpit_frame is not ported
-- src/sim/mech/tickHooks.ts:56 - Phase 2 (HUD): player_cockpit_release is not ported
-- src/sim/mech/tickHooks.ts:65 - Phase 2: does nothing
-- src/sim/mech/tickHooks.ts:74 - Phase 2: does nothing
-- src/sim/mech/tickHooks.ts:92 - Phase 2: does nothing
-- src/sim/mech/tickHooks.ts:101 - Phase 2: does nothing
+- src/sim/mech/tickHooks.ts:22 - Phase 2 (HUD): player_cockpit_frame is not ported
+- src/sim/mech/tickHooks.ts:32 - Phase 2 (HUD): player_cockpit_release is not ported
+- src/sim/mech/tickHooks.ts:41 - Phase 2: does nothing
+- src/sim/mech/tickHooks.ts:50 - Phase 2: does nothing
+- src/sim/mech/tickHooks.ts:68 - Phase 2: does nothing
+- src/sim/mech/tickHooks.ts:77 - Phase 2: does nothing
+- src/sim/net/netplay.ts:30 - netplay is out of scope: only the single-player early return is ported
+- src/sim/sound/sound.ts:11 - Phase 7 (audio): nothing plays
+- src/sim/sound/sound.ts:14 - sound_play: no audio yet (sound 0x${id.toString(16)})
+- src/sim/sound/sound.ts:20 - Phase 7 (audio): nothing plays
+- src/sim/sound/sound.ts:23 - sound_play_at: no audio yet (sound 0x${id.toString(16)})
+- src/sim/sound/sound.ts:29 - Phase 7 (audio): no voice cue plays
+- src/sim/sound/sound.ts:32 - sound_cue_play: no audio yet (cue 0x${cue.toString(16)})
+- src/sim/ui/commands.ts:59 - the wait is split across host frames (keyPauseActive) instead of a blocking loop; the PAUSED shape is not drawn and the sounds are Phase 7
+- src/sim/ui/commands.ts:79 - the HUD, radar, menu, weapon-group, screenshot and vision commands are Phase 4 and reported, not run; debug commands (hangAround) are not ported
+- src/sim/ui/commands.ts:86 - command 0x${cmd.toString(16)} (${what}) is not ported yet
+- src/sim/ui/uiContext.ts:80 - the node is a JS object rather than malloc(0x12)
+- src/sim/ui/uiContext.ts:115 - the sound pause and resume (sound_config_sub_043f70 / _043fd0) are Phase 7
+- src/sim/ui/uiContext.ts:196 - Phase 4 (menus): no context is ever requested, so the handlers (project_tables_sub_017b40, project_tables_font_handler_2, project_tables_sub_017f30) are not ported; a request is reported and dropped
+- src/sim/ui/uiContext.ts:205 - an active ui context gets no frame: the menu frame (project_tables_sub_017f30) is not ported
+- src/sim/ui/uiContext.ts:218 - cheat_handle_command (the cheat-code decoder) is not ported
 - src/sim/world/anim2d.ts:40 - takes the chunk rather than its four fields; the malloc cannot fail
 - src/sim/world/bitmap3d.ts:67 - ${fn}: slot ${slot} is outside bitmap3dTable; the original reads/writes past the table
 - src/sim/world/bitmap3d.ts:181 - the CEL pointers are dropped without release, as in the original (the port's cache has nothing to release)
+- src/sim/world/collision.ts:750 - the knock-over sound (0xb5 at the object) is Phase 7
+- src/sim/world/collision.ts:790 - mech_collide_obstacles: the knock-over sound 0xb5 is not played
 - src/sim/world/dayCycle.ts:79 - the first test - hudWidgets[0] +6 above 0 while infrared is on turns infrared off through vfx_font_sub_0150f0 - needs the HUD, which is not ported; infraredOn is only set by that HUD path, so it stays 0 and the branch cannot run
 - src/sim/world/dayCycle.ts:85 - day_cycle_tick: hudWidgets[0] check for leaving infrared not ported
 - src/sim/world/detailRecords.ts:48 - nodes are JS objects rather than one static_malloc'd pool
 - src/sim/world/detailRecords.ts:180 - no cache purge-and-retry loop: the in-memory container cannot run out
-- src/sim/world/groundQuadtree.ts:15 - ground quadtrees are not built yet (Phase 2: collision and ground height)
+- src/sim/world/groundQuadtree.ts:21 - a JS object; the 'Not enough memory' path cannot happen
+- src/sim/world/groundQuadtree.ts:273 - nothing to free in JS; kept so object_free_bounds' class-5 branch has its callee
 - src/sim/world/palettes.ts:70 - palette_slot_set_resource: a slot outside the 20-entry table writes past it in the original; ignored
 - src/sim/world/palettes.ts:92 - the state is exact; the colour interpolation table clib_sub_063a70 builds (paletteFadeState) is left to the renderer
 - src/sim/world/palettes.ts:140 - the colour step (clib_sub_063b50) and the 0x970bc-guarded clib_sub_0639b0 call are the renderer's
@@ -546,15 +791,21 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/core/math/matrix.ts:336 - matrix_to_euler near-pole branch mirrors the pitch sign
 - src/data/config/ini.ts:110 - ini_find_section dereferences strtok NULL on a blank line; read as "not a section"
 - src/data/config/ini.ts:155 - ini_get_value drops the last character of a value with no line end
+- src/engine/clock.ts:150 - time compression/expansion advances simTick by the adjusted delta on top of the real one
 - src/mission/tables/missionTables.ts:86 - the marking loops read all 48 records, past the table copy
-- src/mission/vm/chunkExec.ts:344 - GP with no object: the original clears the PREVIOUS gamepiece node
+- src/mission/vm/chunkExec.ts:346 - GP with no object: the original clears the PREVIOUS gamepiece node
 - src/mission/vm/streams.ts:197 - '.BWD' is appended in the caller's own reference buffer
+- src/render/SceneRenderer.ts:297 - the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled
 - src/sim/mech/anim.ts:81 - anim_ensure_loaded: a named ANIM (id -1) hits the cache entry of the first named ANIM
+- src/sim/mech/animTask.ts:277 - anim_player_step: a transition lands one frame past the entry frame it finds
+- src/sim/mech/mechTickAi.ts:378 - reset_target clears previous_target, not itself
+- src/sim/mech/mechTickAi.ts:472 - the turn-rate cosine takes the forward speed in km/h as an angle in degrees
 
 ## Unestablished (gaps the decompilation has not closed)
 
 - src/core/random.ts:60 - random seed: the original uses the argv pointer address; a fixed default is used
 - src/mission/vm/objExec.ts:45 - OBJ with no POLY id loads a loose .wtb file; not ported
+- src/sim/controls/input.ts:623 - input device ${input.devices[i]!.name} asks for calibration; the calibration screen is not ported
 - src/sim/groups/groups.ts:54 - formation slot ${i}: outside the StarFormation record
 - src/sim/groups/groups.ts:137 - group ${group} member ${k}: past the five-member star
 - src/sim/mech/config.ts:80 - weaponTypes[${type}]: past the 31-entry table
@@ -566,4 +817,8 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/mech/config.ts:350 - weapon mount ${i}: past the end of the MEK record
 - src/sim/mech/config.ts:354 - ammo bin ${i}: past the end of the MEK record
 - src/sim/mech/config.ts:377 - MGEO record of ${r.data.length} bytes: the loader reads ${MGEO_RECORD_SIZE} regardless
+- src/sim/mech/mechTickAi.ts:329 - the autopilot is engaged, and autopilot_drive is not ported
 - src/sim/mech/resourceRef.ts:51 - resource_load_ref: loose-file fallback for a reference given by id uses an uninitialised name
+- src/sim/net/netplay.ts:34 - a network session is running, and netplay is not ported
+- src/sim/ui/uiContext.ts:201 - ui context ${c.id} requested ${c.request}: the menu handlers are not ported
+- src/sim/ui/uiContext.ts:228 - cheat codes (cheat_handle_command) are not ported

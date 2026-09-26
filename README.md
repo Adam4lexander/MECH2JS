@@ -22,12 +22,19 @@ Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
 
 ## Modes
 
-- **Play** - the game loop runs.
-- **Edit** - the loop is paused (the original's own pause), and the editor
-  shows the scene hierarchy, the game's tables, an inspector over every struct
-  field with its offset and C type, a free camera, the asset browser and the
-  console. Step advances one frame of the original loop. (Play and Step are
-  disabled until Phase 2 ports the loop.)
+- **Play** - main's frame loop runs, one pass per display frame, with the
+  182 Hz timer fed from real time. The view is the game's own camera
+  (`camera_update`). The keyboard and mouse go to the game through its own
+  input layer: the browser's keys become PC scancodes for `GIDDI\KEYBOARD.DLL`,
+  and INPUT.MAP / GAMEKEY.MAP bind them exactly as in the original - e.g. `=`
+  / `-` throttle, `0`..`9` throttle presets, the arrow keys / keypad turn,
+  `,` `.` twist the torso, `c` cockpit / external view, `m` feet to torso,
+  `` ` `` reverse, Alt+P or Pause to pause. Click the view to give the game
+  the mouse (MOUSE.DLL: it steers the torso like a centring joystick).
+- **Edit** - no frame runs and time stands still; the editor shows the scene
+  hierarchy, the game's tables, an inspector over every struct field with its
+  offset and C type, a free camera, the asset browser and the console. Step
+  runs one pass of the loop in the clock's own fixed-step mode (12 ticks).
 
 Editor viewport controls: right-drag to look, WASD/QE to fly, wheel for speed,
 click to select a gamepiece (Alt+click selects the part hit), F to frame the

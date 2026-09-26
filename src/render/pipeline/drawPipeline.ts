@@ -18,6 +18,7 @@
  * The rasterising half (projection, screen outcodes, the painter's sort) is
  * the GPU's; see SceneRenderer.
  */
+import { cameraGlobals } from '../../sim/camera/viewer.ts';
 import type { MeshBlock, MeshPolygon, MeshVertex, WorldObject } from '../../generated/classes.gen.ts';
 import { Acc64, imul64, regHi, regLo } from '../../core/int/i64.ts';
 import { renderView } from './viewLatch.ts';
@@ -39,7 +40,7 @@ const acc = new Acc64();
  */
 export function objectCullMainView(obj: WorldObject): number {
   const r = renderView;
-  if (r.cockpitViewActive !== 0 && (obj.type & 0xf0) === 0xa0) return 1;
+  if (cameraGlobals.cockpitViewActive !== 0 && (obj.type & 0xf0) === 0xa0) return 1;
   const dx = (obj.posX - r.viewTranslationX) | 0;
   const dy = (obj.posY - r.viewTranslationY) | 0;
   const dz = (obj.posZ - r.viewTranslationZ) | 0;

@@ -8,6 +8,7 @@
 import type { Viewer } from '../../generated/classes.gen.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import { cdiv } from '../../core/int/cint.ts';
+import { matrixFromEulerOrder0, matrixTranspose, newTransform } from '../../core/math/matrix.ts';
 
 import { registerGlobals } from '../../engine/globals.ts';
 import { imageI32 } from '../../engine/image.ts';
@@ -75,4 +76,22 @@ export function viewerUpdateProjection(v: Viewer): void {
   v.focalScaleY = ((zAspect >>> 0) * hw) % 4294967296 | 0;
   if (projectionGlobals.lodQuality < 1) projectionGlobals.lodQuality = 1;
   v.lodScale = cdiv(focal, Math.imul(projectionGlobals.lodQuality, 0xa0));
+}
+
+const scratch = newTransform();
+
+/**
+ * The view transform from the viewer's own pose: matrix_from_euler_order0
+ * of (pitch, yaw, roll, pos), transposed into rotation (camera-to-world
+ * becomes world-to-view) and its translation into translationX/Y/Z.
+ *
+ * @mw2 viewer_build_transform 0x0003f230
+ * @fidelity exact
+ */
+export function viewerBuildTransform(v: Viewer): void {
+  matrixFromEulerOrder0(scratch, v.pitch, v.yaw, v.roll, v.posX, v.posY, v.posZ);
+  matrixTranspose(scratch, v.rotation);
+  v.translationX = scratch[9]!;
+  v.translationY = scratch[10]!;
+  v.translationZ = scratch[11]!;
 }
