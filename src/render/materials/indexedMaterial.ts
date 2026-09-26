@@ -134,7 +134,7 @@ uniform sampler2D uAtlas;     // R8 palette indices of every CEL in use
 uniform sampler2D uSlots;     // 512 x 1 RGBA32F: atlas x, y, w, h of each slot's current frame (w = 0: none)
 uniform vec2 uAtlasSize;
 uniform int uTextureAffine;
-uniform int uTexturesOn;
+uniform int uTexturesOn;      // DAT_0009702c: textured modes are drawn (1 in the image and in every inset setup)
 uniform int uShadedFill;
 uniform int uSprites;         // DAT_00097030 bit 0: mode 0x3000 sprites are drawn
 uniform int uMapFill;
@@ -175,9 +175,12 @@ void main() {
     int slot = (vDraw & 255) + 256;
     int shade = (vDraw >> 8) & 15;
     vec4 r = texelFetch(uSlots, ivec2(slot, 0), 0);
-    if (uTexturesOn == 0 || r.z <= 0.0) {
-      idx = 0x80 + shade;          // no CEL bound: a neutral ramp at the polygon's shade
-    } else {
+    // render_asm_sub_03bb80 hands modes 0x5000..0x7000 to bitmap3d_draw only while DAT_0009702c is set,
+    // and bitmap3d_draw draws nothing for a slot without a frame (stopped, not running, celId < 1): in
+    // both cases the polygon is not drawn. (An effect's animation can end before the effect retires -
+    // the DEATH0 quad's 32 frames stop 0.4 s early; this used to fill it flat, an opaque billboard.)
+    if (uTexturesOn == 0 || r.z <= 0.0) discard;
+    else {
       bool affine = mode == 0x6000 || (mode == 0x5000 && uTextureAffine != 0) || mode == 0x7000;
       vec2 uv = affine ? vUvw.xy / vUvw.z : vUvPersp;
       vec2 t = mod(floor(uv), r.zw);   // wrapping: not established for out-of-range texels
