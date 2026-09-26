@@ -147,12 +147,18 @@ Three things are specific to stereo:
   (`lodDistanceScale`, `src/sim/camera/projection.ts`). That covers the
   meshes' detail steps and the mechs' detail levels. The flat view keeps the
   original's distances.
+- **View distance**: things are drawn 3x further out than the mission's far
+  distance while in VR (`viewDistance`, `src/render/xr/xrRig.ts`
+  `cullViewer`). This scales both the object cull's far sphere and the
+  clipper's far limit, on the viewer the headset culls for. The flat view
+  and the game's own viewer keep the mission's distance.
 - **The sky and ground** are drawn on a sphere about the eye
   (`src/render/xr/xrSky.ts`). The cull runs from your head, so a turned head
   sees what is behind the game's viewer.
 
 When a headset is present, sliders next to **VR** tune these sizes live:
-cockpit size, HUD width, detail and HUD distance. They are remembered.
+cockpit size, HUD width, view distance, detail, seat height and HUD
+distance. They are remembered.
 
 Controllers (`src/app/xrInput.ts`) press the game's own keys:
 

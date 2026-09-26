@@ -23,7 +23,9 @@
  *    it rejects is what lies behind the viewer. Behind the game's viewer is
  *    where a turned head looks, so cullViewer is the game's viewer standing
  *    at the head instead (as the editor's scene camera does,
- *    viewerFromCamera); the sides are the GPU's frustum clip, per eye.
+ *    viewerFromCamera); the sides are the GPU's frustum clip, per eye. Its
+ *    far distance is the mission's times settings.viewDistance: at the
+ *    original's, buildings and hills popped in and out in plain view.
  *
  *  - The cockpit shell. It is painted over the world after a depth clear,
  *    so on a screen its size never mattered, and it is modelled at the
@@ -159,7 +161,16 @@ export class XrRig {
   cullViewer(head: THREE.Camera, src: Viewer, out: Viewer): Viewer {
     head.matrixWorld.decompose(this.cull.position, this.cull.quaternion, this.s);
     this.cull.scale.set(1, 1, 1);
-    return viewerFromCamera(this.cull, src, out);
+    viewerFromCamera(this.cull, src, out);
+    // the far distance pushed out (settings.viewDistance): the cull's far sphere (+0xb4) and the clipper's far
+    // limit, which it latches times 4 - so kept under 2^29 cm
+    const k = this.settings.viewDistance;
+    if (k !== 1) {
+      const far = (cm: number) => Math.min(0x1fffffff, Math.max(0, Math.round(cm * k))) | 0;
+      out.farClip = far(src.farClip);
+      out.field_0xb4 = far(src.field_0xb4);
+    }
+    return out;
   }
 }
 
