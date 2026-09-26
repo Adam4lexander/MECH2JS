@@ -14,7 +14,6 @@ import type { GameData } from './gameData.ts';
 import { parseLuma } from '../data/formats/image.ts';
 import { cacheLoadResource } from '../engine/resources/cache.ts';
 import { palettes, paletteSlotRgb } from '../sim/world/palettes.ts';
-import { brightnessRemap } from '../sim/world/brightness.ts';
 import { lighting } from '../sim/world/environment.ts';
 import { dayCycle } from '../sim/world/dayCycle.ts';
 import type { SceneRenderer } from '../render/SceneRenderer.ts';
@@ -22,7 +21,7 @@ import { BitmapAtlas } from '../render/textures/bitmapAtlas.ts';
 import { clock } from '../engine/clock.ts';
 import { ailTimerService } from '../engine/miles/ail.ts';
 import { AudioHost } from '../audio/AudioHost.ts';
-import { mainLoopRunning, mainLoopStep } from '../mission/mainLoop.ts';
+import { mainLoop, mainLoopRunning, mainLoopStep } from '../mission/mainLoop.ts';
 import { missionEnd, type MissionResults } from '../mission/end.ts';
 
 export type Mode = 'edit' | 'play';
@@ -47,6 +46,8 @@ export class Game {
     this.mission = stream;
     this.loadError = null;
     this.results = null;
+    this.pendingResults = null;
+    this.playbackShown = null;
     const t0 = performance.now();
     let ok = false;
     try {
@@ -61,12 +62,6 @@ export class Game {
     return ok;
   }
 
-  /**
-   * The palette to show. In play, the PAL in paletteCurrentSlot. A mission
-   * starts on slot 0x10 (the fade-from preset) with a fade running toward the
-   * day cycle's palette; in edit mode time is frozen before that fade, so the
-   * editor shows the fade's target instead of the black it starts from.
-   */
   /** Editor override: a day phase (0 dawn, 1 day, 2 dusk, 3 night) whose palette to show, or null for the game's. */
   palettePhase: number | null = null;
 
@@ -75,11 +70,28 @@ export class Game {
     this.palettePhase = phase;
   }
 
+  /** the blocking fade's in-between DAC being shown, and how many frames it has left */
+  private playbackShown: { dac: Uint8Array; left: number; n: number } | null = null;
+  private playbackCount = 0;
+  /** the results of a mission whose end fade is still being shown */
+  private pendingResults: MissionResults | null = null;
+
+  /**
+   * The palette to show: the DAC once the game has run (with a blocking
+   * fade's in-between DACs while one is being shown), which carries the
+   * monitor brightness. Before the first frame - a mission starts on slot
+   * 0x10 (the fade-from preset) with a fade toward the day cycle's palette -
+   * and in edit mode, where time is frozen, the editor shows the slot the
+   * game is heading to (through the brightness table), and the editor's own
+   * day phase when one is picked.
+   */
   paletteRgb(): Uint8Array | null {
     const p = palettes;
+    if (this.playbackShown) return this.playbackShown.dac;
     let slot = p.paletteCurrentSlot;
-    if (this.palettePhase !== null) return paletteSlotRgb(dayCycle.dayPhasePaletteSlot[this.palettePhase]!) ?? paletteSlotRgb(slot);
-    if (this.mode === 'edit') {
+    if (this.palettePhase !== null) return this.throughBrightness(paletteSlotRgb(dayCycle.dayPhasePaletteSlot[this.palettePhase]!) ?? paletteSlotRgb(slot));
+    if (this.mode === 'play' || mainLoop.frameCount > 0) return p.dac;
+    {
       if (p.paletteFadeStepsLeft > 0) slot = p.paletteFadeTarget;
       else if (dayCycle.dayPhase === -1 && dayCycle.dayCycleEnabled) {
         // the phase day_cycle_tick will pick for the current time of day
@@ -88,9 +100,44 @@ export class Game {
         slot = dayCycle.dayPhasePaletteSlot[phase]!;
       }
     }
-    const rgb = paletteSlotRgb(slot) ?? paletteSlotRgb(p.paletteCurrentSlot);
-    // the Monitor Brightness slider's DAC remap, while its palette is still the one showing
-    return rgb && this.mode !== 'edit' ? brightnessRemap(rgb, slot) : rgb;
+    return this.throughBrightness(paletteSlotRgb(slot) ?? paletteSlotRgb(p.paletteCurrentSlot));
+  }
+
+  /** Changes whenever paletteRgb's answer does. */
+  paletteKey(): string {
+    if (this.playbackShown) return `fade ${this.playbackShown.n}`;
+    if (this.palettePhase === null && (this.mode === 'play' || mainLoop.frameCount > 0)) return `dac ${palettes.dacVersion}`;
+    const p = this.paletteRgb();
+    return `slot ${p ? p.byteOffset : -1} ${palettes.brightnessShown}`;
+  }
+
+  /** A slot's palette as palette_set_entries would put it on the DAC. */
+  private throughBrightness(rgb: Uint8Array | null): Uint8Array | null {
+    if (!rgb) return null;
+    const t = palettes.brightnessShown * 64;
+    const out = new Uint8Array(0x300);
+    for (let i = 0; i < 0x300; i++) out[i] = palettes.brightnessTables[t + rgb[i]!] ?? 0;
+    return out;
+  }
+
+  /**
+   * One display frame of a blocking fade (palette_fade_used_colours holds the
+   * screen while it runs): each in-between DAC for its waits. Returns false
+   * when there is none left to show.
+   */
+  private showPlayback(): boolean {
+    const q = palettes.dacPlayback;
+    if (this.playbackShown && this.playbackShown.left > 1) {
+      this.playbackShown.left--;
+      return true;
+    }
+    const next = q.shift();
+    if (!next) {
+      this.playbackShown = null;
+      return false;
+    }
+    this.playbackShown = { dac: next.dac, left: next.waits, n: ++this.playbackCount };
+    return true;
   }
 
   /** The mission's LUMA shade table (lumaTableId, set by LTBL). */
@@ -145,6 +192,15 @@ export class Game {
    * per display frame). Returns false once the loop has ended (quit).
    */
   playFrame(ms: number): boolean {
+    if (this.showPlayback()) return true;
+    if (this.pendingResults) {
+      // the end fade has been shown: the debriefing
+      this.results = this.pendingResults;
+      this.pendingResults = null;
+      this.mode = 'edit';
+      engineStore.bump();
+      return false;
+    }
     this.pending = Math.min(this.pending + (ms * 182) / 1000, Game.MAX_TICKS_PER_FRAME);
     while (this.pending >= 1) {
       ailTimerService();
@@ -176,8 +232,13 @@ export class Game {
     try {
       mainLoopStep();
       if (!mainLoopRunning()) {
-        // main's shutdown after its loop: the results the debriefing shows
-        this.results = missionEnd();
+        // main's shutdown after its loop: the results the debriefing shows, once its fade has been
+        const r = missionEnd();
+        if (palettes.dacPlayback.length > 0) {
+          this.pendingResults = r;
+          return true;
+        }
+        this.results = r;
         this.mode = 'edit';
         engineStore.bump();
       }

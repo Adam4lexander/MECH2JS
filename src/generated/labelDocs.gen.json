@@ -122,7 +122,7 @@
  "brightnessShown": {
   "address": "0x95784",
   "kind": "int",
-  "doc": "the brightness table palette_apply_brightness was last asked for: brightness_preview's level, set back to brightness by commit and revert"
+  "doc": "the brightness table every palette upload goes through: palette_set_entries maps each entry by brightnessTables[brightnessShown] before the DAC write. brightness_preview sets it, commit and revert set it back to brightness; main starts it at brightness. CORRECTION: the first note called it only the table palette_apply_brightness was last asked for"
  },
  "dayPhasePaletteSlot": {
   "address": "0x95788",
@@ -1167,6 +1167,11 @@
   "kind": "raw",
   "doc": "frames remaining in the running fade; 0 means no fade"
  },
+ "paletteCycleActive": {
+  "address": "0x970bc",
+  "kind": "int",
+  "doc": "palette_fade_step runs palette_cycle_step on paletteCycleState while it is set. Nothing writes it: colour cycling is dead in the shipped game"
+ },
  "lodQuality": {
   "address": "0x970c4",
   "kind": "int",
@@ -1695,6 +1700,16 @@
   "kind": "int",
   "doc": "1 in CHAIN FIRE, 0 in GROUP FIRE; 1 in the image. Its only references are in mech_weapons_tick: the toggle_group_fire control flips it, playing cue 6 'Chain fire' going to 1 and cue 7 'Group fire' going to 0 (read from soundCues), and while it is 0 the player's weapon_fire is moved onto weapon_fire_group, so the trigger arms the whole current group through player_fire_group instead of the one selected weapon. One global, not per mech; only the player's control path sets the channels it redirects"
  },
+ "videoWaitHook": {
+  "address": "0x9fd5c",
+  "kind": "raw",
+  "doc": "a VFX driver hook that paces: palette_fade_used_colours calls it duration times over a fade, and main's display step calls it before the page flip when 0x95514 is set - consistent with a wait for vertical retrace, which is NOT established"
+ },
+ "paletteDacRead": {
+  "address": "0x9fd68",
+  "kind": "raw",
+  "doc": "the VFX driver hook palette_fade_used_colours calls with (index, destination) for each colour it will fade: the hardware DAC entry read back into paletteWorking. Named for that use and for sitting beside paletteDacWrite in the driver table"
+ },
  "paletteDacWrite": {
   "address": "0x9fd6c",
   "kind": "raw",
@@ -1703,7 +1718,7 @@
  "paletteWorking": {
   "address": "0xa02c1",
   "kind": "raw",
-  "doc": "256 three-byte entries that palette_fade_used_colours steps toward its target, poking paletteDacWrite after each colour. ITS RELATION TO paletteDac AT 0xa52d0 IS NOT ESTABLISHED: both are 256x3 palettes written immediately before the same hook, and which one the hook reads cannot be seen because its arguments are passed in registers the decompiler does not show"
+  "doc": "256 three-byte entries: palette_fade_used_colours reads each colour it will fade from the hardware DAC into here (the hook paletteDacRead, with the entry index and this entry's address), steps it toward the target and writes it back with paletteDacWrite. RESOLVED: the first note left its relation to paletteDac open; paletteDac is the palette last UPLOADED (palette_set_entries, before the brightness remap), this is a read-back of the hardware, so it carries the remap"
  },
  "paletteUsedIndices": {
   "address": "0xa05c1",
@@ -1773,7 +1788,7 @@
  "paletteDac": {
   "address": "0xa52d0",
   "kind": "raw",
-  "doc": "256 entries of three bytes, the shadow of the hardware palette. palette_set_entries writes here and pokes paletteDacWrite per entry. CHANNEL ORDER IS NOT ESTABLISHED, so the +1 and +2 bytes keep their bare labels rather than being called green and blue"
+  "doc": "256 entries of three bytes, the palette last uploaded: palette_set_entries writes the caller's colours here and pokes paletteDacWrite per entry with the colour mapped through brightnessTables[brightnessShown] - so the hardware holds the remapped colours and this the unmapped ones, which palette_apply_brightness remaps again. CHANNEL ORDER IS NOT ESTABLISHED, so the +1 and +2 bytes keep their bare labels rather than being called green and blue"
  },
  "dayPhaseStart": {
   "address": "0xa55d0",
@@ -2181,6 +2196,11 @@
   "address": "0x14fe0c",
   "kind": "raw",
   "doc": "the interpolator clib_sub_063a70 fills - three 0x300-byte arrays, which is 256 entries x 3 components, and the reason this block is a PALETTE rather than any other 0x100-element table"
+ },
+ "paletteCycleState": {
+  "address": "0x14fe28",
+  "kind": "raw",
+  "doc": "the colour-cycling block palette_cycle_setup would fill: {palette, copy, first byte, count at +9}; nothing fills it"
  },
  "viewProjShiftX": {
   "address": "0x14fe38",

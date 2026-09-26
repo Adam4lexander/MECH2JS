@@ -32,7 +32,7 @@ import { groupsStartMission } from '../sim/groups/orders.ts';
 import { mechDispatchHook0 } from '../sim/mech/hooks.ts';
 import { thingNodes } from '../sim/mech/spawn.ts';
 import { layoutRescaleAll } from '../sim/display/rescale.ts';
-import { videoInit } from '../sim/display/video.ts';
+import { defaultCanvas, videoInit } from '../sim/display/video.ts';
 import { vfxVideoSub010320 } from '../sim/display/mainView.ts';
 import { setMekSource } from '../sim/mech/looseFiles.ts';
 import { destructiblesReset } from '../sim/things/destructibles.ts';
@@ -43,6 +43,7 @@ import { worldRecordsAllDefined, worldRecordsBuildAll, worldRecordsTick } from '
 import { objectiveTableStart } from './objectives.ts';
 import { vfxVideoSub0103c0 } from '../sim/world/viewScene.ts';
 import { brightnessLoad, brightnessTablesBuild } from '../sim/world/brightness.ts';
+import { screenFadeIn } from '../sim/world/palettes.ts';
 import { detailOptionsApplyThunk } from '../sim/ui/menuCallbacks.ts';
 import { missionTables, missionTablesFree } from './tables/missionTables.ts';
 import { projectChunkExec } from './vm/chunkExec.ts';
@@ -145,5 +146,7 @@ export function bootMission(opts: MissionBootOptions): boolean {
   worldRecordsTick();
   vfxVideoSub0103c0();
   detailOptionsApplyThunk();
+  // hangAround's debug title (input_sub_048e80, hud_draw_title): not ported; game_boot_sub_0155a0 stops the launch animation, which the port has none of
+  screenFadeIn(0, defaultCanvas);
   return ok;
 }

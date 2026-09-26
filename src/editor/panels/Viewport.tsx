@@ -56,7 +56,7 @@ export function Viewport({ game }: { game: Game }) {
     const sr = new SceneRenderer();
     const pal = game.paletteRgb();
     if (pal) sr.setPalette(pal);
-    let lastPalette = pal ? pal.byteOffset : -1;
+    let lastPalette = game.paletteKey();
     const luma = game.lumaRows();
     if (luma) sr.setLuma(luma);
     game.bindTextures(sr);
@@ -183,12 +183,11 @@ export function Viewport({ game }: { game: Game }) {
         editorViewUpdate(camera);
       }
       // the palette on screen follows the game's (day cycle, infrared, flashes) as well as the editor's choice
-      const p = game.paletteRgb();
-      // (each read is a fresh view into the container; its offset names the resource)
-      const key = p ? p.byteOffset : -1;
+      const key = game.paletteKey();
       if (paletteDirty.current || key !== lastPalette) {
         paletteDirty.current = false;
         lastPalette = key;
+        const p = game.paletteRgb();
         if (p) sr.setPalette(p);
       }
       const w = el.clientWidth;

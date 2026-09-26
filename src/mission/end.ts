@@ -18,7 +18,8 @@ import { mechDispatchHook5 } from '../sim/mech/hooks.ts';
 import { mechs } from '../sim/mech/mechGlobals.ts';
 import { missionEndCode } from '../sim/mech/damage.ts';
 import { simTables } from '../sim/effects/simTables.ts';
-import { palettes } from '../sim/world/palettes.ts';
+import { paletteApplySlot, paletteFadeUsedColours, palettes } from '../sim/world/palettes.ts';
+import { defaultCanvas } from '../sim/display/video.ts';
 import { unestablished } from '../core/provenance.ts';
 import { missionClockUpdate } from './missionClock.ts';
 import { objectives } from './objectives.ts';
@@ -57,15 +58,16 @@ export interface MissionResults {
  * ejection refused (missionEndCode 4), then applies that slot.
  *
  * @mw2 palette_fade_screen_to_preset 0x00028980
- * @fidelity partial
- * @divergence palette_fade_used_colours' blocking 0x5a-tick DAC fade and palette_apply_slot's upload are the host's; the port makes the slot the current one, which is what the host draws the screen in
+ * @fidelity exact
  */
 export function paletteFadeScreenToPreset(ejectRefused: number): void {
   const slot = (ejectRefused !== 0 ? 1 : 0) + 0x10;
   const id = palettes.paletteResourceIds[slot]!;
-  if (cacheLoadResource(id, 'PAL')) {
+  const rgb = cacheLoadResource(id, 'PAL');
+  if (rgb) {
+    paletteFadeUsedColours(defaultCanvas, rgb, 0x5a);
     cacheUnlock(id, 'PAL');
-    if (0 < id) palettes.paletteCurrentSlot = slot;
+    paletteApplySlot(slot);
   }
 }
 

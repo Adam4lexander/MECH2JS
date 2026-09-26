@@ -1,42 +1,15 @@
 /**
  * Monitor brightness: sixteen 64-entry tables (6-bit colour in, 6-bit out)
- * built at start-up, and the level mw2snd.cfg keeps (+0x28, 8 in the shipped
- * file). Only the menu's Monitor Brightness slider uses them: its preview,
- * commit and revert write the palette on screen to the DAC through a table.
- * Nothing else reads the level, so the next palette the game puts on screen
- * (a fade, a slot change) goes up without it.
- *
- * The port has no DAC: palette_apply_brightness records the level and the
- * slot it was applied over (dacBrightness), and the host shows that slot
- * remapped until the slot changes.
+ * built at start-up, the level mw2snd.cfg keeps (+0x28, 8 in the shipped
+ * file - the identity table), and the menu's Monitor Brightness slider.
+ * Every palette upload goes through table brightnessShown on its way to the
+ * DAC (palette_set_entries), so the level holds for every palette after it;
+ * the slider's preview, commit and revert re-send the last upload through
+ * the new table (palette_apply_brightness). The state is in palettes.ts.
  */
 import { registerCode } from '../../engine/codePtr.ts';
-import { registerGlobals } from '../../engine/globals.ts';
-import { imageI32 } from '../../engine/image.ts';
-import { LABEL } from '../../generated/labels.gen.ts';
 import { sound } from '../sound/mixer.ts';
-import { palettes } from './palettes.ts';
-
-export const brightnessState = registerGlobals(
-  'brightness',
-  {
-    /** 0xa4ed0: 16 tables of 64 bytes */
-    brightnessTables: new Uint8Array(16 * 64),
-    /** 0x95780: the level, 0..15 */
-    brightness: 0,
-    /** 0x95784: the table palette_apply_brightness was last asked for */
-    brightnessShown: 0,
-    /** @portOnly the DAC's remap: the table and the slot it was applied over, or null */
-    dacBrightness: null as { level: number; slot: number } | null,
-  },
-  () => {
-    const b = brightnessState;
-    b.brightnessTables = new Uint8Array(16 * 64);
-    b.brightness = imageI32(LABEL.brightness, 0);
-    b.brightnessShown = imageI32(0x95784, 0);
-    b.dacBrightness = null;
-  },
-);
+import { paletteApplyBrightness, palettes } from './palettes.ts';
 
 /**
  * table[level][i] = trunc(63 * pow(i * (1/63), 1 / (level * 0.0625 + 0.5))):
@@ -53,39 +26,15 @@ export function brightnessTablesBuild(): void {
   const c = 0.015873015873015876;
   for (let l = 0; l < 16; l++) {
     const e = 1 / (l * 0.0625 + 0.5);
-    for (let i = 0; i < 64; i++) brightnessState.brightnessTables[l * 64 + i] = Math.trunc(Math.pow(i * c, e) * 63) & 0xff;
+    for (let i = 0; i < 64; i++) palettes.brightnessTables[l * 64 + i] = Math.trunc(Math.pow(i * c, e) * 63) & 0xff;
   }
 }
 
 /** main: brightness = brightnessShown = mw2snd.cfg +0x28. @portOnly the line of main (0x15a30) that loads it */
 export function brightnessLoad(): void {
   const cfg = sound.soundConfigBuffer;
-  brightnessState.brightness = cfg ? cfg[10]! : 0;
-  brightnessState.brightnessShown = brightnessState.brightness;
-}
-
-/**
- * The on-screen palette through brightness table `level` to the DAC.
- *
- * @mw2 palette_apply_brightness 0x00014e70
- * @fidelity partial
- * @divergence the port has no DAC: the level is recorded over the current slot for the host to apply (dacBrightness)
- */
-export function paletteApplyBrightness(level: number): void {
-  brightnessState.dacBrightness = { level, slot: palettes.paletteCurrentSlot };
-}
-
-/**
- * A 6-bit palette through the DAC's brightness remap, when one was applied
- * over the slot now showing; otherwise the palette as it is. @portOnly
- */
-export function brightnessRemap(rgb: Uint8Array, slot: number): Uint8Array {
-  const d = brightnessState.dacBrightness;
-  if (!d || d.slot !== slot) return rgb;
-  const t = brightnessState.brightnessTables.subarray(d.level * 64, d.level * 64 + 64);
-  const out = new Uint8Array(rgb.length);
-  for (let i = 0; i < rgb.length; i++) out[i] = t[rgb[i]! & 0x3f]!;
-  return out;
+  palettes.brightness = cfg ? cfg[10]! : 0;
+  palettes.brightnessShown = palettes.brightness;
 }
 
 /**
@@ -95,7 +44,7 @@ export function brightnessRemap(rgb: Uint8Array, slot: number): Uint8Array {
  * @fidelity exact
  */
 export const brightnessGet = registerCode('brightness_get', 0x19560, (): number =>
-  Number(BigInt.asIntN(32, (BigInt(brightnessState.brightness << 16) * 0x1111n) >> 16n)),
+  Number(BigInt.asIntN(32, (BigInt(palettes.brightness << 16) * 0x1111n) >> 16n)),
 );
 
 /** value * 15 in 16.16, rounded (imul, shrd, adc) */
@@ -110,8 +59,8 @@ function level15(value: number): number {
  */
 export const brightnessPreview = registerCode('brightness_preview', 0x195a0, (_selector: number, value: number): void => {
   const l = level15(value);
-  if (l !== brightnessState.brightnessShown) {
-    brightnessState.brightnessShown = l;
+  if (l !== palettes.brightnessShown) {
+    palettes.brightnessShown = l;
     paletteApplyBrightness(l);
   }
 });
@@ -122,8 +71,8 @@ export const brightnessPreview = registerCode('brightness_preview', 0x195a0, (_s
  */
 export const brightnessCommit = registerCode('brightness_commit', 0x195d0, (_selector: number, value: number): void => {
   const l = level15(value);
-  brightnessState.brightness = l;
-  brightnessState.brightnessShown = l;
+  palettes.brightness = l;
+  palettes.brightnessShown = l;
   if (sound.soundConfigBuffer) sound.soundConfigBuffer[10] = l;
   paletteApplyBrightness(l);
 });
@@ -133,6 +82,6 @@ export const brightnessCommit = registerCode('brightness_commit', 0x195d0, (_sel
  * @fidelity exact
  */
 export const brightnessRevert = registerCode('brightness_revert', 0x19600, (): void => {
-  brightnessState.brightnessShown = brightnessState.brightness;
-  paletteApplyBrightness(brightnessState.brightnessShown);
+  palettes.brightnessShown = palettes.brightness;
+  paletteApplyBrightness(palettes.brightnessShown);
 });

@@ -6,7 +6,7 @@ Every ported function carries `@mw2 <name> <address>`; this file is built from t
 against `decompiled/mw2/listing/functions.csv`, so a function renamed upstream fails the build rather
 than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 
-**Game functions:** 1159  |  **ported exact:** 851  |  **partial:** 65  |  **stub:** 3  |  library functions ported: 33
+**Game functions:** 1159  |  **ported exact:** 857  |  **partial:** 62  |  **stub:** 3  |  library functions ported: 36
 
 ## By original module
 
@@ -14,7 +14,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 |---|---|---:|---:|---:|---:|---:|
 | ai_combat | ai | 31 | 31 | 0 | 0 | 0 |
 | ai_debug | ai | 2 | 0 | 0 | 0 | 2 |
-| ai_group | ai | 98 | 95 | 2 | 0 | 1 |
+| ai_group | ai | 98 | 96 | 1 | 0 | 1 |
 | ai_state | ai | 17 | 17 | 0 | 0 | 0 |
 | game_boot | boot | 18 | 8 | 2 | 0 | 8 |
 | main | boot | 15 | 10 | 2 | 0 | 3 |
@@ -31,7 +31,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | project_file | project | 34 | 14 | 4 | 0 | 16 |
 | project_tables | project | 39 | 32 | 0 | 1 | 6 |
 | stream_seen | project | 3 | 3 | 0 | 0 | 0 |
-| render_asm | render | 74 | 38 | 11 | 0 | 25 |
+| render_asm | render | 74 | 42 | 9 | 0 | 23 |
 | res_cache | resource | 25 | 0 | 1 | 2 | 22 |
 | res_loaders | resource | 9 | 4 | 1 | 0 | 4 |
 | cockpit | sim | 12 | 10 | 2 | 0 | 0 |
@@ -50,8 +50,8 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | ui_callbacks | ui | 33 | 29 | 0 | 0 | 4 |
 | screenshot | util | 3 | 1 | 0 | 0 | 2 |
 | time_format | util | 3 | 3 | 0 | 0 | 0 |
-| vfx_font | vfx | 47 | 40 | 2 | 0 | 5 |
-| vfx_lib | vfx | 42 | 15 | 1 | 0 | 26 |
+| vfx_font | vfx | 47 | 41 | 1 | 0 | 5 |
+| vfx_lib | vfx | 42 | 15 | 2 | 0 | 25 |
 | vfx_video | vfx | 51 | 41 | 5 | 0 | 5 |
 
 ## Ported functions
@@ -139,8 +139,8 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00014ae0 | pane_lerp | vfx_font | exact | `paneLerp` src/sim/cockpit/hud.ts:261 |
 | 0x00014b80 | pane_transition_step | vfx_font | exact | `paneTransitionStep` src/sim/cockpit/hud.ts:289 |
 | 0x00014c50 | pane_transition_step_split | vfx_font | exact | `paneTransitionStepSplit` src/sim/cockpit/hud.ts:323 |
-| 0x00014d90 | brightness_tables_build | vfx_font | exact | `brightnessTablesBuild` src/sim/world/brightness.ts:49 |
-| 0x00014e70 | palette_apply_brightness | vfx_font | partial | `paletteApplyBrightness` src/sim/world/brightness.ts:70 |
+| 0x00014d90 | brightness_tables_build | vfx_font | exact | `brightnessTablesBuild` src/sim/world/brightness.ts:22 |
+| 0x00014e70 | palette_apply_brightness | vfx_font | exact | `paletteApplyBrightness` src/sim/world/palettes.ts:152 |
 | 0x00014ee0 | day_cycle_init | vfx_font | exact | `dayCycleInit` src/sim/world/dayCycle.ts:57 |
 | 0x00014f80 | day_cycle_tick | vfx_font | exact | `dayCycleTick` src/sim/world/dayCycle.ts:78 |
 | 0x00015070 | day_cycle_set_phase | vfx_font | exact | `dayCycleSetPhase` src/sim/world/dayCycle.ts:111 |
@@ -163,7 +163,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00016720 | objective_evaluate | mission_result | exact | `objectiveEvaluate` src/mission/results.ts:282 |
 | 0x00016e80 | mission_results_update | mission_result | exact | `missionResultsUpdate` src/mission/results.ts:388 |
 | 0x000170c0 | mission_clock_update | mission_result | exact | `missionClockUpdate` src/mission/missionClock.ts:25 |
-| 0x000170e0 | mission_save_results | mission_config | partial | `missionSaveResults` src/mission/end.ts:92 |
+| 0x000170e0 | mission_save_results | mission_config | partial | `missionSaveResults` src/mission/end.ts:94 |
 | 0x00017280 | mission_event_nop | mission_config | exact | `missionEventNop` src/sim/things/gameThingDamage.ts:135 |
 | 0x00017290 | mission_stub_true | mission_config | exact | `missionStubTrue` src/mission/tables/missionTables.ts:182 |
 | 0x000172a0 | group_identify_target | mission_config | exact | `groupIdentifyTarget` src/mission/objectives.ts:218 |
@@ -197,10 +197,10 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00018d00 | menu_item_toggle | project_tables | exact | `menuItemToggle` src/sim/ui/menus.ts:429 |
 | 0x000191a0 | menu_calibration_onload | project_tables | exact | `menuCalibrationOnload` src/sim/ui/menuCallbacks.ts:502 |
 | 0x000192d0 | menu_item_calibrate | project_tables | stub | `menuItemCalibrate` src/sim/ui/menuCallbacks.ts:545 |
-| 0x00019560 | brightness_get | project_tables | exact | `brightnessGet` src/sim/world/brightness.ts:94 |
-| 0x000195a0 | brightness_preview | project_tables | exact | `brightnessPreview` src/sim/world/brightness.ts:108 |
-| 0x000195d0 | brightness_commit | project_tables | exact | `brightnessCommit` src/sim/world/brightness.ts:120 |
-| 0x00019600 | brightness_revert | project_tables | exact | `brightnessRevert` src/sim/world/brightness.ts:132 |
+| 0x00019560 | brightness_get | project_tables | exact | `brightnessGet` src/sim/world/brightness.ts:43 |
+| 0x000195a0 | brightness_preview | project_tables | exact | `brightnessPreview` src/sim/world/brightness.ts:57 |
+| 0x000195d0 | brightness_commit | project_tables | exact | `brightnessCommit` src/sim/world/brightness.ts:69 |
+| 0x00019600 | brightness_revert | project_tables | exact | `brightnessRevert` src/sim/world/brightness.ts:81 |
 | 0x000196b0 | lance_menu_onload | ui_callbacks | exact | `lanceMenuOnload` src/sim/ui/menuCallbacks.ts:96 |
 | 0x00019790 | lance_point_menu_onload | ui_callbacks | exact | `lancePointMenuOnload` src/sim/ui/menuCallbacks.ts:128 |
 | 0x00019830 | lance_order_selected | ui_callbacks | exact | `lanceOrderSelected` src/sim/ui/menuCallbacks.ts:150 |
@@ -446,7 +446,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00028810 | render_view_from_pose | ai_group | exact | `renderViewFromPose` src/sim/display/insetView.ts:68 |
 | 0x00028910 | death_flash | ai_group | exact | `deathFlash` src/sim/mech/mechTickAi.ts:87 |
 | 0x00028930 | damage_flash | ai_group | exact | `damageFlash` src/sim/cockpit/hud.ts:600 |
-| 0x00028980 | palette_fade_screen_to_preset | ai_group | partial | `paletteFadeScreenToPreset` src/mission/end.ts:59 |
+| 0x00028980 | palette_fade_screen_to_preset | ai_group | exact | `paletteFadeScreenToPreset` src/mission/end.ts:60 |
 | 0x000289f0 | mech_death_update | ai_group | exact | `mechDeathUpdate` src/sim/mech/mechTickAi.ts:157 |
 | 0x00028ae0 | mech_jump_jet_effects | ai_group | exact | `mechJumpJetEffects` src/sim/mech/mechTickAi.ts:128 |
 | 0x00028be0 | mech_play_landing | ai_group | exact | `mechPlayLanding` src/sim/mech/mechTickTerrain.ts:50 |
@@ -740,13 +740,15 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0003e1de | poly_clip_and_queue | render_asm | partial | `polyDepthKey` src/render/pipeline/drawPipeline.ts:274 |
 | 0x0003e5b0 | viewport_windows_reset | render_asm | exact | `viewportWindowsReset` src/sim/display/video.ts:114 |
 | 0x0003e600 | viewport_select | render_asm | exact | `viewportSelect` src/sim/display/video.ts:168 |
-| 0x0003e6d0 | palette_apply_pending | render_asm | partial | `paletteApplyPending` src/sim/world/palettes.ts:157 |
-| 0x0003e760 | palette_fade_step | render_asm | partial | `paletteFadeStep` src/sim/world/palettes.ts:138 |
-| 0x0003e7d0 | palette_start_fade | render_asm | partial | `paletteStartFade` src/sim/world/palettes.ts:90 |
-| 0x0003e950 | palette_fade_for_effect | render_asm | exact | `paletteFadeForEffect` src/sim/world/palettes.ts:173 |
-| 0x0003eaa0 | palette_slot_set_resource | render_asm | exact | `paletteSlotSetResource` src/sim/world/palettes.ts:64 |
-| 0x0003eae0 | palette_fade_to_new_base | render_asm | exact | `paletteFadeToNewBase` src/sim/world/palettes.ts:183 |
-| 0x0003ecd0 | palette_fade_steps_left | render_asm | exact | `paletteFadeStepsLeft` src/sim/world/palettes.ts:193 |
+| 0x0003e6d0 | palette_apply_pending | render_asm | exact | `paletteApplyPending` src/sim/world/palettes.ts:338 |
+| 0x0003e710 | palette_apply_slot | render_asm | exact | `paletteApplySlot` src/sim/world/palettes.ts:187 |
+| 0x0003e760 | palette_fade_step | render_asm | exact | `paletteFadeStep` src/sim/world/palettes.ts:317 |
+| 0x0003e7d0 | palette_start_fade | render_asm | exact | `paletteStartFade` src/sim/world/palettes.ts:268 |
+| 0x0003e950 | palette_fade_for_effect | render_asm | exact | `paletteFadeForEffect` src/sim/world/palettes.ts:354 |
+| 0x0003eaa0 | palette_slot_set_resource | render_asm | exact | `paletteSlotSetResource` src/sim/world/palettes.ts:168 |
+| 0x0003eae0 | palette_fade_to_new_base | render_asm | exact | `paletteFadeToNewBase` src/sim/world/palettes.ts:364 |
+| 0x0003eb10 | screen_fade_in | render_asm | partial | `screenFadeIn` src/sim/world/palettes.ts:464 |
+| 0x0003ecd0 | palette_fade_steps_left | render_asm | exact | `paletteFadeStepsLeft` src/sim/world/palettes.ts:374 |
 | 0x0003ece0 | viewer_latch_globals | render_asm | partial | `viewerLatchGlobals` src/render/pipeline/viewLatch.ts:60 |
 | 0x0003ef30 | viewer_update_projection | render_asm | partial | `viewerUpdateProjection` src/sim/camera/projection.ts:47 |
 | 0x0003f230 | viewer_build_transform | render_asm | exact | `viewerBuildTransform` src/sim/camera/projection.ts:90 |
@@ -911,7 +913,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0004e540 | thing_node_queue_pop | sim_objects | exact | `thingNodeQueuePop` src/sim/mech/spawn.ts:45 |
 | 0x0004e570 | gamething_alloc | sim_objects | exact | `gamethingAlloc` src/sim/things/gameThings.ts:52 |
 | 0x0004e5d0 | project_chunk_exec | sim_objects | exact | `projectChunkExec` src/mission/vm/chunkExec.ts:110 |
-| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:55 |
+| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:56 |
 | 0x0004fde0 | poly_resolve_code | sim_objects | exact | `polyResolveCode` src/engine/scene/wtboLoader.ts:80 |
 | 0x0004fe80 | poly_set_vertex_offset | sim_objects | exact | `polySetVertexOffset` src/engine/scene/wtboLoader.ts:99 |
 | 0x0004fea0 | poly_set_vertex_scale | sim_objects | exact | `polySetVertexScale` src/engine/scene/wtboLoader.ts:109 |
@@ -935,7 +937,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00051aa0 | gamething_destroy | sim_objects | exact | `gamethingDestroy` src/sim/things/gameThingDamage.ts:61 |
 | 0x00051b70 | gamething_apply_damage | sim_objects | exact | `gamethingApplyDamage` src/sim/things/gameThingDamage.ts:30 |
 | 0x00051c50 | effect_spawn_fragments | sim_objects | exact | `effectSpawnFragments` src/sim/effects/effects.ts:249 |
-| 0x00051d20 | cockpit_save_config | cockpit | partial | `cockpitSaveConfig` src/mission/end.ts:76 |
+| 0x00051d20 | cockpit_save_config | cockpit | partial | `cockpitSaveConfig` src/mission/end.ts:78 |
 | 0x00051d40 | environment_heat_update | cockpit | exact | `environmentHeatUpdate` src/sim/effects/effects.ts:469 |
 | 0x00051e90 | nuke_detonate | cockpit | exact | `nukeDetonate` src/sim/effects/effects.ts:439 |
 | 0x00051f50 | nuke_blast_update | cockpit | exact | `nukeBlastUpdate` src/sim/effects/effects.ts:419 |
@@ -977,6 +979,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x000588e5 | vfx_shape_origin | vfx_lib | exact | `vfxShapeOrigin` src/engine/vfx/vfx.ts:243 |
 | 0x00058908 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:230 |
 | 0x00058a43 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:220 |
+| 0x00058e0d | palette_fade_used_colours | vfx_lib | partial | `paletteFadeUsedColours` src/sim/world/palettes.ts:387 |
 | 0x0005dc10 | AIL_install_DIG_driver_file | miles_ail | stub | `ailInstallDigDriverFile` src/engine/miles/ail.ts:168 |
 | 0x0005dd90 | AIL_allocate_sample_handle | miles_ail | partial | `ailAllocateSampleHandle` src/engine/miles/ail.ts:186 |
 | 0x0005de90 | AIL_allocate_file_sample | miles_ail | partial | `ailAllocateFileSample` src/engine/miles/ail.ts:242 |
@@ -1008,6 +1011,9 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00061f33 | stopwatch_set | clib_start | exact | `stopwatchSet` src/engine/timer.ts:106 |
 | 0x00061f76 | stopwatch_free | clib_start | exact | `stopwatchFree` src/engine/timer.ts:115 |
 | 0x00061fb0 | timer_set_paused | clib_start | exact | `timerSetPaused` src/engine/timer.ts:128 |
+| 0x00063860 | palette_set_entries | clib | exact | `paletteSetEntries` src/sim/world/palettes.ts:129 |
+| 0x00063a70 | palette_fade_state_build | clib | exact | `paletteFadeStateBuild` src/sim/world/palettes.ts:205 |
+| 0x00063b50 | palette_fade_state_step | clib | exact | `paletteFadeStateStep` src/sim/world/palettes.ts:235 |
 | 0x0007617f | miles_driver_sub_07617f | miles_driver | exact | `milesRand` src/core/random.ts:32 |
 | 0x000761a3 | miles_driver_sub_0761a3 | miles_driver | exact | `milesSrand` src/core/random.ts:24 |
 
@@ -1094,11 +1100,10 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/engine/vfx/vfx.ts:173 - takes window coordinates and the clip vfx_shape_draw has set up, not (pane, shape, x, y, pitch)
 - src/engine/vfx/vfx.ts:212 - takes window coordinates and the clip vfx_shape_remap_draw has set up
 - src/engine/vfx/vfx.ts:307 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
-- src/mission/end.ts:61 - palette_fade_used_colours' blocking 0x5a-tick DAC fade and palette_apply_slot's upload are the host's; the port makes the slot the current one, which is what the host draws the screen in
-- src/mission/end.ts:78 - the port never writes the game's cfg files: the block is returned to the host instead
-- src/mission/end.ts:94 - the record is returned to the host rather than written to mw2msn.cfg
-- src/mission/load.ts:117 - static_arena_init: no arena pre-pass; tables are allocated on demand
-- src/mission/load.ts:133 - sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)
+- src/mission/end.ts:80 - the port never writes the game's cfg files: the block is returned to the host instead
+- src/mission/end.ts:96 - the record is returned to the host rather than written to mw2msn.cfg
+- src/mission/load.ts:118 - static_arena_init: no arena pre-pass; tables are allocated on demand
+- src/mission/load.ts:134 - sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)
 - src/mission/mainLoop.ts:87 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
 - src/mission/mainLoop.ts:91 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
 - src/mission/objectives.ts:62 - ${what} longer than its ${destSize}-byte field; the original overruns into the next field
@@ -1145,7 +1150,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/cockpit/resources.ts:217 - res_load_hdi: HUD shorter than 292 bytes; the original reads past it
 - src/sim/cockpit/weaponList.ts:66 - a ready weapon in a fire group above 2 has no colour in the original (the stack local is left as it was); the port keeps the last line's colour - weapon_set_fire_group refuses groups above 2, so it does not arise
 - src/sim/controls/input.ts:265 - the driver's methods are the port's implementations of the shipped DLL (sim/controls/giddi.ts), bound to the loaded module; a device without one fails as a module that will not load
-- src/sim/controls/input.ts:612 - a driver asking for calibration (install returns 4) would open the calibration screen (project_tables_sub_018f90), which is not ported
+- src/sim/controls/input.ts:612 - a driver asking for calibration (install returns 4) would open the calibration screen (calibration_menu_run), which is not ported
 - src/sim/controls/input.ts:751 - no keyboard device is open, so no keystroke is read
 - src/sim/display/insetView.ts:70 - viewer_latch_globals (before and after the draw) is the render layer's, which latches the viewer itself when it draws; empty_stub_37e70 is empty
 - src/sim/display/mainView.ts:46 - the drawing - sky and ground, backdrop, world, cockpit - is the host's, beneath the 2D window (renderPort.mainView): the viewport's window pixels are handed back to it (vfxWindowClearPane) where the original paints them, and a wipe instead of sky and ground becomes the host view's background rather than window pixels. viewer_latch_globals and the draw counter at 0x95510 are the render layer's. mainViewWindow's memset of the buffer at 0xa46fc (a window the shipped game never selects) and vfx_video_sub_010a50 (the cheat at 0x954e0) are not ported
@@ -1212,17 +1217,14 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/world/anim2d.ts:102 - a play-once animation that finishes without bit 1 leaves the frame variable unset in the original; nothing is drawn in that state, so it is never read
 - src/sim/world/bitmap3d.ts:67 - ${fn}: slot ${slot} is outside bitmap3dTable; the original reads/writes past the table
 - src/sim/world/bitmap3d.ts:181 - the CEL pointers are dropped without release, as in the original (the port's cache has nothing to release)
-- src/sim/world/brightness.ts:72 - the port has no DAC: the level is recorded over the current slot for the host to apply (dacBrightness)
 - src/sim/world/detailRecords.ts:48 - nodes are JS objects rather than one static_malloc'd pool
 - src/sim/world/detailRecords.ts:180 - no cache purge-and-retry loop: the in-memory container cannot run out
 - src/sim/world/groundQuadtree.ts:21 - a JS object; the 'Not enough memory' path cannot happen
 - src/sim/world/groundQuadtree.ts:273 - nothing to free in JS; kept so object_free_bounds' class-5 branch has its callee
 - src/sim/world/objectTasks.ts:265 - INIT's two products are evaluated in doubles, not the x87's 80 bits (0x1b66e..0x1b6ae); every shipped lap is a small integer, which leaves them far from a rounding boundary
 - src/sim/world/objectTasks.ts:424 - the -1 arm: task_list_notify_rebuilt neither sets currentTask nor passes an argument (0x17450..0x17477), so the C works on whatever task last ran (usually none: address 4) and atoi's a null pointer; the port answers 0 with the task untouched when there is no current task, and otherwise keeps the object slot rather than atoi'ing nothing
-- src/sim/world/palettes.ts:70 - palette_slot_set_resource: a slot outside the 20-entry table writes past it in the original; ignored
-- src/sim/world/palettes.ts:92 - the state is exact; the colour interpolation table clib_sub_063a70 builds (paletteFadeState) is left to the renderer
-- src/sim/world/palettes.ts:140 - the colour step (clib_sub_063b50) and the 0x970bc-guarded clib_sub_0639b0 call are the renderer's
-- src/sim/world/palettes.ts:159 - palette_apply_slot's DAC upload is the renderer's; the slot change is made here
+- src/sim/world/palettes.ts:389 - the port's window holds only the 2D; wherever a pixel is not drawn the GPU's 3D view shows, so when any is undrawn every colour not seen in the drawn ones counts as used, in ascending order. The waits are the host's: each pass's DAC is kept in dacPlayback with the waits that follow it
+- src/sim/world/palettes.ts:466 - a non-zero mode (calibration_menu_run's dissolve) is not ported
 - src/sim/world/projectMaps.ts:41 - capacities are fixed and large; the original takes them from arena_budget_bytes (the DTBL totals the pre-pass sums)
 - src/sim/world/projectMaps.ts:45 - project id maps sized to a fixed large capacity instead of the DTBL arena budget
 - src/sim/world/scrounge.ts:79 - scrounge_install: vertexCount beyond the vertices the port holds
@@ -1276,7 +1278,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/engine/miles/ail.ts:481 - AIL mixer: a double-buffered sample starved; the port ends it
 - src/engine/resources/preload.ts:112 - sim_preload_data: ai_rule_tables_load is not installed
 - src/engine/vfx/vfx.ts:313 - vfx_line_draw: a callback mode (above 1) is not ported
-- src/mission/end.ts:126 - mission_save_results: an objective text runs past the end of the record, onto the stack
+- src/mission/end.ts:128 - mission_save_results: an objective text runs past the end of the record, onto the stack
 - src/mission/vm/objExec.ts:45 - OBJ with no POLY id loads a loose .wtb file; not ported
 - src/render/pipeline/fillDispatch.ts:76 - polygonFillHook 0x${h.toString(16)} is not ported; render_asm_sub_03bb80 used
 - src/render/pipeline/hooks.ts:43 - objectCullHook 0x${a.toString(16)} is not ported; object_cull_main_view used
@@ -1349,3 +1351,6 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/world/objectTasks.ts:441 - task_object_track: REBUILT looks its object up by atoi(NULL); the port keeps the slot it has
 - src/sim/world/objectTasks.ts:465 - task_object_track: fewer than three words - the rest are uninitialised stack buffers in the C (empty here)
 - src/sim/world/objectTasks.ts:528 - task_object_track: a point with duration 0 faults the divide in the C
+- src/sim/world/palettes.ts:174 - palette_slot_set_resource: a slot outside the 20-entry table writes past it in the original; ignored
+- src/sim/world/palettes.ts:331 - palette_fade_step: paletteCycleActive is set, and palette_cycle_step is not ported
+- src/sim/world/palettes.ts:479 - screen_fade_in: the dissolve (a non-zero mode) is not ported
