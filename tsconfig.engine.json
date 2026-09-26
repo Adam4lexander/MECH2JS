@@ -1,0 +1,11 @@
+{
+  // The simulation layers. No DOM lib and no node types: an accidental use of
+  // window, document or fs here fails typecheck. These layers must run
+  // unchanged in the browser, in node (tests) and in a worker.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": []
+  },
+  "include": ["src/core", "src/data", "src/engine", "src/sim", "src/ai", "src/mission", "src/generated"]
+}

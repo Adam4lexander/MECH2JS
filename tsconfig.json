@@ -1,0 +1,6 @@
+{
+  // Editor entry point only; `npm run typecheck` checks the three projects
+  // separately so the engine layers are compiled without the DOM lib.
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.engine.json" }, { "path": "./tsconfig.node.json" }]
+}

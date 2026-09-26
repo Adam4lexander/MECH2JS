@@ -1,0 +1,41 @@
+{
+  "name": "mw2-port",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Faithful TypeScript port of MechWarrior 2 (1995), built from the decompilation in ../decompiled",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run typecheck && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:golden": "vitest run --project golden",
+    "gen": "tsx tools/gen-structs.ts && tsx tools/gen-labels.ts && tsx tools/porting-map.ts",
+    "typecheck": "tsc -p tsconfig.engine.json && tsc -p tsconfig.app.json && tsc -p tsconfig.node.json",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-resizable-panels": "^4.13.3",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^10.11.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "fast-check": "^4.10.2",
+    "globals": "^17.12.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
+  }
+}
