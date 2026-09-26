@@ -23,6 +23,7 @@ import { ailTimerService } from '../engine/miles/ail.ts';
 import { AudioHost } from '../audio/AudioHost.ts';
 import { mainLoop, mainLoopRunning, mainLoopStep } from '../mission/mainLoop.ts';
 import { missionEnd, type MissionResults } from '../mission/end.ts';
+import { buildUserStar, type StarSetup } from '../data/config/userStar.ts';
 
 export type Mode = 'edit' | 'play';
 
@@ -41,9 +42,20 @@ export class Game {
     this.audio = new AudioHost(data.cue);
   }
 
-  loadMission(stream: string): boolean {
+  /** the player's star the last mission was set up with (Replay reuses it), or null for a mission that takes none */
+  setup: StarSetup | null = null;
+
+  /**
+   * Loads a mission. `setup` is the player's star for a mission that includes
+   * USERSTAR.BWD - built here, as the shell would have written it - and is
+   * kept for Replay.
+   */
+  loadMission(stream: string, setup: StarSetup | null = this.setup): boolean {
     this.audio.pause();
     this.mission = stream;
+    this.setup = setup;
+    const loose = new Map(this.data.loose);
+    if (setup) loose.set('USERSTAR.BWD', buildUserStar(setup));
     this.loadError = null;
     this.results = null;
     this.pendingResults = null;
@@ -51,7 +63,7 @@ export class Game {
     const t0 = performance.now();
     let ok = false;
     try {
-      ok = bootMission({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, looseFiles: this.data.loose, mission: stream });
+      ok = bootMission({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, looseFiles: loose, mission: stream });
     } catch (e) {
       this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
       logError('mission', this.loadError);

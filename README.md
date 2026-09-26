@@ -20,6 +20,22 @@ npm run typecheck
 
 Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
 
+## Missions
+
+The shell (MW2SHELL.EXE - career, trials, mech lab) is not ported. It hands the
+game its players through loose BWD files; the port does not read those from the
+install, and sorts the missions by which of them each includes:
+
+- **Ready** (20) - the mission sets the player's 'Mech itself (training, the
+  Trials of Position): it just launches.
+- **Choose pilot and 'Mech** (24) - the mission takes the player's star
+  (`USERSTAR.BWD`). You name the pilot and pick a 'Mech - every 'Mech the
+  shipped missions field - and up to four starmates; the port builds the file
+  in the shell's own layout. The last setup is remembered.
+- **Needs opponents** (15) - these also take opponent stars (`EN01STAR`..
+  `EN05STAR`, and for ten of them `INSTMAP1`) that only the shell's opponent
+  setup writes; they are listed but not offered yet.
+
 ## Modes
 
 - **Play** - main's frame loop runs, one pass per display frame, with the

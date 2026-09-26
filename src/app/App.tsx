@@ -46,8 +46,8 @@ export function App() {
     return (
       <MissionPicker
         data={data}
-        onPick={(stream) => {
-          game.loadMission(stream);
+        onPick={(stream, setup) => {
+          game.loadMission(stream, setup);
           setInMission(true);
         }}
       />

@@ -6,6 +6,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { mw2Decompiled, mw2Root } from '../../tools/paths.ts';
 import { NodeFsSource } from '../../tools/nodeSource.ts';
+import type { MechChoice } from '../../src/data/catalog/mechs.ts';
+import { buildEmptyStar, buildUserStar, type StarSetup } from '../../src/data/config/userStar.ts';
 
 export const MW2_ROOT = mw2Root();
 export const MW2_DECOMPILED = mw2Decompiled();
@@ -16,20 +18,35 @@ export const hasDecompiled = fs.existsSync(path.join(MW2_DECOMPILED, 'mw2', 'lis
 export const gameSource = (): NodeFsSource => new NodeFsSource(MW2_ROOT);
 
 /**
- * The install's loose files as the port reads them (upper-case keys, '/'
- * separators): the star BWDs, MEK\ variants, the input maps and the GIDDI
- * drivers - what app/gameData.ts fetches.
+ * The star the install's USERSTAR.BWD held when the tests were written - a
+ * Mad Dog (mdg00std, MEK 62, piece stream 29 'maddog') piloted by 'ADAM'
+ * with one Mad Dog starmate 'Friend 1' - which the sim tests play with.
+ * test/sim/missionSetup.test.ts checks buildUserStar reproduces that file.
  */
-export function installFiles(): Map<string, Uint8Array> {
+export const TEST_STAR: StarSetup = (() => {
+  const madDog: MechChoice = { config: 'mdg00std', mekId: 62, stream: { id: 29, name: 'maddog' }, tons: 60 };
+  return { pilot: { name: 'ADAM', mech: madDog }, starmates: [{ name: 'Friend 1', mech: madDog }] };
+})();
+
+/**
+ * The loose files as the port supplies them (upper-case keys, '/'
+ * separators): what app/gameData.ts fetches from the install - the input
+ * maps, MW2SND.CFG and the GIDDI drivers - plus the player's star built
+ * from `star` (as Game.loadMission does). For tests of every mission, the
+ * opponent stars the shell would write are supplied empty (as the install's
+ * are) and INSTMAP1.BWD read from the install; the app offers neither.
+ */
+export function installFiles(star: StarSetup = TEST_STAR): Map<string, Uint8Array> {
   const m = new Map<string, Uint8Array>();
   const add = (dir: string, re: RegExp) => {
     const d = path.join(MW2_ROOT, dir);
     if (!fs.existsSync(d)) return;
     for (const f of fs.readdirSync(d)) if (re.test(f)) m.set((dir ? dir + '/' : '') + f.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(d, f))));
   };
-  add('', /\.(BWD|MAP)$|^MW2SND\.CFG$/i);
-  add('MEK', /\.MEK$/i);
+  add('', /\.MAP$|^MW2SND\.CFG$|^INSTMAP1\.BWD$/i);
   add('GIDDI', /\.(DLL|STD|CAL)$/i);
+  m.set('USERSTAR.BWD', buildUserStar(star));
+  for (let i = 1; i <= 5; i++) m.set(`EN0${i}STAR.BWD`, buildEmptyStar());
   return m;
 }
 
