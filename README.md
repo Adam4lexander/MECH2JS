@@ -38,9 +38,10 @@ install, and sorts the missions by which of them each includes:
 
 ## Modes
 
-- **Play** - main's frame loop runs, one pass per display frame, with the
-  182 Hz timer fed from real time. The view is the game's own camera
-  (`camera_update`). The keyboard and mouse go to the game through its own
+- **Play** - a mission starts in Play. main's frame loop runs, one pass per
+  display frame, with the 182 Hz timer fed from real time. The view is the
+  game's own camera (`camera_update`), with its cockpit and HUD; nothing in
+  it is the editor's (no picking, no gizmo). The keyboard and mouse go to the game through its own
   input layer: the browser's keys become PC scancodes for `GIDDI\KEYBOARD.DLL`,
   and INPUT.MAP / GAMEKEY.MAP bind them exactly as in the original - e.g. `=`
   / `-` throttle, `0`..`9` throttle presets, the arrow keys / keypad turn,
@@ -88,12 +89,20 @@ install, and sorts the missions by which of them each includes:
   with the first Play; the toolbar's Sound button toggles it. The engine hum
   is a MIDI note on the player's sound card in the original - its pitch and
   level follow the game here, its timbre is a stand-in.
+  The rule toggles the original reads from mw2dif.cfg (the shell's options
+  screen writes it) are the port's own: splash damage, collision damage
+  and heat tracking on, difficulty 1 (`DEFAULT_RULES`,
+  src/sim/mech/simOptions.ts). With heat tracking off the player's mech
+  never heats, as in the original.
 - **Edit** - no frame runs and time stands still; the editor shows the scene
   hierarchy, the game's tables, an inspector over every struct field with its
-  offset and C type, a free camera, the asset browser and the console. Step
-  runs one pass of the loop in the clock's own fixed-step mode (12 ticks).
+  offset and C type, the asset browser and the console. The viewport's
+  Scene / Game buttons pick the camera: Scene is the editor's free camera
+  (its own place, kept across Play), Game the paused game's own view with its
+  cockpit and HUD. Step runs one pass of the loop in the clock's own
+  fixed-step mode (12 ticks).
 
-Editor viewport controls: right-drag to look, WASD/QE to fly, wheel for speed,
+Scene camera controls: right-drag to look, WASD/QE to fly, wheel for speed,
 click to select a gamepiece (Alt+click selects the part hit), F to frame the
 selection, and drag the gizmo to move it. Moving a gamepiece, or editing its
 posX/posY/posZ/heading in the inspector, keeps its entity fields and scene

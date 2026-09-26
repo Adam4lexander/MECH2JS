@@ -1,6 +1,7 @@
 /**
  * Edit-mode camera: fly with WASD (Q/E down/up, Shift faster) while the right
- * mouse button is held to look around; the wheel changes speed.
+ * mouse button is held to look around; the wheel changes speed. Input is
+ * taken only while `active()` holds (the scene camera is the one shown).
  *
  * @portOnly
  */
@@ -17,6 +18,7 @@ export class FreeFly {
   constructor(
     readonly camera: THREE.PerspectiveCamera,
     readonly el: HTMLElement,
+    readonly active: () => boolean = () => true,
   ) {
     const on = <K extends keyof HTMLElementEventMap>(t: EventTarget, type: K | string, fn: (e: never) => void) => {
       t.addEventListener(type, fn as EventListener);
@@ -24,22 +26,23 @@ export class FreeFly {
     };
     on(el, 'contextmenu', (e: MouseEvent) => e.preventDefault());
     on(el, 'mousedown', (e: MouseEvent) => {
-      if (e.button === 2) this.looking = true;
+      if (e.button === 2 && this.active()) this.looking = true;
     });
     on(window, 'mouseup', (e: MouseEvent) => {
       if (e.button === 2) this.looking = false;
     });
     on(window, 'mousemove', (e: MouseEvent) => {
-      if (!this.looking) return;
+      if (!this.looking || !this.active()) return;
       this.yaw -= e.movementX * 0.003;
       this.pitch = Math.max(-1.55, Math.min(1.55, this.pitch - e.movementY * 0.003));
     });
     on(window, 'keydown', (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement).tagName === 'INPUT') return;
+      if ((e.target as HTMLElement).tagName === 'INPUT' || !this.active()) return;
       this.keys.add(e.code);
     });
     on(window, 'keyup', (e: KeyboardEvent) => this.keys.delete(e.code));
     on(el, 'wheel', (e: WheelEvent) => {
+      if (!this.active()) return;
       this.speed = Math.max(2, Math.min(2000, this.speed * (e.deltaY > 0 ? 0.8 : 1.25)));
     });
   }
@@ -52,6 +55,11 @@ export class FreeFly {
 
   update(dt: number): void {
     const c = this.camera;
+    if (!this.active()) {
+      this.keys.clear();
+      this.looking = false;
+      return;
+    }
     c.rotation.set(this.pitch, this.yaw, 0, 'YXZ');
     const f = new THREE.Vector3(0, 0, -1).applyEuler(c.rotation);
     const r = new THREE.Vector3(1, 0, 0).applyEuler(c.rotation);

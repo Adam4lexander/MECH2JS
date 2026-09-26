@@ -78,6 +78,9 @@ export function attachHostInput(target: HTMLElement, active: () => boolean): () 
   const held = new Set<string>();
   const onKey = (e: KeyboardEvent) => {
     if (!active()) return;
+    // typing into the editor's fields (the inspector, the console) is not the game's
+    const tag = (e.target as HTMLElement | null)?.tagName;
+    if (e.type === 'keydown' && (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT')) return;
     const down = e.type === 'keydown';
     const seq = scancodesFor(e.code, down);
     if (!seq) return;

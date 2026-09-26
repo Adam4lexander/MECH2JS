@@ -40,8 +40,8 @@ export const mechs = registerGlobals(
     playerControls: new ControlState(),
     /**
      * *0x9586c: the SimOptions simOptions points at (mw2dif.cfg, loaded by
-     * sim_options_load; the pointer is 0 in the image). Kept here until
-     * sim_options_load is ported; mech_load_config reads difficulty from it.
+     * sim_options_load - the port's host supplies the record; the pointer is 0
+     * in the image). mech_load_config reads difficulty from it.
      */
     simOptions: new SimOptions(),
     /** 0x9587c: the -R option; mech_std_create starts the player on autopilot when set */

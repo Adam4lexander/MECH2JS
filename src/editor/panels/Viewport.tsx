@@ -1,8 +1,17 @@
 /**
- * The 3D view. In Edit mode it looks through a free camera; click picks the
- * object under the cursor (selecting its scene node, or the object itself for
- * static scenery), and the gizmo moves the selected node through the
- * engine's own setter (scene_node_set_origin + scene_node_walk).
+ * The 3D view, through one of two cameras:
+ *
+ *   game   the game's own viewer (camera_update's): the world as the player
+ *          sees it, the cockpit shell and the game's 2D (HUD, radar) over it.
+ *          Play always looks through it; nothing in the view is the editor's.
+ *   scene  the editor's free camera: fly anywhere, click to pick (the
+ *          object's scene node, or the object itself for static scenery), and
+ *          the gizmo moves the selected node through the engine's own setter
+ *          (scene_node_set_origin + scene_node_walk). Edit mode only; no HUD
+ *          or cockpit, which belong to the game's camera.
+ *
+ * In Edit the bar picks which one to look through (the game camera shows the
+ * paused frame). The scene camera keeps its own place across Play.
  *
  * Faithful mode renders at VGA resolution (640 x 480 aspect-fitted) and
  * scales up with nearest filtering; Modern renders at native resolution.
@@ -24,7 +33,7 @@ import { cameraGlobals, viewer } from '../../sim/camera/viewer.ts';
 import { mechLodUpdate } from '../../sim/world/detailRecords.ts';
 import { scroungeFollowViewer } from '../../sim/world/scrounge.ts';
 import { mechs } from '../../sim/mech/mechGlobals.ts';
-import { engineStore, editorStore } from '../store/store.ts';
+import { engineStore, editorStore, useRevision } from '../store/store.ts';
 import { select, selected } from '../store/selection.ts';
 import { FreeFly } from '../viewport/freeFly.ts';
 import { syncFieldsFromNode } from '../inspector/poseSync.ts';
@@ -37,15 +46,24 @@ import { renderOptions } from '../../render/shading/polygonColour.ts';
 import { lighting } from '../../sim/world/environment.ts';
 import { structOf } from './Inspector.tsx';
 
+/** which camera Edit looks through */
+type EditView = 'scene' | 'game';
+
 export function Viewport({ game }: { game: Game }) {
+  useRevision(engineStore);
   const host = useRef<HTMLDivElement>(null);
   const [faithful, setFaithful] = useState(true);
+  const [editView, setEditView] = useState<EditView>('scene');
   const [info, setInfo] = useState('');
   const faithfulRef = useRef(faithful);
+  const editViewRef = useRef(editView);
   const paletteDirty = useRef(false);
   useEffect(() => {
     faithfulRef.current = faithful;
   }, [faithful]);
+  useEffect(() => {
+    editViewRef.current = editView;
+  }, [editView]);
 
   useEffect(() => {
     const el = host.current!;
@@ -61,26 +79,31 @@ export function Viewport({ game }: { game: Game }) {
     if (luma) sr.setLuma(luma);
     game.bindTextures(sr);
 
-    const camera = new THREE.PerspectiveCamera(60, 4 / 3, 0.5, 20000);
+    /** the editor's view: flown with FreeFly, picked through, the gizmo's */
+    const sceneCam = new THREE.PerspectiveCamera(60, 4 / 3, 0.5, 20000);
+    /** the game's view: set from the game's viewer every frame it is shown */
+    const gameCam = new THREE.PerspectiveCamera(60, 4 / 3, 0.5, 20000);
+    /** true while the editor's scene camera is the one shown (Edit, scene view) */
+    const sceneView = () => game.mode === 'edit' && editViewRef.current === 'scene';
     const editorViewer = new Viewer();
     const drawSize = new THREE.Vector2();
     const skyGround = new SkyGround(sr.uniforms);
     sr.backdropScene.add(skyGround.mesh);
     const hudOverlay = new HudOverlay(sr.uniforms);
     renderer.autoClear = false;
-    const fly = new FreeFly(camera, el);
+    const fly = new FreeFly(sceneCam, el, sceneView);
     // start at the player's mech, else the mission's start view (VWST)
     const player = mechs.mechTable[mechs.playerMechIndex];
     const v = cameraGlobals.mainViewer;
     const start = player?.node ? [player.node.worldPos[0]!, player.node.worldPos[1]!, player.node.worldPos[2]!] : [v.posX, v.posY, v.posZ];
     const [sx, sy, sz] = toThree(start[0]!, start[1]!, start[2]!);
-    camera.position.set(sx - 15, sy + 12, sz + 25);
+    sceneCam.position.set(sx - 15, sy + 12, sz + 25);
     fly.lookAt(new THREE.Vector3(sx, sy + 3, sz));
 
-    // debug handle: window.mw2.view.camera / .fly (setting fly.yaw / fly.pitch aims it) / .renderer / .views
+    // debug handle: window.mw2.view.camera (the scene camera) / .gameCamera / .fly (setting fly.yaw / fly.pitch aims it) / .renderer / .views
     const dbg = (window as unknown as { mw2?: Record<string, unknown> }).mw2;
 
-    const gizmo = new TransformControls(camera, renderer.domElement);
+    const gizmo = new TransformControls(sceneCam, renderer.domElement);
     gizmo.setSpace('world');
     const gizmoHelper = gizmo.getHelper();
     sr.scene.add(gizmoHelper);
@@ -122,14 +145,14 @@ export function Viewport({ game }: { game: Game }) {
       } else gizmo.detach();
     });
 
-    // F: frame the selection, as in Unity
+    // F: frame the selection, as in Unity (scene view only - in the game, F is TARGET_FRIENDLY)
     const onKey = (e: KeyboardEvent) => {
-      if (e.code !== 'KeyF' || !gizmoNode || (e.target as HTMLElement).tagName === 'INPUT') return;
+      if (!sceneView() || e.code !== 'KeyF' || !gizmoNode || isTextField(e.target)) return;
       // aim a few metres up the node (a mech's node is at its feet) from 25 m out
       const t = proxy.position.clone().add(new THREE.Vector3(0, 4, 0));
-      const back = new THREE.Vector3().subVectors(camera.position, t);
+      const back = new THREE.Vector3().subVectors(sceneCam.position, t);
       if (back.lengthSq() < 1e-6) back.set(0, 0.5, 1);
-      camera.position.copy(t).add(back.normalize().multiplyScalar(25));
+      sceneCam.position.copy(t).add(back.normalize().multiplyScalar(25));
       fly.lookAt(t);
     };
     window.addEventListener('keydown', onKey);
@@ -140,10 +163,10 @@ export function Viewport({ game }: { game: Game }) {
         dragEnded = false;
         return;
       }
-      if (e.button !== 0 || gizmo.dragging) return;
+      if (!sceneView() || e.button !== 0 || gizmo.dragging) return;
       const r = renderer.domElement.getBoundingClientRect();
       const p = new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-      ray.setFromCamera(p, camera);
+      ray.setFromCamera(p, sceneCam);
       const hits = ray.intersectObjects(sr.pickables(), false);
       const obj = hits.length ? sr.objectOf(hits[0]!.object) : null;
       if (!obj) return;
@@ -164,7 +187,7 @@ export function Viewport({ game }: { game: Game }) {
     // drawn when the game asks, into the window's pixels (render/passes/indexedView.ts)
     const views = new IndexedViews(renderer, sr.uniforms);
     renderPort.current = views;
-    if (dbg) dbg.view = { camera, fly, renderer: sr, views };
+    if (dbg) dbg.view = { camera: sceneCam, gameCamera: gameCam, fly, renderer: sr, views };
 
     let raf = 0;
     let last = performance.now();
@@ -178,10 +201,21 @@ export function Viewport({ game }: { game: Game }) {
       if (playing) {
         if (!game.playFrame(elapsedMs)) game.setMode('edit');
         engineStore.bumpThrottled();
-      } else {
-        fly.update(dt);
-        editorViewUpdate(camera);
       }
+      // after the frame: the loop may have ended and left Edit
+      const scene = sceneView();
+      const camera = scene ? sceneCam : gameCam;
+      // the gizmo is the scene camera's alone
+      gizmo.enabled = scene;
+      gizmoHelper.visible = scene && gizmoNode !== null;
+      if (scene) {
+        fly.update(dt);
+        viewUpdateFrom(sceneCam.position);
+      } else if (!playing) {
+        // the paused game view: the detail the game's own viewer would choose
+        const gv = viewer();
+        viewUpdateFrom(new THREE.Vector3(...toThree(gv.posX, gv.posY, gv.posZ)));
+      } else lodFrom = null;
       // the palette on screen follows the game's (day cycle, infrared, flashes) as well as the editor's choice
       const key = game.paletteKey();
       if (paletteDirty.current || key !== lastPalette) {
@@ -192,28 +226,29 @@ export function Viewport({ game }: { game: Game }) {
       }
       const w = el.clientWidth;
       const h = el.clientHeight;
+      let aspect: number;
       if (faithfulRef.current) {
-        const scale = Math.min(w / 640, h / 480);
+        const s = Math.min(w / 640, h / 480);
         renderer.setSize(Math.floor(640), Math.floor(480), false);
-        renderer.domElement.style.width = `${Math.floor(640 * scale)}px`;
-        renderer.domElement.style.height = `${Math.floor(480 * scale)}px`;
+        renderer.domElement.style.width = `${Math.floor(640 * s)}px`;
+        renderer.domElement.style.height = `${Math.floor(480 * s)}px`;
         renderer.domElement.style.imageRendering = 'pixelated';
-        camera.aspect = 640 / 480;
+        aspect = 640 / 480;
       } else {
         renderer.setSize(w, h, false);
         renderer.domElement.style.width = `${w}px`;
         renderer.domElement.style.height = `${h}px`;
         renderer.domElement.style.imageRendering = 'auto';
-        camera.aspect = w / h;
+        aspect = w / h;
       }
-      camera.updateProjectionMatrix();
-      if (playing) cameraFromViewer(viewer(), camera, camera.aspect);
+      if (scene) {
+        sceneCam.aspect = aspect;
+        sceneCam.updateProjectionMatrix();
+      } else cameraFromViewer(viewer(), gameCam, aspect);
       const eye = fromThree(camera.position.x, camera.position.y, camera.position.z);
       game.updateTextures(sr);
-      // the game's viewer, standing at the editor camera: the cull, LOD and clipper see what three.js draws
-      // Edit: the game's viewer, standing at the editor camera, so the cull, LOD
-      // and clipper see what three.js draws. Play: the game's own viewer.
-      sr.sync(playing ? viewer() : viewerFromCamera(camera, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer));
+      // the game's viewer as the cull, LOD and clipper see it: its own, or standing at the scene camera
+      sr.sync(scene ? viewerFromCamera(sceneCam, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer) : viewer());
       renderer.getDrawingBufferSize(drawSize);
       // Play: the main view only when the game's render hook asked for it this frame (not while the
       // map has the hook), with its wipe colour in place of sky and ground when it gave one
@@ -234,18 +269,20 @@ export function Viewport({ game }: { game: Game }) {
         renderer.render(sr.backdropScene, camera);
         renderer.clearDepth();
         renderer.render(sr.scene, camera);
-        // the cockpit shell, painted over the world (empty outside the cockpit view). Its near clip
-        // is 8 cm, inside three's 50 cm near plane, so the pass runs with the plane pulled in
-        renderer.clearDepth();
-        const near = camera.near;
-        camera.near = 0.04;
-        camera.updateProjectionMatrix();
-        renderer.render(sr.cockpitScene, camera);
-        camera.near = near;
-        camera.updateProjectionMatrix();
+        if (!scene) {
+          // the cockpit shell, painted over the world (empty outside the cockpit view). Its near clip
+          // is 8 cm, inside three's 50 cm near plane, so the pass runs with the plane pulled in
+          renderer.clearDepth();
+          const near = camera.near;
+          camera.near = 0.04;
+          camera.updateProjectionMatrix();
+          renderer.render(sr.cockpitScene, camera);
+          camera.near = near;
+          camera.updateProjectionMatrix();
+        }
       }
-      // the game's 2D (HUD, radar, cockpit text) over it all, in Play
-      if (playing && hudOverlay.update(defaultCanvas, drawSize.x, drawSize.y)) renderer.render(hudOverlay.scene, hudOverlay.camera);
+      // the game's 2D (HUD, radar, cockpit text) over it all, through the game's camera
+      if (!scene && hudOverlay.update(defaultCanvas, drawSize.x, drawSize.y)) renderer.render(hudOverlay.scene, hudOverlay.camera);
       if (now - lastInfo > 250) {
         lastInfo = now;
         setInfo(`${sr.stats.objects} objects · ${sr.stats.polygons} polygons · eye ${eye.map((c) => (c * CM_TO_UNITS).toFixed(0)).join(', ')} m`);
@@ -271,17 +308,31 @@ export function Viewport({ game }: { game: Game }) {
     };
   }, [game, game.mission]);
 
+  const playing = game.mode === 'play';
+  const view: EditView = playing ? 'game' : editView;
   return (
-    <div className="viewport" ref={host}>
+    <div className={`viewport${playing ? ' playing' : ''}`} ref={host}>
       <div className="viewport-overlay">
-        {game.mode === 'edit' ? 'EDIT' : 'PLAY'} · {info}
+        {playing ? 'PLAY' : 'EDIT'} · {view === 'game' ? 'game camera' : 'scene camera'} · {info}
         <div className="hint">
-          {game.mode === 'edit'
-            ? 'right-drag look · WASD/QE fly · wheel speed · click select · F frame'
-            : 'the game has the keyboard (INPUT.MAP / GAMEKEY.MAP) · click to capture the mouse · Edit to leave'}
+          {playing
+            ? 'the game has the keyboard (INPUT.MAP / GAMEKEY.MAP) · click to capture the mouse · Edit to pause'
+            : view === 'scene'
+              ? 'right-drag look · WASD/QE fly · wheel speed · click select · F frame'
+              : "the paused game, through the game's camera"}
         </div>
       </div>
       <div className="viewport-bar">
+        {!playing && (
+          <>
+            <button className={editView === 'scene' ? 'active' : ''} onClick={() => setEditView('scene')} title="the editor's free camera: fly, pick, move things">
+              Scene
+            </button>
+            <button className={editView === 'game' ? 'active' : ''} onClick={() => setEditView('game')} title="the game's own camera, cockpit and HUD, paused">
+              Game
+            </button>
+          </>
+        )}
         <select
           title="palette: the game's own (day cycle at the current time) or a fixed day phase"
           value={game.palettePhase ?? -1}
@@ -308,6 +359,11 @@ export function Viewport({ game }: { game: Game }) {
   );
 }
 
+function isTextField(t: EventTarget | null): boolean {
+  const tag = (t as HTMLElement | null)?.tagName;
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+}
+
 /** The mech whose scene node is the root above `n`, or -1. */
 function mechOwning(n: SceneNode): number {
   const root = rootOf(n);
@@ -323,13 +379,14 @@ function mechOwning(n: SceneNode): number {
  * and the scene camera is not the viewer, so the mechs would keep the detail
  * chosen from the start view and the patch, which scrounge_install takes out
  * of the world at load, would never come back. This runs the game's own two
- * functions with the viewer standing, for the call, where the editor camera is.
+ * functions with the viewer standing, for the call, where the camera shown
+ * is (the scene camera, or the game's own viewer when looking through it).
  *
  * @portOnly
  */
 let lodFrom: [number, number, number] | null = null;
-function editorViewUpdate(camera: THREE.Camera): void {
-  const [x, y, z] = fromThree(camera.position.x, camera.position.y, camera.position.z);
+function viewUpdateFrom(eye: THREE.Vector3): void {
+  const [x, y, z] = fromThree(eye.x, eye.y, eye.z);
   if (lodFrom && Math.abs(lodFrom[0] - x) + Math.abs(lodFrom[1] - y) + Math.abs(lodFrom[2] - z) < 100) return;
   lodFrom = [x, y, z];
   const v = viewer();

@@ -105,6 +105,7 @@ input, select { background: var(--panel2); color: var(--text); border: 1px solid
 
 .viewport { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #000; }
 .viewport canvas { display: block; }
+.viewport.playing { box-shadow: inset 0 0 0 2px var(--accent); }
 .viewport-overlay { position: absolute; left: 6px; top: 4px; font-family: var(--mono); font-size: 11px; color: #cfd3da; text-shadow: 0 0 3px #000; pointer-events: none; }
 .viewport-bar { position: absolute; right: 6px; top: 4px; display: flex; gap: 4px; }
 .panel-error { padding: 10px; color: var(--err); overflow: auto; } .panel-error pre { font-size: 10px; color: var(--dim); white-space: pre-wrap; }

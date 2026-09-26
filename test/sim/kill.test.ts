@@ -4,7 +4,10 @@
 // strike the enemy's parts (world_raycast), take its armour and structure
 // (mech_apply_damage) until a section whose loss kills it goes, and
 // mech_on_destroyed marks it dead. Nothing is called directly but the
-// placement of the two mechs.
+// placement of the two mechs. The port's default rules are on, so splash
+// damage runs too: every frame an impact's area effect lives, each
+// section of a mech in reach takes a sliver and - once its armour is gone -
+// rolls criticals, so an ammo bin can cook off first (mech_damage_slot).
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
@@ -20,6 +23,7 @@ import { input } from '../../src/sim/controls/input.ts';
 import { mechAllegiance } from '../../src/sim/groups/groups.ts';
 import { loadoutSections } from '../../src/sim/mech/loadout.ts';
 import { mechs } from '../../src/sim/mech/mechGlobals.ts';
+import { simTables } from '../../src/sim/effects/simTables.ts';
 import { worldGroundHeightNear } from '../../src/sim/world/collision.ts';
 import { gameSource, hasGameData, installFiles } from '../support/env.ts';
 
@@ -104,8 +108,11 @@ describe.runIf(hasGameData)('kill', () => {
     expect(armour1).toBeLessThan(armour0);
     expect(l.status).toBe(4);
     expect(en.flags & 6).toBe(6);
-    // it died by a section whose loss kills: head (1), centre torso (3) or both legs (7, 8)
+    // it died by a section whose loss kills - head (1), centre torso (3) or
+    // both legs (7, 8) - or by an ammo bin cooking off: a section gone and
+    // the cook-off's effect 7 (2.2 s) still alive
     const gone = (loc: number) => (loadoutSections(l)[loc - 1]!.flags & 0x2000) !== 0;
-    expect(gone(1) || gone(3) || (gone(7) && gone(8))).toBe(true);
+    const cookOff = [1, 2, 3, 4, 5, 6, 7, 8].some(gone) && simTables.simSlots.some((s) => s.active !== 0 && s.typeIndex === 7);
+    expect(gone(1) || gone(3) || (gone(7) && gone(8)) || cookOff).toBe(true);
   });
 });

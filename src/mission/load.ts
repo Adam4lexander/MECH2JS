@@ -35,6 +35,7 @@ import { layoutRescaleAll } from '../sim/display/rescale.ts';
 import { defaultCanvas, videoInit } from '../sim/display/video.ts';
 import { vfxVideoSub010320 } from '../sim/display/mainView.ts';
 import { setMekSource } from '../sim/mech/looseFiles.ts';
+import { DEFAULT_RULES, simOptionsLoad, type SimRules } from '../sim/mech/simOptions.ts';
 import { destructiblesReset } from '../sim/things/destructibles.ts';
 import { gamethingTableReset } from '../sim/things/gameThings.ts';
 import { dayCycleInit } from '../sim/world/dayCycle.ts';
@@ -87,6 +88,8 @@ export interface MissionBootOptions {
    * INPUT.MAP, GAMEKEY.MAP, GIDDI/*.DLL ...), upper-case keys with '/'
    */
   looseFiles?: Map<string, Uint8Array>;
+  /** the rule toggles (mw2dif.cfg's record in the original); DEFAULT_RULES when omitted, null for the original's no-file zeroes */
+  rules?: SimRules | null;
   /** the mission stream to load, e.g. 'AMY_SCN1' */
   mission: string;
   /** the RNG seed (the original's is the argv pointer; see core/random.ts) */
@@ -111,7 +114,7 @@ export function bootMission(opts: MissionBootOptions): boolean {
   // main reads mw2snd.cfg before anything else it brings up
   soundConfigLoad();
   brightnessLoad();
-  // sim_options_load happens before this in main; the timer comes up here
+  simOptionsLoad(opts.rules === undefined ? DEFAULT_RULES : opts.rules);
   audioTimerInit();
   videoInit();
   // static_arena_init: the DTBL pre-pass sizes arenas; the port allocates on demand

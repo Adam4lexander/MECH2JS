@@ -46,9 +46,10 @@ export class Game {
   setup: StarSetup | null = null;
 
   /**
-   * Loads a mission. `setup` is the player's star for a mission that includes
-   * USERSTAR.BWD - built here, as the shell would have written it - and is
-   * kept for Replay.
+   * Loads a mission and starts it in Play (the Launch or Replay click is the
+   * user gesture sound needs); a mission that failed to load stays in Edit.
+   * `setup` is the player's star for a mission that includes USERSTAR.BWD -
+   * built here, as the shell would have written it - and is kept for Replay.
    */
   loadMission(stream: string, setup: StarSetup | null = this.setup): boolean {
     this.audio.pause();
@@ -70,6 +71,7 @@ export class Game {
     }
     log('mission', `${stream} loaded in ${(performance.now() - t0).toFixed(0)} ms${ok ? '' : ' (with errors)'}`);
     this.mode = 'edit';
+    if (this.loadError === null) this.setMode('play');
     engineStore.bump();
     return ok;
   }
