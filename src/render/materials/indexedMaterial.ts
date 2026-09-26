@@ -49,6 +49,20 @@
  * 0xff as 0xff at every shade and map nothing else to it, so a texel of 0xff
  * is transparent, lit or not.
  *
+ * THE MAP (uMapFill, the overhead map's SceneRenderer): map_fill_polygon
+ * gives a mode 0x4000 polygon's vertices their palette index outright -
+ * (word & 0xf0) | map_height_shade - which SceneRenderer puts in aUv.x, and
+ * fills it with the same per-vertex-shade filler; its mode 0x3000 sprites
+ * are render_asm_sub_03b990's other variant (last argument 1), drawn
+ * without the DAT_00097030 / code & 0xf gate: from the vertex with u != 0
+ * (R, aSpriteR) and Q, half = |(Q.x - R.x) >> 1| in screen pixels, the
+ * square Q +- half on both axes, upright on the screen, at R's depth, with
+ * the same corner u, v.
+ *
+ * OUTPUT: with uIndexOut the fragment is the palette index itself (red =
+ * index / 255, alpha 1), for a render whose pixels are read back into the
+ * game's 8-bit window (render/passes/indexedView.ts); otherwise its colour.
+ *
  * Mode 0x5000 is perspective-correct unless textureAffine is set; 0x6000 is
  * always affine (render_asm_sub_03bb80's dispatch, per polygon_resolve_colour's
  * note). WebGL interpolates perspective-correctly; affine is reproduced by
@@ -63,7 +77,9 @@ export const vertexShader = /* glsl */ `
 in float aDraw;
 in vec2 aUv;
 in vec4 aSprite;        // mode 0x3000: xyz the sprite's point Q (model space), w its corner 0..3; w < 0 otherwise
+in vec3 aSpriteR;       // mode 0x3000: the vertex with u != 0 (the map variant's P)
 uniform vec2 uViewport; // the render target, pixels
+uniform int uMapFill;   // the overhead map: map_fill_polygon's vertex indices and sprite squares
 flat out int vDraw;
 out vec3 vUvw;
 out vec2 vUvPersp;
@@ -71,14 +87,27 @@ out float vIdxW;   // vIdx * w: divided by the interpolated w, it is linear in s
 void main() {
   vDraw = aDraw < 0.0 ? -1 : int(aDraw + 0.5);
   float vIdx = 0.0;
-  if (vDraw >= 0 && (vDraw & 0x7000) == 0x4000) {
+  if (vDraw >= 0 && (vDraw & 0x7000) == 0x4000 && uMapFill != 0) {
+    vIdx = aUv.x;   // (word & 0xf0) | map_height_shade(depth), set per vertex by SceneRenderer
+  } else if (vDraw >= 0 && (vDraw & 0x7000) == 0x4000) {
     int u = int(floor(aUv.x * 65536.0 + 0.5));   // ClipVertex.texU, 16.16 (fractional at near-plane crossings)
     int shade = vDraw & 15;
     // (u & 0xfff00000) + ((u & 0xf0000) * ((shade + 1) * 0x1000) >> 16), in index units
     vIdx = u < 0x300000 ? float(u) / 65536.0 : float(u >> 20) * 16.0 + float((u >> 16) & 15) * float(shade + 1) / 16.0;
   }
   vec4 clip = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  if (aSprite.w >= 0.0) {
+  if (aSprite.w >= 0.0 && uMapFill != 0) {
+    // render_asm_sub_03b990, last argument 1: a square upright on the screen about Q, half the x distance from R to Q, at R's depth
+    vec4 cr = projectionMatrix * modelViewMatrix * vec4(aSpriteR, 1.0);
+    vec4 cq = projectionMatrix * modelViewMatrix * vec4(aSprite.xyz, 1.0);
+    vec2 h = uViewport * 0.5;
+    vec2 r = floor(vec2(cr.x, -cr.y) / cr.w * h);
+    vec2 q = floor(vec2(cq.x, -cq.y) / cq.w * h);
+    float a = abs(floor((q.x - r.x) * 0.5));
+    int c = int(aSprite.w + 0.5);
+    vec2 s = c == 0 ? q + vec2(-a, -a) : c == 1 ? q + vec2(a, -a) : c == 2 ? q + vec2(a, a) : q + vec2(-a, a);
+    clip = vec4(s.x / h.x * cr.w, -s.y / h.y * cr.w, cr.z, cr.w);
+  } else if (aSprite.w >= 0.0) {
     // render_asm_sub_03b990: the square on P and Q in screen pixels (y down), at P's depth
     vec4 cq = projectionMatrix * modelViewMatrix * vec4(aSprite.xyz, 1.0);
     vec2 h = uViewport * 0.5;
@@ -108,6 +137,8 @@ uniform int uTextureAffine;
 uniform int uTexturesOn;
 uniform int uShadedFill;
 uniform int uSprites;         // DAT_00097030 bit 0: mode 0x3000 sprites are drawn
+uniform int uMapFill;
+uniform int uIndexOut;        // write the palette index, not its colour
 flat in int vDraw;
 in vec3 vUvw;
 in vec2 vUvPersp;
@@ -115,6 +146,7 @@ in float vIdxW;
 out vec4 outColor;
 
 vec3 pal(int i) { return texelFetch(uPalette, ivec2(i & 255, 0), 0).rgb; }
+vec4 outFor(int i) { return uIndexOut != 0 ? vec4(float(i & 255) / 255.0, 0.0, 0.0, 1.0) : vec4(pal(i), 1.0); }
 
 void main() {
   if (vDraw < 0) discard; // not queued by the clipper
@@ -132,7 +164,7 @@ void main() {
   }
   if (mode == 0x3000) {
     int k = vDraw & 15;
-    if (uSprites == 0 || !(k == 0 || k == 3)) discard;
+    if (uMapFill == 0 && (uSprites == 0 || !(k == 0 || k == 3))) discard;
     vec4 r = texelFetch(uSlots, ivec2((vDraw & 0xff0) >> 4, 0), 0);
     if (r.z <= 0.0) discard;         // bitmap3d_draw draws nothing without a frame
     vec2 t = clamp(floor(vUvPersp * (r.zw - 1.0)), vec2(0.0), r.zw - 1.0);
@@ -154,7 +186,31 @@ void main() {
       if (idx == 0xff) discard;      // the span loops skip 0xff after the shade lookup
     }
   }
-  outColor = vec4(pal(idx), 1.0);
+  outColor = outFor(idx);
+}
+`;
+
+/** Outlines (mode 0x2000, wireframe): a line loop in one palette index, aDraw per vertex (< 0: not drawn). */
+export const lineVertexShader = /* glsl */ `
+in float aDraw;
+flat out int vDraw;
+void main() {
+  vDraw = aDraw < 0.0 ? -1 : int(aDraw + 0.5);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+export const lineFragmentShader = /* glsl */ `
+precision highp float;
+precision highp int;
+uniform sampler2D uPalette;
+uniform int uIndexOut;
+flat in int vDraw;
+out vec4 outColor;
+void main() {
+  if (vDraw < 0) discard;
+  int i = vDraw & 255;
+  outColor = uIndexOut != 0 ? vec4(float(i) / 255.0, 0.0, 0.0, 1.0) : vec4(texelFetch(uPalette, ivec2(i, 0), 0).rgb, 1.0);
 }
 `;
 
@@ -172,6 +228,8 @@ export interface IndexedUniforms {
   uShadedFill: { value: number };
   uSprites: { value: number };
   uViewport: { value: THREE.Vector2 };
+  uMapFill: { value: number };
+  uIndexOut: { value: number };
   [k: string]: { value: unknown };
 }
 
@@ -196,6 +254,25 @@ export function makeUniforms(): IndexedUniforms {
     uShadedFill: { value: 1 },
     uSprites: { value: 1 },
     uViewport: { value: new THREE.Vector2(640, 480) },
+    uMapFill: { value: 0 },
+    uIndexOut: { value: 0 },
+  };
+}
+
+/**
+ * A uniform set sharing `shared`'s palette, LUMA, atlas and slot textures
+ * (the same { value } holders, so uploads and rebinds reach both) with its
+ * own per-view values.
+ */
+export function makeViewUniforms(shared: IndexedUniforms, indexOut: boolean, mapFill: boolean): IndexedUniforms {
+  return {
+    ...shared,
+    uTextureAffine: { value: 0 },
+    uShadedFill: { value: 1 },
+    uSprites: { value: 1 },
+    uViewport: { value: new THREE.Vector2(1, 1) },
+    uMapFill: { value: mapFill ? 1 : 0 },
+    uIndexOut: { value: indexOut ? 1 : 0 },
   };
 }
 
@@ -224,5 +301,18 @@ export function makeIndexedMaterial(u: IndexedUniforms, opts: { behind?: boolean
     fragmentShader,
     side: THREE.DoubleSide, // the clipper's back-face test (polyDepthKey) is the original's; the GPU does not add its own
     depthWrite: !opts.behind,
+    // a polygon's outline is drawn after its fill (poly_fill_dispatch); fills sit slightly behind so it shows
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+  });
+}
+
+export function makeLineMaterial(u: IndexedUniforms): THREE.ShaderMaterial {
+  return new THREE.ShaderMaterial({
+    glslVersion: THREE.GLSL3,
+    uniforms: u,
+    vertexShader: lineVertexShader,
+    fragmentShader: lineFragmentShader,
   });
 }

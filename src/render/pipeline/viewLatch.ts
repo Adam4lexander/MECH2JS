@@ -28,6 +28,14 @@ export const renderView = registerGlobals(
     cullDepthRowX: 0,
     cullDepthRowY: 0,
     cullDepthRowZ: 0,
+    /** 0x14fe80 / 0x14fe84 / 0x14fe88: Viewer.rotation row 0, the first lateral axis object_view_cull projects onto */
+    cullRow0X: 0,
+    cullRow0Y: 0,
+    cullRow0Z: 0,
+    /** 0x14fe70 / 0x14fe74 / 0x14fe78: Viewer.rotation row 1, the second */
+    cullRow1X: 0,
+    cullRow1Y: 0,
+    cullRow1Z: 0,
     /** 0x14feb4 / 0x14fea4: near and far clip, cm */
     viewNearClip: 0,
     viewFarClip: 0,
@@ -45,8 +53,8 @@ export const renderView = registerGlobals(
 );
 
 /**
- * Publishes a viewer to the renderer: the eye, the rotation's depth row
- * (raw, for the clipper and the cull), the clip distances plain and x 4, and
+ * Publishes a viewer to the renderer: the eye, the rotation's rows (raw,
+ * row 2 for the clipper and the culls, rows 0 and 1 for object_view_cull), the clip distances plain and x 4, and
  * the light latch.
  *
  * @mw2 viewer_latch_globals 0x0003ece0
@@ -60,6 +68,12 @@ export function viewerLatchGlobals(v: Viewer): void {
   r.cullDepthRowX = r.viewDepthRowX = v.rotation[6]!;
   r.cullDepthRowY = r.viewDepthRowY = v.rotation[7]!;
   r.cullDepthRowZ = r.viewDepthRowZ = v.rotation[8]!;
+  r.cullRow0X = v.rotation[0]!;
+  r.cullRow0Y = v.rotation[1]!;
+  r.cullRow0Z = v.rotation[2]!;
+  r.cullRow1X = v.rotation[3]!;
+  r.cullRow1Y = v.rotation[4]!;
+  r.cullRow1Z = v.rotation[5]!;
   r.viewTranslationX = v.translationX;
   r.viewTranslationY = v.translationY;
   r.viewTranslationZ = v.translationZ;

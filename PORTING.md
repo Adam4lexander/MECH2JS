@@ -6,7 +6,7 @@ Every ported function carries `@mw2 <name> <address>`; this file is built from t
 against `decompiled/mw2/listing/functions.csv`, so a function renamed upstream fails the build rather
 than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 
-**Game functions:** 1156  |  **ported exact:** 598  |  **partial:** 68  |  **stub:** 26  |  library functions ported: 8
+**Game functions:** 1158  |  **ported exact:** 609  |  **partial:** 65  |  **stub:** 25  |  library functions ported: 8
 
 ## By original module
 
@@ -14,7 +14,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 |---|---|---:|---:|---:|---:|---:|
 | ai_combat | ai | 31 | 15 | 2 | 3 | 11 |
 | ai_debug | ai | 2 | 0 | 0 | 0 | 2 |
-| ai_group | ai | 98 | 69 | 7 | 0 | 22 |
+| ai_group | ai | 98 | 70 | 6 | 0 | 22 |
 | ai_state | ai | 17 | 2 | 1 | 0 | 14 |
 | game_boot | boot | 18 | 2 | 3 | 0 | 13 |
 | main | boot | 15 | 10 | 2 | 0 | 3 |
@@ -31,11 +31,11 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | project_file | project | 34 | 13 | 5 | 0 | 16 |
 | project_tables | project | 39 | 8 | 1 | 0 | 30 |
 | stream_seen | project | 3 | 3 | 0 | 0 | 0 |
-| render_asm | render | 74 | 36 | 10 | 0 | 28 |
+| render_asm | render | 74 | 36 | 11 | 0 | 27 |
 | res_cache | resource | 25 | 0 | 1 | 2 | 22 |
 | res_loaders | resource | 9 | 4 | 1 | 0 | 4 |
 | cockpit | sim | 12 | 8 | 1 | 0 | 3 |
-| damage | sim | 54 | 37 | 4 | 2 | 11 |
+| damage | sim | 54 | 40 | 1 | 2 | 11 |
 | mech_config | sim | 20 | 17 | 1 | 0 | 2 |
 | sim_objects | sim | 29 | 26 | 2 | 0 | 1 |
 | weapons | sim | 15 | 14 | 0 | 0 | 1 |
@@ -50,17 +50,19 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | ui_callbacks | ui | 33 | 0 | 0 | 0 | 33 |
 | screenshot | util | 3 | 1 | 0 | 0 | 2 |
 | time_format | util | 3 | 3 | 0 | 0 | 0 |
-| vfx_font | vfx | 46 | 29 | 4 | 1 | 12 |
+| vfx_font | vfx | 47 | 33 | 2 | 0 | 12 |
 | vfx_lib | vfx | 42 | 15 | 1 | 0 | 26 |
-| vfx_video | vfx | 50 | 35 | 3 | 1 | 11 |
+| vfx_video | vfx | 51 | 38 | 5 | 1 | 7 |
 
 ## Ported functions
 
 | address | original | module | fidelity | port |
 |---|---|---|---|---|
 | 0x00010210 | video_init | vfx_video | partial | `videoInit` src/sim/display/video.ts:133 |
+| 0x00010320 | vfx_video_sub_010320 | vfx_video | partial | `vfxVideoSub010320` src/sim/display/mainView.ts:84 |
 | 0x000103c0 | vfx_video_sub_0103c0 | vfx_video | exact | `vfxVideoSub0103c0` src/sim/world/viewScene.ts:46 |
-| 0x000106c0 | viewport_select_main | vfx_video | exact | `vfxVideoSub0106c0` src/sim/cockpit/radar.ts:1210 |
+| 0x00010490 | vfx_video_sub_010490 | vfx_video | partial | `vfxVideoSub010490` src/sim/display/mainView.ts:44 |
+| 0x000106c0 | viewport_select_main | vfx_video | exact | `vfxVideoSub0106c0` src/sim/cockpit/radar.ts:1224 |
 | 0x000106d0 | vfx_video_sub_0106d0 | vfx_video | partial | `vfxVideoSub0106d0` src/mission/mainLoop.ts:85 |
 | 0x00010b50 | frame_prj_add | vfx_video | exact | `framePrjAdd` src/sim/world/framePrj.ts:48 |
 | 0x00010bd0 | frame_prj_reset | vfx_video | exact | `framePrjReset` src/sim/world/framePrj.ts:69 |
@@ -71,36 +73,40 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00010d70 | anim2d_draw | vfx_video | exact | `anim2dDraw` src/sim/world/anim2d.ts:100 |
 | 0x00010ed0 | anim2d_rewind | vfx_video | exact | `anim2dRewind` src/sim/world/anim2d.ts:151 |
 | 0x00011020 | message_post | vfx_video | stub | `messagePost` src/sim/cockpit/messages.ts:8 |
-| 0x000113a0 | radar_module_load | vfx_video | exact | `vfxVideoDispHandler` src/sim/cockpit/radar.ts:370 |
-| 0x00011440 | radar_mode_install | vfx_video | exact | `vfxVideoSub011440` src/sim/cockpit/radar.ts:416 |
-| 0x000115e0 | radar_init | vfx_video | exact | `radarDisplayInit` src/sim/cockpit/radar.ts:458 |
-| 0x00011660 | radar_frame_running | vfx_video | exact | `radarDisplayRunning` src/sim/cockpit/radar.ts:558 |
-| 0x000116d0 | radar_mode_step | vfx_video | exact | `vfxVideoSub0116d0` src/sim/cockpit/radar.ts:485 |
-| 0x000118e0 | map_view_render_hook | vfx_video | exact | `mapViewRenderHook` src/sim/cockpit/radar.ts:543 |
-| 0x00011910 | radar_draw | vfx_video | partial | `vfxVideoSub011910` src/sim/cockpit/radar.ts:835 |
-| 0x00011b10 | radar_draw_blips | vfx_video | exact | `vfxVideoSub011b10` src/sim/cockpit/radar.ts:894 |
-| 0x00011bb0 | radar_draw_blip | vfx_video | exact | `vfxVideoSub011bb0` src/sim/cockpit/radar.ts:918 |
-| 0x00011c40 | radar_draw_contacts | vfx_video | exact | `vfxVideoSub011c40` src/sim/cockpit/radar.ts:940 |
-| 0x00011d80 | radar_draw_target | vfx_video | exact | `vfxVideoSub011d80` src/sim/cockpit/radar.ts:967 |
-| 0x00011f60 | radar_draw_navpoints | vfx_video | exact | `vfxVideoSub011f60` src/sim/cockpit/radar.ts:1027 |
-| 0x000120c0 | radar_draw_view_cone | vfx_video | exact | `vfxVideoSub0120c0` src/sim/cockpit/radar.ts:1056 |
-| 0x000121b0 | radar_draw_readouts | vfx_video | exact | `vfxVideoSub0121b0` src/sim/cockpit/radar.ts:1084 |
-| 0x00012330 | radar_cycle_mode | vfx_video | exact | `vfxVideoSub012330` src/sim/cockpit/radar.ts:759 |
-| 0x00012370 | radar_map_up | vfx_video | exact | `vfxVideoSub012370` src/sim/cockpit/radar.ts:769 |
-| 0x00012390 | radar_map_close_request | vfx_video | exact | `vfxVideoSub012390` src/sim/cockpit/radar.ts:779 |
-| 0x000123d0 | radar_map_toggle | vfx_video | exact | `vfxVideoSub0123d0` src/sim/cockpit/radar.ts:793 |
-| 0x00012410 | radar_zoom | vfx_video | exact | `vfxVideoSub012410` src/sim/cockpit/radar.ts:807 |
-| 0x00012790 | map_height_shade | vfx_video | exact | `mapHeightShade` src/sim/cockpit/radar.ts:1258 |
-| 0x000127e0 | radar_draw_transition | vfx_video | exact | `vfxVideoSub0127e0` src/sim/cockpit/radar.ts:581 |
-| 0x00012890 | radar_frame_powerup | vfx_video | exact | `radarDisplayPowerup` src/sim/cockpit/radar.ts:609 |
-| 0x00012950 | radar_map_static | vfx_video | exact | `vfxVideoSub012950` src/sim/cockpit/radar.ts:668 |
-| 0x00012a70 | radar_draw_damaged | vfx_video | exact | `vfxVideoSub012a70` src/sim/cockpit/radar.ts:715 |
-| 0x00012b50 | radar_frame_other | vfx_video | exact | `radarDisplayOther` src/sim/cockpit/radar.ts:640 |
-| 0x00012bf0 | radar_release | vfx_video | exact | `radarDisplayRelease` src/sim/cockpit/radar.ts:746 |
-| 0x00012c20 | ortho_view_begin | vfx_font | partial | `orthoViewBegin` src/sim/cockpit/radar.ts:1139 |
-| 0x00012da0 | ortho_view_draw_world | vfx_font | stub | `vfxFontSub012da0` src/sim/cockpit/radar.ts:1179 |
-| 0x00012dd0 | ortho_view_end | vfx_font | partial | `vfxFontSub012dd0` src/sim/cockpit/radar.ts:1192 |
-| 0x00013130 | ortho_project_point | vfx_font | exact | `vfxFontSub013130` src/sim/cockpit/radar.ts:1231 |
+| 0x000113a0 | radar_module_load | vfx_video | exact | `vfxVideoDispHandler` src/sim/cockpit/radar.ts:375 |
+| 0x00011440 | radar_mode_install | vfx_video | exact | `vfxVideoSub011440` src/sim/cockpit/radar.ts:421 |
+| 0x000115e0 | radar_init | vfx_video | exact | `radarDisplayInit` src/sim/cockpit/radar.ts:463 |
+| 0x00011660 | radar_frame_running | vfx_video | exact | `radarDisplayRunning` src/sim/cockpit/radar.ts:563 |
+| 0x000116d0 | radar_mode_step | vfx_video | exact | `vfxVideoSub0116d0` src/sim/cockpit/radar.ts:490 |
+| 0x000118e0 | map_view_render_hook | vfx_video | exact | `mapViewRenderHook` src/sim/cockpit/radar.ts:548 |
+| 0x00011910 | radar_draw | vfx_video | exact | `vfxVideoSub011910` src/sim/cockpit/radar.ts:840 |
+| 0x00011b10 | radar_draw_blips | vfx_video | exact | `vfxVideoSub011b10` src/sim/cockpit/radar.ts:900 |
+| 0x00011bb0 | radar_draw_blip | vfx_video | exact | `vfxVideoSub011bb0` src/sim/cockpit/radar.ts:924 |
+| 0x00011c40 | radar_draw_contacts | vfx_video | exact | `vfxVideoSub011c40` src/sim/cockpit/radar.ts:946 |
+| 0x00011d80 | radar_draw_target | vfx_video | exact | `vfxVideoSub011d80` src/sim/cockpit/radar.ts:973 |
+| 0x00011f60 | radar_draw_navpoints | vfx_video | exact | `vfxVideoSub011f60` src/sim/cockpit/radar.ts:1033 |
+| 0x000120c0 | radar_draw_view_cone | vfx_video | exact | `vfxVideoSub0120c0` src/sim/cockpit/radar.ts:1062 |
+| 0x000121b0 | radar_draw_readouts | vfx_video | exact | `vfxVideoSub0121b0` src/sim/cockpit/radar.ts:1090 |
+| 0x00012330 | radar_cycle_mode | vfx_video | exact | `vfxVideoSub012330` src/sim/cockpit/radar.ts:764 |
+| 0x00012370 | radar_map_up | vfx_video | exact | `vfxVideoSub012370` src/sim/cockpit/radar.ts:774 |
+| 0x00012390 | radar_map_close_request | vfx_video | exact | `vfxVideoSub012390` src/sim/cockpit/radar.ts:784 |
+| 0x000123d0 | radar_map_toggle | vfx_video | exact | `vfxVideoSub0123d0` src/sim/cockpit/radar.ts:798 |
+| 0x00012410 | radar_zoom | vfx_video | exact | `vfxVideoSub012410` src/sim/cockpit/radar.ts:812 |
+| 0x000124a0 | map_object_cull | vfx_video | exact | `mapObjectCull` src/render/pipeline/drawPipeline.ts:128 |
+| 0x00012520 | map_polygon_colour | vfx_video | exact | `mapPolygonColour` src/render/shading/mapColour.ts:27 |
+| 0x00012690 | map_fill_polygon | vfx_video | partial | `mapFillPolygon` src/render/pipeline/fillDispatch.ts:54 |
+| 0x00012790 | map_height_shade | vfx_video | exact | `mapHeightShade` src/sim/cockpit/radar.ts:1272 |
+| 0x000127e0 | radar_draw_transition | vfx_video | exact | `vfxVideoSub0127e0` src/sim/cockpit/radar.ts:586 |
+| 0x00012890 | radar_frame_powerup | vfx_video | exact | `radarDisplayPowerup` src/sim/cockpit/radar.ts:614 |
+| 0x00012950 | radar_map_static | vfx_video | exact | `vfxVideoSub012950` src/sim/cockpit/radar.ts:673 |
+| 0x00012a70 | radar_draw_damaged | vfx_video | exact | `vfxVideoSub012a70` src/sim/cockpit/radar.ts:720 |
+| 0x00012b50 | radar_frame_other | vfx_video | exact | `radarDisplayOther` src/sim/cockpit/radar.ts:645 |
+| 0x00012bf0 | radar_release | vfx_video | exact | `radarDisplayRelease` src/sim/cockpit/radar.ts:751 |
+| 0x00012c20 | ortho_view_begin | vfx_font | exact | `orthoViewBegin` src/sim/cockpit/radar.ts:1148 |
+| 0x00012da0 | ortho_view_draw_world | vfx_font | exact | `vfxFontSub012da0` src/sim/cockpit/radar.ts:1192 |
+| 0x00012dd0 | ortho_view_end | vfx_font | exact | `vfxFontSub012dd0` src/sim/cockpit/radar.ts:1207 |
+| 0x00012e40 | object_view_cull | vfx_font | exact | `objectViewCull` src/render/pipeline/drawPipeline.ts:98 |
+| 0x00013130 | ortho_project_point | vfx_font | exact | `vfxFontSub013130` src/sim/cockpit/radar.ts:1245 |
 | 0x00013300 | layout_pane_to_window | vfx_font | exact | `layoutPaneToWindow` src/sim/display/layout.ts:20 |
 | 0x00013360 | layout_pane_in_pane | vfx_font | exact | `layoutPaneInPane` src/sim/display/layout.ts:40 |
 | 0x00013460 | layout_point_to_window | vfx_font | exact | `layoutPointToWindow` src/sim/display/layout.ts:60 |
@@ -111,15 +117,15 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00013710 | layout_pane_centre_in_window | vfx_font | exact | `layoutPaneCentreInWindow` src/sim/display/layout.ts:135 |
 | 0x00013960 | vfx_pane_frame | vfx_font | exact | `vfxPaneFrame` src/sim/display/layout.ts:153 |
 | 0x00013a40 | hud_text_underline | vfx_font | exact | `vfxFontSub013a40` src/sim/cockpit/objectivesHud.ts:96 |
-| 0x00013ad0 | vfx_text_box_draw | vfx_font | exact | `vfxFontSub013ad0` src/sim/cockpit/targetDisplay.ts:329 |
+| 0x00013ad0 | vfx_text_box_draw | vfx_font | exact | `vfxFontSub013ad0` src/sim/cockpit/targetDisplay.ts:265 |
 | 0x00014020 | vfx_font_sub_014020 | vfx_font | exact | `vfxFontSub014020` src/sim/display/layout.ts:172 |
-| 0x000140f0 | pane_edge_at_angle | vfx_font | exact | `vfxFontSub0140f0` src/sim/cockpit/radar.ts:1484 |
+| 0x000140f0 | pane_edge_at_angle | vfx_font | exact | `vfxFontSub0140f0` src/sim/cockpit/radar.ts:1498 |
 | 0x00014240 | vfx_font_sub_014240 | vfx_font | exact | `vfxFontSub014240` src/sim/display/layout.ts:201 |
-| 0x00014410 | radar_ellipse_frame | vfx_font | exact | `vfxFontSub014410` src/sim/cockpit/radar.ts:1351 |
-| 0x00014530 | radar_ellipse_contains | vfx_font | exact | `vfxFontSub014530` src/sim/cockpit/radar.ts:1367 |
-| 0x000145a0 | radar_ellipse_clamp | vfx_font | exact | `vfxFontSub0145a0` src/sim/cockpit/radar.ts:1441 |
-| 0x00014670 | radar_ellipse_edge_at | vfx_font | exact | `vfxFontSub014670` src/sim/cockpit/radar.ts:1467 |
-| 0x000147c0 | ellipse_point | vfx_font | exact | `vfxFontSub0147c0` src/sim/cockpit/radar.ts:1384 |
+| 0x00014410 | radar_ellipse_frame | vfx_font | exact | `vfxFontSub014410` src/sim/cockpit/radar.ts:1365 |
+| 0x00014530 | radar_ellipse_contains | vfx_font | exact | `vfxFontSub014530` src/sim/cockpit/radar.ts:1381 |
+| 0x000145a0 | radar_ellipse_clamp | vfx_font | exact | `vfxFontSub0145a0` src/sim/cockpit/radar.ts:1455 |
+| 0x00014670 | radar_ellipse_edge_at | vfx_font | exact | `vfxFontSub014670` src/sim/cockpit/radar.ts:1481 |
+| 0x000147c0 | ellipse_point | vfx_font | exact | `vfxFontSub0147c0` src/sim/cockpit/radar.ts:1398 |
 | 0x000148a0 | viewer_set_aspect_from_screen | vfx_font | exact | `viewerSetAspectFromScreen` src/sim/display/video.ts:88 |
 | 0x000148d0 | screen_select_asset_variant | vfx_font | exact | `screenSelectAssetVariant` src/sim/display/video.ts:70 |
 | 0x00014950 | layout_rescale_all | vfx_font | partial | `layoutRescaleAll` src/sim/display/rescale.ts:55 |
@@ -309,7 +315,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00028690 | mech_std_create_loadout | ai_group | exact | `mechStdCreateLoadout` src/sim/mech/loadout.ts:91 |
 | 0x000287b0 | mech_loadout_size | ai_group | exact | `mechLoadoutSize` src/sim/mech/loadout.ts:79 |
 | 0x000287f0 | weapon_fire_sound_play | ai_group | exact | `weaponFireSoundPlay` src/sim/weapons/weapons.ts:616 |
-| 0x00028810 | render_view_from_pose | ai_group | partial | `renderViewFromPose` src/sim/cockpit/damageDisplay.ts:348 |
+| 0x00028810 | render_view_from_pose | ai_group | exact | `renderViewFromPose` src/sim/display/insetView.ts:68 |
 | 0x00028910 | death_flash | ai_group | exact | `deathFlash` src/sim/mech/mechTickAi.ts:81 |
 | 0x00028930 | damage_flash | ai_group | exact | `damageFlash` src/sim/cockpit/hud.ts:600 |
 | 0x000289f0 | mech_death_update | ai_group | exact | `mechDeathUpdate` src/sim/mech/mechTickAi.ts:151 |
@@ -391,28 +397,28 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0002f160 | hud_widget_store_06 | damage | exact | `hudWidgetStore06` src/sim/cockpit/hud.ts:177 |
 | 0x0002f170 | hud_widget_show | damage | exact | `hudWidgetShow` src/sim/cockpit/hud.ts:185 |
 | 0x0002f180 | hud_widget_hide | damage | exact | `hudWidgetHide` src/sim/cockpit/hud.ts:193 |
-| 0x0002f190 | hud_damage_display_init | damage | exact | `hudDamageDisplayInit` src/sim/cockpit/damageDisplay.ts:118 |
-| 0x0002f560 | hud_damage_diagram_draw | damage | exact | `hudDamageDiagramDraw` src/sim/cockpit/damageDisplay.ts:211 |
-| 0x0002f790 | hud_armour_bars_draw | damage | exact | `damageFontHandler` src/sim/cockpit/damageDisplay.ts:295 |
+| 0x0002f190 | hud_damage_display_init | damage | exact | `hudDamageDisplayInit` src/sim/cockpit/damageDisplay.ts:113 |
+| 0x0002f560 | hud_damage_diagram_draw | damage | exact | `hudDamageDiagramDraw` src/sim/cockpit/damageDisplay.ts:206 |
+| 0x0002f790 | hud_armour_bars_draw | damage | exact | `damageFontHandler` src/sim/cockpit/damageDisplay.ts:290 |
 | 0x0002fa90 | hud_weapon_widget_tick | damage | exact | `hudWeaponWidgetTick` src/sim/cockpit/weaponList.ts:64 |
 | 0x0002fbe0 | hud_weapon_widget_powerup | damage | exact | `hudWeaponWidgetPowerup` src/sim/cockpit/weaponList.ts:24 |
-| 0x0002fc90 | hud_target_readout_tick | damage | exact | `hudTargetReadoutTick` src/sim/cockpit/targetDisplay.ts:397 |
-| 0x00030220 | hud_widget13_tick | damage | partial | `hudWidget13Tick` src/sim/cockpit/targetDisplay.ts:158 |
-| 0x00030660 | hud_widget13_hook3 | damage | exact | `hudWidget13Hook3` src/sim/cockpit/targetDisplay.ts:254 |
-| 0x00030690 | hud_target_display_powerup | damage | exact | `hudTargetDisplayPowerup` src/sim/cockpit/targetDisplay.ts:289 |
-| 0x00030750 | hud_target_display_powerdown | damage | exact | `hudTargetDisplayPowerdown` src/sim/cockpit/targetDisplay.ts:308 |
-| 0x00030820 | damage_display_mode_cycle | damage | exact | `damageDisplayModeCycle` src/sim/cockpit/damageDisplay.ts:577 |
-| 0x00030860 | hud_widget02_tick | damage | partial | `hudWidget02Tick` src/sim/cockpit/damageDisplay.ts:375 |
-| 0x00030d30 | render_state_save_for_inset | damage | partial | `damageSub030d30` src/sim/cockpit/targetDisplay.ts:126 |
-| 0x00030da0 | hud_widget02_hook3 | damage | exact | `hudWidget02Hook3` src/sim/cockpit/damageDisplay.ts:462 |
-| 0x00030e10 | hud_damage_display_powerup | damage | exact | `hudDamageDisplayPowerup` src/sim/cockpit/damageDisplay.ts:499 |
-| 0x00030ee0 | hud_damage_display_powerdown | damage | exact | `hudDamageDisplayPowerdown` src/sim/cockpit/damageDisplay.ts:520 |
-| 0x00030fc0 | hud_gauge_layout_init | damage | exact | `damageSub030fc0` src/sim/cockpit/damageDisplay.ts:547 |
+| 0x0002fc90 | hud_target_readout_tick | damage | exact | `hudTargetReadoutTick` src/sim/cockpit/targetDisplay.ts:333 |
+| 0x00030220 | hud_widget13_tick | damage | exact | `hudWidget13Tick` src/sim/cockpit/targetDisplay.ts:92 |
+| 0x00030660 | hud_widget13_hook3 | damage | exact | `hudWidget13Hook3` src/sim/cockpit/targetDisplay.ts:190 |
+| 0x00030690 | hud_target_display_powerup | damage | exact | `hudTargetDisplayPowerup` src/sim/cockpit/targetDisplay.ts:225 |
+| 0x00030750 | hud_target_display_powerdown | damage | exact | `hudTargetDisplayPowerdown` src/sim/cockpit/targetDisplay.ts:244 |
+| 0x00030820 | damage_display_mode_cycle | damage | exact | `damageDisplayModeCycle` src/sim/cockpit/damageDisplay.ts:571 |
+| 0x00030860 | hud_widget02_tick | damage | exact | `hudWidget02Tick` src/sim/cockpit/damageDisplay.ts:364 |
+| 0x00030d30 | render_state_save_for_inset | damage | exact | `renderStateSaveForInset` src/sim/display/insetView.ts:104 |
+| 0x00030da0 | hud_widget02_hook3 | damage | exact | `hudWidget02Hook3` src/sim/cockpit/damageDisplay.ts:456 |
+| 0x00030e10 | hud_damage_display_powerup | damage | exact | `hudDamageDisplayPowerup` src/sim/cockpit/damageDisplay.ts:493 |
+| 0x00030ee0 | hud_damage_display_powerdown | damage | exact | `hudDamageDisplayPowerdown` src/sim/cockpit/damageDisplay.ts:514 |
+| 0x00030fc0 | hud_gauge_layout_init | damage | exact | `damageSub030fc0` src/sim/cockpit/damageDisplay.ts:541 |
 | 0x000310b0 | hud_gauge_heat | damage | exact | `hudGaugeHeat` src/sim/cockpit/gauges.ts:93 |
 | 0x000311f0 | hud_gauge_heat_rate | damage | exact | `hudGaugeHeatRate` src/sim/cockpit/gauges.ts:136 |
 | 0x00031300 | hud_gauge_throttle | damage | exact | `hudGaugeThrottle` src/sim/cockpit/gauges.ts:180 |
 | 0x00031480 | hud_gauge_jumpjets | damage | exact | `hudGaugeJumpjets` src/sim/cockpit/gauges.ts:214 |
-| 0x00031520 | hud_draw_bar_vertical | damage | exact | `damageSub031520` src/sim/cockpit/damageDisplay.ts:270 |
+| 0x00031520 | hud_draw_bar_vertical | damage | exact | `damageSub031520` src/sim/cockpit/damageDisplay.ts:265 |
 | 0x00031670 | hud_draw_bar | damage | exact | `hudDrawBar` src/sim/cockpit/gauges.ts:64 |
 | 0x000317b0 | format_ticks_hms | time_format | exact | `timeFormatSub0317b0` src/sim/cockpit/objectivesHud.ts:53 |
 | 0x00031850 | format_hms | time_format | exact | `timeFormatSub031850` src/sim/cockpit/objectivesHud.ts:70 |
@@ -515,15 +521,15 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00038990 | object_set_node | geom_luma | exact | `objectSetNode` src/engine/scene/worldObject.ts:410 |
 | 0x000389c0 | object_apply_load_flags | geom_luma | exact | `objectApplyLoadFlags` src/engine/scene/worldObject.ts:420 |
 | 0x00038a20 | object_destroy | geom_luma | exact | `objectDestroy` src/engine/scene/worldObject.ts:463 |
-| 0x00038ae0 | polygon_resolve_colour | geom_luma | exact | `polygonResolveColour` src/render/shading/polygonColour.ts:139 |
-| 0x00038ee0 | light_shade_level | geom_luma | exact | `lightShadeLevel` src/render/shading/polygonColour.ts:122 |
+| 0x00038ae0 | polygon_resolve_colour | geom_luma | exact | `polygonResolveColour` src/render/shading/polygonColour.ts:110 |
+| 0x00038ee0 | light_shade_level | geom_luma | exact | `lightShadeLevel` src/render/shading/polygonColour.ts:93 |
 | 0x00038ff0 | camera_init | geom_luma | exact | `cameraInit` src/sim/camera/cameraUpdate.ts:689 |
 | 0x00039190 | camera_update | geom_luma | exact | `cameraUpdate` src/sim/camera/cameraUpdate.ts:731 |
 | 0x00039400 | camera_set_mode | geom_luma | exact | `cameraSetMode` src/sim/mech/mechTickAi.ts:63 |
 | 0x00039430 | camera_get_mode | geom_luma | exact | `cameraGetMode` src/sim/camera/viewer.ts:55 |
 | 0x00039440 | camera_apply_zoom | geom_luma | exact | `cameraApplyZoom` src/sim/camera/cameraUpdate.ts:323 |
-| 0x000394c0 | viewer_pose_save | geom_luma | exact | `viewerPoseSave` src/sim/cockpit/targetDisplay.ts:78 |
-| 0x00039510 | viewer_pose_restore | geom_luma | exact | `viewerPoseRestore` src/sim/cockpit/targetDisplay.ts:97 |
+| 0x000394c0 | viewer_pose_save | geom_luma | exact | `viewerPoseSave` src/sim/display/insetView.ts:25 |
+| 0x00039510 | viewer_pose_restore | geom_luma | exact | `viewerPoseRestore` src/sim/display/insetView.ts:44 |
 | 0x00039560 | camera_track_cycle | geom_luma | exact | `cameraTrackCycle` src/sim/camera/cameraUpdate.ts:644 |
 | 0x000395d0 | camera_subject_eye_pose | geom_luma | exact | `cameraSubjectEyePose` src/sim/camera/cameraUpdate.ts:354 |
 | 0x000396b0 | camera_missile_view | geom_luma | exact | `cameraMissileView` src/sim/camera/cameraUpdate.ts:598 |
@@ -561,10 +567,11 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0003b522 | matrix_from_euler | render_asm | exact | `matrixFromEuler` src/core/math/matrix.ts:180 |
 | 0x0003b88b | matrix_from_euler_order0 | render_asm | exact | `matrixFromEulerOrder0` src/core/math/matrix.ts:259 |
 | 0x0003b8af | matrix_to_euler | render_asm | exact | `matrixToEuler` src/core/math/matrix.ts:317 |
-| 0x0003b990 | render_asm_sub_03b990 | render_asm | partial | `spriteVertices` src/render/pipeline/drawPipeline.ts:294 |
-| 0x0003cda0 | object_draw_lod_mesh | render_asm | partial | `objectSelectLodMesh` src/render/pipeline/drawPipeline.ts:96 |
-| 0x0003e086 | poly_light_intensity | render_asm | exact | `polyLightIntensity` src/render/shading/polygonColour.ts:83 |
-| 0x0003e1de | poly_clip_and_queue | render_asm | partial | `polyDepthKey` src/render/pipeline/drawPipeline.ts:210 |
+| 0x0003b990 | render_asm_sub_03b990 | render_asm | partial | `spriteVertices` src/render/pipeline/drawPipeline.ts:357 |
+| 0x0003ccf0 | poly_fill_dispatch | render_asm | partial | `polyFillDispatch` src/render/pipeline/fillDispatch.ts:87 |
+| 0x0003cda0 | object_draw_lod_mesh | render_asm | partial | `objectSelectLodMesh` src/render/pipeline/drawPipeline.ts:157 |
+| 0x0003e086 | poly_light_intensity | render_asm | exact | `polyLightIntensity` src/render/shading/polygonColour.ts:54 |
+| 0x0003e1de | poly_clip_and_queue | render_asm | partial | `polyDepthKey` src/render/pipeline/drawPipeline.ts:271 |
 | 0x0003e5b0 | viewport_windows_reset | render_asm | exact | `viewportWindowsReset` src/sim/display/video.ts:114 |
 | 0x0003e600 | viewport_select | render_asm | exact | `viewportSelect` src/sim/display/video.ts:168 |
 | 0x0003e6d0 | palette_apply_pending | render_asm | partial | `paletteApplyPending` src/sim/world/palettes.ts:157 |
@@ -574,11 +581,11 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0003eaa0 | palette_slot_set_resource | render_asm | exact | `paletteSlotSetResource` src/sim/world/palettes.ts:64 |
 | 0x0003eae0 | palette_fade_to_new_base | render_asm | exact | `paletteFadeToNewBase` src/sim/world/palettes.ts:183 |
 | 0x0003ecd0 | palette_fade_steps_left | render_asm | exact | `paletteFadeStepsLeft` src/sim/world/palettes.ts:193 |
-| 0x0003ece0 | viewer_latch_globals | render_asm | partial | `viewerLatchGlobals` src/render/pipeline/viewLatch.ts:52 |
+| 0x0003ece0 | viewer_latch_globals | render_asm | partial | `viewerLatchGlobals` src/render/pipeline/viewLatch.ts:60 |
 | 0x0003ef30 | viewer_update_projection | render_asm | partial | `viewerUpdateProjection` src/sim/camera/projection.ts:47 |
 | 0x0003f230 | viewer_build_transform | render_asm | exact | `viewerBuildTransform` src/sim/camera/projection.ts:90 |
 | 0x0003f320 | viewer_project_point | render_asm | exact | `viewerProjectPoint` src/sim/camera/projection.ts:117 |
-| 0x0003f500 | object_cull_main_view | code label, no Ghidra function | partial | `objectCullMainView` src/render/pipeline/drawPipeline.ts:37 |
+| 0x0003f500 | object_cull_main_view | code label, no Ghidra function | partial | `objectCullMainView` src/render/pipeline/drawPipeline.ts:39 |
 | 0x0003fa50 | vec3_normalise | render_asm | exact | `vec3Normalise` src/engine/collision/ray.ts:227 |
 | 0x0003fbc0 | camera_keys_init | render_asm | exact | `cameraKeysInit` src/sim/camera/cameraUpdate.ts:158 |
 | 0x0003fc00 | camera_keys_update | render_asm | exact | `cameraKeysUpdate` src/sim/camera/cameraUpdate.ts:272 |
@@ -741,7 +748,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00054846 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:194 |
 | 0x00054d1e | vfx_shape_remap_draw_unclipped | vfx_lib | exact | `vfxShapeRemapDrawUnclipped` src/engine/vfx/vfx.ts:210 |
 | 0x000561f0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:263 |
-| 0x00056868 | vfx_ellipse_draw | vfx_lib | exact | `vfxEllipseDraw` src/sim/cockpit/radar.ts:1276 |
+| 0x00056868 | vfx_ellipse_draw | vfx_lib | exact | `vfxEllipseDraw` src/sim/cockpit/radar.ts:1290 |
 | 0x00057e60 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:367 |
 | 0x00057e73 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:377 |
 | 0x00057e93 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:390 |
@@ -840,7 +847,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/mission/laterPhases.ts:38 - Phase 7 (audio): the sound sequence queue does not advance
 - src/mission/laterPhases.ts:47 - Phase 7 (audio): CD music is not restarted
 - src/mission/load.ts:110 - static_arena_init: no arena pre-pass; tables are allocated on demand
-- src/mission/load.ts:125 - sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)
+- src/mission/load.ts:124 - sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)
 - src/mission/mainLoop.ts:87 - vfx_video_font_handler_2, input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the palette steps and the map transition's restore (0xa46d0) run here
 - src/mission/mainLoop.ts:90 - the page flip and font/input housekeeping of vfx_video_sub_0106d0 are the host renderer\
 - src/mission/objectives.ts:62 - ${what} longer than its ${destSize}-byte field; the original overruns into the next field
@@ -856,46 +863,43 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/mission/vm/streams.ts:137 - goes to the log sink (channel 'mw2debug') instead of the file and hud_debug_sub_0499c0's overlay
 - src/mission/vm/streams.ts:177 - the item is allocated here instead of being the caller's 28-byte local; the 0x2b message names the item (projectItemFromStream) rather than the reference
 - src/mission/vm/streams.ts:347 - the optional third output (the (size - 0x10) / 4 dwords from +0x10) is not offered: all three callers pass null for it, so the copy never runs in this build
-- src/render/pipeline/drawPipeline.ts:39 - the lateral tests after 0x3f62a (against rotation rows 0 and 1) are not read upstream; objects to the side of the view are returned 0 and left to the GPU's frustum clip, which does not change what is visible
-- src/render/pipeline/drawPipeline.ts:68 - the lateral tests after 0x3f835 are not read; objects to the side are left to the GPU's frustum clip
-- src/render/pipeline/drawPipeline.ts:98 - split in two: this is the selection half; meshResetClipState and polyDepthKey are the draw half, run by SceneRenderer per polygon; the frameHasRoom / draw-list budget is not modelled
-- src/render/pipeline/drawPipeline.ts:212 - the key, the rejects and the near-plane clip records (clipRecords, which SceneRenderer draws in place of the polygon when it crosses the near plane); projection, the screen-edge reject (all records off one screen edge) and the draw list are the GPU's
-- src/render/pipeline/drawPipeline.ts:296 - the vertex reading only, over the mesh vertices rather than the clipped screen records (a sprite crossing the near plane is not drawn); the square itself is built in the vertex shader (render/materials/indexedMaterial.ts) and the map view's variant (last argument 1) is not ported
-- src/render/pipeline/viewLatch.ts:54 - only the fields the object cull, clipper and shading read are latched: the projection (rows 0-1 premultiplied by projScale, centre, viewport bounds) is done by the GPU from the same viewer; viewerPosition itself is left to the caller, so the editor can draw from its own viewer without handing it to the simulation
+- src/render/pipeline/drawPipeline.ts:41 - the lateral tests after 0x3f62a (against rotation rows 0 and 1) are not read upstream; objects to the side of the view are returned 0 and left to the GPU's frustum clip, which does not change what is visible
+- src/render/pipeline/drawPipeline.ts:70 - the lateral tests after 0x3f835 are not read; objects to the side are left to the GPU's frustum clip
+- src/render/pipeline/drawPipeline.ts:159 - split in two: this is the selection half; meshResetClipState and polyDepthKey are the draw half, run by SceneRenderer per polygon; the frameHasRoom / draw-list budget is not modelled
+- src/render/pipeline/drawPipeline.ts:273 - the key, the rejects and the near-plane clip records (clipRecords, which SceneRenderer draws in place of the polygon when it crosses the near plane); projection, the screen-edge reject (all records off one screen edge) and the draw list are the GPU's
+- src/render/pipeline/drawPipeline.ts:359 - the vertex reading only, over the mesh vertices rather than the clipped screen records (a sprite crossing the near plane is not drawn); the square itself is built in the vertex shader (render/materials/indexedMaterial.ts), for the map view's variant (last argument 1) from q and r
+- src/render/pipeline/fillDispatch.ts:56 - the pixels are the GPU's (SceneRenderer); with shadedFillEnabled clear the flat filler 0x59180 would fill from one vertex's index, where the port drops the dither and interpolates (as for mode 0x4000 elsewhere); the vertex loop writes the indices through mapVertexIndex; returns nothing when the current radar mode has no record, as the original does
+- src/render/pipeline/fillDispatch.ts:89 - 1- and 2-vertex polygons (points while 0x97038 is set, vfx_line_draw lines while 0x97034 is set, else the filler) are not drawn: SceneRenderer builds no geometry for them
+- src/render/pipeline/viewLatch.ts:62 - only the fields the object cull, clipper and shading read are latched: the projection (rows 0-1 premultiplied by projScale, centre, viewport bounds) is done by the GPU from the same viewer; viewerPosition itself is left to the caller, so the editor can draw from its own viewer without handing it to the simulation
 - src/sim/camera/cameraUpdate.ts:670 - the video-state-4 case (radar_map_up: a fixed yaw of 180 and pitch of -45) is not reproduced; the port is never in that state
 - src/sim/camera/projection.ts:49 - the fields +0xa8 and +0xac (secant terms from the atan tables) are not computed
 - src/sim/camera/projection.ts:119 - the original reads the globals viewer_latch_globals left at the last draw (viewTranslation, the premultiplied rows, viewDepthRow, projShift, centre and bounds, viewNearClipScaled); the port computes the same values from the viewer passed in, which callers make viewerPosition - the viewer the last draw latched, except while the cockpit shell pass had its near clip at 8
-- src/sim/cockpit/damageDisplay.ts:213 - region 15 shows section 0, which reads sections[-1] - the tail of the last weapon record, including half of a pointer; what the original draws there depends on its memory layout (the region is a 1x1 pane at the diagram's corner), so the port skips it
-- src/sim/cockpit/damageDisplay.ts:297 - the arguments (loadout EAX, pane EDX) and every call in the body are read from the disassembly (0x2f790..0x2fa7f); the exported C loses most of them
-- src/sim/cockpit/damageDisplay.ts:350 - the port's 3D view is the host renderer's: the inset view is not drawn, only recorded in damageDisplay.insetView. Of its effects on the game it keeps the one on the caller's pose (pose[6] = 1, the valid flag - for the missile camera that is the camera's own pose record). It leaves out viewport_select(viewportMode), which the original never undoes within the frame (its render hook selects the main viewport again at the next frame's start, which the port's host does not do), and the save and restore of the viewer's pose, zoom and paletteRestorePending around the draw, which net to nothing
-- src/sim/cockpit/damageDisplay.ts:353 - render_view_from_pose: the inset 3D view is not drawn (the host renders the 3D view)
-- src/sim/cockpit/damageDisplay.ts:377 - modes 3..5 do not draw their 3D view (render_view_from_pose); the render-state block at 0x97020 the original saves, sets for the inset view and restores is not touched, which nets to the same
+- src/sim/cockpit/damageDisplay.ts:208 - region 15 shows section 0, which reads sections[-1] - the tail of the last weapon record, including half of a pointer; what the original draws there depends on its memory layout (the region is a 1x1 pane at the diagram's corner), so the port skips it
+- src/sim/cockpit/damageDisplay.ts:292 - the arguments (loadout EAX, pane EDX) and every call in the body are read from the disassembly (0x2f790..0x2fa7f); the exported C loses most of them
 - src/sim/cockpit/hud.ts:447 - the +0x14 dword of each MechWeapon (no port field) is not carried over
 - src/sim/cockpit/messages.ts:10 - Phase 4 (HUD): the text is logged, not shown
 - src/sim/cockpit/objectivesHud.ts:181 - for any other result (1, or above 4) the original skips its sprintf and draws its uninitialised 256-byte stack buffer; the port draws an empty string there
 - src/sim/cockpit/overlay.ts:113 - each cache_unlock is passed vfx_shape_size's result + the base id - a wrong id the port's cache ignores (cache_unlock does nothing here)
-- src/sim/cockpit/radar.ts:837 - the map's world polygons are not drawn (see vfxFontSub012da0): the map shows its ground colour, nav points, target and view cone only
-- src/sim/cockpit/radar.ts:874 - the overhead map: objectCullHook, polygonDrawHook and polygonFillHook (0x124a0, vfx_video_sub_012520, map_fill_polygon) are render-layer and not installed
-- src/sim/cockpit/radar.ts:1141 - objectCullHook / clipProjectHook (object_view_cull, 0x12ff0) and viewer_latch_globals are render-layer: the sim's projection (vfxFontSub013130) reads the viewer directly; of the 0x97020 block only cam.dat00097020 and main's render hook are saved
-- src/sim/cockpit/radar.ts:1181 - render_sky_and_ground / render_object_list are the render layer's (the GPU's in the port); the map's world polygons, coloured by vfx_video_sub_012520 and filled by map_fill_polygon with map_height_shade's ramp, are not drawn
-- src/sim/cockpit/radar.ts:1184 - the overhead map\
-- src/sim/cockpit/radar.ts:1194 - viewer_latch_globals is the render layer's; of the 0x97020 block only cam.dat00097020 and main's render hook are restored
-- src/sim/cockpit/radar.ts:1233 - reads the viewer, which ortho_view_begin set up, instead of the globals viewer_latch_globals copies from it
-- src/sim/cockpit/radar.ts:1278 - returns 0 where the original's EAX holds the last value it computed (no caller reads it)
-- src/sim/cockpit/radar.ts:1486 - a steep ray leaves the original's slope uninitialised (and negates it); the port passes 0, which the steep cases (4..7) never read
+- src/sim/cockpit/radar.ts:1150 - viewer_latch_globals is the render layer's, which latches the viewer itself when it draws; the sim's projection (vfxFontSub013130) reads the viewer directly
+- src/sim/cockpit/radar.ts:1194 - empty_stub_37e70 is empty
+- src/sim/cockpit/radar.ts:1209 - viewer_latch_globals is the render layer's, which latches the viewer itself when it draws
+- src/sim/cockpit/radar.ts:1247 - reads the viewer, which ortho_view_begin set up, instead of the globals viewer_latch_globals copies from it
+- src/sim/cockpit/radar.ts:1292 - returns 0 where the original's EAX holds the last value it computed (no caller reads it)
+- src/sim/cockpit/radar.ts:1500 - a steep ray leaves the original's slope uninitialised (and negates it); the port passes 0, which the steep cases (4..7) never read
 - src/sim/cockpit/resources.ts:170 - the 'Couldn't load' line appended to symlog.txt is not written
 - src/sim/cockpit/resources.ts:175 - res_load_cockpit: couldn't load ${ref.name} (symlog.txt not written)
 - src/sim/cockpit/resources.ts:179 - res_load_cockpit: CPIT shorter than 164 bytes; the original reads past it
 - src/sim/cockpit/resources.ts:208 - the 'Couldn't load' line appended to symlog.txt is not written
 - src/sim/cockpit/resources.ts:213 - res_load_hdi: couldn't load ${ref.name} (symlog.txt not written)
 - src/sim/cockpit/resources.ts:217 - res_load_hdi: HUD shorter than 292 bytes; the original reads past it
-- src/sim/cockpit/targetDisplay.ts:128 - the block's render-side dwords (shadedFillEnabled, textureOffTypeMask, textureAffine, 0x97030, the wireframe and draw hooks) are the render layer's renderOptions, which the sim cannot reach: only the sim-held dwords are saved, and the writes are not made. They only set up the inset view, which the port does not draw
-- src/sim/cockpit/targetDisplay.ts:135 - render_state_save_for_inset: the render options for the inset view are the render layer\
-- src/sim/cockpit/targetDisplay.ts:160 - the 3D view is not drawn (render_view_from_pose; the wireframe and render options it would be drawn with are the render layer's); the SHP 0x5b / 0x58 early returns leave the original's inset render options set, which the port does not set at all
 - src/sim/cockpit/weaponList.ts:66 - a ready weapon in a fire group above 2 has no colour in the original (the stack local is left as it was); the port keeps the last line's colour - weapon_set_fire_group refuses groups above 2, so it does not arise
 - src/sim/controls/input.ts:265 - the driver's methods are the port's implementations of the shipped DLL (sim/controls/giddi.ts), bound to the loaded module; a device without one fails as a module that will not load
 - src/sim/controls/input.ts:612 - a driver asking for calibration (install returns 4) would open the calibration screen (project_tables_sub_018f90), which is not ported
 - src/sim/controls/input.ts:751 - no keyboard device is open, so no keystroke is read
+- src/sim/display/insetView.ts:70 - viewer_latch_globals (before and after the draw) is the render layer's, which latches the viewer itself when it draws; empty_stub_37e70 is empty
+- src/sim/display/mainView.ts:46 - the drawing - sky and ground, backdrop, world, cockpit - is the host's, beneath the 2D window (renderPort.mainView): the viewport's window pixels are handed back to it (vfxWindowClearPane) where the original paints them, and a wipe instead of sky and ground becomes the host view's background rather than window pixels. viewer_latch_globals and the draw counter at 0x95510 are the render layer's. mainViewWindow's memset of the buffer at 0xa46fc (a window the shipped game never selects) and vfx_video_sub_010a50 (the cheat at 0x954e0) are not ported
+- src/sim/display/mainView.ts:86 - render_buffers_init(0x80, 0x5dc) and polysDrawnLimit = 0x578 size the software renderer's arenas and draw budget, which the port's renderer does not have
+- src/sim/display/mainView.ts:89 - vfx_video_sub_010320: no render arenas or polygon budget (render_buffers_init, polysDrawnLimit)
 - src/sim/display/rescale.ts:57 - vfx_video_font_handler (the message bar's layout) and hud_debug_sub_049a90 (the debug text's) are not ported yet
 - src/sim/display/rescale.ts:87 - vfx_video_font_handler (the message bar layout) is not ported yet
 - src/sim/display/rescale.ts:88 - hud_debug_sub_049a90 (the debug text layout) is not ported
@@ -1019,12 +1023,12 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/mission/tables/missionTables.ts:86 - the marking loops read all 48 records, past the table copy
 - src/mission/vm/chunkExec.ts:346 - GP with no object: the original clears the PREVIOUS gamepiece node
 - src/mission/vm/streams.ts:197 - '.BWD' is appended in the caller's own reference buffer
-- src/render/SceneRenderer.ts:297 - the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled
+- src/render/SceneRenderer.ts:406 - the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled
 - src/sim/ai/aiGeometry.ts:94 - mech_probe_ray: the flank point is transformed with the probe end\
 - src/sim/cockpit/objectivesHud.ts:226 - hud_objectives_draw: this result draws an uninitialised stack buffer; the port draws nothing
 - src/sim/cockpit/overlay.ts:98 - hud_tapes_init unlocks id vfx_shape_size() + base rather than assetVariant + base
 - src/sim/cockpit/overlay.ts:344 - ${where}: an allegiance above 2 draws with uninitialised shape ids; the port draws nothing
-- src/sim/cockpit/radar.ts:1018 - radar nav points: seenByGroups is ORed with the player group bit (0x1202a / 0x11e9e), so the reached test is flags & 0x20 alone
+- src/sim/cockpit/radar.ts:1024 - radar nav points: seenByGroups is ORed with the player group bit (0x1202a / 0x11e9e), so the reached test is flags & 0x20 alone
 - src/sim/cockpit/weaponList.ts:75 - hud_weapon_widget_tick: a ready weapon in a fire group above 2 leaves the colour unset
 - src/sim/mech/anim.ts:81 - anim_ensure_loaded: a named ANIM (id -1) hits the cache entry of the first named ANIM
 - src/sim/mech/animTask.ts:277 - anim_player_step: a transition lands one frame past the entry frame it finds
@@ -1041,11 +1045,16 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/core/random.ts:60 - random seed: the original uses the argv pointer address; a fixed default is used
 - src/engine/vfx/vfx.ts:313 - vfx_line_draw: a callback mode (above 1) is not ported
 - src/mission/vm/objExec.ts:45 - OBJ with no POLY id loads a loose .wtb file; not ported
-- src/sim/cockpit/damageDisplay.ts:101 - hud_damage_display_init: a diagram of size 0 divides by zero on the x87
-- src/sim/cockpit/damageDisplay.ts:261 - hud_damage_diagram_draw: region 15 reads sections[-1] (loadout bytes before the section array); skipped
-- src/sim/cockpit/damageDisplay.ts:317 - hud_armour_bars_draw: fullArmourMax is 0 - the original divides by it (idiv), a fault
-- src/sim/cockpit/radar.ts:396 - radar function table: 0x${a.toString(16)} is not ported
+- src/render/pipeline/fillDispatch.ts:76 - polygonFillHook 0x${h.toString(16)} is not ported; render_asm_sub_03bb80 used
+- src/render/pipeline/hooks.ts:43 - objectCullHook 0x${a.toString(16)} is not ported; object_cull_main_view used
+- src/render/pipeline/hooks.ts:52 - polygonDrawHook 0x${a.toString(16)} is not ported; polygon_resolve_colour used
+- src/sim/cockpit/damageDisplay.ts:96 - hud_damage_display_init: a diagram of size 0 divides by zero on the x87
+- src/sim/cockpit/damageDisplay.ts:256 - hud_damage_diagram_draw: region 15 reads sections[-1] (loadout bytes before the section array); skipped
+- src/sim/cockpit/damageDisplay.ts:312 - hud_armour_bars_draw: fullArmourMax is 0 - the original divides by it (idiv), a fault
+- src/sim/cockpit/radar.ts:401 - radar function table: 0x${a.toString(16)} is not ported
 - src/sim/controls/input.ts:623 - input device ${input.devices[i]!.name} asks for calibration; the calibration screen is not ported
+- src/sim/display/mainView.ts:50 - vfx_video_sub_010490: mainViewWindow is set - the memset of the buffer at 0xa46fc is not ported
+- src/sim/display/mainView.ts:72 - vfx_video_sub_010490: the 0x954e0 cheat draw (vfx_video_sub_010a50) is not ported
 - src/sim/effects/effects.ts:282 - effect_align_to_mount: the mech has no mountNode (the original would read through a null pointer)
 - src/sim/effects/effects.ts:313 - sim_slots_update: an area effect with no node object (the original reads its radius through a null pointer)
 - src/sim/groups/groups.ts:54 - formation slot ${i}: outside the StarFormation record

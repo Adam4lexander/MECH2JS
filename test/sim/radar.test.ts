@@ -29,7 +29,7 @@ let files: Map<string, Uint8Array>;
 
 function frame(ticks = 7) {
   for (let i = 0; i < ticks; i++) timerInterrupt();
-  // the host's render hook paints the 3D view over the window; without one, clear it here
+  // a clean window each frame, so what a frame draws can be measured
   vfxWindowClear(defaultCanvas);
   mainLoopFrame();
 }

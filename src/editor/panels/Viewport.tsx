@@ -19,9 +19,6 @@ import { SceneRenderer } from '../../render/SceneRenderer.ts';
 import { fromThree, toThree, CM_TO_UNITS } from '../../render/bridge/space.ts';
 import { cameraFromViewer, viewerFromCamera } from '../../render/bridge/cameraViewer.ts';
 import { attachHostInput } from '../../app/hostInput.ts';
-import { mainLoop } from '../../mission/mainLoop.ts';
-import { cam } from '../../sim/camera/cameraUpdate.ts';
-import { viewerBuildTransform, viewerUpdateProjection } from '../../sim/camera/projection.ts';
 import { sceneNodeSetOrigin, sceneNodeWalk } from '../../engine/scene/sceneGraph.ts';
 import { cameraGlobals, viewer } from '../../sim/camera/viewer.ts';
 import { mechLodUpdate } from '../../sim/world/detailRecords.ts';
@@ -32,9 +29,10 @@ import { select, selected } from '../store/selection.ts';
 import { FreeFly } from '../viewport/freeFly.ts';
 import { syncFieldsFromNode } from '../inspector/poseSync.ts';
 import { SkyGround } from '../../render/passes/skyGround.ts';
-import { defaultCanvas, display } from '../../sim/display/video.ts';
+import { defaultCanvas } from '../../sim/display/video.ts';
 import { HudOverlay } from '../../render/passes/hudOverlay.ts';
-import { vfxWindowClearPane } from '../../engine/vfx/vfx.ts';
+import { IndexedViews } from '../../render/passes/indexedView.ts';
+import { renderPort } from '../../sim/display/renderPort.ts';
 import { renderOptions } from '../../render/shading/polygonColour.ts';
 import { lighting } from '../../sim/world/environment.ts';
 import { structOf } from './Inspector.tsx';
@@ -78,9 +76,8 @@ export function Viewport({ game }: { game: Game }) {
     camera.position.set(sx - 15, sy + 12, sz + 25);
     fly.lookAt(new THREE.Vector3(sx, sy + 3, sz));
 
-    // debug handle: window.mw2.view.camera / .fly (setting fly.yaw / fly.pitch aims it) / .renderer
+    // debug handle: window.mw2.view.camera / .fly (setting fly.yaw / fly.pitch aims it) / .renderer / .views
     const dbg = (window as unknown as { mw2?: Record<string, unknown> }).mw2;
-    if (dbg) dbg.view = { camera, fly, renderer: sr };
 
     const gizmo = new TransformControls(camera, renderer.domElement);
     gizmo.setSpace('world');
@@ -161,20 +158,12 @@ export function Viewport({ game }: { game: Game }) {
 
     // Play: the PC's keyboard and mouse feed the game's GIDDI drivers
     const detachInput = attachHostInput(renderer.domElement, () => game.mode === 'play');
-    // DAT_00097074, the frame's render call inside main's loop: its sim half
-    // (vfx_video_sub_010490's projection refresh and viewer_build_transform);
-    // the drawing itself happens once the loop pass returns
-    // It also paints the 3D viewport over whatever 2D was in the window there
-    // (vfxWindowClearPane), which the HUD then draws over again.
-    mainLoop.renderHook = () => {
-      vfxWindowClearPane(display.currentViewport);
-      const v = viewer();
-      if (cam.dat000954ec !== 0) {
-        viewerUpdateProjection(v);
-        cam.dat000954ec = 0;
-      }
-      if (cam.dat00097020 === 0) viewerBuildTransform(v);
-    };
+    // the game's render calls: main's render hook (vfx_video_sub_010490) asks for the main
+    // view, drawn below once the loop pass returns; the HUD's inset views and the map are
+    // drawn when the game asks, into the window's pixels (render/passes/indexedView.ts)
+    const views = new IndexedViews(renderer, sr.uniforms);
+    renderPort.current = views;
+    if (dbg) dbg.view = { camera, fly, renderer: sr, views };
 
     let raf = 0;
     let last = performance.now();
@@ -184,6 +173,7 @@ export function Viewport({ game }: { game: Game }) {
       const elapsedMs = now - last;
       last = now;
       const playing = game.mode === 'play';
+      views.beginFrame();
       if (playing) {
         if (!game.playFrame(elapsedMs)) game.setMode('edit');
         engineStore.bumpThrottled();
@@ -221,30 +211,35 @@ export function Viewport({ game }: { game: Game }) {
       // and clipper see what three.js draws. Play: the game's own viewer.
       sr.sync(playing ? viewer() : viewerFromCamera(camera, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer));
       renderer.getDrawingBufferSize(drawSize);
+      // Play: the main view only when the game's render hook asked for it this frame (not while the
+      // map has the hook), with its wipe colour in place of sky and ground when it gave one
+      const wipe = playing ? views.mainWipe : null;
       skyGround.update(camera, drawSize.x, drawSize.y, {
-        sky: lighting.skyColour,
-        ground: lighting.groundColour,
-        skyOn: lighting.skyEnabled !== 0,
-        groundOn: lighting.groundEnabled !== 0,
+        sky: wipe ?? lighting.skyColour,
+        ground: wipe ?? lighting.groundColour,
+        skyOn: wipe !== null || lighting.skyEnabled !== 0,
+        groundOn: wipe !== null || lighting.groundEnabled !== 0,
         bandHeight: lighting.horizonBandHeight,
         screenWidth: Math.max(1, defaultCanvas.xMax + 1),
-        bandOn: lighting.horizonBandEnabled !== 0 && renderOptions.shadedFillEnabled !== 0,
+        bandOn: wipe === null && lighting.horizonBandEnabled !== 0 && renderOptions.shadedFillEnabled !== 0,
       });
       sr.setViewport(drawSize.x, drawSize.y);
-      // the sky and the backdrop, then the world over them
       renderer.clear();
-      renderer.render(sr.backdropScene, camera);
-      renderer.clearDepth();
-      renderer.render(sr.scene, camera);
-      // the cockpit shell, painted over the world (empty outside the cockpit view). Its near clip
-      // is 8 cm, inside three's 50 cm near plane, so the pass runs with the plane pulled in
-      renderer.clearDepth();
-      const near = camera.near;
-      camera.near = 0.04;
-      camera.updateProjectionMatrix();
-      renderer.render(sr.cockpitScene, camera);
-      camera.near = near;
-      camera.updateProjectionMatrix();
+      if (!playing || views.mainRequested) {
+        // the sky and the backdrop, then the world over them
+        renderer.render(sr.backdropScene, camera);
+        renderer.clearDepth();
+        renderer.render(sr.scene, camera);
+        // the cockpit shell, painted over the world (empty outside the cockpit view). Its near clip
+        // is 8 cm, inside three's 50 cm near plane, so the pass runs with the plane pulled in
+        renderer.clearDepth();
+        const near = camera.near;
+        camera.near = 0.04;
+        camera.updateProjectionMatrix();
+        renderer.render(sr.cockpitScene, camera);
+        camera.near = near;
+        camera.updateProjectionMatrix();
+      }
       // the game's 2D (HUD, radar, cockpit text) over it all, in Play
       if (playing && hudOverlay.update(defaultCanvas, drawSize.x, drawSize.y)) renderer.render(hudOverlay.scene, hudOverlay.camera);
       if (now - lastInfo > 250) {
@@ -261,7 +256,8 @@ export function Viewport({ game }: { game: Game }) {
       window.removeEventListener('keydown', onKey);
       renderer.domElement.removeEventListener('click', onClick);
       detachInput();
-      mainLoop.renderHook = null;
+      if (renderPort.current === views) renderPort.current = null;
+      views.dispose();
       hudOverlay.dispose();
       gizmo.dispose();
       fly.dispose();

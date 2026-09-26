@@ -8,12 +8,11 @@
  * (HudWidget.field_0x6) shows static. The readout under it names the target
  * and gives its range.
  */
-import type { HudWidget, SceneNode, Viewer, ViewWindow } from '../../generated/classes.gen.ts';
+import type { HudWidget, SceneNode, ViewWindow } from '../../generated/classes.gen.ts';
 import { fixedCos, fixedSin } from '../../core/angle/trig.ts';
 import { cdiv } from '../../core/int/cint.ts';
 import { mulr16 } from '../../core/int/fx16.ts';
 import { mulr29 } from '../../core/int/i64.ts';
-import { divergence } from '../../core/provenance.ts';
 import { registerCode } from '../../engine/codePtr.ts';
 import { clock } from '../../engine/clock.ts';
 import { registerGlobals } from '../../engine/globals.ts';
@@ -23,7 +22,6 @@ import { objectGetPosRadius } from '../../engine/scene/worldObject.ts';
 import { vfxCharacterWidth, vfxFontHeight, vfxPaneWipe, vfxShapeDraw, vfxStringDraw } from '../../engine/vfx/vfx.ts';
 import { targeting, playerTargetNode } from '../ai/targeting.ts';
 import { trackedGlobals } from '../ai/tracked.ts';
-import { cam } from '../camera/cameraUpdate.ts';
 import { cameraGlobals } from '../camera/viewer.ts';
 import { vfxPaneFrame } from '../display/layout.ts';
 import { display } from '../display/video.ts';
@@ -36,7 +34,8 @@ import { anim2dDrawThunk } from '../world/anim2d.ts';
 import { mechApplyDetailLevel } from '../world/detailRecords.ts';
 import { lighting } from '../world/environment.ts';
 import { randomRange } from '../../core/random.ts';
-import { renderViewFromPose } from './damageDisplay.ts';
+import { newRenderBlock, renderBlockRestore, renderOptions } from '../display/renderState.ts';
+import { renderStateSaveForInset, renderViewFromPose, viewerPoseSave } from '../display/insetView.ts';
 import { hud, hudFont, hudFontUnlock, hudShapeDrawInPane, paneTransitionRestart, paneTransitionStepSplit, widgetPane } from './hud.ts';
 import type { PaneTransition } from './resources.ts';
 
@@ -71,77 +70,6 @@ export const targetDisplay = registerGlobals(
   },
 );
 
-/**
- * The viewer's position and angles into pose[0..5], pose[6] = 1 (valid).
- * Returns 0 without writing when either is missing.
- *
- * @mw2 viewer_pose_save 0x000394c0
- * @fidelity exact
- */
-export function viewerPoseSave(v: Viewer | null, pose: Int32Array | null): number {
-  if (!pose || !v) return 0;
-  pose[0] = v.posX;
-  pose[1] = v.posY;
-  pose[2] = v.posZ;
-  pose[3] = v.yaw;
-  pose[4] = v.pitch;
-  pose[6] = 1;
-  pose[5] = v.roll;
-  return 1;
-}
-
-/**
- * The inverse of viewer_pose_save, only when pose[6] is set; returns 1 if it
- * copied.
- *
- * @mw2 viewer_pose_restore 0x00039510
- * @fidelity exact
- */
-export function viewerPoseRestore(v: Viewer | null, pose: Int32Array | null): number {
-  if (!pose || !v) return 0;
-  if (pose[6] === 0) return 0;
-  v.posX = pose[0]!;
-  v.posY = pose[1]!;
-  v.posZ = pose[2]!;
-  v.yaw = pose[3]!;
-  v.pitch = pose[4]!;
-  v.roll = pose[5]!;
-  return 1;
-}
-
-/** The part of the render-state block at 0x97020 (26 dwords) the sim holds. @portOnly */
-interface RenderBlock {
-  dat00097020: number;
-  skyEnabled: number;
-  groundEnabled: number;
-  horizonBandEnabled: number;
-}
-
-/**
- * Saves the render-state block (0x97020, 26 dwords) into `save` and sets it
- * up for an inset view: 0x97038 = 0, 0x97028 = 0, 0x9702c = 1,
- * shadedFillEnabled = 1, textureOffTypeMask = 0xb00, textureAffine = 1,
- * 0x97030 bit 2 cleared.
- *
- * @mw2 render_state_save_for_inset 0x00030d30
- * @fidelity partial
- * @divergence the block's render-side dwords (shadedFillEnabled, textureOffTypeMask, textureAffine, 0x97030, the wireframe and draw hooks) are the render layer's renderOptions, which the sim cannot reach: only the sim-held dwords are saved, and the writes are not made. They only set up the inset view, which the port does not draw
- */
-export function damageSub030d30(save: RenderBlock): void {
-  save.dat00097020 = cam.dat00097020;
-  save.skyEnabled = lighting.skyEnabled;
-  save.groundEnabled = lighting.groundEnabled;
-  save.horizonBandEnabled = lighting.horizonBandEnabled;
-  divergence('render_state_save_for_inset: the render options for the inset view are the render layer\'s and are not set', 'render_state_save_for_inset');
-}
-
-function restoreBlock(save: RenderBlock): void {
-  cam.dat00097020 = save.dat00097020;
-  lighting.skyEnabled = save.skyEnabled;
-  lighting.groundEnabled = save.groundEnabled;
-  lighting.horizonBandEnabled = save.horizonBandEnabled;
-}
-
 function wipeAndFrame(pane: ViewWindow): void {
   vfxPaneWipe(pane, 0);
   vfxPaneFrame(pane, 8);
@@ -153,11 +81,16 @@ function wipeAndFrame(pane: ViewWindow): void {
  * of 7 in 10 clears it; above 2: always), then by target type - none: an
  * empty frame; a tracked object: its marker; a mech or gamething: the view
  * from three radii in front of it, or SHP 0x5b / 0x58 when it has no node /
- * no userData.
+ * no userData. The view draws only the target's own scene tree
+ * (render_view_from_pose's root is player_target_node's result, ECX at
+ * 0x30607), over the pane wiped black, with sky and ground off and the
+ * render options render_state_save_for_inset sets - in hidden-line wireframe
+ * while targetDisplayMode is 1 - and the block is copied back afterwards.
+ * The SHP 0x5b / 0x58 returns leave the block as the inset set it (a quirk
+ * of the original, kept).
  *
  * @mw2 hud_widget13_tick 0x00030220
- * @fidelity partial
- * @divergence the 3D view is not drawn (render_view_from_pose; the wireframe and render options it would be drawn with are the render layer's); the SHP 0x5b / 0x58 early returns leave the original's inset render options set, which the port does not set at all
+ * @fidelity exact
  */
 export const hudWidget13Tick = registerCode('hud_widget13_tick', 0x30220, (w: HudWidget): void => {
   const h = hud;
@@ -198,8 +131,8 @@ export const hudWidget13Tick = registerCode('hud_widget13_tick', 0x30220, (w: Hu
   if (type === 0x200) mechApplyDetailLevel(mechs.mechTable[e.targetHandle & 0xff]!.index, 0);
   const pose = new Int32Array(7);
   viewerPoseSave(cameraGlobals.viewerPosition, pose);
-  const block: RenderBlock = { dat00097020: 0, skyEnabled: 0, groundEnabled: 0, horizonBandEnabled: 0 };
-  damageSub030d30(block);
+  const block = newRenderBlock();
+  renderStateSaveForInset(block);
   let tx = e.targetX;
   let ty = e.targetY;
   let tz = e.targetZ;
@@ -239,13 +172,16 @@ export const hudWidget13Tick = registerCode('hud_widget13_tick', 0x30220, (w: Hu
   pose[3] = heading;
   pose[4] = 0;
   pose[5] = 0;
-  // wireframeMode = (targetDisplayMode == 1), wireframeColourScheme 0: render options (see render_state_save_for_inset)
+  if (h.targetDisplayMode === 1) {
+    renderOptions.wireframeMode = h.targetDisplayMode;
+    renderOptions.wireframeColourScheme = 0;
+  } else renderOptions.wireframeMode = 0;
   lighting.groundEnabled = 0;
   lighting.skyEnabled = 0;
   vfxPaneWipe(pane, 0);
-  if (h.playerStatusCopy === 2) renderViewFromPose(7, 0x20000, pose, null);
+  if (h.playerStatusCopy === 2) renderViewFromPose(7, 0x20000, pose, node);
   vfxPaneFrame(pane, 8);
-  restoreBlock(block);
+  renderBlockRestore(block);
 });
 
 /**

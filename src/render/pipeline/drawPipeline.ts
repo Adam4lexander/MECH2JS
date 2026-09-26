@@ -22,6 +22,8 @@ import { cameraGlobals } from '../../sim/camera/viewer.ts';
 import type { MeshBlock, MeshPolygon, MeshVertex, WorldObject } from '../../generated/classes.gen.ts';
 import { Acc64, imul64, regHi, regLo } from '../../core/int/i64.ts';
 import { renderView } from './viewLatch.ts';
+import { radar } from '../../sim/cockpit/radar.ts';
+import { mechs } from '../../sim/mech/mechGlobals.ts';
 
 const acc = new Acc64();
 
@@ -77,6 +79,65 @@ export function objectCullBackdrop(obj: WorldObject): number {
   r.objectViewDepth = depth;
   if (((depth + obj.radius) | 0) < r.viewNearClip) return 4;
   return 0;
+}
+
+/** A 64-bit dot of (dx, dy, dz) with a rotation row, >> 29 rounded by bit 28 (the culls' view-axis distance). */
+function rowDist(dx: number, dy: number, dz: number, x: number, y: number, z: number): number {
+  return acc.clear().mulAdd(dx, x).mulAdd(dy, y).mulAdd(z, dz).shr29r();
+}
+
+/**
+ * The orthographic view's object cull, which ortho_view_begin installs: 1
+ * for an object with flags bit 0x1000; else its view depth into
+ * objectViewDepth, 4 when depth + radius is nearer than the near clip, 5
+ * when depth - radius is beyond the far clip; then its distance along
+ * rotation row 0 beyond the view's half extent on that side (orthoLeft for
+ * a distance below 1, orthoRight otherwise), 6 when that exceeds the
+ * radius; the same along row 1 against orthoBottom / orthoTop, 7. 0 = draw.
+ *
+ * @mw2 object_view_cull 0x00012e40
+ * @fidelity exact
+ */
+export function objectViewCull(obj: WorldObject): number {
+  if (((obj.flags >> 8) & 0x10) !== 0) return 1;
+  const r = renderView;
+  const rad = obj.radius;
+  const dx = (obj.posX - r.viewTranslationX) | 0;
+  const dy = (obj.posY - r.viewTranslationY) | 0;
+  const dz = (obj.posZ - r.viewTranslationZ) | 0;
+  const depth = rowDist(dx, dy, dz, r.cullDepthRowX, r.cullDepthRowY, r.cullDepthRowZ);
+  r.objectViewDepth = depth;
+  if (((rad + depth) | 0) < r.viewNearClip) return 4;
+  if (r.viewFarClip < ((depth - rad) | 0)) return 5;
+  const o = radar;
+  let x = rowDist(dx, dy, dz, r.cullRow0X, r.cullRow0Y, r.cullRow0Z);
+  x = x < 1 ? (o.orthoLeft - x) | 0 : (x - o.orthoRight) | 0;
+  if (rad < x) return 6;
+  let y = rowDist(dx, dy, dz, r.cullRow1X, r.cullRow1Y, r.cullRow1Z);
+  y = y < 1 ? (o.orthoBottom - y) | 0 : (y - o.orthoTop) | 0;
+  if (rad < y) return 7;
+  return 0;
+}
+
+/**
+ * The overhead map's object cull (radar_draw installs it for mode 4): a mech
+ * is left out (1) while its MechEntity.flags - of mechTable[object.index] -
+ * has any of 0x16; objects of type family 0x30 or 0x70 are left out; every
+ * other object goes to object_view_cull.
+ *
+ * @mw2 map_object_cull 0x000124a0
+ * @fidelity exact
+ */
+export function mapObjectCull(obj: WorldObject): number {
+  if ((obj.type & 0xf00) === 0x100) {
+    const m = mechs.mechTable[obj.index & 0xffff];
+    // movsx of the flags word, then test al
+    if (m && (m.flags & 0x16) !== 0) return 1;
+    return objectViewCull(obj);
+  }
+  const family = obj.type & 0xf0;
+  if (family === 0x30 || family === 0x70) return 1;
+  return objectViewCull(obj);
 }
 
 /** (lodScale * lodKey) >> 16, rounded by bit 15 - object_draw_lod_mesh's threshold. */
@@ -279,6 +340,8 @@ export interface SpriteVertices {
   q: MeshVertex | null;
   /** a negative v on q, or a negative u on another vertex: the texture is mirrored in u (no shipped sprite sets it) */
   mirror: boolean;
+  /** u != 0: the vertex the map view's variant (last argument 1) measures the square from - its "P" */
+  r: MeshVertex | null;
 }
 
 /**
@@ -293,10 +356,10 @@ export interface SpriteVertices {
  *
  * @mw2 render_asm_sub_03b990 0x0003b990
  * @fidelity partial
- * @divergence the vertex reading only, over the mesh vertices rather than the clipped screen records (a sprite crossing the near plane is not drawn); the square itself is built in the vertex shader (render/materials/indexedMaterial.ts) and the map view's variant (last argument 1) is not ported
+ * @divergence the vertex reading only, over the mesh vertices rather than the clipped screen records (a sprite crossing the near plane is not drawn); the square itself is built in the vertex shader (render/materials/indexedMaterial.ts), for the map view's variant (last argument 1) from q and r
  */
 export function spriteVertices(poly: MeshPolygon, vertices: MeshVertex[]): SpriteVertices {
-  const out: SpriteVertices = { p: null, q: null, mirror: false };
+  const out: SpriteVertices = { p: null, q: null, mirror: false, r: null };
   for (let k = 0; k < 3 && k < poly.vertexCount; k++) {
     const v = vertices[poly.indices[k]!]!;
     if (v.texU === 0) {
@@ -304,7 +367,10 @@ export function spriteVertices(poly: MeshPolygon, vertices: MeshVertex[]): Sprit
         out.q = v;
         if (v.texV < 0) out.mirror = true;
       } else out.p = v;
-    } else if (v.texU < 0) out.mirror = true;
+    } else {
+      out.r = v;
+      if (v.texU < 0) out.mirror = true;
+    }
   }
   return out;
 }

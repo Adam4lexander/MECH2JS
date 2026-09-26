@@ -21,7 +21,7 @@ import { cdiv, cmod } from '../../core/int/cint.ts';
 import { mulr16 } from '../../core/int/fx16.ts';
 import { sdivShl } from '../../core/int/i64.ts';
 import { fixedAtan2, fixedCos, fixedSin } from '../../core/angle/trig.ts';
-import { divergence, quirk, unestablished } from '../../core/provenance.ts';
+import { quirk, unestablished } from '../../core/provenance.ts';
 import { randomRange } from '../../core/random.ts';
 import { systemError } from '../../core/systemError.ts';
 import { lxModuleLoad } from '../../data/exe/tables/menus.ts';
@@ -34,6 +34,9 @@ import { sceneNodeGetWorldPos } from '../../engine/scene/sceneGraph.ts';
 import type { VfxWindow } from '../../engine/vfx/vfx.ts';
 import { vfxLineDraw, vfxPaneWipe, vfxShapeDraw, vfxStringDraw } from '../../engine/vfx/vfx.ts';
 import { mainLoop, type RenderHook } from '../../mission/mainLoop.ts';
+import { worldRootNode } from '../../engine/scene/objectLists.ts';
+import { HOOK, newRenderBlock, renderBlockRestore, renderBlockSave, renderOptions } from '../display/renderState.ts';
+import { renderPort } from '../display/renderPort.ts';
 import { cam } from '../camera/cameraUpdate.ts';
 import { viewerBuildTransform, viewerUpdateProjection } from '../camera/projection.ts';
 import { cameraGetMode, cameraGlobals } from '../camera/viewer.ts';
@@ -352,8 +355,10 @@ function bootRadar() {
     savedPaletteRestore: 0,
     /** 0xa4cbc: the viewer, saved over the orthographic view */
     savedViewer: null as Record<string, unknown> | null,
-    /** 0xa4c54: the 0x97020 block, saved over it (of which the port keeps cam.dat00097020 and main's render hook) */
-    savedBlock: { dat00097020: 0, renderHook: null as RenderHook | null },
+    /** 0xa4dac: ortho_view_begin clears it; no reader has been read */
+    datA4dac: 0,
+    /** 0xa4c54: the 0x97020 block, saved over it */
+    savedBlock: newRenderBlock(),
   };
 }
 
@@ -833,8 +838,7 @@ export function vfxVideoSub012410(how: number): void {
  * the viewer restored, the frame and, while running, the range readout.
  *
  * @mw2 radar_draw 0x00011910
- * @fidelity partial
- * @divergence the map's world polygons are not drawn (see vfxFontSub012da0): the map shows its ground colour, nav points, target and view cone only
+ * @fidelity exact
  */
 export function vfxVideoSub011910(): void {
   const r = radar;
@@ -871,7 +875,9 @@ export function vfxVideoSub011910(): void {
   const far = lighting.mapHeightLow < 0 ? (alt - lighting.mapHeightLow) | 0 : alt;
   orthoViewBegin([x, alt, z, yaw, 0x5a0000, 0], vp, alt, far);
   if (m === 4) {
-    divergence('the overhead map: objectCullHook, polygonDrawHook and polygonFillHook (0x124a0, vfx_video_sub_012520, map_fill_polygon) are render-layer and not installed', 'radar_draw');
+    renderOptions.objectCullHook = HOOK.mapObjectCull;
+    renderOptions.polygonDrawHook = HOOK.mapPolygonColour;
+    renderOptions.polygonFillHook = HOOK.mapFillPolygon;
     const prev = cameraGetMode();
     cameraSetMode(6);
     mechLodUpdate();
@@ -1136,9 +1142,12 @@ function viewerCopy(dst: Viewer, src: Viewer): void {
  * overridden to a fixed scale (projScaleX 0x2000, shifts 3, projScaleY
  * aspect >> 3), and the transform built.
  *
+ * The render-state block is saved over the view, and objectCullHook and
+ * clipProjectHook become object_view_cull and ortho_clip_project.
+ *
  * @mw2 ortho_view_begin 0x00012c20
- * @fidelity partial
- * @divergence objectCullHook / clipProjectHook (object_view_cull, 0x12ff0) and viewer_latch_globals are render-layer: the sim's projection (vfxFontSub013130) reads the viewer directly; of the 0x97020 block only cam.dat00097020 and main's render hook are saved
+ * @fidelity exact
+ * @divergence viewer_latch_globals is the render layer's, which latches the viewer itself when it draws; the sim's projection (vfxFontSub013130) reads the viewer directly
  */
 export function orthoViewBegin(pose: number[], vpIndex: number, width: number, far: number): void {
   const r = radar;
@@ -1148,6 +1157,7 @@ export function orthoViewBegin(pose: number[], vpIndex: number, width: number, f
   r.orthoTop = cdiv(Math.imul(r.orthoUnitsPerPixel, (w.bottom - w.top + 1) | 0), 2);
   r.orthoBottom = -r.orthoTop | 0;
   r.savedPaletteRestore = palettes.paletteRestorePending;
+  r.datA4dac = 0;
   r.orthoLeft = cdiv(-width | 0, 2);
   r.orthoFarClip = far;
   const saved = new Viewer();
@@ -1162,8 +1172,9 @@ export function orthoViewBegin(pose: number[], vpIndex: number, width: number, f
   v.posZ = pose[2]!;
   viewportSelect(vpIndex);
   v.farClip = r.orthoFarClip;
-  r.savedBlock.dat00097020 = cam.dat00097020;
-  r.savedBlock.renderHook = mainLoop.renderHook;
+  renderBlockSave(r.savedBlock);
+  renderOptions.objectCullHook = HOOK.objectViewCull;
+  renderOptions.clipProjectHook = HOOK.orthoClipProject;
   viewerUpdateProjection(v);
   v.projScaleX = 0x2000;
   v.projShiftX = 3;
@@ -1174,14 +1185,18 @@ export function orthoViewBegin(pose: number[], vpIndex: number, width: number, f
 }
 
 /**
- * Draws the world into the current view - the map's terrain and objects.
+ * Draws the world into the current view: sky and ground with flags bit 0,
+ * then the world list through the installed hooks - for the map,
+ * map_object_cull, map_polygon_colour and map_fill_polygon.
  *
  * @mw2 ortho_view_draw_world 0x00012da0
- * @fidelity stub
- * @divergence render_sky_and_ground / render_object_list are the render layer's (the GPU's in the port); the map's world polygons, coloured by vfx_video_sub_012520 and filled by map_fill_polygon with map_height_shade's ramp, are not drawn
+ * @fidelity exact
+ * @divergence empty_stub_37e70 is empty
  */
-export function vfxFontSub012da0(_flags: number): void {
-  divergence('the overhead map\'s world (render_object_list through map_fill_polygon) is not drawn', 'ortho_view_draw_world');
+export function vfxFontSub012da0(flags: number): void {
+  const port = renderPort.current;
+  if ((flags & 1) !== 0) port?.skyAndGround();
+  port?.objectList(worldRootNode);
 }
 
 /**
@@ -1190,13 +1205,12 @@ export function vfxFontSub012da0(_flags: number): void {
  * rebuilt.
  *
  * @mw2 ortho_view_end 0x00012dd0
- * @fidelity partial
- * @divergence viewer_latch_globals is the render layer's; of the 0x97020 block only cam.dat00097020 and main's render hook are restored
+ * @fidelity exact
+ * @divergence viewer_latch_globals is the render layer's, which latches the viewer itself when it draws
  */
 export function vfxFontSub012dd0(): void {
   const r = radar;
-  cam.dat00097020 = r.savedBlock.dat00097020;
-  mainLoop.renderHook = r.savedBlock.renderHook;
+  renderBlockRestore(r.savedBlock);
   palettes.paletteRestorePending = r.savedPaletteRestore;
   const v = cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer;
   if (r.savedViewer) viewerCopy(v, r.savedViewer as unknown as Viewer);

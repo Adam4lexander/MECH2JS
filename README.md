@@ -39,7 +39,11 @@ Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
   the mouse (MOUSE.DLL: it steers the torso like a centring joystick).
   The cockpit HUD is the game's own: its widgets, radar, tapes and reticle
   draw into the game's 640x480 indexed window, which is laid over the 3D view
-  through the palette.
+  through the palette. The 3D views the game draws mid-frame - the target
+  display (F4), the damage display's rear / down / missile views (F1 cycles),
+  the overhead map (F3) - are rendered in palette indices and read back into
+  that window when the game asks, so its 2D lands over them as it does in
+  the original.
 - **Edit** - no frame runs and time stands still; the editor shows the scene
   hierarchy, the game's tables, an inspector over every struct field with its
   offset and C type, a free camera, the asset browser and the console. Step

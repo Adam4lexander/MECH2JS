@@ -23,7 +23,6 @@ import { resetAllGlobals } from '../engine/globals.ts';
 import { setBootImage } from '../engine/image.ts';
 import { setMainProject } from '../engine/resources/cache.ts';
 import { simPreloadData } from '../engine/resources/preload.ts';
-import { objectListsReset } from '../engine/scene/objectLists.ts';
 import { polySetVertexOffset } from '../engine/scene/wtboLoader.ts';
 import { installSystemErrorHandler } from '../engine/systemErrors.ts';
 import { simTablesReset } from '../sim/effects/simTables.ts';
@@ -32,6 +31,7 @@ import { mechDispatchHook0 } from '../sim/mech/hooks.ts';
 import { thingNodes } from '../sim/mech/spawn.ts';
 import { layoutRescaleAll } from '../sim/display/rescale.ts';
 import { videoInit } from '../sim/display/video.ts';
+import { vfxVideoSub010320 } from '../sim/display/mainView.ts';
 import { setMekSource } from '../sim/mech/looseFiles.ts';
 import { destructiblesReset } from '../sim/things/destructibles.ts';
 import { gamethingTableReset } from '../sim/things/gameThings.ts';
@@ -109,8 +109,7 @@ export function bootMission(opts: MissionBootOptions): boolean {
   // static_arena_init: the DTBL pre-pass sizes arenas; the port allocates on demand
   divergence('static_arena_init: no arena pre-pass; tables are allocated on demand', 'main');
   randomTablesInit(opts.randomSeed);
-  // vfx_video_sub_010320 (video setup) resets the object lists
-  objectListsReset();
+  vfxVideoSub010320();
   simTablesReset();
   gamethingTableReset();
   destructiblesReset();

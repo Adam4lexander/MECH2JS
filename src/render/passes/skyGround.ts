@@ -49,6 +49,7 @@ uniform int uSky;
 uniform int uGround;
 uniform int uSkyOn;
 uniform int uGroundOn;
+uniform int uIndexOut;     // write the palette index (a render read back into the game's window)
 out vec4 outColor;
 void main() {
   float up = dot(uUpPlane, vec3(gl_FragCoord.xy, 1.0));
@@ -66,7 +67,7 @@ void main() {
       idx = (v + 0x8000 + (upStep ? 0x7fff : -0x8000)) >> 16;
     }
   }
-  outColor = vec4(texelFetch(uPalette, ivec2(idx & 255, 0), 0).rgb, 1.0);
+  outColor = uIndexOut != 0 ? vec4(float(idx & 255) / 255.0, 0.0, 0.0, 1.0) : vec4(texelFetch(uPalette, ivec2(idx & 255, 0), 0).rgb, 1.0);
 }
 `;
 
@@ -95,10 +96,12 @@ export class SkyGround {
     uGround: { value: 0 },
     uSkyOn: { value: 1 },
     uGroundOn: { value: 1 },
+    uIndexOut: { value: 0 },
   };
 
-  constructor(indexed: IndexedUniforms) {
+  constructor(indexed: IndexedUniforms, indexOut = false) {
     this.u.uPalette = indexed.uPalette;
+    this.u.uIndexOut.value = indexOut ? 1 : 0;
     const geo = new THREE.PlaneGeometry(2, 2);
     const mat = new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, uniforms: this.u, vertexShader, fragmentShader, depthTest: false, depthWrite: false });
     this.mesh = new THREE.Mesh(geo, mat);

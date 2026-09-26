@@ -8,16 +8,15 @@
  * all the time past 2.
  *
  * Modes 3..5 are 3D views drawn into viewportModes[5] by
- * render_view_from_pose. The port's 3D view is drawn by the host's renderer,
- * so those inset views are not drawn (see renderViewFromPose); their frames,
- * labels and every effect they have on the simulation are.
+ * render_view_from_pose (display/insetView.ts), with the player's own mech
+ * set aside on the alt list for modes 3 and 4.
  *
  * hud_gauge_layout_init, run beside the display's set-up, lays out the gauges of
  * widgets 17, 19, 20 and 21 (gaugeLayout below); gauges.ts reads it.
  */
 import { type HudWidget, type MechLoadout, ViewWindow } from '../../generated/classes.gen.ts';
 import { cdiv } from '../../core/int/cint.ts';
-import { divergence, unestablished } from '../../core/provenance.ts';
+import { unestablished } from '../../core/provenance.ts';
 import { randomRange } from '../../core/random.ts';
 import { registerCode } from '../../engine/codePtr.ts';
 import { registerGlobals } from '../../engine/globals.ts';
@@ -26,6 +25,8 @@ import { cacheLoadResource, cacheUnlock } from '../../engine/resources/cache.ts'
 import { sceneSubtreeMoveToAltList, sceneSubtreeMoveToWorldList } from '../../engine/scene/sceneGraph.ts';
 import { vfxLineDraw, vfxPaneWipe, vfxShapeDraw, vfxShapeRemapDraw, vfxShapeRemapSet, vfxShapeSize, vfxStringDraw } from '../../engine/vfx/vfx.ts';
 import { viewer } from '../camera/viewer.ts';
+import { renderStateSaveForInset, renderViewFromPose } from '../display/insetView.ts';
+import { newRenderBlock, renderBlockRestore, type RenderBlock } from '../display/renderState.ts';
 import { layoutPointInPane, vfxPaneFrame } from '../display/layout.ts';
 import { defaultCanvas, display, imageCanvas } from '../display/video.ts';
 import { mechConfig } from '../mech/config.ts';
@@ -82,12 +83,6 @@ function bootDamageDisplay() {
      * panes of widgets 17, 19, 20 and 21 (see there for each entry)
      */
     gaugeLayout: Int32Array.from(imageI32s(0x96888, 20, new Array<number>(20).fill(0))),
-    /**
-     * @portOnly the inset view render_view_from_pose was last asked to draw -
-     * viewportModes index, zoom and pose - for a presentation layer that
-     * draws it; frame is mainLoop's frame count when it was asked
-     */
-    insetView: { mode: -1, zoom: 0, pose: new Int32Array(7), requested: 0 },
   };
 }
 
@@ -342,21 +337,15 @@ export function damageFontHandler(l: MechLoadout, pane: ViewWindow): void {
 }
 
 /**
- * Renders a 3D view from a pose into viewportModes[viewportMode] and puts
- * the main view back.
- *
- * @mw2 render_view_from_pose 0x00028810
- * @fidelity partial
- * @divergence the port's 3D view is the host renderer's: the inset view is not drawn, only recorded in damageDisplay.insetView. Of its effects on the game it keeps the one on the caller's pose (pose[6] = 1, the valid flag - for the missile camera that is the camera's own pose record). It leaves out viewport_select(viewportMode), which the original never undoes within the frame (its render hook selects the main viewport again at the next frame's start, which the port's host does not do), and the save and restore of the viewer's pose, zoom and paletteRestorePending around the draw, which net to nothing
+ * The block saved and set for an inset view: the same writes as
+ * render_state_save_for_inset, which modes 3..5 make inline (0x309e0..,
+ * 0x30ae0.., 0x30c00..) around render_view_from_pose, copying the block back
+ * after.
  */
-export function renderViewFromPose(viewportMode: number, zoom: number, pose: Int32Array, _root: null): void {
-  divergence('render_view_from_pose: the inset 3D view is not drawn (the host renders the 3D view)', 'render_view_from_pose');
-  pose[6] = 1;
-  const v = damageDisplay.insetView;
-  v.mode = viewportMode;
-  v.zoom = zoom;
-  v.pose.set(pose.subarray(0, 7));
-  v.requested = (v.requested + 1) | 0;
+function insetStateSet(): RenderBlock {
+  const block = newRenderBlock();
+  renderStateSaveForInset(block);
+  return block;
 }
 
 /** Modes 3..5's frame and label: vfx_pane_frame in 6, then the label shape centred at the top. */
@@ -373,8 +362,7 @@ function frameAndLabel(w: HudWidget, shape: number): void {
  * draws by damageDisplayMode.
  *
  * @mw2 hud_widget02_tick 0x00030860
- * @fidelity partial
- * @divergence modes 3..5 do not draw their 3D view (render_view_from_pose); the render-state block at 0x97020 the original saves, sets for the inset view and restores is not touched, which nets to the same
+ * @fidelity exact
  */
 export const hudWidget02Tick = registerCode('hud_widget02_tick', 0x30860, (w: HudWidget): void => {
   const h = hud;
@@ -409,11 +397,13 @@ export const hudWidget02Tick = registerCode('hud_widget02_tick', 0x30860, (w: Hu
       const pose = viewerPose();
       pose[3] = d.rearViewForward === 0 ? (e.heading + 0xb40000) | 0 : (e.aimAngle + e.heading) | 0;
       pose[4] = 0;
+      const block = insetStateSet();
       sceneSubtreeMoveToAltList(e.node!);
       renderViewFromPose(5, 0x20000, pose, null);
       sceneSubtreeMoveToWorldList(e.node!);
       if (d.rearViewForward === 0) frameAndLabel(w, 0xfa);
       else vfxPaneFrame(widgetPane(w), 6);
+      renderBlockRestore(block);
       return;
     }
     case 4: {
@@ -424,10 +414,12 @@ export const hudWidget02Tick = registerCode('hud_widget02_tick', 0x30860, (w: Hu
       pose[2] = e.posZ;
       pose[4] = 0x5a0000;
       pose[5] = 0;
+      const block = insetStateSet();
       sceneSubtreeMoveToAltList(e.node!);
       renderViewFromPose(5, 0x20000, pose, null);
       sceneSubtreeMoveToWorldList(e.node!);
       frameAndLabel(w, 0xf7);
+      renderBlockRestore(block);
       return;
     }
     case 5: {
@@ -438,8 +430,10 @@ export const hudWidget02Tick = registerCode('hud_widget02_tick', 0x30860, (w: Hu
       }
       if (!pose) vfxPaneWipe(widgetPane(w), 0);
       else {
+        const block = insetStateSet();
         pose[4] = 0;
         renderViewFromPose(5, 0x20000, pose, null);
+        renderBlockRestore(block);
       }
       frameAndLabel(w, 0xfd);
       return;

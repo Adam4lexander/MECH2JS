@@ -22,42 +22,13 @@
  * damageShadeRaises are globals the mission sets.
  */
 import type { MeshPolygon, MeshVertex, Viewer } from '../../generated/classes.gen.ts';
-import { LABEL } from '../../generated/labels.gen.ts';
 import { cdiv } from '../../core/int/cint.ts';
-import { registerGlobals } from '../../engine/globals.ts';
-import { imageI32 } from '../../engine/image.ts';
 import { sqrtTable } from '../../engine/scene/worldObject.ts';
 import { lighting } from '../../sim/world/environment.ts';
+import { renderOptions } from '../../sim/display/renderState.ts';
 
-export const renderOptions = registerGlobals(
-  'renderOptions',
-  {
-    wireframeMode: 0,
-    wireframeColourScheme: 0,
-    polygonRampOverride: 0,
-    textureAffine: 0,
-    /** 0x97024: the per-vertex-shade filler for mode 0x4000 (else flat); 1 in the image, and every write found sets 1 */
-    shadedFillEnabled: 1,
-    /**
-     * 0x97030, unlabelled: bit 0 gates the mode 0x3000 sprites
-     * (render_asm_sub_03b950); vfx_video sets bit 3 and the HUD code clears
-     * bit 2, which are not read here. 1 in the image.
-     */
-    dat00097030: 1,
-    /** bits 0x100 mechs, 0x200 gamethings, 0x400 ?, 0x800 terrain: textures off for that class */
-    textureOffTypeMask: 0,
-  },
-  () => {
-    const r = renderOptions;
-    r.wireframeMode = imageI32(LABEL.wireframeMode, 0);
-    r.wireframeColourScheme = imageI32(LABEL.wireframeColourScheme, 0);
-    r.polygonRampOverride = imageI32(LABEL.polygonRampOverride, 0);
-    r.textureAffine = imageI32(LABEL.textureAffine, 0);
-    r.shadedFillEnabled = imageI32(LABEL.shadedFillEnabled, 1);
-    r.dat00097030 = imageI32(0x97030, 1);
-    r.textureOffTypeMask = imageI32(LABEL.textureOffTypeMask, 0);
-  },
-);
+/** The render-state block's options (0x97020..), game state the sim sets. */
+export { renderOptions };
 
 /** The values viewer_latch_globals copies out for the shading code. */
 export interface LightLatch {
