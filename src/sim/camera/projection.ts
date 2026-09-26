@@ -27,6 +27,12 @@ export const projectionGlobals = registerGlobals(
      * original's steps pop close in. Apply a change with viewerRefreshLodScale.
      */
     lodDistanceScale: 1,
+    /**
+     * @portOnly the host's switch for mech_lod_update's policy: when set, every
+     * mech inside the nearest range t0 gets level 0, not only the nearest one
+     * (the detail enhancement, render/enhance). 0 is the original.
+     */
+    lodAllNear: 0,
   },
   () => {
     projectionGlobals.lodQuality = imageI32(LABEL.lodQuality, 1);

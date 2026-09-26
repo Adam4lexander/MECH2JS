@@ -60,6 +60,18 @@ import { playerTargetPosition } from '../../render/xr/xrRig.ts';
 import { aimDepth } from '../../render/xr/aim.ts';
 import { HUD_LAYER } from '../../engine/vfx/vfx.ts';
 import { projectionGlobals, viewerRefreshLodScale } from '../../sim/camera/projection.ts';
+import { GroundField } from '../../render/enhance/groundField.ts';
+import { lightDirection, Shadows } from '../../render/enhance/shadows.ts';
+import { renderView } from '../../render/pipeline/viewLatch.ts';
+import { commonRamps, CockpitRenderer, darkestIndex, nearestIndex, slotPanes } from '../../render/cockpit/cockpit.ts';
+import { cockpitChassis } from '../../render/cockpit/chassis.ts';
+import { buildDesign, DESIGNS } from '../../render/cockpit/designs/index.ts';
+import { radar } from '../../sim/cockpit/radar.ts';
+import { viewScene } from '../../sim/world/viewScene.ts';
+import { hud } from '../../sim/cockpit/hud.ts';
+import { skyPaletteChoice, type SkyChoice } from '../../render/enhance/skyDetail.ts';
+import { hueRun } from '../../render/enhance/paletteRuns.ts';
+import { ENHANCE_LABELS, recallEnhanceSettings, storeEnhanceSettings, type EnhanceSettings } from '../../render/enhance/enhanceSettings.ts';
 
 /** VR: the reticle's plane - out to this far with nothing under it, never nearer than the min, easing over RETICLE_EASE seconds (metres) */
 const RETICLE_DISTANCE = 300;
@@ -83,10 +95,19 @@ export function Viewport({ game }: { game: Game }) {
   const paletteDirty = useRef(false);
   const [xrSupported, setXrSupported] = useState(false);
   const [xrOn, setXrOn] = useState(false);
+  /** VR asked for and the headset not yet given it (the browser and the XR runtime can take a minute) */
+  const [xrPending, setXrPending] = useState(false);
   /** enters VR, or leaves it while in it (set by the renderer's effect) */
   const toggleXr = useRef<(() => void) | null>(null);
   const [xrSettings, setXrSettings] = useState<XrSettings>(recallXrSettings);
   const xrSettingsRef = useRef(xrSettings);
+  const [enhance, setEnhance] = useState<EnhanceSettings>(recallEnhanceSettings);
+  const [enhanceOpen, setEnhanceOpen] = useState(false);
+  const enhanceRef = useRef(enhance);
+  useEffect(() => {
+    enhanceRef.current = enhance;
+    storeEnhanceSettings(enhance);
+  }, [enhance]);
   useEffect(() => {
     xrSettingsRef.current = xrSettings;
     storeXrSettings(xrSettings);
@@ -129,6 +150,15 @@ export function Viewport({ game }: { game: Game }) {
     const skyGround = new SkyGround(sr.uniforms);
     sr.backdropScene.add(skyGround.mesh);
     const hudOverlay = new HudOverlay(sr.uniforms);
+    // the hand-built cockpits (render/cockpit): the chassis's design, its colours, and a preview override
+    const cockpit = new CockpitRenderer(hudOverlay.windowUniforms);
+    let cockpitKey: string | null = null;
+    let previewKey: string | null = null;
+    /** debug: also draw the cockpit, at the game's eye, when looking through the scene camera */
+    let cockpitOutside = false;
+    let cockpitRampsOf: string | null = null;
+    let hullRamps: number[] = [];
+    const lampColours = { red: 0, amber: 0, green: 0, blank: 0 };
     renderer.autoClear = false;
     // VR: the rig the headset sits in, the sky about it, the controllers
     renderer.xr.enabled = true;
@@ -136,6 +166,14 @@ export function Viewport({ game }: { game: Game }) {
     const rig = new XrRig();
     const xrSky = new XrSky(sr.uniforms);
     sr.backdropScene.add(xrSky.mesh);
+    // the enhancements (render/enhance): the ground surface with the backdrop, the scrounge field in the world
+    const groundField = new GroundField(sr.uniforms);
+    sr.backdropScene.add(groundField.grid);
+    sr.scene.add(groundField.field);
+    const shadows = new Shadows();
+    let skyChoice: SkyChoice | null = null;
+    let groundRun: [number, number] = [0, 255];
+    let skyChoiceFor = '';
     const xrInput = new XrInput();
     const xrViewer = new Viewer();
     /** the cockpit scene carries the rig's matrix (reset on leaving VR) */
@@ -144,20 +182,74 @@ export function Viewport({ game }: { game: Game }) {
       xrInput.release();
       setXrOn(false);
     };
+    /**
+     * Entering VR, timed (one console line once the headset has had five frames): the session's grant,
+     * three's setSession (which awaits makeXRCompatible - a context the headset's GPU cannot use is
+     * lost and rebuilt, every shader and texture with it), the first headset frame, and the first few
+     * frames' cost with the shaders compiled for them. Measured on the user's PC headset: the grant took
+     * 55 s - the browser and the XR runtime starting up, before the page is involved - and all the
+     * rest under 50 ms.
+     */
+    let xrEntry: { t0: number; granted: number; set: number; frames: number[]; programs: number; lost: boolean } | null = null;
+    const ms = (t: number) => `${t.toFixed(0)} ms`;
+    const vrLog = (text: string) => console.info(`[vr] ${text}`);
+    const onLost = () => {
+      if (xrEntry) xrEntry.lost = true;
+      console.warn(`[vr] WebGL context lost${xrEntry ? ` ${ms(performance.now() - xrEntry.t0)} into entering VR` : ''}`);
+    };
+    const onRestored = () => console.warn(`[vr] WebGL context restored${xrEntry ? ` ${ms(performance.now() - xrEntry.t0)} into entering VR` : ''}`);
+    renderer.domElement.addEventListener('webglcontextlost', onLost);
+    renderer.domElement.addEventListener('webglcontextrestored', onRestored);
     toggleXr.current = () => {
       const current = renderer.xr.getSession();
       if (current) {
         void current.end();
         return;
       }
+      if (!navigator.xr) return;
+      const entry = { t0: performance.now(), granted: 0, set: 0, frames: [] as number[], programs: renderer.info.programs?.length ?? 0, lost: false };
+      xrEntry = entry;
+      // the mission holds (the game's own pause, sound and all) until the headset is showing it: the
+      // session can take a minute to be granted, and the pilot is not in the seat yet
+      const resume = game.mode === 'play';
+      if (resume) game.setMode('edit');
+      setXrPending(true);
+      const done = () => {
+        setXrPending(false);
+        if (resume && game.mode !== 'play') game.setMode('play');
+      };
       navigator.xr
-        ?.requestSession('immersive-vr', { optionalFeatures: ['local'] })
+        .requestSession('immersive-vr', { optionalFeatures: ['local'] })
         .then(async (session) => {
+          entry.granted = performance.now();
           session.addEventListener('end', onXrEnd, { once: true });
           await renderer.xr.setSession(session);
+          entry.set = performance.now();
           setXrOn(true);
+          done();
         })
-        .catch((err: unknown) => console.warn('VR session refused', err));
+        .catch((err: unknown) => {
+          xrEntry = null;
+          done();
+          console.warn('VR session refused', err);
+        });
+    };
+    /** Times a headset frame while entering VR; reports after the fifth. */
+    const timeXrFrame = (start: number) => {
+      const e = xrEntry;
+      if (!e || !renderer.xr.isPresenting) return;
+      const end = performance.now();
+      if (e.frames.length === 0) e.frames.push(start - e.set);
+      e.frames.push(end - start);
+      if (e.frames.length < 6) return;
+      xrEntry = null;
+      const [wait, ...cost] = e.frames;
+      const compiled = (renderer.info.programs?.length ?? 0) - e.programs;
+      vrLog(
+        `entered VR: session granted after ${ms(e.granted - e.t0)}, setSession ${ms(e.set - e.granted)}, ` +
+          `first headset frame ${ms(wait!)} later; first frames took ${cost.map(ms).join(', ')}; ${compiled} shader programs compiled for them` +
+          (e.lost ? '; the WebGL context was lost and rebuilt' : ''),
+      );
     };
     const fly = new FreeFly(sceneCam, el, sceneView);
     // start at the player's mech, else the mission's start view (VWST)
@@ -168,7 +260,7 @@ export function Viewport({ game }: { game: Game }) {
     sceneCam.position.set(sx - 15, sy + 12, sz + 25);
     fly.lookAt(new THREE.Vector3(sx, sy + 3, sz));
 
-    // debug handle: window.mw2.view.camera (the scene camera) / .gameCamera / .fly (setting fly.yaw / fly.pitch aims it) / .renderer / .views
+    // debug handle: window.mw2.view.camera (the scene camera) / .gameCamera / .fly (setting fly.yaw / fly.pitch aims it) / .renderer / .views / .dash / .hudOverlay
     const dbg = (window as unknown as { mw2?: Record<string, unknown> }).mw2;
 
     const gizmo = new TransformControls(sceneCam, renderer.domElement);
@@ -255,7 +347,21 @@ export function Viewport({ game }: { game: Game }) {
     // drawn when the game asks, into the window's pixels (render/passes/indexedView.ts)
     const views = new IndexedViews(renderer, sr.uniforms);
     renderPort.current = views;
-    if (dbg) dbg.view = { camera: sceneCam, gameCamera: gameCam, fly, renderer: sr, views };
+    const cockpitDebug = {
+      keys: Object.keys(DESIGNS),
+      /** draws `key`'s cockpit whatever the player's chassis (null: the player's own) */
+      preview(key: string | null) {
+        previewKey = key;
+      },
+      get current() {
+        return cockpit.current?.key ?? null;
+      },
+      /** debug: see the cockpit from the scene camera too */
+      set outside(on: boolean) {
+        cockpitOutside = on;
+      },
+    };
+    if (dbg) dbg.view = { camera: sceneCam, gameCamera: gameCam, fly, renderer: sr, views, cockpit: cockpitDebug, hudOverlay };
 
     let last = performance.now();
     let lastInfo = 0;
@@ -268,6 +374,10 @@ export function Viewport({ game }: { game: Game }) {
       // the controllers are read before the pass, as the keyboard's interrupts arrive before it
       if (session) xrInput.poll(session, game.mode === 'play');
       // the LOD distances: pushed out in a headset, the original's otherwise - set before the pass, whose mech_lod_update reads them
+      const en = enhanceRef.current;
+      // the enhancements (render/enhance): the main view's uniforms, and mech_lod_update's policy before the pass reads it
+      sr.uniforms.uPanels.value = en.mechPanels ? 1 : 0;
+      projectionGlobals.lodAllNear = en.mechsAllTop ? 1 : 0;
       const lodScale = xr ? xrSettingsRef.current.detail : 1;
       if (projectionGlobals.lodDistanceScale !== lodScale) {
         projectionGlobals.lodDistanceScale = lodScale;
@@ -305,6 +415,21 @@ export function Viewport({ game }: { game: Game }) {
         lastPalette = key;
         const p = game.paletteRgb();
         if (p) sr.setPalette(p);
+      }
+      // the sky enhancement's indices, from the palette on screen and the mission's sky colour
+      const skyFor = `${key}|${lighting.skyColour}|${lighting.groundColour}|${paletteDirty.current}`;
+      if (skyFor !== skyChoiceFor) {
+        skyChoiceFor = skyFor;
+        const p = game.paletteRgb();
+        skyChoice = p ? skyPaletteChoice(p, lighting.skyColour & 255) : null;
+        groundRun = p ? hueRun(p, lighting.groundColour & 255) : [lighting.groundColour & 255, lighting.groundColour & 255];
+        if (p) shadows.setPalette(p, sr.uniforms);
+        if (p) {
+          lampColours.blank = darkestIndex(p);
+          lampColours.red = nearestIndex(p, 63, 8, 4);
+          lampColours.amber = nearestIndex(p, 63, 42, 0);
+          lampColours.green = nearestIndex(p, 12, 60, 12);
+        }
       }
       const w = el.clientWidth;
       const h = el.clientHeight;
@@ -367,12 +492,43 @@ export function Viewport({ game }: { game: Game }) {
       };
       skyGround.mesh.visible = !xr;
       xrSky.mesh.visible = xr;
+      skyGround.setDetail(en.sky && wipe === null ? skyChoice : null);
+      xrSky.setDetail(en.sky && wipe === null ? skyChoice : null);
+      // the ground surface under the eye, and the scrounge field round the game's patch
+      const eyeAt = head ? new THREE.Vector3().setFromMatrixPosition(head.matrixWorld) : camera.position;
+      groundField.updateGrid(eyeAt, lighting.groundColour & 255, groundRun, en.ground && wipe === null && lighting.groundEnabled !== 0);
+      groundField.updateField(sr, en.ground);
+      // the shadow map along the mission's light (the one sync just latched), round the eye
+      if (en.shadows && (!playing || views.mainRequested)) {
+        const [ex, ey, ez] = fromThree(eyeAt.x, eyeAt.y, eyeAt.z);
+        shadows.render(renderer, sr.scene, eyeAt, lightDirection(renderView.light, [ex, ey, ez]), sr.uniforms);
+      } else sr.uniforms.uShadowOn.value = 0;
       if (head) xrSky.update(new THREE.Vector3().setFromMatrixPosition(head.matrixWorld), tanH, skyState);
       else skyGround.update(camera, drawSize.x, drawSize.y, skyState);
       sr.setViewport(drawSize.x, drawSize.y);
-      // the cockpit shell: in a headset, carried to the rig and enlarged about the eye (xrRig.ts)
+      // the cockpit: the chassis's hand-built design when there is one, in place of the shell's own mesh
+      const mapUp = radar.mode >= 3;
+      const inCockpit = en.cockpit && (!scene || cockpitOutside) && cameraGlobals.cockpitViewActive !== 0 && !mapUp;
+      if (cockpitKey === null && viewScene.cockpitHeadNode) cockpitKey = cockpitChassis(game.data.prj);
+      const headObj = viewScene.cockpitHeadNode?.userData ?? null;
+      const headEntry = headObj ? sr.cockpitEntryOf(headObj) : null;
+      const design = inCockpit && headEntry ? (DESIGNS[previewKey ?? cockpitKey ?? ''] ?? null) : null;
+      if (design && headEntry) {
+        // its colours are the shell's: the ramps its words are in
+        if (cockpitRampsOf !== `${design.key}|${lastPalette}`) {
+          const words: number[] = [];
+          for (const m of headEntry.meshes) for (const w of m.draw) words.push(w);
+          hullRamps = commonRamps(words);
+          if (hullRamps.length) cockpitRampsOf = `${design.key}|${lastPalette}`;
+        }
+        // the design's cabin stands in for the shell's mesh; the head's arms and guns stay
+        headEntry.group.visible = false;
+      }
+      cockpit.setDesign(design, buildDesign);
+      // the cockpit shell (or, under a hand-built cockpit, the head's arms): in a headset, carried to the rig
+      // and scaled about the eye (xrRig.ts) - at their own scale when the shell itself is not drawn
       if (xr) {
-        rig.cockpitMatrix(gameCam, sr.cockpitScene.matrix);
+        rig.cockpitMatrix(gameCam, sr.cockpitScene.matrix, design ? 1 : undefined);
         sr.cockpitScene.matrixWorldNeedsUpdate = true;
         cockpitMoved = true;
       } else if (cockpitMoved) {
@@ -415,6 +571,37 @@ export function Viewport({ game }: { game: Game }) {
           camera.updateProjectionMatrix();
         }
       }
+      // the hand-built cockpit and its screens, against the cockpit pass's depth: in the headset at the rig,
+      // on the flat screen at the game's eye
+      if (design && (hudReady || (scene && cockpitOutside))) {
+        const hull = hullRamps[0] ?? 0x40;
+        cockpit.setColours({ hull, trim: hullRamps[1] ?? hull, ...lampColours });
+        const pc = mechs.mechTable[mechs.playerMechIndex]?.control;
+        const n = (v: number | undefined) => (v ?? 0) / 0x400;
+        const throttle = pc ? (pc.reverseDirection !== 0 ? -0.5 : 1) * n(pc.throttle) : 0;
+        // each widget's pane is its window - where it draws (the radar lays its own over widget 0's)
+        const panes = slotPanes((i) => {
+          const win = hud.hudWidgets[i]?.window as { left: number; top: number; right: number; bottom: number } | null | undefined;
+          return win ? { x: win.left, y: win.top, w: win.right - win.left + 1, h: win.bottom - win.top + 1 } : null;
+        });
+        // radar modes: 0 off, 1 small, 2 large, 3-5 the map. The large radar stays on the HUD glass, across the
+        // view as the original draws it
+        if (radar.mode !== 1) panes.radar = null;
+        const seat = new THREE.Matrix4().makeTranslation(0, -xrSettingsRef.current.dashDrop, 0);
+        cockpit.update((xr ? rig.rig.matrixWorld : gameCam.matrixWorld).clone().multiply(seat), panes, { throttle, turn: n(pc?.legsPan), tilt: n(pc?.torso_tilt) });
+        if (xr) renderer.render(cockpit.scene, view);
+        else if (scene) renderer.render(cockpit.scene, sceneCam);
+        else {
+          // nearer than three's 50 cm near plane, like the shell: drawn with the plane pulled in as the shell was
+          const near = gameCam.near;
+          gameCam.near = 0.04;
+          gameCam.updateProjectionMatrix();
+          renderer.render(cockpit.scene, gameCam);
+          gameCam.near = near;
+          gameCam.updateProjectionMatrix();
+        }
+      } else cockpit.hide();
+      hudOverlay.setExcluded(cockpit.shown);
       // the game's 2D (HUD, radar, cockpit text) over it all, through the game's camera - in a headset on a plane ahead
       if (hudReady) {
         if (xr) {
@@ -422,7 +609,8 @@ export function Viewport({ game }: { game: Game }) {
           hudOverlay.markerMesh.visible = false;
           hudOverlay.worldMesh.visible = true;
           hudOverlay.setWorldLayers(0b111 & ~lifted);
-          rig.placeHud(hudOverlay.worldMesh, tanH, hudOverlay.aspect);
+          // the satellite map takes the whole view, as in the original: the HUD plane at the game's full field of view
+          rig.placeHud(hudOverlay.worldMesh, tanH, hudOverlay.aspect, mapUp ? 1 : undefined);
           renderer.render(rig.hudScene, rig.camera);
         } else renderer.render(hudOverlay.scene, hudOverlay.camera);
       }
@@ -482,9 +670,56 @@ export function Viewport({ game }: { game: Game }) {
       return aimDepth(gameCam, new THREE.Vector2((c.x / W) * 2 - 1, 1 - (c.y / H) * 2), world, own, RETICLE_MIN_DISTANCE, RETICLE_DISTANCE);
     };
     // the renderer's loop: the window's animation frames, or the headset's while a session is on
-    renderer.setAnimationLoop(frame);
+    /**
+     * The page's mirror of the headset: the left eye, copied onto the canvas after each headset frame
+     * (one framebuffer blit - the scene is not drawn again). While presenting, three sizes the canvas's
+     * drawing buffer to the headset's (both eyes side by side) but not its box on the page, so the eye
+     * is cropped to the box's shape and stretched over the whole buffer; the page's scaling then shows
+     * it undistorted. The crop is centred where straight ahead falls in the eye - a headset's eyes see
+     * further to the outside than the nose side, so that is not the eye image's middle.
+     */
+    const mirror = { on: true };
+    if (dbg) dbg.vrMirror = mirror;
+    const mirrorEye = (target: THREE.WebGLRenderTarget) => {
+      if (!mirror.on) return;
+      const gl = renderer.getContext();
+      if (!(gl instanceof WebGL2RenderingContext)) return;
+      const fb = (renderer.properties.get(target) as { __webglFramebuffer?: WebGLFramebuffer }).__webglFramebuffer;
+      const eye = renderer.xr.getCamera().cameras[0];
+      const boxW = renderer.domElement.clientWidth;
+      const boxH = renderer.domElement.clientHeight;
+      if (!fb || !eye || boxW <= 0 || boxH <= 0) return;
+      const vp = eye.viewport;
+      const aspect = boxW / boxH;
+      const w = Math.min(vp.z, vp.w * aspect);
+      const h = w / aspect;
+      // straight ahead in the eye's NDC: (0, 0, -1) through its projection
+      const e = eye.projectionMatrix.elements;
+      const cx = vp.x + ((1 - e[8]!) / 2) * vp.z;
+      const cy = vp.y + ((1 - e[9]!) / 2) * vp.w;
+      const x0 = Math.round(Math.min(Math.max(cx - w / 2, vp.x), vp.x + vp.z - w));
+      const y0 = Math.round(Math.min(Math.max(cy - h / 2, vp.y), vp.y + vp.w - h));
+      const state = renderer.state;
+      state.bindFramebuffer(gl.READ_FRAMEBUFFER, fb);
+      state.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+      // the blit obeys the scissor test
+      state.setScissorTest(false);
+      gl.blitFramebuffer(x0, y0, x0 + Math.round(w), y0 + Math.round(h), 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, gl.COLOR_BUFFER_BIT, gl.LINEAR);
+      state.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+      state.bindFramebuffer(gl.DRAW_FRAMEBUFFER, fb);
+    };
+    renderer.setAnimationLoop((now: number) => {
+      const start = performance.now();
+      // the headset's framebuffer for this frame: three binds it before calling back
+      const xrTarget = renderer.xr.isPresenting ? renderer.getRenderTarget() : null;
+      frame(now);
+      if (xrTarget) mirrorEye(xrTarget);
+      timeXrFrame(start);
+    });
     return () => {
       renderer.setAnimationLoop(null);
+      renderer.domElement.removeEventListener('webglcontextlost', onLost);
+      renderer.domElement.removeEventListener('webglcontextrestored', onRestored);
       toggleXr.current = null;
       void renderer.xr.getSession()?.end();
       xrInput.release();
@@ -496,6 +731,9 @@ export function Viewport({ game }: { game: Game }) {
       if (renderPort.current === views) renderPort.current = null;
       views.dispose();
       hudOverlay.dispose();
+      groundField.dispose();
+      shadows.dispose();
+      cockpit.dispose();
       gizmo.dispose();
       fly.dispose();
       sr.clear();
@@ -518,6 +756,13 @@ export function Viewport({ game }: { game: Game }) {
               : "the paused game, through the game's camera"}
         </div>
       </div>
+      {xrPending && (
+        <div className="xr-pending">
+          <div className="title">Starting VR…</div>
+          <div>Put the headset on. The mission is paused and carries on once the headset is showing it.</div>
+          <div className="hint">The browser and the VR runtime (SteamVR, Quest Link) can take a minute to start the first time; leaving the runtime running makes it quick.</div>
+        </div>
+      )}
       <div className="viewport-bar">
         {!playing && (
           <>
@@ -550,14 +795,29 @@ export function Viewport({ game }: { game: Game }) {
         <button className={!faithful ? 'active' : ''} onClick={() => setFaithful(false)} title="native resolution">
           Modern
         </button>
+        <div className="enhance">
+          <button className={enhanceOpen ? 'active' : ''} onClick={() => setEnhanceOpen((o) => !o)} title="detail added in the game's own palette terms (the inset displays stay the original's)">
+            Enhance
+          </button>
+          {enhanceOpen && (
+            <div className="enhance-menu">
+              {(Object.keys(ENHANCE_LABELS) as Array<keyof EnhanceSettings>).map((k) => (
+                <label key={k}>
+                  <input type="checkbox" checked={enhance[k]} onChange={(e) => setEnhance((s) => ({ ...s, [k]: e.target.checked }))} />
+                  {ENHANCE_LABELS[k]}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
         {xrSupported && (
           <button
-            className={xrOn ? 'active' : ''}
-            disabled={!playing && !xrOn}
+            className={xrOn ? 'active' : xrPending ? 'pending' : ''}
+            disabled={xrPending || (!playing && !xrOn)}
             onClick={() => toggleXr.current?.()}
-            title={xrOn ? 'leave VR' : "VR: sit in the cockpit with a headset (Play). Left stick throttle and turn, right stick torso, triggers fire, A/B targets, X view, Y menu"}
+            title={xrOn ? 'leave VR' : xrPending ? 'waiting for the headset' : "VR: sit in the cockpit with a headset (Play). Left stick throttle and turn, right stick torso, triggers fire, A/B targets, X view, Y menu"}
           >
-            VR
+            {xrPending ? 'VR…' : 'VR'}
           </button>
         )}
         {xrSupported && (
@@ -565,6 +825,7 @@ export function Viewport({ game }: { game: Game }) {
             <XrSlider label="cockpit" title="the cockpit's size about your eye (1 = the mech's own scale)" value={xrSettings.cockpitScale} min={0.15} max={1.5} step={0.05} unit="x" onChange={(v) => setXrSettings((s) => ({ ...s, cockpitScale: v }))} />
             <XrSlider label="HUD" title="the HUD's width as a share of the game's view (the reticle and target brackets are drawn in the world, not on it)" value={xrSettings.hudScale} min={0.3} max={1} step={0.05} unit="%" onChange={(v) => setXrSettings((s) => ({ ...s, hudScale: v }))} />
             <XrSlider label="detail" title="how far out the detail steps are pushed in VR (1 = the original's)" value={xrSettings.detail} min={1} max={8} step={0.5} unit="x" onChange={(v) => setXrSettings((s) => ({ ...s, detail: v }))} />
+            <XrSlider label="seat" title="VR cockpit: how far the cockpit sits below its place (a taller or shorter pilot)" value={xrSettings.dashDrop} min={-0.3} max={0.3} step={0.02} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, dashDrop: v }))} />
             <XrSlider label="at" title="how far ahead of your eye the HUD stands" value={xrSettings.hudDistance} min={0.5} max={5} step={0.1} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, hudDistance: v }))} />
           </>
         )}

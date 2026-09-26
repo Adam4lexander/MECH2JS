@@ -36,10 +36,17 @@ uniform sampler2D uPalette;
 uniform sampler2D uWindow;   // RG8: index, drawn
 uniform vec2 uWindowSize;    // window width, height
 uniform vec2 uTarget;        // render target width, height
+uniform vec4 uExclude[8];    // window rectangles (x, y, w, h) shown elsewhere (the cockpit's screens)
+uniform int uExcludeN;
 out vec4 fragColour;
 void main() {
   // window row 0 is the top of the screen
   ivec2 p = ivec2(floor(gl_FragCoord.x * uWindowSize.x / uTarget.x), int(uWindowSize.y) - 1 - int(floor(gl_FragCoord.y * uWindowSize.y / uTarget.y)));
+  for (int k = 0; k < 8; k++) {
+    if (k >= uExcludeN) break;
+    vec4 r = uExclude[k];
+    if (float(p.x) >= r.x && float(p.y) >= r.y && float(p.x) < r.x + r.z && float(p.y) < r.y + r.w) discard;
+  }
   vec2 t = texelFetch(uWindow, p, 0).rg;
   if (t.g < 0.5) discard;
   int i = int(t.r * 255.0 + 0.5);
@@ -62,11 +69,18 @@ uniform sampler2D uPalette;
 uniform sampler2D uWindow;
 uniform vec2 uWindowSize;
 uniform int uLayers;   // bit n: draw the pixels of HUD layer n
+uniform vec4 uExclude[8];   // window rectangles (x, y, w, h) shown elsewhere (the VR cockpit's screens)
+uniform int uExcludeN;
 in vec2 vUv;
 out vec4 fragColour;
 void main() {
   ivec2 size = ivec2(uWindowSize);
   ivec2 p = clamp(ivec2(floor(vUv.x * uWindowSize.x), size.y - 1 - int(floor(vUv.y * uWindowSize.y))), ivec2(0), size - 1);
+  for (int k = 0; k < 8; k++) {
+    if (k >= uExcludeN) break;
+    vec4 r = uExclude[k];
+    if (float(p.x) >= r.x && float(p.y) >= r.y && float(p.x) < r.x + r.z && float(p.y) < r.y + r.w) discard;
+  }
   vec2 t = texelFetch(uWindow, p, 0).rg;
   if (t.g < 0.5) discard;
   int layer = 255 - int(t.g * 255.0 + 0.5);
@@ -75,6 +89,11 @@ void main() {
   fragColour = vec4(texelFetch(uPalette, ivec2(i, 0), 0).rgb, 1.0);
 }
 `;
+
+/** A material's own rectangles to leave out (setExcluded), none at first. */
+function excludeUniforms(): { uExclude: { value: THREE.Vector4[] }; uExcludeN: { value: number } } {
+  return { uExclude: { value: Array.from({ length: 8 }, () => new THREE.Vector4()) }, uExcludeN: { value: 0 } };
+}
 
 export class HudOverlay {
   readonly scene = new THREE.Scene();
@@ -90,7 +109,8 @@ export class HudOverlay {
 
   constructor(shared: IndexedUniforms) {
     this.u.uPalette.value = shared.uPalette.value;
-    const mat = new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, uniforms: this.u, vertexShader, fragmentShader, depthTest: false, depthWrite: false, transparent: false });
+    const mat = new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, uniforms: { ...this.u, ...excludeUniforms() }, vertexShader, fragmentShader, depthTest: false, depthWrite: false, transparent: false });
+    this.screenMaterial = mat;
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
     mesh.frustumCulled = false;
     this.scene.add(mesh);
@@ -117,8 +137,26 @@ export class HudOverlay {
     (this.worldMesh.material as THREE.ShaderMaterial).uniforms.uLayers!.value = mask;
   }
 
+  /** Rectangles of the window the HUD leaves out, on the screen and on worldMesh (up to eight: they are on the cockpit's screens). */
+  setExcluded(rects: ReadonlyArray<{ x: number; y: number; w: number; h: number }>): void {
+    for (const m of [this.worldMesh.material as THREE.ShaderMaterial, this.screenMaterial]) {
+      const u = m.uniforms;
+      const arr = u.uExclude!.value as THREE.Vector4[];
+      const n = Math.min(8, rects.length);
+      for (let i = 0; i < n; i++) arr[i]!.set(rects[i]!.x, rects[i]!.y, rects[i]!.w, rects[i]!.h);
+      u.uExcludeN!.value = n;
+    }
+  }
+  /** the flat pass's material (screen space) */
+  private readonly screenMaterial: THREE.ShaderMaterial;
+
+  /** The palette and window-texture uniform holders, for other surfaces that show the window (the VR cockpit's screens). */
+  get windowUniforms(): { uPalette: { value: THREE.DataTexture | null }; uWindow: { value: THREE.DataTexture | null }; uWindowSize: { value: THREE.Vector2 } } {
+    return this.u;
+  }
+
   private worldPlane(layers: number): THREE.Mesh {
-    const uniforms = { ...this.u, uLayers: { value: layers } };
+    const uniforms = { ...this.u, uLayers: { value: layers }, ...excludeUniforms() };
     const mat = new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, uniforms, vertexShader: worldVertexShader, fragmentShader: worldFragmentShader, depthTest: false, depthWrite: false });
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
     mesh.frustumCulled = false;

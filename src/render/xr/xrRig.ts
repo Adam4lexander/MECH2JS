@@ -126,8 +126,8 @@ export class XrRig {
    * Sizes the HUD plane: `tanH` the tangent of half the game's horizontal
    * field of view, `aspect` the window's height / width.
    */
-  placeHud(hud: THREE.Object3D, tanH: number, aspect: number): void {
-    place(this.rig, hud, this.settings.hudDistance, tanH * this.settings.hudScale, aspect);
+  placeHud(hud: THREE.Object3D, tanH: number, aspect: number, hudScale = this.settings.hudScale): void {
+    place(this.rig, hud, this.settings.hudDistance, tanH * hudScale, aspect);
   }
 
   /**
@@ -143,11 +143,12 @@ export class XrRig {
 
   /**
    * The cockpit scene's matrix: from the pass's eye (`eye`, the game camera)
-   * to the rig, scaled settings.cockpitScale times about the eye.
+   * to the rig, scaled settings.cockpitScale times about the eye (`k` in
+   * its place: 1 when a hand-built cockpit stands in for the shell and only
+   * the head's arms remain, at their own scale).
    */
-  cockpitMatrix(eye: THREE.Camera, out: THREE.Matrix4): THREE.Matrix4 {
+  cockpitMatrix(eye: THREE.Camera, out: THREE.Matrix4, k = this.settings.cockpitScale): THREE.Matrix4 {
     eye.updateMatrixWorld();
-    const k = this.settings.cockpitScale;
     return out.copy(this.rig.matrixWorld).multiply(this.m.makeScale(k, k, k)).multiply(this.m.copy(eye.matrixWorld).invert());
   }
 

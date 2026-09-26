@@ -19,6 +19,9 @@
  * hudDistance: metres ahead of the eye. Drawn over the cockpit, the HUD
  * reads best just in front of its nearest parts.
  *
+ * dashDrop: how far below its place the hand-built cockpit sits
+ * (render/cockpit), metres - for a pilot sitting taller or shorter.
+ *
  * detail: how far out every LOD step is pushed (projection.ts
  * lodDistanceScale) while in VR - the meshes' detail steps and
  * mech_lod_update's ranges. 1 is the original's; its steps, chosen for a
@@ -31,9 +34,10 @@ export interface XrSettings {
   hudScale: number;
   hudDistance: number;
   detail: number;
+  dashDrop: number;
 }
 
-export const XR_DEFAULTS: XrSettings = { cockpitScale: 0.35, hudScale: 0.6, hudDistance: 1.2, detail: 3 };
+export const XR_DEFAULTS: XrSettings = { cockpitScale: 0.35, hudScale: 0.6, hudDistance: 1.2, detail: 3, dashDrop: 0 };
 
 const KEY = 'mw2.vr';
 
@@ -46,6 +50,7 @@ export function recallXrSettings(): XrSettings {
       hudScale: num(s.hudScale, XR_DEFAULTS.hudScale),
       hudDistance: num(s.hudDistance, XR_DEFAULTS.hudDistance),
       detail: num(s.detail, XR_DEFAULTS.detail),
+      dashDrop: typeof s.dashDrop === 'number' && Number.isFinite(s.dashDrop) ? s.dashDrop : XR_DEFAULTS.dashDrop,
     };
   } catch {
     return { ...XR_DEFAULTS };

@@ -122,6 +122,10 @@ your head moves inside it (`src/render/xr/xrRig.ts`). The rig is drawn one
 loop pass behind, interpolated between passes, so the cockpit doesn't
 judder at the 20 Hz loop rate.
 
+While you're in VR, the page's viewport mirrors the headset's left eye,
+cropped to the viewport's shape. It is copied from the headset's
+framebuffer after each frame, not drawn again.
+
 Three things are specific to stereo:
 
 - **The cockpit shell** is modelled at the mech's own scale, 2.7 m to
@@ -170,10 +174,81 @@ The keyboard still works. Recentre with the headset's own recentre.
 WebXR needs a secure origin:
 
 - **PC VR** (Link, SteamVR): Chrome or Edge on `localhost` works as is.
+  The browser can take a minute to grant the session while the VR runtime
+  starts; keeping the runtime running beforehand makes it quick. Meanwhile
+  the button reads **VR...**, a notice says so, and the mission is paused.
+  It carries on once the headset is showing it. The console logs a
+  `[vr] entered VR` line with the timings.
 - **Standalone Quest:** run `adb reverse tcp:5173 tcp:5173` and open
   `localhost:5173` in the Quest browser.
 - **Without a headset:** the Immersive Web Emulator extension works on
   `localhost`.
+
+## Enhancements
+
+The viewport bar's **Enhance** menu adds detail in the game's own terms: every
+new pixel is a palette index chosen by colour ramp, shade step or the
+checkerboard dither. So the day cycle, dusk, night and infrared recolour it
+all. Each item switches off on its own, and the inset displays the game reads
+back (target display, damage views, map) stay the original's.
+
+- **Armour panels.** Mech faces are divided into plates about a metre across,
+  a shade step apart, with seams two steps darker, all on the face's own ramp.
+  Plates too small to see are left plain (the shader in
+  `src/render/materials/indexedMaterial.ts`).
+- **All near mechs at top detail.** `mech_lod_update` gives its top level to
+  every mech in its nearest range, not only the nearest one. This is the
+  port-only `lodAllNear` in `src/sim/camera/projection.ts`, marked as a
+  divergence.
+- **Ground detail.** The flat ground becomes a dithered surface around the
+  ground colour, about 3 km across, fading back into the original fill at its
+  edge. It varies only within the ground colour's hue run
+  (`src/render/enhance/paletteRuns.ts`), because a palette row can hold other
+  colours: PLUMSCN1's ground row holds the lakes' teal, so its ground stays
+  flat. The game's scrounge patch (rocks and scrub) is repeated on the grid
+  cells round its own (`src/render/enhance/groundField.ts`).
+- **Sky gradient and stars.** Above the haze band the sky keeps dithering up
+  its ramp towards the zenith. At night there are stars in the palette's
+  brightest grey (`src/render/enhance/skyDetail.ts`).
+- **Shadows.** A shadow map along the mission's own light covers 320 m round
+  the eye (`src/render/enhance/shadows.ts`). A shadowed colour becomes the
+  palette's nearest colour to it at about 55% brightness, built the way a
+  LUMA table is, from the palette on screen. The game's own LUMA tables leave
+  whole ramps unchanged, AMY_SCN1's ground among them. Edges are dithered.
+- **Cockpits.** Every chassis gets a hand-built cockpit in MW2's own style:
+  low-poly, flat-shaded, palette-coloured (`src/render/cockpit`).
+  - **The glass.** Each cockpit is cut to its mech's own glass: the window's
+    outline as the original shell shows it from the pilot's eye, measured
+    for every chassis (`glass.ts`, checked against the shells by
+    `test/sim/cockpits.test.ts`). The Mad Dog keeps its nose glass, the Nova
+    its tall slot, the Timber Wolf its wrap-round canopy.
+  - **Layout.** Inside, a console runs across under the glass. Its centre
+    face carries the target display and the radar, where the flat view
+    keeps them whole. The left wing carries the heat and jump-jet gauges;
+    the right wing carries the weapon list over the damage display and
+    speed. Where the glass runs on down, the console splits into two pods
+    and the floor stays open: target and radar on the left pod, weapons,
+    speed, damage and gauges on the right.
+  - **Screens.** The console carries six screens: radar, speed and
+    throttle, heat and jump-jet status, target display, weapon list and
+    damage display. Each shows the game's own pixels, and the HUD keeps only
+    the compass, altitude, reticle, target box and messages. The original's
+    widget panes overlap, so each screen shows only the pieces of panes
+    its widgets draw in (`kit.ts` SCREENS). The target screen is the
+    target display over its name-and-range readout. The status screen is
+    the heat, heat-rate and jump-jet gauges stacked. The speed screen is
+    the kph readout over the throttle bar. Screens are laid out on their
+    faces with a margin, each sized to its content's shape. Lamps and
+    switches keep to a strip along each face's foot and trim to its top
+    edge, so nothing sits on a screen.
+  - **Controls and details.** Armrests carry a throttle lever and a stick
+    that follow the controls. Inner Sphere mechs get pipes and switch banks;
+    Clan mechs get cleaner panels and lamp strips.
+  - **Modes.** The satellite map (F3) takes over the whole view as in the
+    original. The large radar (F2) draws across the glass. The missile
+    camera (F10) leaves the cockpit.
+  - **Headset.** The **seat** slider in VR raises or lowers the whole
+    cockpit.
 
 ## Layout
 

@@ -18,6 +18,7 @@
 import * as THREE from 'three';
 import type { IndexedUniforms } from '../materials/indexedMaterial.ts';
 import type { SkyGroundState } from '../passes/skyGround.ts';
+import { SKY_DETAIL_GLSL, type SkyChoice } from '../enhance/skyDetail.ts';
 
 const vertexShader = /* glsl */ `
 out vec3 vDir;
@@ -38,13 +39,17 @@ uniform int uSkyOn;
 uniform int uGroundOn;
 in vec3 vDir;
 out vec4 outColor;
+${SKY_DETAIL_GLSL}
 void main() {
   vec3 d = normalize(vDir);
+  float starR = skyStarRadius(d);
+  bool inBand = false;
   bool below = d.y < 0.0;
   if ((below && uGroundOn == 0) || (!below && uSkyOn == 0)) discard;
   int idx = below ? uGround : uSky;
   if (!below && uBandTan > 0.0) {
     float tanE = d.y / max(length(d.xz), 1e-6);
+    inBand = tanE <= uBandTan;
     if (tanE <= uBandTan) {
       float t = tanE / uBandTan;   // 0 on the horizon, 1 at the band's top
       int v = int(floor((float((uGround - 1) << 16) + t * float((uSky - (uGround - 1)) << 16)) + 0.5));
@@ -53,6 +58,7 @@ void main() {
       idx = (v + 0x8000 + (upStep ? 0x7fff : -0x8000)) >> 16;
     }
   }
+  if (!below && !inBand && uSkyEnh != 0) idx = skyDetail(d, uSky, ivec2(gl_FragCoord.xy), starR);
   outColor = vec4(texelFetch(uPalette, ivec2(idx & 255, 0), 0).rgb, 1.0);
 }
 `;
@@ -66,6 +72,9 @@ export class XrSky {
     uGround: { value: 0 },
     uSkyOn: { value: 1 },
     uGroundOn: { value: 1 },
+    uSkyEnh: { value: 0 },
+    uSkyTop: { value: 0 },
+    uStar: { value: -1 },
   };
 
   constructor(indexed: IndexedUniforms) {
@@ -87,5 +96,14 @@ export class XrSky {
     this.u.uGround.value = s.ground;
     this.u.uSkyOn.value = s.skyOn ? 1 : 0;
     this.u.uGroundOn.value = s.groundOn ? 1 : 0;
+  }
+
+  /** The sky enhancement (render/enhance/skyDetail.ts): off with null. */
+  setDetail(choice: SkyChoice | null): void {
+    this.u.uSkyEnh.value = choice ? 1 : 0;
+    if (choice) {
+      this.u.uSkyTop.value = choice.top;
+      this.u.uStar.value = choice.star;
+    }
   }
 }
