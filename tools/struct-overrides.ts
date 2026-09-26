@@ -30,6 +30,8 @@ export const POINTER_TYPES: Record<string, string> = {
   'GamepieceClass.createLoadout': 'CodePtr',
   'GamepieceClass.hooks': 'CodePtr',
   'MechEntity.hooks': 'CodeFn',
+  // AiRule ** - the mech's six-slot record at 0xf44e8 (mech_ai_setup), a null-terminated rule list
+  'MechEntity.ruleSet': '(AiRule | null)[]',
   'HudWidget.methods': 'CodeFn',
   'HudWidget.hooks': 'CodeFn',
 };

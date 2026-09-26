@@ -43,7 +43,7 @@ import { fallingObjectAttach, fallingObjectRandomiseMotion } from '../things/fal
 import { gamethingApplyDamage } from '../things/gameThingDamage.ts';
 import { things } from '../things/gameThings.ts';
 import { lighting } from '../world/environment.ts';
-import { paletteFadeForEffect, paletteFadeStepsLeft } from '../world/palettes.ts';
+import { paletteFadeForEffect, paletteFadeStepsLeft, paletteStartFade } from '../world/palettes.ts';
 import { bitmap3dSetEnable, bitmap3dSetFrame } from '../world/bitmap3d.ts';
 import { worldRecordObject } from '../world/worldRecords.ts';
 import { SIM_SLOT_COUNT, simTables } from './simTables.ts';
@@ -429,6 +429,35 @@ export function nukeBlastUpdate(): void {
     destructiblesBlastDamage(t.nukeBlastX, t.nukeBlastY, t.nukeBlastZ, t.nukeBlastRadius, 0x1000);
     t.nukeBlastTicksLeft = (t.nukeBlastTicksLeft - clock.tickDelta) | 0;
   }
+}
+
+/**
+ * Sets off a nuke at a mech: the blast centred on it, up to 4 km (or a live
+ * nuke effect's object radius * 100), lasting twice effect 0x16's lifetime
+ * with the screen flashing for as long; then effect 0x16 there.
+ *
+ * @mw2 nuke_detonate 0x00051e90
+ * @fidelity exact
+ */
+export function nukeDetonate(mech: MechEntity): void {
+  const t = simTables;
+  t.nukeBlastMaxRadius = 0x61a80;
+  const duration = Math.imul(effectTypes()[0x16]!.lifetime, 2);
+  for (let i = 0xff; i >= 0; i--) {
+    const s = t.simSlots[i]!;
+    const obj = s.typeIndex === 0x16 && s.node ? s.node.userData : null;
+    if (obj) {
+      t.nukeBlastMaxRadius = Math.imul(obj.radius, 100);
+      break;
+    }
+  }
+  paletteStartFade(0x12, duration, 2);
+  t.nukeBlastX = mech.posX;
+  t.nukeBlastTicksLeft = duration;
+  t.nukeBlastY = mech.posY;
+  t.nukeBlastZ = mech.posZ;
+  t.nukeBlastRadius = 0;
+  effectSpawn(0x16, t.nukeBlastX, t.nukeBlastY, t.nukeBlastZ, t.nukeBlastX, t.nukeBlastY, t.nukeBlastZ, 0, 0, 0);
 }
 
 /**

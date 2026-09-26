@@ -60,7 +60,7 @@ function placeOnNode(l: MechLoadout): void {
  *
  * @mw2 mech_std_create 0x000266e0
  * @fidelity partial
- * @divergence mech_ai_setup's rule tables are Phase 5 stubs; the loadout dwords at +0x90 and +0xf0 (header padding, no port fields) are zeroed in the original
+ * @divergence the loadout dwords at +0x90 and +0xf0 (header padding, no port fields) are zeroed in the original
  */
 export const mechStdCreate = registerCode('mech_std_create', 0x266e0, (entity: MechEntity): void => {
   const l = entity.loadout;
@@ -127,7 +127,7 @@ export const mechStdCreate = registerCode('mech_std_create', 0x266e0, (entity: M
  *
  * @mw2 mech_alt_create 0x0002eb00
  * @fidelity partial
- * @divergence mech_ai_setup's rule tables are Phase 2; the loadout dword at +0xf0 (no port field) is zeroed in the original
+ * @divergence the loadout dword at +0xf0 (no port field) is zeroed in the original
  */
 export const mechAltCreate = registerCode('mech_alt_create', 0x2eb00, (entity: MechEntity): void => {
   const l = entity.loadout;
@@ -174,7 +174,7 @@ export const mechAltCreate = registerCode('mech_alt_create', 0x2eb00, (entity: M
  *
  * @mw2 door_create 0x00033140
  * @fidelity partial
- * @divergence mech_ai_setup's rule tables are Phase 2; the loadout dword at +0xf0 (no port field) is zeroed in the original
+ * @divergence the loadout dword at +0xf0 (no port field) is zeroed in the original
  */
 export const doorCreate = registerCode('door_create', 0x33140, (entity: MechEntity): void => {
   const l = entity.loadout;

@@ -1745,7 +1745,7 @@ export class MechEntity {
   /** +0x0fe char[22] */
   nameAlt: string = '';
   /** +0x114 AiRule * * */
-  ruleSet: AiRule | null = null;
+  ruleSet: (AiRule | null)[] | null = null;
   /** +0x118 void *[3] */
   stateRules: (unknown)[] = new Array<unknown>(3).fill(null);
   /** +0x124 uint[2] */

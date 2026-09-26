@@ -44,6 +44,12 @@ Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
   the overhead map (F3) - are rendered in palette indices and read back into
   that window when the game asks, so its 2D lands over them as it does in
   the original.
+  The other gamepieces think for themselves: the AIT rule tables, the state
+  machine and behaviours, group orders and the per-frame objective
+  evaluation are the game's own (src/sim/ai, src/sim/groups/orders.ts,
+  src/mission/results.ts). Enemy stars start shut down on their start
+  objective and wake as the mission's objectives open - in AMY_SCN1 the
+  first star powers up and comes for the player straight away.
 - **Edit** - no frame runs and time stands still; the editor shows the scene
   hierarchy, the game's tables, an inspector over every struct field with its
   offset and C type, a free camera, the asset browser and the console. Step

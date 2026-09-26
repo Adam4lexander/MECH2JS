@@ -31,3 +31,8 @@ export function imageU8(addr: number, fallback: number): number {
 export function imageI32s(addr: number, count: number, fallback: number[]): number[] {
   return image ? Array.from({ length: count }, (_, i) => image!.i32(addr + i * 4)) : fallback.slice();
 }
+
+/** The double at `addr`, or `fallback` before an image is loaded. */
+export function imageF64(addr: number, fallback: number): number {
+  return image ? image.f64(addr) : fallback;
+}

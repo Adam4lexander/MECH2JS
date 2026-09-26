@@ -329,6 +329,18 @@ function objectMethod(objectClass: number, column: number): CodeFn | null {
   return resolveCode(imageI32(OBJECT_METHODS + i * 4, OBJECT_METHODS_IMAGE[i] ?? 0) >>> 0);
 }
 
+/**
+ * Non-zero when the object's class has a ground-height method
+ * (objectGroundHeightMethods, column 2: classes 0 and 5).
+ *
+ * @mw2 object_is_ground 0x0001c2e0
+ * @fidelity exact
+ */
+export function objectIsGround(obj: WorldObject): number {
+  const i = obj.objectClass * 3 + 2;
+  return imageI32(OBJECT_METHODS + i * 4, OBJECT_METHODS_IMAGE[i] ?? 0) !== 0 ? 1 : 0;
+}
+
 // ---------------------------------------------------------------------------
 // ground height
 

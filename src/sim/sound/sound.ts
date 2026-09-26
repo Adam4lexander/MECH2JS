@@ -4,6 +4,7 @@
  * place and in order.
  */
 import { divergence } from '../../core/provenance.ts';
+import { registerGlobals } from '../../engine/globals.ts';
 
 /**
  * @mw2 sound_play 0x00040c50
@@ -101,4 +102,44 @@ export function engineNoteStop(): void {
  */
 export function engineNoteMute(): void {
   divergence('engine_note_mute: no audio yet', 'engine_note_mute');
+}
+
+/**
+ * The voice channel's sequencer state: 0x97ddc, the message playing now
+ * (null when none). The sequencer is Phase 7, so nothing ever plays.
+ */
+export const soundSeq = registerGlobals('soundSeq', { currentMessage: null as unknown }, () => {
+  soundSeq.currentMessage = null;
+});
+
+/** The {sound id, text, sfl} block the mission-result announcers queue. @portOnly */
+export interface SoundSeqMessage {
+  sound: number;
+  text: string;
+  sfl: Uint8Array | null;
+}
+
+/**
+ * Queues a {sound, text, sfl} block as sequence message 0x50
+ * (sound_seq_queue_message) - the objective and mission result
+ * announcements.
+ *
+ * @mw2 sound_seq_sub_0423d0 0x000423d0
+ * @fidelity stub
+ * @divergence Phase 7 (audio): sound_seq_queue_message is not ported; the announcement is logged, not played
+ */
+export function soundSeqSub0423d0(m: SoundSeqMessage): void {
+  divergence(`sound_seq_sub_0423d0: no audio yet (sound ${m.sound}, "${m.text}")`, 'sound_seq_sub_0423d0');
+}
+
+/**
+ * Called every frame by mission_results_update once the player's table is
+ * decided, with 1.
+ *
+ * @mw2 sound_seq_sub_042080 0x00042080
+ * @fidelity stub
+ * @divergence Phase 7 (audio): the sequencer is not ported
+ */
+export function soundSeqSub042080(_arg: number): void {
+  divergence('sound_seq_sub_042080: the sound sequencer is not ported yet', 'sound_seq_sub_042080');
 }

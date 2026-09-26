@@ -8,11 +8,10 @@
  */
 import type { MechEntity } from '../../generated/classes.gen.ts';
 import type { StarFormation } from '../../generated/classes.gen.ts';
-import { divergence, unestablished } from '../../core/provenance.ts';
+import { unestablished } from '../../core/provenance.ts';
 import { transformPoint } from '../../core/math/matrix.ts';
 import { sceneNodeSetEuler, sceneNodeSetOrigin, sceneNodeTransform, sceneNodeWalk } from '../../engine/scene/sceneGraph.ts';
 import { setPolyOwnerAffiliation } from '../../engine/scene/wtboLoader.ts';
-import { missionTables } from '../../mission/tables/missionTables.ts';
 import { mechs, GROUP_COUNT } from '../mech/mechGlobals.ts';
 import { things } from '../things/gameThings.ts';
 import { formations, starFormationCopy } from './formations.ts';
@@ -107,6 +106,18 @@ export function mechSetStarSlot(mech: number, slot: number): number {
  */
 export function mechAllegiance(mechIndex: number): number {
   return mechs.groupTable[mechs.mechTable[mechIndex]!.groupId]!.allegiance & 0xff;
+}
+
+/**
+ * 1 when two mechs' groups have the same allegiance (0 friendly, 1 enemy,
+ * 2 neutral): two enemies are on the same side, and so are two neutrals.
+ *
+ * @mw2 mechs_same_allegiance 0x0002b2a0
+ * @fidelity exact
+ */
+export function mechsSameAllegiance(mechA: number, mechB: number): number {
+  const a = mechs.groupTable[mechs.mechTable[mechA]!.groupId]!.allegiance & 0xff;
+  return a === mechAllegiance(mechB) ? 1 : 0;
 }
 
 /**
@@ -272,33 +283,6 @@ export function starPlaceFormation(group: number, x: number, y: number, z: numbe
     }
   }
   return 1;
-}
-
-/**
- * A request to a group: none or code 0 re-applies its current objective
- * (group_apply_objective), code 7 dispatches a responder.
- *
- * @mw2 group_handle_request 0x00023fc0
- * @fidelity stub
- * @divergence Phase 2 (AI): group_apply_objective and group_dispatch_responder are not ported, so the group's AI members are not re-tasked
- */
-export function groupHandleRequest(_group: number, _request: number[] | null): void {
-  divergence('group_handle_request: objectives are not applied to groups until the AI is ported (Phase 2)', 'group_handle_request');
-}
-
-/**
- * Mission start: per group, number the star and apply its objective.
- *
- * @mw2 groups_start_mission 0x000218d0
- * @fidelity partial
- * @divergence no monochrome debug display to clear (monoDebugPresent / project_file_sub_04afff); group_handle_request is a Phase 2 stub
- */
-export function groupsStartMission(): void {
-  const n = missionTables.missionTableCount;
-  for (let g = 0; g < n; g++) {
-    starAssignSlots(g);
-    groupHandleRequest(g, null);
-  }
 }
 
 /**

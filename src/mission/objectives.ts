@@ -8,7 +8,7 @@
  * Objective EVALUATION (objective_evaluate, mission_results_update and the
  * target tests) is Phase 6 and not ported here.
  */
-import { divergence } from '../core/provenance.ts';
+import { divergence, quirk } from '../core/provenance.ts';
 import { systemError } from '../core/systemError.ts';
 import { udiv, u16, u8 } from '../core/int/cint.ts';
 import type { Chunk } from '../data/bwd/stream.ts';
@@ -177,4 +177,49 @@ export function objectiveTableStart(i: number): number {
   t.startTime = missionClock.missionSeconds;
   o0.startedAt = missionClock.missionSeconds;
   return found;
+}
+
+/** An objective target as the ushort handle the C reads at record +0xd7: kind << 8 | index. @portOnly */
+export function objectiveTargetHandle(group: number, objective: number, target: number): number {
+  const t = objectives.objectiveTables[group]!.objectives[objective]!.targets[target]!;
+  return ((t.kind & 0xff) << 8) | (t.index & 0xff);
+}
+
+/** The original address of objectiveTables[group].objectives[objective] (0xa5750 + 0x3a + ...). @portOnly */
+export function objectiveRecordAddress(group: number, objective: number): number {
+  return (0xa5750 + Math.imul(group, 0x2e8a) + 0x3a + Math.imul(objective, 0xf7)) | 0;
+}
+
+/**
+ * objectives[objective].restraint (+0x65) - including objective -1, which
+ * group_apply_objective reads when a group has no current objective. That
+ * dword lies 0x58 bytes before the table: in the previous group's table it is
+ * text[10..13] of objective 47; before table 0 it is 0xa56f8, unlabelled and
+ * zero in the image, and whether anything writes it at run time is not
+ * established (read here as 0).
+ *
+ * @portOnly the flat-memory read behind objectives[-1]
+ */
+export function objectiveRestraint(group: number, objective: number): number {
+  if (objective >= 0) return objectives.objectiveTables[group]!.objectives[objective]!.restraint;
+  quirk('group_apply_objective reads objectives[-1].restraint when the group has no current objective', 'group_apply_objective');
+  if (group === 0) return 0;
+  const text = objectives.objectiveTables[group - 1]!.objectives[OBJECTIVES_MAX - 1]!.text;
+  let v = 0;
+  for (let k = 0; k < 4; k++) v |= (k + 10 < text.length ? text.charCodeAt(k + 10) & 0xff : 0) << (8 * k);
+  return v | 0;
+}
+
+/**
+ * Designator agp_home: the first target of the group's first objective of
+ * type 0x20 (identify, required), else objective 0's first target - its
+ * start nav point.
+ *
+ * @mw2 group_identify_target 0x000172a0
+ * @fidelity exact
+ */
+export function groupIdentifyTarget(group: number): number {
+  const t = objectives.objectiveTables[group]!;
+  for (let i = 0; i < t.count; i++) if (t.objectives[i]!.type >>> 0 === 0x20) return objectiveTargetHandle(group, i, 0);
+  return objectiveTargetHandle(group, 0, 0);
 }

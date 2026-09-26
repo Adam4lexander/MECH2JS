@@ -464,6 +464,18 @@ export function weaponSelectGroup(l: MechLoadout, group: number): number {
 }
 
 /**
+ * The selected weapon's readiness: 1 when its fireState is 1 (ready), 0 in
+ * any other state, -1 when nothing is selected.
+ *
+ * @mw2 selected_weapon_ready 0x00052af0
+ * @fidelity exact
+ */
+export function selectedWeaponReady(l: MechLoadout): number {
+  if (l.selectedWeapon === -1) return -1;
+  return loadoutWeapons(l)[l.selectedWeapon]!.fireState === 1 ? 1 : 0;
+}
+
+/**
  * Steps the selection to the next usable weapon (slot order, wrapping, nine
  * tries) in the selected weapon's fire group; failing that, with
  * orNextGroup, to the next group that has one.

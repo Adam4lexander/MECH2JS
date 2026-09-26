@@ -13,7 +13,7 @@
 import { fixedCos } from '../../core/angle/trig.ts';
 import { mulr16, mulDiv64 } from '../../core/int/fx16.ts';
 import { mulr29 } from '../../core/int/i64.ts';
-import { quirk } from '../../core/provenance.ts';
+import { quirk, unestablished } from '../../core/provenance.ts';
 import { randomNext, randomRange } from '../../core/random.ts';
 import type { MechEntity, MechLoadout } from '../../generated/classes.gen.ts';
 import { clock } from '../../engine/clock.ts';
@@ -30,7 +30,14 @@ import { paletteStartFade } from '../world/palettes.ts';
 import { planet } from '../world/planet.ts';
 import { sceneNodeGetWorldPos } from '../../engine/scene/sceneGraph.ts';
 import { mechAnimClearRequest, mechAnimSelectGait } from './animTask.ts';
-import { aiRulesRun, groupAssignObjectiveTask } from './laterPhases.ts';
+import { aiRulesRun } from '../ai/rules.ts';
+import { ai } from '../ai/aiGlobals.ts';
+import { aiHandleBlocked } from '../ai/pilot.ts';
+import { aiSteerHeading } from '../ai/states.ts';
+import { trackedGlobals } from '../ai/tracked.ts';
+import { groupAssignObjectiveTask } from '../groups/orders.ts';
+import { missionEventNop } from '../things/gameThingDamage.ts';
+import { logWrite } from '../../engine/logWrite.ts';
 import {
   aiCycleFriendly,
   aiCycleGamepiece,
@@ -46,7 +53,6 @@ import { mechUpdateMissileLock, mechWeaponsTick, weaponCycleGroup, weaponCycleNe
 import { loadoutAmmo, loadoutSections, loadoutWeapons } from './loadout.ts';
 import { mechs } from './mechGlobals.ts';
 import { mechRuntime } from './mechRuntime.ts';
-import { unestablished, divergence } from '../../core/provenance.ts';
 import { resolveCode } from '../../engine/codePtr.ts';
 import { bootImage } from '../../engine/image.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
@@ -265,16 +271,19 @@ export function mechHeatUpdate(l: MechLoadout): void {
 }
 
 /**
- * Logs an attack on the player's side of the table and makes it the mech's
- * state: aiState 3 (attack), targetSecondary the target.
+ * An attack by the player's mech (or any, in a network game): logged when it
+ * is a new target or state, then aiState 3 (attack) at the target.
  *
  * @mw2 ai_log_attack 0x00023650
- * @fidelity partial
- * @divergence the AI log line is not written
+ * @fidelity exact
  */
 export function aiLogAttack(attackerIndex: number, targetIndex: number): void {
   if (attackerIndex === mechs.playerMechIndex || net.netRole !== 0) {
     const a = mechs.mechTable[attackerIndex]!;
+    if (a.targetPrimary !== ((targetIndex | 0x200) >>> 0) || a.aiState !== 3) {
+      logWrite(`${String(clock.simTick).padStart(6)} : ${String(a.groupId).padStart(2)} Mech ${String(attackerIndex).padStart(2)} has attacked mech ${String(targetIndex).padStart(2)}
+`);
+    }
     a.aiState = 3;
     a.targetSecondary = (targetIndex | 0x200) & 0xffff;
   }
@@ -294,16 +303,17 @@ function aiStateHandler(state: number): ((e: MechEntity, target: number) => void
  *
  * @mw2 mech_ai_think 0x00021510
  * @fidelity partial
- * @divergence the AI debug log (mission_log_sub_0214a0) and the per-pass global at 0xf4ab4 are not kept; the AI itself is Phase 5 (the rules and state handlers are stubs)
+ * @divergence the monochrome-screen AI debug display (mission_log_sub_0214a0, run for the player's mech while monoDebugPresent) is not ported
  */
 export function mechAiThink(e: MechEntity): void {
+  if (e.index === 0) ai.dat000f4ab4 = 0;
   if (e.aiState === 0xc) return;
   if (groupGetLeader(e.groupId) === e.index) groupAssignObjectiveTask(e.groupId);
   if (e.controlSource === 2) {
     if (aiRulesRun(e) === 0) {
       const h = aiStateHandler(e.aiState);
       if (h) h(e, (e.targetPrimary << 16) >> 16);
-      else divergence(`aiStateHandlers[${e.aiState}] is not ported (Phase 5)`, 'mech_ai_think');
+      else unestablished(`aiStateHandlers[${e.aiState}] is null`, 'mech_ai_think');
     }
     e.targetHandle = (e.targetSecondary << 16) >> 16;
     aiValidateCurrentTarget(e);
@@ -313,14 +323,68 @@ export function mechAiThink(e: MechEntity): void {
 }
 
 /**
- * The player's autopilot along the nav points.
+ * The player's autopilot, while engaged: take the first nav point not yet
+ * reached (giving up with NONE when all are), mark it reached on arrival
+ * (flags 0x20, seen by the group, sound 0xe7) and move on - switching off,
+ * throttle 0, when the route wraps; steer for it (ai_steer_heading) unless
+ * avoiding, keeping the throttle in aiDirection and restoring it after an
+ * avoidance (aiBlocked).
  *
  * @mw2 autopilot_drive 0x00024ca0
- * @fidelity stub
- * @divergence Phase 4/5: it steers with the AI's ai_steer_heading and ai_handle_blocked and cycles nav points; while engaged the port only reports it
+ * @fidelity exact
  */
 export function autopilotDrive(l: MechLoadout): void {
-  if (l.autopilotEngaged !== 0) unestablished('the autopilot is engaged, and autopilot_drive is not ported', 'autopilot_drive');
+  if (l.autopilotEngaged === 0) return;
+  const tracked = trackedGlobals.trackedObjects;
+  if (l.autopilotEngaged === 1) {
+    const e = l.entity!;
+    let h = e.targetHandle;
+    if ((h & 0x100) === 0 || (h & 0x1000) !== 0) {
+      aiCycleNavpoint(e, 0, 0);
+      const first = e.targetHandle & 0xff;
+      let i = first;
+      while ((tracked[i]!.flags & 0x20) !== 0) {
+        aiCycleNavpoint(e, 1, 0);
+        i = e.targetHandle & 0xff;
+        if (i === first) {
+          e.targetHandle |= 0x1000;
+          return;
+        }
+      }
+    }
+    h = e.targetHandle;
+    if ((h & 0x100) !== 0) {
+      const i = h & 0xff;
+      const t = tracked[i]!;
+      if (e.targetDistance < t.range && mechs.playerMechIndex === e.index) {
+        if ((t.flags & 0x20) === 0) {
+          t.flags = (t.flags | 0x20) & 0xffff;
+          t.seenByGroups = (t.seenByGroups | (1 << (e.groupId & 0x1f))) & 0xffff;
+          if ((t.flags & 0x40) !== 0) missionEventNop();
+          soundPlay(0xe7, 100, 0x40, 5, 0x50);
+        }
+        aiCycleNavpoint(e, 1, 0);
+        if ((e.targetHandle & 0xff) < i) {
+          l.autopilotEngaged = 0;
+          e.targetHandle |= 0x1000;
+          e.control!.throttle = 0;
+          e.control!.throttle_set = 1;
+          return;
+        }
+      }
+    }
+  }
+  const e = l.entity!;
+  if (aiHandleBlocked(e) === 0) {
+    aiSteerHeading(e);
+    if (e.aiBlocked === 1) {
+      e.control!.throttle = e.aiDirection;
+      e.aiBlocked = 0;
+    }
+    e.aiDirection = e.control!.throttle;
+    return;
+  }
+  e.aiBlocked = 1;
 }
 
 /**
@@ -328,7 +392,7 @@ export function autopilotDrive(l: MechLoadout): void {
  *
  * @mw2 mech_std_tick_ai 0x00027780
  * @fidelity partial
- * @divergence its AI, weapons, targeting, damage, effects and sound callees are later-phase stubs (sim/mech/laterPhases.ts, sound, effects); the order of every call is the original's
+ * @divergence its sound callees are Phase 7 stubs; the order of every call is the original's
  */
 export const mechStdTickAi = registerCode('mech_std_tick_ai', 0x27780, (l: MechLoadout, _index: number): void => {
   const r = mechRuntime;

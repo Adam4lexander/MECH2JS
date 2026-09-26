@@ -9,7 +9,7 @@
  * the rule tables are real state (aiRuleTables), owned by the AI.
  */
 import { LABEL } from '../../generated/labels.gen.ts';
-import { divergence } from '../../core/provenance.ts';
+import { divergence, unestablished } from '../../core/provenance.ts';
 import type { StreamRef } from '../../data/bwd/stream.ts';
 import { readEffectTypes } from '../../data/exe/tables/effects.ts';
 import { readWeaponTypes } from '../../data/exe/tables/weaponTypes.ts';
@@ -93,12 +93,23 @@ export function soundPreloadFixed(): void {
  * ai_rule_tables_load, whose result it returns.
  *
  * @mw2 sim_preload_data 0x0004a230
- * @fidelity partial
- * @divergence ai_rule_tables_load (0x236e0: aiRuleTables[1..9] = AIT resources 1..9, slot 0 zeroed, returns 1) is not ported - it belongs with the AI; the result it would return, 1, is returned
+ * @fidelity exact
  */
 export function simPreloadData(): number {
   weaponsPreloadSounds();
   soundPreloadFixed();
-  divergence('sim_preload_data: ai_rule_tables_load not ported yet (aiRuleTables stays empty)');
-  return 1;
+  return preloadLinks.aiRuleTablesLoad();
 }
+
+/**
+ * The AI's loader, installed by sim/ai/rules.ts: the engine layer does not
+ * import the sim.
+ *
+ * @portOnly
+ */
+export const preloadLinks = {
+  aiRuleTablesLoad: (): number => {
+    unestablished('sim_preload_data: ai_rule_tables_load is not installed', 'sim_preload_data');
+    return 1;
+  },
+};

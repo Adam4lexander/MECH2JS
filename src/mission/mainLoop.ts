@@ -42,12 +42,8 @@ import { simSlotsUpdate } from '../sim/effects/effects.ts';
 import { destructiblesUpdate } from '../sim/things/destructibles.ts';
 import { projectilesUpdateAll } from '../sim/weapons/projectiles.ts';
 import { radarFlipRestore } from '../sim/cockpit/radar.ts';
-import {
-  missionResultsUpdate,
-  soundConfigSub043dd0,
-  soundConfigSub043e50,
-  soundSeqSub041dd0,
-} from './laterPhases.ts';
+import { soundConfigSub043dd0, soundConfigSub043e50, soundSeqSub041dd0 } from './laterPhases.ts';
+import { missionResultsUpdate } from './results.ts';
 
 /**
  * DAT_00097074: the frame's render call. main's loop calls it between

@@ -12,15 +12,6 @@ function notYet(name: string, phase: string): void {
 }
 
 /**
- * @mw2 mission_results_update 0x00016e80
- * @fidelity stub
- * @divergence Phase 6 (mission runtime)
- */
-export function missionResultsUpdate(): void {
-  notYet('mission_results_update', 'Phase 6');
-}
-
-/**
  * Refills the streaming sound buffers and, every 0x38e ticks, sounds the
  * missile-lock warning when an enemy has the player targeted.
  *
