@@ -41,6 +41,7 @@ import { divergence } from '../core/provenance.ts';
 import { simSlotsUpdate } from '../sim/effects/effects.ts';
 import { destructiblesUpdate } from '../sim/things/destructibles.ts';
 import { projectilesUpdateAll } from '../sim/weapons/projectiles.ts';
+import { messageBarDraw } from '../sim/cockpit/messages.ts';
 import { radarFlipRestore } from '../sim/cockpit/radar.ts';
 import { soundFrameUpdate } from '../sim/sound/mixer.ts';
 import { musicUpdate } from '../sim/sound/music.ts';
@@ -77,15 +78,16 @@ export function mainLoopRunning(): boolean {
 }
 
 /**
- * The display step after the HUD: font and input housekeeping, the palette
- * fade, then the page flip.
+ * The display step after the HUD: the message bars, input housekeeping,
+ * the palette fade, then the page flip.
  *
  * @mw2 vfx_video_sub_0106d0 0x000106d0
  * @fidelity partial
- * @divergence vfx_video_font_handler_2, input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the palette steps and the map transition's restore (0xa46d0) run here
+ * @divergence input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
  */
 export function vfxVideoSub0106d0(): void {
-  divergence('the page flip and font/input housekeeping of vfx_video_sub_0106d0 are the host renderer\'s', 'vfx_video_sub_0106d0');
+  messageBarDraw();
+  divergence('the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\'s', 'vfx_video_sub_0106d0');
   paletteFadeStep();
   paletteApplyPending();
   // after the flip (DAT_0009fd74): a map transition's currentViewport and hudEnabled go back

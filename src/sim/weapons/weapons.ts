@@ -613,7 +613,7 @@ export function weaponJettisonAmmo(l: MechLoadout): number {
   const w = loadoutWeapons(l)[sel]!;
   if (weaponTypes()[w.type]!.shots < 1 || w.ammo < 1) return 0;
   soundPlay(0xb3, 100, 0x40, 5, 0x50);
-  messagePost('Ammo for current weapon jettisonned.', 1, 0x16c);
+  messagePost('Ammo for current weapon jettisonned.', 1, 0x16c, 0x32);
   soundPlay(0xb3, 100, 0x40, 5, 0x32);
   w.ammo = 0;
   w.fireState = -1;

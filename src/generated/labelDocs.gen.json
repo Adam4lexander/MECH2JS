@@ -84,6 +84,16 @@
   "kind": "int",
   "doc": "slots handed out by anim2d_add, starting at 0. Only anim2d_add touches it (every fixup to it is in that function) and nothing decrements or resets it, so anim2d_free does NOT make a slot reusable: at most 7 ANM2 chunks are ever accepted per run of MW2.EXE"
  },
+ "messagePanes": {
+  "address": "0x95530",
+  "kind": "raw",
+  "doc": "the two message slots' panes (ViewWindow x 2): {&defaultCanvas, 0, 0, 1.0, 1.0} as 16.16 fractions in the image; message_bar_layout lays them out"
+ },
+ "messageSlots": {
+  "address": "0x95558",
+  "kind": "raw",
+  "doc": "the two message-bar slots (MessageSlot): 0 the top bar, 1 the bottom"
+ },
  "mapHeightLow": {
   "address": "0x955b8",
   "kind": "int",
@@ -1359,6 +1369,16 @@
   "kind": "int",
   "doc": "a hit location chosen from the keyboard: debug_command_execute (formerly target_select_section) stores 1..8 here and posts the location's name - Head, Right Torso, Center Torso, Left Torso, Right Arm, Left Arm, Right Leg, Left Leg, in that order. mech_std_tick_ai then calls mech_damage_slot(player's loadout, testDamageLocation, testDamageSlot, 0) and resets testDamageSlot to -1, so the player's OWN mech takes a critical there. A developer damage-test feature; its value to a port is that it names all eight 1-based locations"
  },
+ "pausePane": {
+  "address": "0x9832c",
+  "kind": "raw",
+  "doc": "the pane cheats_sub_046ac0 (PAUSE_GAME) draws SHP assetVariant + 0x5e in: {0, 0, 0.2, 1.0, 0.4} as fractions in the image; on first use it gets &defaultCanvas, becomes window pixels and is fitted to the shape (layout_pane_fit_shape), and the flip is given it"
+ },
+ "pausePaneStale": {
+  "address": "0x98340",
+  "kind": "int",
+  "doc": "1 in the image: cheats_sub_046ac0 lays pausePane out on its first pause and clears it"
+ },
  "commandNames": {
   "address": "0x9dca4",
   "kind": "raw",
@@ -1704,6 +1724,11 @@
   "address": "0xa4a10",
   "kind": "raw",
   "doc": "the Anim2D records ANM2 chunks add, 7 at most: anim2d_add refuses at anim2dCount >= 7. anim2d_draw, anim2d_free and anim2d_rewind index it by slot. project_chunk_exec discards anim2d_add's return, so the first ANM2 lands in slot 0 - the slot hud_widget02_tick and hud_widget13_tick draw"
+ },
+ "messageText": {
+  "address": "0xa4a2c",
+  "kind": "raw",
+  "doc": "the two message slots' 0x100-byte text buffers"
  },
  "screenAspect": {
   "address": "0xa4dbc",

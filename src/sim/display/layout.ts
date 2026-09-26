@@ -11,7 +11,7 @@ import { mulr16 } from '../../core/int/fx16.ts';
 import { cdiv } from '../../core/int/cint.ts';
 import { sdivShl } from '../../core/int/i64.ts';
 import type { VfxWindow } from '../../engine/vfx/vfx.ts';
-import { vfxLineDraw } from '../../engine/vfx/vfx.ts';
+import { vfxLineDraw, vfxShapeBounds } from '../../engine/vfx/vfx.ts';
 
 /**
  * out = pane scaled by the window's size: x0, x1 times xMax, y0, y1 times
@@ -145,6 +145,45 @@ export function layoutPaneCentreInWindow(win: VfxWindow, pane: ViewWindow, out: 
   out.right = (w + x) | 0;
   out.bottom = (h + y) | 0;
   return out;
+}
+
+/**
+ * out = the pane scaled about its centre: centre = left + (right - left + 1)
+ * >> 1 (and the same for y), each edge's offset from it times scaleX or
+ * scaleY (16.16, rounded), the centre added back.
+ *
+ * @mw2 layout_pane_scale_about_centre 0x000137a0
+ * @fidelity exact
+ */
+export function layoutPaneScaleAboutCentre(pane: ViewWindow, out: ViewWindow, scaleX: number, scaleY: number): ViewWindow {
+  const cx = ((((pane.right - pane.left + 1) | 0) >> 1) + pane.left) | 0;
+  const cy = (pane.top + (((pane.bottom - pane.top + 1) | 0) >> 1)) | 0;
+  const l = (pane.left - cx) | 0;
+  const t = (pane.top - cy) | 0;
+  const r = (pane.right - cx) | 0;
+  const b = (pane.bottom - cy) | 0;
+  out.left = (mulr16(l, scaleX) + cx) | 0;
+  out.top = (mulr16(t, scaleY) + cy) | 0;
+  out.right = (mulr16(r, scaleX) + cx) | 0;
+  out.bottom = (mulr16(b, scaleY) + cy) | 0;
+  return out;
+}
+
+/**
+ * out = the pane shrunk (or grown) about its centre to a shape's own size:
+ * vfx_shape_bounds' high word (the width) over the pane's width, its low
+ * word (the height) over the pane's height, each 16.16 by idiv.
+ *
+ * @mw2 layout_pane_fit_shape 0x00013860
+ * @fidelity exact
+ */
+export function layoutPaneFitShape(pane: ViewWindow, out: ViewWindow, table: Uint8Array, shapeNumber: number): ViewWindow {
+  const bounds = vfxShapeBounds(table, shapeNumber);
+  const h = bounds & 0xffff;
+  const w = bounds >> 16;
+  const sx = sdivShl(w, 16, (pane.right - pane.left + 1) | 0);
+  const sy = sdivShl(h, 16, (pane.bottom - pane.top + 1) | 0);
+  return layoutPaneScaleAboutCentre(pane, out, sx, sy);
 }
 
 /**

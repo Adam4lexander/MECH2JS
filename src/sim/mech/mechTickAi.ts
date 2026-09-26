@@ -551,7 +551,7 @@ export const mechStdTickAi = registerCode('mech_std_tick_ai', 0x27780, (l: MechL
       if (r.mascEngaged !== 0 && 0xb6 < ((clock.simTick - r.mascLastRollTick) | 0)) {
         r.mascLastRollTick = clock.simTick;
         if (randomRange(0x3c) === 0xc && mechs.simOptions.invulnerability === 0 && l.status === 2) {
-          messagePost('MASC malfunction!', 1, 0x16c);
+          messagePost('MASC malfunction!', 1, 0x16c, 0x32);
           soundPlay(0xc9, 100, 0x40, 5, 0x50);
           l.heatLevel = (l.heatLevel + (l.heatLevel >> 2)) | 0;
           r.mascEngaged = 0;
@@ -725,7 +725,7 @@ export const mechStdTickPlayer = registerCode('mech_std_tick_player', 0x28320, (
       }
       if (r.mascToggleRequest !== 0) {
         r.mascToggleRequest = 0;
-        if ((l.flags & 0x10) === 0) messagePost('Not equipped with MASC!', 1, 0x16c);
+        if ((l.flags & 0x10) === 0) messagePost('Not equipped with MASC!', 1, 0x16c, 0x32);
         else {
           const on = r.mascEngaged === 0;
           if (on) {
@@ -772,7 +772,7 @@ export const mechStdTickPlayer = registerCode('mech_std_tick_player', 0x28320, (
   } else if (0 < r.reactorRequest) {
     if (r.reactorRequest !== 1) return;
     if (((l.flags & 4) === 0 || (l.flags & 8) !== 0) && l.status === 3) {
-      messagePost('Powering up...', 1, 0x16c);
+      messagePost('Powering up...', 1, 0x16c, 0x32);
       l.status = 0;
       l.entity!.flags &= ~0x10 & 0xffff;
       r.reactorRequest = 0;

@@ -18,6 +18,7 @@ import {
   layoutPointToWindow,
 } from './layout.ts';
 import { defaultCanvas, viewportSelect } from './video.ts';
+import { messageBarLayout } from '../cockpit/messages.ts';
 
 /**
  * The 24 HudWidget panes (0x968e0) from design pixels to the screen, their
@@ -49,12 +50,12 @@ export function hudWidgetPanesRescale(): void {
  * The start-up rescale: viewportModes 0..7, the five panes at 0x955e8, the
  * point at 0x9572c, the six points at 0x9623c and horizonBandHeight (as the
  * x of a point) go from design pixels to fractions to the window; then
- * viewport_select(0) and the viewer's projection and transform, and the HUD
- * widgets' panes.
+ * viewport_select(0) and the viewer's projection and transform, the HUD
+ * widgets' panes and the message bars.
  *
  * @mw2 layout_rescale_all 0x00014950
  * @fidelity partial
- * @divergence vfx_video_font_handler (the message bar's layout) and hud_debug_sub_049a90 (the debug text's) are not ported yet
+ * @divergence hud_debug_sub_049a90 (the debug text's layout) is not ported yet
  */
 export function layoutRescaleAll(): void {
   const c = cockpit;
@@ -84,6 +85,6 @@ export function layoutRescaleAll(): void {
   layoutPointToWindow(defaultCanvas, band, band);
   lighting.horizonBandHeight = band[0]!;
   hudWidgetPanesRescale();
-  divergence('vfx_video_font_handler (the message bar layout) is not ported yet', 'layout_rescale_all');
+  messageBarLayout();
   divergence('hud_debug_sub_049a90 (the debug text layout) is not ported', 'layout_rescale_all');
 }

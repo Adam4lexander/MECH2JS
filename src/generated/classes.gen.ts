@@ -505,6 +505,29 @@ export class SimSlot {
   typeIndex: number = 0;
 }
 
+/** MessageSlot - 36 (0x24) bytes. */
+export class MessageSlot {
+  static readonly schema = STRUCTS.MessageSlot;
+  /** +0x000 char * */
+  text: string | null = null;
+  /** +0x004 int */
+  textX: number = 0;
+  /** +0x008 int */
+  textY: number = 0;
+  /** +0x00c int */
+  inUse: number = 0;
+  /** +0x010 int */
+  priority: number = 0;
+  /** +0x014 int */
+  fontId: number = 0;
+  /** +0x018 int */
+  shpId: number = 0;
+  /** +0x01c int */
+  endTick: number = 0;
+  /** +0x020 ViewWindow * */
+  pane: ViewWindow | null = null;
+}
+
 /** MeshPolygon - 36 (0x24) bytes. */
 export class MeshPolygon {
   static readonly schema = STRUCTS.MeshPolygon;

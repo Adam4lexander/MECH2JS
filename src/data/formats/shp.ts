@@ -9,7 +9,10 @@
  *   table +0   "1.10", a version nothing reads
  *         +4   u32 shape count (vfx_shape_count)
  *         +8   per shape {u32 offset, u32 unread}, offsets from the table
- *   shape +0   u32 vfx_shape_bounds returns it (callers not yet read)
+ *   shape +0   u32 vfx_shape_bounds returns it: a size, high word x, low
+ *              word y, that layout_pane_fit_shape fits a pane to. In 258 of
+ *              309 shapes (xmax - xmin, ymax - ymin), one less than drawn;
+ *              the PAUSE shapes store the drawn size
  *         +4   u32 vfx_shape_origin returns it; in 282 of 309 shapes it is
  *              (-xmin) << 16 | (-ymin) (shapes.txt)
  *         +8   i32 xmin, ymin, xmax, ymax about the draw point
@@ -24,7 +27,7 @@ export interface ShapeHeader {
   offset: number;
   /** the table's second dword beside the offset; no reader found */
   tableWord: number;
-  /** shape +0, what vfx_shape_bounds returns */
+  /** shape +0, what vfx_shape_bounds returns: x << 16 | y, a size (see the header note) */
   word0: number;
   /** shape +4, what vfx_shape_origin returns */
   origin: number;

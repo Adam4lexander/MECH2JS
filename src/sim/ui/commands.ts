@@ -6,6 +6,11 @@
  * dropped until their phases.
  */
 import { divergence } from '../../core/provenance.ts';
+import { ViewWindow } from '../../generated/classes.gen.ts';
+import { cacheLoadResource } from '../../engine/resources/cache.ts';
+import { vfxShapeDraw } from '../../engine/vfx/vfx.ts';
+import { layoutPaneFitShape, layoutPaneToWindow } from '../display/layout.ts';
+import { defaultCanvas, display, imageCanvas } from '../display/video.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import { clock } from '../../engine/clock.ts';
 import { registerGlobals } from '../../engine/globals.ts';
@@ -49,6 +54,10 @@ export const commandGlobals = registerGlobals(
      * frame while this is set (see mission/mainLoop.ts).
      */
     keyPauseActive: 0,
+    /** 0x9832c: the pane the PAUSE shape is drawn in - {0, 0, 0.2, 1.0, 0.4} as fractions in the image */
+    pausePane: bootPausePane(),
+    /** 0x98340: 1 until the first pause lays pausePane out */
+    pausePaneStale: 1,
   },
   () => {
     const g = commandGlobals;
@@ -57,8 +66,21 @@ export const commandGlobals = registerGlobals(
     g.hangAround = imageI32(LABEL.hangAround, 0);
     g.crackModeEnabled = imageI32(LABEL.crackModeEnabled, 0);
     g.keyPauseActive = 0;
+    g.pausePane = bootPausePane();
+    g.pausePaneStale = imageI32(LABEL.pausePaneStale, 1);
   },
 );
+
+function bootPausePane(): ViewWindow {
+  const w = new ViewWindow();
+  const at = LABEL.pausePane;
+  w.canvas = imageCanvas(at);
+  w.left = imageI32(at + 4, 0);
+  w.top = imageI32(at + 8, 0x3333);
+  w.right = imageI32(at + 0xc, 0x10000);
+  w.bottom = imageI32(at + 0x10, 0x6666);
+  return w;
+}
 
 /**
  * PAUSE_GAME: unless the pause menu is up or this is a network game, stops
@@ -66,14 +88,26 @@ export const commandGlobals = registerGlobals(
  *
  * @mw2 cheats_sub_046ac0 0x00046ac0
  * @fidelity partial
- * @divergence the wait is split across host frames (keyPauseActive) instead of a blocking loop; the PAUSED shape is not drawn
+ * @divergence the wait is split across host frames (keyPauseActive) instead of a blocking loop
  */
 export function cheatsSub046ac0(): void {
   if (uiContextActive(4) === 0 && net.netRole === 0) {
     timerSetPaused(0x80, 1);
     soundPause();
     soundSfxSub040b50(0xc6, 100, 0x40, soundRandomRate());
-    commandGlobals.keyPauseActive = 1;
+    const g = commandGlobals;
+    const shp = cacheLoadResource((display.assetVariant + 0x5e) | 0, 'SHP');
+    if (shp) {
+      if (g.pausePaneStale !== 0) {
+        g.pausePane.canvas = defaultCanvas;
+        layoutPaneToWindow(defaultCanvas, g.pausePane, g.pausePane);
+        layoutPaneFitShape(g.pausePane, g.pausePane, shp, 0);
+        g.pausePaneStale = 0;
+      }
+      vfxShapeDraw(g.pausePane, shp, 0, 0, 0);
+      // then the driver's flip of pausePane (DAT_0009fd74): the host shows the window as it is
+    }
+    g.keyPauseActive = 1;
   }
 }
 
@@ -182,10 +216,10 @@ export function commandExecute(cmd: number): void {
       if (((mechs.mechTable[mechs.playerMechIndex]!.flags >> 8) & 0x20) !== 0) {
         if (r.autoEjectEnabled === 0) {
           r.autoEjectEnabled = 1;
-          messagePost('Automatic ejection ON', 1, 0x16c);
+          messagePost('Automatic ejection ON', 1, 0x16c, 0x32);
         } else {
           r.autoEjectEnabled = 0;
-          messagePost('Automatic ejection OFF', 1, 0x16c);
+          messagePost('Automatic ejection OFF', 1, 0x16c, 0x32);
         }
       }
       break;
@@ -249,7 +283,7 @@ export function commandExecute(cmd: number): void {
       if (g.crackModeEnabled !== 0) {
         const on = clock.timeCompression === 0;
         clock.timeCompression = on ? 1 : 0;
-        messagePost(on ? 'Time compression enabled' : 'Time compression disabled', 1, on ? 0xb60 : 0x16c);
+        messagePost(on ? 'Time compression enabled' : 'Time compression disabled', 1, on ? 0xb60 : 0x16c, 0x32);
       }
       break;
     case 0x91:

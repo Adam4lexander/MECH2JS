@@ -465,6 +465,28 @@ export interface RawSimSlot {
   typeIndex: number;
 }
 
+/** MessageSlot - 36 (0x24) bytes, as read raw from memory (pointers are addresses). */
+export interface RawMessageSlot {
+  /** +0x000 char * */
+  text: number;
+  /** +0x004 int */
+  textX: number;
+  /** +0x008 int */
+  textY: number;
+  /** +0x00c int */
+  inUse: number;
+  /** +0x010 int */
+  priority: number;
+  /** +0x014 int */
+  fontId: number;
+  /** +0x018 int */
+  shpId: number;
+  /** +0x01c int */
+  endTick: number;
+  /** +0x020 ViewWindow * */
+  pane: number;
+}
+
 /** MeshPolygon - 36 (0x24) bytes, as read raw from memory (pointers are addresses). */
 export interface RawMeshPolygon {
   /** +0x000 ushort */
@@ -2206,6 +2228,21 @@ export const STRUCTS = {
       { name: 'bitmapSlot', offset: 0x18, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'ownsLight', offset: 0x1c, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'typeIndex', offset: 0x20, size: 4, count: 1, ctype: "int", kind: 'int' },
+    ],
+  },
+  MessageSlot: {
+    name: 'MessageSlot',
+    size: 0x24,
+    fields: [
+      { name: 'text', offset: 0x0, size: 4, count: 1, ctype: "char *", kind: 'ptr' },
+      { name: 'textX', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'textY', offset: 0x8, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'inUse', offset: 0xc, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'priority', offset: 0x10, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'fontId', offset: 0x14, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'shpId', offset: 0x18, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'endTick', offset: 0x1c, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'pane', offset: 0x20, size: 4, count: 1, ctype: "ViewWindow *", kind: 'ptr', target: 'ViewWindow' },
     ],
   },
   MeshPolygon: {

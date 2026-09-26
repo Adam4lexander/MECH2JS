@@ -419,7 +419,7 @@ export function missionResultsUpdate(): void {
       const since = (missionClock.missionSeconds - T.decidedAt) | 0;
       if (voice.voiceQueueHead === null) {
         if (ui.exitPromptShown === 0 && 3 < since) {
-          messagePost('Press any key to exit...', 1, 0x1554);
+          messagePost('Press any key to exit...', 1, 0x1554, 100);
           ui.exitPromptShown = 1;
         } else if (0x14 < since) {
           ui.quitCountdown = (ui.quitCountdown + 2) | 0;

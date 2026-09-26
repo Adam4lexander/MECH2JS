@@ -330,6 +330,20 @@
    "typeIndex": "initialised to -1; an index into effectTypes - what the slot is currently showing. effect_spawn only ever reuses a slot whose typeIndex already matches the effect it is about to spawn, and counts how many nearby slots carry the same index to decide whether to spawn at all. CORRECTION: this was recorded as indexing 'a table of 28-byte descriptors at 0x0009f918'. The stride was right and the base was not: 0x9f918 is field +0x18 of the record, the one field sim_slots_update happens to read. The table starts at 0x9f900. The comparison against 0x16 is the split between world-placed effects and the mount-attached ones from 0x17 up."
   }
  },
+ "MessageSlot": {
+  "doc": "",
+  "fields": {
+   "text": "the slot's 0x100-byte text buffer (0xa4a2c, 0xa4b2c): message_post strncpy's up to 0xff bytes into it and forces a NUL at +0xff",
+   "textX": "the text's x in the pane: 0x28f (1%, a 16.16 fraction) in the image, pixels after message_bar_layout's layout_point_in_pane",
+   "textY": "the text's y in the pane: 0 in the image; message_bar_layout sets (pane height - font height) / 2",
+   "inUse": "1 from message_post until message_bar_draw finds the time up; an empty slot is the first message_post takes",
+   "priority": "message_post's ECX; a new message replaces a busy slot only when this is not above its own",
+   "fontId": "FONT id (plus assetVariant) of the text; 1 in the image, message_post's EDX (1 when below 1)",
+   "shpId": "SHP id (plus assetVariant) of the bar drawn behind the text, shape 0: 0x4c in both slots; message_bar_layout also sizes the pane to it",
+   "endTick": "sim_stopwatch_elapsed() + ticks at message_post; the message shows while the stopwatch is below it",
+   "pane": "the slot's pane (0x95530, 0x95544 - whole-screen fractions in the image), laid out in pixels by message_bar_layout: slot 0 along the top of the screen, slot 1 along the bottom"
+  }
+ },
  "MeshPolygon": {
   "doc": "",
   "fields": {

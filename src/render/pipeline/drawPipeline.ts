@@ -16,7 +16,10 @@
  *                           polygon_resolve_colour dims by
  *
  * The rasterising half (projection, screen outcodes, the painter's sort) is
- * the GPU's; see SceneRenderer.
+ * the GPU's; see SceneRenderer. The depth buffer replacing the painter's
+ * sort is a DECIDED divergence, not a stand-in: the original's sort draws
+ * things in the wrong order at times, and reproducing that was judged not
+ * worth it (2026-09-26), so render_asm's sort will not be ported.
  */
 import { cameraGlobals } from '../../sim/camera/viewer.ts';
 import type { MeshBlock, MeshPolygon, MeshVertex, WorldObject } from '../../generated/classes.gen.ts';

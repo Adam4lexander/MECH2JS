@@ -93,6 +93,19 @@ export function audioTimerInit(): void {
 }
 
 /**
+ * The SIM stopwatch read raw - what simTick is taken from in the normal
+ * mode, but uncompressed and never +12: message_post and message_bar_draw
+ * time the message bars with it, so a message does not expire while the
+ * timer is paused (Step, PAUSE_GAME).
+ *
+ * @mw2 sim_stopwatch_elapsed 0x00015980
+ * @fidelity exact
+ */
+export function simStopwatchElapsed(): number {
+  return stopwatchElapsed(clock.simStopwatch);
+}
+
+/**
  * Called by main once, just before the frame loop: mission time starts here.
  *
  * @mw2 sim_clock_reset 0x000159e0

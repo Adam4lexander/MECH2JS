@@ -191,7 +191,7 @@ export function voiceLineStart(line: VoiceLine): boolean {
   const m = sound.soundMixer;
   if (!m || (soundFlags() & 2) === 0) {
     if (line.text !== '') {
-      messagePost(line.text, 0, 0x71c);
+      messagePost(line.text, 0, 0x71c, 0x32);
       line.endTick = (clock.simTick + 0x71c) | 0;
       return true;
     }
@@ -224,7 +224,7 @@ export function voiceLineStart(line: VoiceLine): boolean {
   } else if (first !== 0) {
     const ch = soundChannelStart(0, 0, first, line.buffer, 100, voiceVolumeScale(), 0x40, 0x2b11, voiceSampleRef, 0x150);
     if (-1 < ch) sound.voiceSample = m.sampleHandles[ch]!;
-  } else if (line.text !== '') messagePost(line.text, 0, 0x71c);
+  } else if (line.text !== '') messagePost(line.text, 0, 0x71c, 0x32);
   return sound.voiceSample !== 0;
 }
 
