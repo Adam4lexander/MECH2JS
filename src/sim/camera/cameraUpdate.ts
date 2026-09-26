@@ -14,7 +14,6 @@ import { cmod } from '../../core/int/cint.ts';
 import { rampAngleSetTarget, rampAngleStart, rampAngleStep, rampStart, rampStep } from '../../core/ramp.ts';
 import { transformPoint } from '../../core/math/matrix.ts';
 import { vecToRangeBearing } from '../../core/math/vec.ts';
-import { divergence } from '../../core/provenance.ts';
 import { vec3Normalise } from '../../engine/collision/ray.ts';
 import { Ramp, RampAngle, type MechEntity } from '../../generated/classes.gen.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
@@ -28,6 +27,7 @@ import { mechRuntime } from '../mech/mechRuntime.ts';
 import { soundCuePlay, soundPlay } from '../sound/sound.ts';
 import { scroungeFollowViewer } from '../world/scrounge.ts';
 import { worldFindHighestHit } from '../world/collision.ts';
+import { missileCamPose } from '../weapons/projectiles.ts';
 import { cameraGlobals } from './viewer.ts';
 
 /** CameraKey - 0x1c bytes: an offset pose and how long to ease to it. */
@@ -589,11 +589,14 @@ function mulShr16(a: number, b: number): number {
 }
 
 /**
- * cameraMode 3: follows a missile until it is gone.
+ * cameraMode 3: follows a missile until it is gone. On entry it remembers
+ * the mode it came from and the viewer's pose and zooms 2x; each frame it
+ * copies missile_cam_pose into the viewer while the pose's valid word is set.
+ * When the missile is gone it returns to the saved mode (after an ejection,
+ * the post-eject mode) and, from the free camera, to the saved pose.
  *
  * @mw2 camera_missile_view 0x000396b0
- * @fidelity partial
- * @divergence missile_cam_pose is Phase 3: there is never a missile, so the view returns at once to the mode it came from
+ * @fidelity exact
  */
 export function cameraMissileView(): void {
   const c = cam;
@@ -605,24 +608,34 @@ export function cameraMissileView(): void {
     c.cameraZoomAlt = 0x20000;
     cameraApplyZoom(0);
   }
-  divergence('missile_cam_pose is Phase 3; the missile camera ends at once', 'camera_missile_view');
-  const g = cameraGlobals;
-  g.cameraMode = c.cameraModeBeforeMissile;
-  if (mechRuntime.playerOut !== 0) {
-    g.cameraMode = g.ejectCameraMode;
-    if (g.ejectCameraMode === -1) {
-      g.ejectCameraMode = 1;
-      g.cameraMode = 1;
+  const pose = missileCamPose();
+  if (pose === null) {
+    const g = cameraGlobals;
+    g.cameraMode = c.cameraModeBeforeMissile;
+    if (mechRuntime.playerOut !== 0) {
+      g.cameraMode = g.ejectCameraMode;
+      if (g.ejectCameraMode === -1) {
+        g.ejectCameraMode = 1;
+        g.cameraMode = 1;
+      }
     }
+    if (c.cameraModeBeforeMissile !== 2 || c.dat0014fb94 === 0) return;
+    const s = c.savedViewPose;
+    v.posX = s[0]!;
+    v.posY = s[1]!;
+    v.posZ = s[2]!;
+    v.yaw = s[3]!;
+    v.pitch = s[4]!;
+    v.roll = s[5]!;
+    return;
   }
-  if (c.cameraModeBeforeMissile !== 2 || c.dat0014fb94 === 0) return;
-  const s = c.savedViewPose;
-  v.posX = s[0]!;
-  v.posY = s[1]!;
-  v.posZ = s[2]!;
-  v.yaw = s[3]!;
-  v.pitch = s[4]!;
-  v.roll = s[5]!;
+  if (pose[6] === 0) return;
+  v.posX = pose[0]!;
+  v.posY = pose[1]!;
+  v.posZ = pose[2]!;
+  v.yaw = pose[3]!;
+  v.pitch = pose[4]!;
+  v.roll = pose[5]!;
 }
 
 /**

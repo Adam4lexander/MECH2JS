@@ -40,15 +40,9 @@ import {
   aiTargetNearestEnemy,
   aiValidateCurrentTarget,
   groupAssignObjectiveTask,
-  mechDamageSlot,
-  mechEject,
-  mechOnDestroyed,
-  mechUpdateMissileLock,
-  mechWeaponsTick,
-  weaponCycleGroup,
-  weaponCycleNext,
-  weaponJettisonAmmo,
 } from './laterPhases.ts';
+import { mechDamageSlot, mechEject, mechOnDestroyed } from './damage.ts';
+import { mechUpdateMissileLock, mechWeaponsTick, weaponCycleGroup, weaponCycleNext, weaponJettisonAmmo } from '../weapons/weapons.ts';
 import { loadoutAmmo, loadoutSections, loadoutWeapons } from './loadout.ts';
 import { mechs } from './mechGlobals.ts';
 import { mechRuntime } from './mechRuntime.ts';

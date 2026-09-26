@@ -29,7 +29,10 @@ Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
   and INPUT.MAP / GAMEKEY.MAP bind them exactly as in the original - e.g. `=`
   / `-` throttle, `0`..`9` throttle presets, the arrow keys / keypad turn,
   `,` `.` twist the torso, `c` cockpit / external view, `m` feet to torso,
-  `` ` `` reverse, Alt+P or Pause to pause. Click the view to give the game
+  `` ` `` reverse, Space fires the selected weapon, Enter cycles weapons,
+  `\` toggles chain / group fire, `;` fires the selected group, Num Lock,
+  keypad `/` and `*` fire groups 1-3, Shift+1..3 add the selected weapon to
+  a group, `k` jettisons its ammo, Alt+P or Pause to pause. Click the view to give the game
   the mouse (MOUSE.DLL: it steers the torso like a centring joystick).
 - **Edit** - no frame runs and time stands still; the editor shows the scene
   hierarchy, the game's tables, an inspector over every struct field with its

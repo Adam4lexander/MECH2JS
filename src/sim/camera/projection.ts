@@ -8,6 +8,8 @@
 import type { Viewer } from '../../generated/classes.gen.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import { cdiv } from '../../core/int/cint.ts';
+import { mulr16 } from '../../core/int/fx16.ts';
+import { sdivShl } from '../../core/int/i64.ts';
 import { matrixFromEulerOrder0, matrixTranspose, newTransform } from '../../core/math/matrix.ts';
 
 import { registerGlobals } from '../../engine/globals.ts';
@@ -94,4 +96,50 @@ export function viewerBuildTransform(v: Viewer): void {
   v.translationX = scratch[9]!;
   v.translationY = scratch[10]!;
   v.translationZ = scratch[11]!;
+}
+
+/** low 32 bits of (a0*b0 + a1*b1 + a2*b2) >> 27, rounded by bit 26 - the projector's 64-bit dot */
+function dot3r27(a0: number, b0: number, a1: number, b1: number, a2: number, b2: number): number {
+  const s = BigInt(a0 | 0) * BigInt(b0 | 0) + BigInt(a1 | 0) * BigInt(b1 | 0) + BigInt(a2 | 0) * BigInt(b2 | 0);
+  return Number(BigInt.asIntN(32, (s >> 27n) + ((s >> 26n) & 1n)));
+}
+
+/**
+ * Projects a world point to the screen, in place: p becomes (screen x,
+ * screen y, view depth). Rows 0 and 1 of the view rotation premultiplied by
+ * projScaleX / projScaleY (16.16, rounded) and row 2 give 64-bit dots that
+ * are taken >> 27 rounded; x and y are then (n << projShift) / depth, + 2
+ * >> 2, about the viewport centre, y flipped within the viewport's height.
+ * Returns 1 when the point is in front of the near clip (depth > 4 x
+ * nearClip) and inside left..right, top..bottom; otherwise 0, with a depth
+ * at or behind the eye divided by as |depth| (0 as 1).
+ *
+ * @mw2 viewer_project_point 0x0003f320
+ * @fidelity exact
+ * @divergence the original reads the globals viewer_latch_globals left at the last draw (viewTranslation, the premultiplied rows, viewDepthRow, projShift, centre and bounds, viewNearClipScaled); the port computes the same values from the viewer passed in, which callers make viewerPosition - the viewer the last draw latched, except while the cockpit shell pass had its near clip at 8
+ */
+export function viewerProjectPoint(v: Viewer, p: number[]): number {
+  const nearLimit = Math.imul(v.nearClip, 4);
+  const r = v.rotation;
+  const dx = (p[0]! - v.translationX) | 0;
+  const dy = (p[1]! - v.translationY) | 0;
+  let depth = (p[2]! - v.translationZ) | 0;
+  const psx = v.projScaleX | 0;
+  const psy = v.projScaleY | 0;
+  const sx = dot3r27(dx, mulr16(psx, r[0]!), dy, mulr16(psx, r[1]!), mulr16(psx, r[2]!), depth);
+  const sy = dot3r27(dx, mulr16(psy, r[3]!), dy, mulr16(psy, r[4]!), mulr16(psy, r[5]!), depth);
+  depth = dot3r27(dx, r[6]!, dy, r[7]!, r[8]!, depth);
+  p[2] = depth;
+  let rejected: boolean;
+  if (nearLimit < depth) {
+    rejected = false;
+  } else {
+    rejected = true;
+    if (depth < 0) depth = -depth | 0;
+    else if (depth === 0) depth = 1;
+  }
+  p[0] = (((sdivShl(sx, v.projShiftX & 0x1f, depth) + 2) >> 2) + v.centreX) | 0;
+  p[1] = (v.bottom - v.top - ((((sdivShl(sy, v.projShiftY & 0x1f, depth) + 2) >> 2) + v.centreY) | 0)) | 0;
+  if (rejected || p[0] < v.left || v.right < p[0] || p[1] < v.top || v.bottom < p[1]) return 0;
+  return 1;
 }

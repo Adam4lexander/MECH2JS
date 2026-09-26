@@ -1,115 +1,15 @@
 /**
- * What the mech tick hooks call that belongs to later phases - weapons,
- * damage and destruction (Phase 3), targeting and the HUD's cycling
- * (Phase 4), the AI (Phase 5). Each is called from its place in the
+ * What the mech tick hooks call that belongs to later phases - targeting
+ * and the HUD's cycling (Phase 4), the AI (Phase 5). Each is called from its place in the
  * original's sequence and reports once that it did nothing, so a run shows
  * which parts of a mech's frame are still missing. A body that is ported
  * moves to its subject's module and its line here goes.
  */
 import { divergence } from '../../core/provenance.ts';
-import type { MechEntity, MechLoadout } from '../../generated/classes.gen.ts';
+import type { MechEntity } from '../../generated/classes.gen.ts';
 
 function notYet(name: string, phase: string): void {
   divergence(`${name} is not ported yet (${phase}); the call does nothing`, name);
-}
-
-/**
- * @mw2 mech_weapons_tick 0x00052080
- * @fidelity stub
- * @divergence Phase 3 (weapons): no weapon fires or recycles
- */
-export function mechWeaponsTick(_l: MechLoadout): void {
-  notYet('mech_weapons_tick', 'Phase 3');
-}
-
-/**
- * @mw2 mech_update_missile_lock 0x00052ea0
- * @fidelity stub
- * @divergence Phase 3 (weapons): no missile lock; it would also move stateTimer (see mech_heat_update's note)
- */
-export function mechUpdateMissileLock(_l: MechLoadout): void {
-  notYet('mech_update_missile_lock', 'Phase 3');
-}
-
-/**
- * @mw2 weapon_cycle_next 0x00052950
- * @fidelity stub
- * @divergence Phase 3 (weapons)
- */
-export function weaponCycleNext(_l: MechLoadout): void {
-  notYet('weapon_cycle_next', 'Phase 3');
-}
-
-/**
- * @mw2 weapon_cycle_group 0x00052c90
- * @fidelity stub
- * @divergence Phase 3 (weapons)
- */
-export function weaponCycleGroup(): void {
-  notYet('weapon_cycle_group', 'Phase 3');
-}
-
-/**
- * @mw2 weapon_jettison_ammo 0x00052b20
- * @fidelity stub
- * @divergence Phase 3 (weapons)
- */
-export function weaponJettisonAmmo(_l: MechLoadout): void {
-  notYet('weapon_jettison_ammo', 'Phase 3');
-}
-
-/**
- * @mw2 mech_damage_slot 0x00025960
- * @fidelity stub
- * @divergence Phase 3 (damage)
- */
-export function mechDamageSlot(_l: MechLoadout, _location: number, _slot: number, _arg: number): void {
-  notYet('mech_damage_slot', 'Phase 3');
-}
-
-/**
- * @mw2 mech_apply_damage 0x00026270
- * @fidelity stub
- * @divergence Phase 3 (damage): fall damage is not applied
- */
-export function mechApplyDamage(_l: MechLoadout, _points: number, _location: number): void {
-  notYet('mech_apply_damage', 'Phase 3');
-}
-
-/**
- * @mw2 mech_collision_damage 0x00020890
- * @fidelity stub
- * @divergence Phase 3 (damage): walking into a mech does no damage
- */
-export function mechCollisionDamage(_l: MechLoadout, _other: MechLoadout | null): void {
-  notYet('mech_collision_damage', 'Phase 3');
-}
-
-/**
- * @mw2 obstacle_collision_damage 0x00020a50
- * @fidelity stub
- * @divergence Phase 3 (damage): walking into scenery does no damage
- */
-export function obstacleCollisionDamage(_l: MechLoadout, _object: unknown): void {
-  notYet('obstacle_collision_damage', 'Phase 3');
-}
-
-/**
- * @mw2 mech_on_destroyed 0x00025340
- * @fidelity stub
- * @divergence Phase 3 (destruction)
- */
-export function mechOnDestroyed(_l: MechLoadout): void {
-  notYet('mech_on_destroyed', 'Phase 3');
-}
-
-/**
- * @mw2 mech_eject 0x000265f0
- * @fidelity stub
- * @divergence Phase 3 (destruction): self-destruct and ejection do nothing
- */
-export function mechEject(_l: MechLoadout, _arg: number): void {
-  notYet('mech_eject', 'Phase 3');
 }
 
 /**

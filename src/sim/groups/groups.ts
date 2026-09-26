@@ -165,6 +165,26 @@ export function groupElectLeader(group: number): number {
 }
 
 /**
+ * Every member of `group` whose secondary target is mech `fromMech` (a
+ * 0x200 handle with no 0xf000 bits) is pointed at mech `toMech` instead;
+ * mech_on_destroyed uses it to hand the fallen leader's followers to the
+ * new one.
+ *
+ * @mw2 group_retarget_secondary 0x00021ce0
+ * @fidelity exact
+ */
+export function groupRetargetSecondary(group: number, fromMech: number, toMech: number): void {
+  const m = mechs;
+  for (let i = 0; i < m.mechCount; i++) {
+    const e = m.mechTable[i]!;
+    const t = e.targetSecondary;
+    if (group === e.groupId && (t & 0xf000) === 0 && (t & 0x200) !== 0 && (fromMech >>> 0) === (t & 0xff)) {
+      e.targetSecondary = ((toMech & 0xffff) | 0x200) & 0xffff;
+    }
+  }
+}
+
+/**
  * Numbers a star: elects a leader if it has none, then gives the leader
  * slot 0 and every other live mech-class member 1, 2, 3... in table order.
  * Returns 0 when no leader can be had.

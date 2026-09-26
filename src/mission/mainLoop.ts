@@ -38,11 +38,11 @@ import { paletteApplyPending, paletteFadeStep } from '../sim/world/palettes.ts';
 import { worldRecordsTick } from '../sim/world/worldRecords.ts';
 import { registerGlobals } from '../engine/globals.ts';
 import { divergence } from '../core/provenance.ts';
+import { simSlotsUpdate } from '../sim/effects/effects.ts';
+import { destructiblesUpdate } from '../sim/things/destructibles.ts';
+import { projectilesUpdateAll } from '../sim/weapons/projectiles.ts';
 import {
-  destructiblesUpdate,
   missionResultsUpdate,
-  projectilesUpdateAll,
-  simSlotsUpdate,
   soundConfigSub043dd0,
   soundConfigSub043e50,
   soundSeqSub041dd0,

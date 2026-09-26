@@ -9,7 +9,7 @@
  */
 import type { Ray } from '../../generated/classes.gen.ts';
 import { sdivShl } from '../../core/int/i64.ts';
-import { mulr16 } from '../../core/int/fx16.ts';
+import { mulDiv64, mulr16 } from '../../core/int/fx16.ts';
 
 /**
  * The octagonal length approximation used throughout the binary:
@@ -207,6 +207,17 @@ export function raySetFromDirection(ray: Ray, startX: number, startY: number, st
   ray.length = length | 0;
   ray.endY = (startY + ray.dy) | 0;
   ray.endZ = (startZ + ray.dz) | 0;
+}
+
+/**
+ * Cuts the segment where it reaches y = height, by length * (height -
+ * startY) / dy; a ray with no vertical extent is left alone.
+ *
+ * @mw2 ray_set_end_at_height 0x0001dc40
+ * @fidelity exact
+ */
+export function raySetEndAtHeight(ray: Ray, height: number): void {
+  if (ray.dy !== 0) raySetLength(ray, mulDiv64(ray.length, (height - ray.startY) | 0, ray.dy));
 }
 
 /**

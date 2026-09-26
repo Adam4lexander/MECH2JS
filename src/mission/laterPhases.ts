@@ -12,33 +12,6 @@ function notYet(name: string, phase: string): void {
 }
 
 /**
- * @mw2 projectiles_update_all 0x000506f0
- * @fidelity stub
- * @divergence Phase 3 (weapons): projectiles do not age or move
- */
-export function projectilesUpdateAll(): void {
-  notYet('projectiles_update_all', 'Phase 3');
-}
-
-/**
- * @mw2 sim_slots_update 0x000515c0
- * @fidelity stub
- * @divergence Phase 3 (effects)
- */
-export function simSlotsUpdate(): void {
-  notYet('sim_slots_update', 'Phase 3');
-}
-
-/**
- * @mw2 destructibles_update 0x0002b740
- * @fidelity stub
- * @divergence Phase 3 (destruction): falling objects do not fall and debris does not expire
- */
-export function destructiblesUpdate(): void {
-  notYet('destructibles_update', 'Phase 3');
-}
-
-/**
  * @mw2 mission_results_update 0x00016e80
  * @fidelity stub
  * @divergence Phase 6 (mission runtime)

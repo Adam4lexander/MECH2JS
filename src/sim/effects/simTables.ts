@@ -9,6 +9,7 @@
  * run of MW2.EXE.
  */
 import { Projectile, SimSlot } from '../../generated/classes.gen.ts';
+import type { MechEntity } from '../../generated/classes.gen.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import { registerGlobals } from '../../engine/globals.ts';
 import { imageI32 } from '../../engine/image.ts';
@@ -38,7 +39,70 @@ function bootSimTables() {
      * 0xa5639, 0xa563b, 0xa564e ...); what they count is NOT established.
      */
     dat000a5630: new Uint8Array(0x50),
+    /**
+     * 0x9ee38: set while an effect is the scene light (effect_spawn saves the
+     * viewer's light and sets it; sim_slots_update restores and clears it)
+     */
+    effectLightActive: imageI32(LABEL.effectLightActive, 0),
+    /** 0x9ee3c: the simSlots index whose effect is the scene light, -1 for none */
+    lightEffectSlot: imageI32(LABEL.lightEffectSlot, -1),
+    /**
+     * 0x9ee40: the projectiles[] slot of the player's latest missile (kinds 3
+     * and 4), -1 after any other kind; mech_weapon_fire writes it (label note)
+     */
+    playerLastMissile: imageI32(LABEL.playerLastMissile, -1),
+    /**
+     * 0x9ee44: the projectile the missile camera follows, -1 for none.
+     * projectile_update sets it for a round with missileCam set,
+     * projectile_destroy puts it back to -1.
+     */
+    missileCamProjectile: imageI32(LABEL.missileCamProjectile, -1),
+    /**
+     * 0x9ee48: the mech credited with the next kill. projectile_update sets it
+     * to the round's attackerMechIndex whenever a round strikes an object;
+     * gamething_destroy and mech_on_destroyed score the kill for it and put
+     * it back to -1.
+     */
+    killCreditMech: imageI32(LABEL.killCreditMech, -1),
+    /**
+     * 0x9ee4c: the mech effect_spawn_on_mount hands to effect_spawn; rows from
+     * 0x17 up are aligned to its mountNode (effect_align_to_mount) and the
+     * pointer is cleared once used
+     */
+    effectMountMech: null as MechEntity | null,
+    /** 0x9ee54: ticks the nuke's blast has left; nuke_blast_update counts it down */
+    nukeBlastTicksLeft: imageI32(LABEL.nukeBlastTicksLeft, 0),
+    /**
+     * 0x1538f8..0x15390c: the light effect_spawn saved when an effect took
+     * over the scene light - lightPos x, y, z, lightDirectional, ambientLight,
+     * and the 0x9705c flag (lighting.lightDimFlag) - which sim_slots_update
+     * puts back
+     */
+    savedLight: new Int32Array(6),
+    /** 0x153910..0x153918: the nuke's centre */
+    nukeBlastX: 0,
+    nukeBlastY: 0,
+    nukeBlastZ: 0,
+    /** 0x15391c: the blast front, growing 200 a tick to nukeBlastMaxRadius */
+    nukeBlastRadius: 0,
+    /** 0x153920 */
+    nukeBlastMaxRadius: 0,
   };
+}
+
+/**
+ * Adds 1 to the 16-bit word at `address` inside the 0xa5630 block (the
+ * counters gamething_destroy and mech_on_destroyed bump, many at unaligned
+ * addresses). Little-endian, wrapping, as the original's `inc word ptr`.
+ *
+ * @portOnly the block is a byte array here; this is the word increment
+ */
+export function statsWordAdd(address: number): void {
+  const b = simTables.dat000a5630;
+  const o = address - 0xa5630;
+  const w = (b[o]! | (b[o + 1]! << 8)) + 1;
+  b[o] = w & 0xff;
+  b[o + 1] = (w >> 8) & 0xff;
 }
 
 export const simTables = registerGlobals('simTables', bootSimTables(), () => {

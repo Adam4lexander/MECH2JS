@@ -2,7 +2,7 @@
  * The player's keyboard commands: command_execute switches on the command
  * id GAMEKEY.MAP bound to the key pressed (commandNames, listing/commands.txt).
  * Most set a control latch or a request the tick hooks answer; the ones
- * that belong to the HUD, radar, menus and weapons are reported and
+ * that belong to the HUD, radar and menus are reported and
  * dropped until their phases.
  */
 import { divergence } from '../../core/provenance.ts';
@@ -14,10 +14,12 @@ import { timerSetPaused } from '../../engine/timer.ts';
 import { cameraGetMode } from '../camera/viewer.ts';
 import { cameraTrackCycle } from '../camera/cameraUpdate.ts';
 import { messagePost } from '../cockpit/messages.ts';
-import { mechEject } from '../mech/laterPhases.ts';
+import { mechEject } from '../mech/damage.ts';
 import { cameraSetMode } from '../mech/mechTickAi.ts';
 import { mechs } from '../mech/mechGlobals.ts';
 import { mechRuntime } from '../mech/mechRuntime.ts';
+import { missileCamFollowLast } from '../weapons/projectiles.ts';
+import { playerWeaponSetFireGroup } from '../weapons/weapons.ts';
 import { net } from '../net/netplay.ts';
 import { soundPlay } from '../sound/sound.ts';
 import { ui, uiContextActive } from './uiContext.ts';
@@ -76,7 +78,7 @@ export function keyPauseEnd(): void {
  *
  * @mw2 command_execute 0x00046060
  * @fidelity partial
- * @divergence the HUD, radar, menu, weapon-group, screenshot and vision commands are Phase 4 and reported, not run; debug commands (hangAround) are not ported
+ * @divergence the HUD, radar, menu, screenshot and vision commands are Phase 4 and reported, not run; debug commands (hangAround) are not ported
  */
 export function commandExecute(cmd: number): void {
   const pc = mechs.playerControls;
@@ -261,7 +263,7 @@ export function commandExecute(cmd: number): void {
       if (((mechs.mechTable[mechs.playerMechIndex]!.flags >> 8) & 0x20) !== 0) soundPlay(0xdc, 100, 0x40, cmd - 2, 0x32);
       break;
     case 0xe:
-      later('missile camera, Phase 3');
+      if (missileCamFollowLast() !== 0) cameraSetMode(3);
       break;
     case 0x13:
       later('HUD toggle, Phase 4');
@@ -288,9 +290,13 @@ export function commandExecute(cmd: number): void {
       later('screenshot');
       break;
     case 0x8e:
+      playerWeaponSetFireGroup(0);
+      break;
     case 0x8f:
+      playerWeaponSetFireGroup(1);
+      break;
     case 0x90:
-      later('weapon groups, Phase 3');
+      playerWeaponSetFireGroup(2);
       break;
     case 0x9d:
     case 0x9e:

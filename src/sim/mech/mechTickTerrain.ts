@@ -28,7 +28,7 @@ import { mechAimRange, mechUpdateAimRange, weaponBuildFireRay } from '../weapons
 import { collision, mechMoveStep, worldGroundHeightNear } from '../world/collision.ts';
 import { lighting } from '../world/environment.ts';
 import { planet } from '../world/planet.ts';
-import { mechApplyDamage, mechCollisionDamage, obstacleCollisionDamage } from './laterPhases.ts';
+import { mechApplyDamage, mechCollisionDamage, obstacleCollisionDamage } from './damage.ts';
 import { mechs } from './mechGlobals.ts';
 import { mechRuntime } from './mechRuntime.ts';
 import { mechCrashToGround } from './mechTickAi.ts';

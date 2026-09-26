@@ -68,7 +68,8 @@ export function setMechConfigLog(fn: ((line: string) => void) | null): void {
 const logWrite = (s: string): void => configLog?.(s);
 
 let weaponCache: { exe: ExeImage; table: WeaponType[] } | null = null;
-function weaponTypes(): WeaponType[] {
+/** weaponTypes (0x9ee58, 31 rows), read from the boot image once. @portOnly */
+export function weaponTypes(): WeaponType[] {
   const exe = bootImage();
   if (!exe) throw new Error('mech_load_config: no boot image (setBootImage)');
   if (weaponCache?.exe !== exe) weaponCache = { exe, table: readWeaponTypes(exe) };
