@@ -213,7 +213,11 @@ export class IndexedViews implements RenderPort {
     r.setClearColor(this.clearColour, 0);
     r.clear(true, true, true);
     r.autoClear = false;
+    // in a headset session three would draw through the XR camera, into the headset's framebuffer
+    const xr = r.xr.enabled;
+    r.xr.enabled = false;
     r.render(scene, cam);
+    r.xr.enabled = xr;
     const n = W * H * 4;
     if (this.pixels.length < n) this.pixels = new Uint8Array(n);
     r.readRenderTargetPixels(this.target, 0, 0, W, H, this.pixels);
@@ -233,6 +237,7 @@ export class IndexedViews implements RenderPort {
         if (x < 0 || x > win.xMax) continue;
         win.buffer[y * pitch + x] = px[i]!;
         win.drawn[y * pitch + x] = 1;
+        win.layer[y * pitch + x] = 0;
       }
     }
   }

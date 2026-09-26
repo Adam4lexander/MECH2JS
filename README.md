@@ -114,6 +114,67 @@ posX/posY/posZ/heading in the inspector, keeps its entity fields and scene
 node in step, which the tick hooks do in play. Mech detail levels come from
 the game's own `mech_lod_update`, evaluated from the editor camera.
 
+## VR
+
+With a WebXR headset the viewport bar shows **VR** (Play only): you sit in
+the cockpit. Nothing of the game changes. The game's viewer poses a rig and
+your head moves inside it (`src/render/xr/xrRig.ts`). The rig is drawn one
+loop pass behind, interpolated between passes, so the cockpit doesn't
+judder at the 20 Hz loop rate.
+
+Three things are specific to stereo:
+
+- **The cockpit shell** is modelled at the mech's own scale, 2.7 m to
+  11.5 m from the eye. It is shrunk to 0.35x about the eye, which puts its
+  nearest parts under a metre away. The flat picture is unchanged.
+- **The HUD** is the game's own window on a plane 1.2 m ahead, 60% of the
+  game's field of view wide, centred on the torso's aim.
+- **The reticle and the target brackets** are not on that plane. The game's
+  pixels for them are tagged as they are drawn (`HUD_LAYER`,
+  `src/engine/vfx/vfx.ts`), and each is drawn on its own plane across the
+  game's whole field of view, so they sit on what they mark. They are drawn
+  after the world with no depth test, and the cockpit covers them.
+  - The brackets stand at the target's range.
+  - The reticle stands at the targeted mech's range while it is in view.
+    Otherwise it takes the nearest of what the ray under it meets, out to
+    300 m (`src/render/xr/aim.ts`): the drawn world, the terrain the mechs
+    walk on, or the flat ground. Its depth eases between them.
+- **Detail**: every LOD step is pushed 3x further out while in VR
+  (`lodDistanceScale`, `src/sim/camera/projection.ts`). That covers the
+  meshes' detail steps and the mechs' detail levels. The flat view keeps the
+  original's distances.
+- **The sky and ground** are drawn on a sphere about the eye
+  (`src/render/xr/xrSky.ts`). The cull runs from your head, so a turned head
+  sees what is behind the game's viewer.
+
+When a headset is present, sliders next to **VR** tune these sizes live:
+cockpit size, HUD width, detail and HUD distance. They are remembered.
+
+Controllers (`src/app/xrInput.ts`) press the game's own keys:
+
+| Control | Action |
+|---|---|
+| Left stick | throttle `=` / `-` and turn |
+| Left stick click | reverse |
+| Left trigger | cycle weapon |
+| Left grip | throttle stop |
+| X / Y | cockpit view / main menu |
+| Right stick | the mouse, which steers the torso |
+| Right stick click | feet to torso |
+| Right trigger | fire |
+| Right grip | fire the selected group |
+| A / B | nearest enemy / next target |
+
+The keyboard still works. Recentre with the headset's own recentre.
+
+WebXR needs a secure origin:
+
+- **PC VR** (Link, SteamVR): Chrome or Edge on `localhost` works as is.
+- **Standalone Quest:** run `adb reverse tcp:5173 tcp:5173` and open
+  `localhost:5173` in the Quest browser.
+- **Without a headset:** the Immersive Web Emulator extension works on
+  `localhost`.
+
 ## Layout
 
 See `docs/porting-notes.md` for the layers, conventions and decisions, and

@@ -108,6 +108,8 @@ input, select { background: var(--panel2); color: var(--text); border: 1px solid
 .viewport.playing { box-shadow: inset 0 0 0 2px var(--accent); }
 .viewport-overlay { position: absolute; left: 6px; top: 4px; font-family: var(--mono); font-size: 11px; color: #cfd3da; text-shadow: 0 0 3px #000; pointer-events: none; }
 .viewport-bar { position: absolute; right: 6px; top: 4px; display: flex; gap: 4px; }
+.viewport-bar .xr-slider { display: flex; align-items: center; gap: 3px; font-size: 11px; color: var(--dim); }
+.viewport-bar .xr-slider input { width: 64px; } .viewport-bar .xr-slider span { min-width: 34px; }
 .panel-error { padding: 10px; color: var(--err); overflow: auto; } .panel-error pre { font-size: 10px; color: var(--dim); white-space: pre-wrap; }
 
 /* the debriefing over the editor once a mission's loop has ended */

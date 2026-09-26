@@ -9,10 +9,20 @@
  * this pass lays the drawn ones over the rendered frame, each window pixel
  * covering its share of the render target (nearest, no filtering).
  *
+ * In a headset a quad glued over each eye cannot be read, so worldMesh is the
+ * same window on a plane in the world (the VR rig places it, render/xr/xrRig.ts
+ * placeHud): a pilot-tuned share of the game's field of view wide, just ahead
+ * of the cockpit, centred on the torso's aim (render/xr/xrSettings.ts).
+ * The HUD's layers that mark the world - the reticle and the target marker
+ * (engine/vfx/vfx.ts HUD_LAYER) - get planes of their own, which the rig
+ * places across the game's whole field of view far out, so they register
+ * with what they mark (the pixel's layer rides in the texture's second
+ * channel as 255 - layer).
+ *
  * @portOnly
  */
 import * as THREE from 'three';
-import type { VfxWindow } from '../../engine/vfx/vfx.ts';
+import { HUD_LAYER, type VfxWindow } from '../../engine/vfx/vfx.ts';
 import type { IndexedUniforms } from '../materials/indexedMaterial.ts';
 
 const vertexShader = /* glsl */ `
@@ -37,6 +47,35 @@ void main() {
 }
 `;
 
+const worldVertexShader = /* glsl */ `
+out vec2 vUv;
+void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+`;
+
+const worldFragmentShader = /* glsl */ `
+precision highp float;
+precision highp int;
+uniform sampler2D uPalette;
+uniform sampler2D uWindow;
+uniform vec2 uWindowSize;
+uniform int uLayers;   // bit n: draw the pixels of HUD layer n
+in vec2 vUv;
+out vec4 fragColour;
+void main() {
+  ivec2 size = ivec2(uWindowSize);
+  ivec2 p = clamp(ivec2(floor(vUv.x * uWindowSize.x), size.y - 1 - int(floor(vUv.y * uWindowSize.y))), ivec2(0), size - 1);
+  vec2 t = texelFetch(uWindow, p, 0).rg;
+  if (t.g < 0.5) discard;
+  int layer = 255 - int(t.g * 255.0 + 0.5);
+  if (((uLayers >> layer) & 1) == 0) discard;
+  int i = int(t.r * 255.0 + 0.5);
+  fragColour = vec4(texelFetch(uPalette, ivec2(i, 0), 0).rgb, 1.0);
+}
+`;
+
 export class HudOverlay {
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -55,6 +94,41 @@ export class HudOverlay {
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
     mesh.frustumCulled = false;
     this.scene.add(mesh);
+    this.worldMesh = this.worldPlane(1 << HUD_LAYER.rest);
+    this.reticleMesh = this.worldPlane(1 << HUD_LAYER.reticle);
+    this.markerMesh = this.worldPlane(1 << HUD_LAYER.targetMarker);
+  }
+
+  /** the window on a unit plane facing +z, for a headset (placed by the VR rig): HUD_LAYER.rest, and any layer setWorldLayers adds */
+  readonly worldMesh: THREE.Mesh;
+  /** the reticle's layer alone, and the target marker's, on planes of their own */
+  readonly reticleMesh: THREE.Mesh;
+  readonly markerMesh: THREE.Mesh;
+
+  /** the centre of the reticle layer's pixels in window pixels (x, y down), or null when it drew none */
+  get reticleCentre(): THREE.Vector2 | null {
+    return this.reticleCount > 0 ? this.reticleAt : null;
+  }
+  private readonly reticleAt = new THREE.Vector2();
+  private reticleCount = 0;
+
+  /** Which HUD layers worldMesh draws (bit n: layer n) - the ones not drawn apart this frame. */
+  setWorldLayers(mask: number): void {
+    (this.worldMesh.material as THREE.ShaderMaterial).uniforms.uLayers!.value = mask;
+  }
+
+  private worldPlane(layers: number): THREE.Mesh {
+    const uniforms = { ...this.u, uLayers: { value: layers } };
+    const mat = new THREE.ShaderMaterial({ glslVersion: THREE.GLSL3, uniforms, vertexShader: worldVertexShader, fragmentShader: worldFragmentShader, depthTest: false, depthWrite: false });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat);
+    mesh.frustumCulled = false;
+    return mesh;
+  }
+
+  /** the window's height / width, once it has pixels */
+  get aspect(): number {
+    const s = this.u.uWindowSize.value;
+    return s.x > 0 ? s.y / s.x : 0.75;
   }
 
   /** Uploads the window's pixels; false when it has none yet (before video_init). */
@@ -74,10 +148,23 @@ export class HudOverlay {
     const d = this.data;
     const b = win.buffer;
     const m = win.drawn;
+    const l = win.layer;
+    const reticle = HUD_LAYER.reticle;
+    let rx = 0;
+    let ry = 0;
+    let rn = 0;
+    // drawn: 255 - its layer (every drawn pixel stays >= 0.5 for the screen pass); not drawn: 0
     for (let i = 0, n = w * h; i < n; i++) {
       d[i * 2] = b[i]!;
-      d[i * 2 + 1] = m[i] ? 255 : 0;
+      d[i * 2 + 1] = m[i] ? 255 - l[i]! : 0;
+      if (m[i] && l[i] === reticle) {
+        rx += i % w;
+        ry += (i / w) | 0;
+        rn++;
+      }
     }
+    this.reticleCount = rn;
+    if (rn > 0) this.reticleAt.set(rx / rn + 0.5, ry / rn + 0.5);
     this.tex.needsUpdate = true;
     this.u.uTarget.value.set(targetWidth, targetHeight);
     return true;

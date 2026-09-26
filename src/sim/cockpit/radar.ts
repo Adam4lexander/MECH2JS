@@ -1311,6 +1311,7 @@ export function vfxEllipseDraw(pane: ViewWindow, xc: number, yc: number, rx: num
     const at = y * width + x;
     win.buffer[at] = c;
     win.drawn[at] = 1;
+    win.layer[at] = 0;
   };
   const four = (x: number, y: number) => {
     put(cx + x, cy + y);

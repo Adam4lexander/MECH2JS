@@ -16,6 +16,13 @@
  * Faithful mode renders at VGA resolution (640 x 480 aspect-fitted) and
  * scales up with nearest filtering; Modern renders at native resolution.
  *
+ * VR (WebXR, where the browser has a headset): the game's camera with the
+ * pilot's head inside it - the world, the cockpit shell and the HUD drawn
+ * through a rig that follows the game's viewer (render/xr/xrRig.ts), the sky
+ * on a sphere (render/xr/xrSky.ts), the controllers as the game's keys and
+ * mouse (app/xrInput.ts). The frame runs from the renderer's animation loop,
+ * which is the headset's while a session is on.
+ *
  * @portOnly
  */
 import { useEffect, useRef, useState } from 'react';
@@ -45,6 +52,22 @@ import { renderPort } from '../../sim/display/renderPort.ts';
 import { renderOptions } from '../../render/shading/polygonColour.ts';
 import { lighting } from '../../sim/world/environment.ts';
 import { structOf } from './Inspector.tsx';
+import { XrRig } from '../../render/xr/xrRig.ts';
+import { XrSky } from '../../render/xr/xrSky.ts';
+import { XrInput } from '../../app/xrInput.ts';
+import { recallXrSettings, storeXrSettings, type XrSettings } from '../../render/xr/xrSettings.ts';
+import { playerTargetPosition } from '../../render/xr/xrRig.ts';
+import { aimDepth } from '../../render/xr/aim.ts';
+import { HUD_LAYER } from '../../engine/vfx/vfx.ts';
+import { projectionGlobals, viewerRefreshLodScale } from '../../sim/camera/projection.ts';
+
+/** VR: the reticle's plane - out to this far with nothing under it, never nearer than the min, easing over RETICLE_EASE seconds (metres) */
+const RETICLE_DISTANCE = 300;
+const RETICLE_MIN_DISTANCE = 3;
+const RETICLE_EASE = 0.12;
+/** VR: the range the target marker's plane is held to (metres) */
+const MARKER_MIN_DISTANCE = 5;
+const MARKER_MAX_DISTANCE = 3000;
 
 /** which camera Edit looks through */
 type EditView = 'scene' | 'game';
@@ -58,9 +81,25 @@ export function Viewport({ game }: { game: Game }) {
   const faithfulRef = useRef(faithful);
   const editViewRef = useRef(editView);
   const paletteDirty = useRef(false);
+  const [xrSupported, setXrSupported] = useState(false);
+  const [xrOn, setXrOn] = useState(false);
+  /** enters VR, or leaves it while in it (set by the renderer's effect) */
+  const toggleXr = useRef<(() => void) | null>(null);
+  const [xrSettings, setXrSettings] = useState<XrSettings>(recallXrSettings);
+  const xrSettingsRef = useRef(xrSettings);
+  useEffect(() => {
+    xrSettingsRef.current = xrSettings;
+    storeXrSettings(xrSettings);
+  }, [xrSettings]);
   useEffect(() => {
     faithfulRef.current = faithful;
   }, [faithful]);
+  useEffect(() => {
+    navigator.xr
+      ?.isSessionSupported('immersive-vr')
+      .then(setXrSupported)
+      .catch(() => setXrSupported(false));
+  }, []);
   useEffect(() => {
     editViewRef.current = editView;
   }, [editView]);
@@ -91,6 +130,35 @@ export function Viewport({ game }: { game: Game }) {
     sr.backdropScene.add(skyGround.mesh);
     const hudOverlay = new HudOverlay(sr.uniforms);
     renderer.autoClear = false;
+    // VR: the rig the headset sits in, the sky about it, the controllers
+    renderer.xr.enabled = true;
+    renderer.xr.setReferenceSpaceType('local');
+    const rig = new XrRig();
+    const xrSky = new XrSky(sr.uniforms);
+    sr.backdropScene.add(xrSky.mesh);
+    const xrInput = new XrInput();
+    const xrViewer = new Viewer();
+    /** the cockpit scene carries the rig's matrix (reset on leaving VR) */
+    let cockpitMoved = false;
+    const onXrEnd = () => {
+      xrInput.release();
+      setXrOn(false);
+    };
+    toggleXr.current = () => {
+      const current = renderer.xr.getSession();
+      if (current) {
+        void current.end();
+        return;
+      }
+      navigator.xr
+        ?.requestSession('immersive-vr', { optionalFeatures: ['local'] })
+        .then(async (session) => {
+          session.addEventListener('end', onXrEnd, { once: true });
+          await renderer.xr.setSession(session);
+          setXrOn(true);
+        })
+        .catch((err: unknown) => console.warn('VR session refused', err));
+    };
     const fly = new FreeFly(sceneCam, el, sceneView);
     // start at the player's mech, else the mission's start view (VWST)
     const player = mechs.mechTable[mechs.playerMechIndex];
@@ -189,21 +257,35 @@ export function Viewport({ game }: { game: Game }) {
     renderPort.current = views;
     if (dbg) dbg.view = { camera: sceneCam, gameCamera: gameCam, fly, renderer: sr, views };
 
-    let raf = 0;
     let last = performance.now();
     let lastInfo = 0;
     const frame = (now: number) => {
       const dt = Math.min(0.1, (now - last) / 1000);
       const elapsedMs = now - last;
       last = now;
+      const session = renderer.xr.isPresenting ? renderer.xr.getSession() : null;
+      const xr = session !== null;
+      // the controllers are read before the pass, as the keyboard's interrupts arrive before it
+      if (session) xrInput.poll(session, game.mode === 'play');
+      // the LOD distances: pushed out in a headset, the original's otherwise - set before the pass, whose mech_lod_update reads them
+      const lodScale = xr ? xrSettingsRef.current.detail : 1;
+      if (projectionGlobals.lodDistanceScale !== lodScale) {
+        projectionGlobals.lodDistanceScale = lodScale;
+        for (const v of new Set([cameraGlobals.mainViewer, cameraGlobals.viewerPosition])) if (v) viewerRefreshLodScale(v);
+      }
       const playing = game.mode === 'play';
+      let passed = false;
       if (playing) {
         // the game's render requests are per pass of its loop: between passes the last one is drawn again
-        if (!game.playFrame(elapsedMs, () => views.beginFrame())) game.setMode('edit');
+        const onPass = () => {
+          views.beginFrame();
+          passed = true;
+        };
+        if (!game.playFrame(elapsedMs, onPass)) game.setMode('edit');
         engineStore.bumpThrottled();
       }
-      // after the frame: the loop may have ended and left Edit
-      const scene = sceneView();
+      // after the frame: the loop may have ended and left Edit. A headset always looks through the game's camera
+      const scene = sceneView() && !xr;
       const camera = scene ? sceneCam : gameCam;
       // the gizmo is the scene camera's alone
       gizmo.enabled = scene;
@@ -227,7 +309,10 @@ export function Viewport({ game }: { game: Game }) {
       const w = el.clientWidth;
       const h = el.clientHeight;
       let aspect: number;
-      if (faithfulRef.current) {
+      if (xr) {
+        // the headset owns the framebuffer's size (three refuses a resize while presenting)
+        aspect = 640 / 480;
+      } else if (faithfulRef.current) {
         const s = Math.min(w / 640, h / 480);
         renderer.setSize(Math.floor(640), Math.floor(480), false);
         renderer.domElement.style.width = `${Math.floor(640 * s)}px`;
@@ -245,15 +330,33 @@ export function Viewport({ game }: { game: Game }) {
         sceneCam.aspect = aspect;
         sceneCam.updateProjectionMatrix();
       } else cameraFromViewer(viewer(), gameCam, aspect);
+      // the rig follows the viewer pass by pass (interpolated between them), or stands with it while paused
+      if (!scene) {
+        if (!playing) rig.hold(gameCam, now);
+        else if (passed) rig.recordPass(gameCam, now);
+      }
       const eye = fromThree(camera.position.x, camera.position.y, camera.position.z);
       game.updateTextures(sr);
-      // the game's viewer as the cull, LOD and clipper see it: its own, or standing at the scene camera
-      sr.sync(scene ? viewerFromCamera(sceneCam, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer) : viewer());
-      renderer.getDrawingBufferSize(drawSize);
+      const tanH = 0x10000 / Math.min(0x100000, Math.max(0x8000, viewer().zoom | 0));
+      let head: THREE.ArrayCamera | null = null;
+      if (xr) {
+        rig.settings = xrSettingsRef.current;
+        rig.update(now);
+        renderer.xr.updateCamera(rig.camera);
+        head = renderer.xr.getCamera();
+        // the game's viewer standing at the head: what a turned head sees is culled from there
+        sr.sync(rig.cullViewer(head, viewer(), xrViewer));
+        const vp = head.cameras[0]?.viewport;
+        drawSize.set(vp?.z ?? 1, vp?.w ?? 1);
+      } else {
+        // the game's viewer as the cull, LOD and clipper see it: its own, or standing at the scene camera
+        sr.sync(scene ? viewerFromCamera(sceneCam, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer) : viewer());
+        renderer.getDrawingBufferSize(drawSize);
+      }
       // Play: the main view only when the game's render hook asked for it this frame (not while the
       // map has the hook), with its wipe colour in place of sky and ground when it gave one
       const wipe = playing ? views.mainWipe : null;
-      skyGround.update(camera, drawSize.x, drawSize.y, {
+      const skyState = {
         sky: wipe ?? lighting.skyColour,
         ground: wipe ?? lighting.groundColour,
         skyOn: wipe !== null || lighting.skyEnabled !== 0,
@@ -261,15 +364,46 @@ export function Viewport({ game }: { game: Game }) {
         bandHeight: lighting.horizonBandHeight,
         screenWidth: Math.max(1, defaultCanvas.xMax + 1),
         bandOn: wipe === null && lighting.horizonBandEnabled !== 0 && renderOptions.shadedFillEnabled !== 0,
-      });
+      };
+      skyGround.mesh.visible = !xr;
+      xrSky.mesh.visible = xr;
+      if (head) xrSky.update(new THREE.Vector3().setFromMatrixPosition(head.matrixWorld), tanH, skyState);
+      else skyGround.update(camera, drawSize.x, drawSize.y, skyState);
       sr.setViewport(drawSize.x, drawSize.y);
+      // the cockpit shell: in a headset, carried to the rig and enlarged about the eye (xrRig.ts)
+      if (xr) {
+        rig.cockpitMatrix(gameCam, sr.cockpitScene.matrix);
+        sr.cockpitScene.matrixWorldNeedsUpdate = true;
+        cockpitMoved = true;
+      } else if (cockpitMoved) {
+        sr.cockpitScene.matrix.identity();
+        sr.cockpitScene.matrixWorldNeedsUpdate = true;
+        cockpitMoved = false;
+      }
+      const view = xr ? rig.camera : camera;
+      const hudReady = !scene && hudOverlay.update(defaultCanvas, drawSize.x, drawSize.y);
+      /** the HUD layers drawn apart this frame, in the world (a headset only) */
+      let lifted = 0;
       renderer.clear();
       if (!playing || views.mainRequested) {
         // the sky and the backdrop, then the world over them
-        renderer.render(sr.backdropScene, camera);
+        renderer.render(sr.backdropScene, view);
         renderer.clearDepth();
-        renderer.render(sr.scene, camera);
-        if (!scene) {
+        renderer.render(sr.scene, view);
+        if (xr) {
+          // the reticle and the target marker, across the game's field of view far out from the pass's
+          // eye, so they lie on what they mark; no depth test against the world, and the cockpit covers them
+          if (hudReady) {
+            lifted = liftHudLayers(tanH, dt);
+            if (lifted) {
+              hudOverlay.worldMesh.visible = false;
+              renderer.render(rig.hudScene, rig.camera);
+            }
+          }
+          // scaled, the shell's nearest parts stay well beyond the headset's 10 cm near plane
+          renderer.clearDepth();
+          renderer.render(sr.cockpitScene, view);
+        } else if (!scene) {
           // the cockpit shell, painted over the world (empty outside the cockpit view). Its near clip
           // is 8 cm, inside three's 50 cm near plane, so the pass runs with the plane pulled in
           renderer.clearDepth();
@@ -281,17 +415,79 @@ export function Viewport({ game }: { game: Game }) {
           camera.updateProjectionMatrix();
         }
       }
-      // the game's 2D (HUD, radar, cockpit text) over it all, through the game's camera
-      if (!scene && hudOverlay.update(defaultCanvas, drawSize.x, drawSize.y)) renderer.render(hudOverlay.scene, hudOverlay.camera);
+      // the game's 2D (HUD, radar, cockpit text) over it all, through the game's camera - in a headset on a plane ahead
+      if (hudReady) {
+        if (xr) {
+          hudOverlay.reticleMesh.visible = false;
+          hudOverlay.markerMesh.visible = false;
+          hudOverlay.worldMesh.visible = true;
+          hudOverlay.setWorldLayers(0b111 & ~lifted);
+          rig.placeHud(hudOverlay.worldMesh, tanH, hudOverlay.aspect);
+          renderer.render(rig.hudScene, rig.camera);
+        } else renderer.render(hudOverlay.scene, hudOverlay.camera);
+      }
       if (now - lastInfo > 250) {
         lastInfo = now;
         setInfo(`${sr.stats.objects} objects · ${sr.stats.polygons} polygons · eye ${eye.map((c) => (c * CM_TO_UNITS).toFixed(0)).join(', ')} m`);
       }
-      raf = requestAnimationFrame(frame);
     };
-    raf = requestAnimationFrame(frame);
+    /**
+     * Places the reticle's and the target marker's planes for this frame and
+     * returns the layer bits placed. The marker stands at its target's range -
+     * but only while the target is in view: off screen the game pins a marker
+     * to the edge of the screen, which belongs on the HUD plane with the rest.
+     * The reticle stands at the same range while there is one; otherwise at
+     * whatever the ray from the pass's eye through the reticle meets first -
+     * the drawn world (not the player's own mech), the terrain, the flat
+     * ground (render/xr/aim.ts) - out to RETICLE_DISTANCE.
+     * Its depth eases between them (in 1 / distance, what the eyes converge
+     * on), so a ray sliding off a building does not snap the reticle out.
+     */
+    let reticleInvDepth = 1 / RETICLE_DISTANCE;
+    const liftHudLayers = (tanH: number, dt: number): number => {
+      const aspect = hudOverlay.aspect;
+      let bits = 0;
+      hudOverlay.markerMesh.visible = false;
+      let targetDepth: number | null = null;
+      const t = playerTargetPosition();
+      if (t) {
+        const p = new THREE.Vector3(...toThree(t[0], t[1], t[2]));
+        const inView = p.clone().applyMatrix4(gameCam.matrixWorldInverse);
+        const ndc = p.clone().project(gameCam);
+        if (inView.z < 0 && Math.abs(ndc.x) <= 1 && Math.abs(ndc.y) <= 1) {
+          targetDepth = Math.min(MARKER_MAX_DISTANCE, Math.max(MARKER_MIN_DISTANCE, -inView.z));
+          rig.placeLifted(hudOverlay.markerMesh, gameCam, targetDepth, tanH, aspect);
+          hudOverlay.markerMesh.visible = true;
+          bits |= 1 << HUD_LAYER.targetMarker;
+        }
+      }
+      const want = targetDepth ?? aimDepthNow();
+      reticleInvDepth += (1 / want - reticleInvDepth) * (1 - Math.exp(-dt / RETICLE_EASE));
+      rig.placeLifted(hudOverlay.reticleMesh, gameCam, 1 / reticleInvDepth, tanH, aspect);
+      hudOverlay.reticleMesh.visible = true;
+      bits |= 1 << HUD_LAYER.reticle;
+      return bits;
+    };
+    /** The depth of what lies under the reticle (render/xr/aim.ts), out to RETICLE_DISTANCE. */
+    const aimDepthNow = (): number => {
+      const c = hudOverlay.reticleCentre;
+      const W = defaultCanvas.xMax + 1;
+      const H = defaultCanvas.yMax + 1;
+      if (!c || W <= 0 || H <= 0) return RETICLE_DISTANCE;
+      const world = sr.pickables().filter((m) => rootOf3(m) === sr.scene);
+      const own = (m: THREE.Object3D) => {
+        const obj = sr.objectOf(m);
+        return !!obj?.node && mechOwning(obj.node) === mechs.playerMechIndex;
+      };
+      return aimDepth(gameCam, new THREE.Vector2((c.x / W) * 2 - 1, 1 - (c.y / H) * 2), world, own, RETICLE_MIN_DISTANCE, RETICLE_DISTANCE);
+    };
+    // the renderer's loop: the window's animation frames, or the headset's while a session is on
+    renderer.setAnimationLoop(frame);
     return () => {
-      cancelAnimationFrame(raf);
+      renderer.setAnimationLoop(null);
+      toggleXr.current = null;
+      void renderer.xr.getSession()?.end();
+      xrInput.release();
       unsubSel();
       unsubEngine();
       window.removeEventListener('keydown', onKey);
@@ -354,8 +550,38 @@ export function Viewport({ game }: { game: Game }) {
         <button className={!faithful ? 'active' : ''} onClick={() => setFaithful(false)} title="native resolution">
           Modern
         </button>
+        {xrSupported && (
+          <button
+            className={xrOn ? 'active' : ''}
+            disabled={!playing && !xrOn}
+            onClick={() => toggleXr.current?.()}
+            title={xrOn ? 'leave VR' : "VR: sit in the cockpit with a headset (Play). Left stick throttle and turn, right stick torso, triggers fire, A/B targets, X view, Y menu"}
+          >
+            VR
+          </button>
+        )}
+        {xrSupported && (
+          <>
+            <XrSlider label="cockpit" title="the cockpit's size about your eye (1 = the mech's own scale)" value={xrSettings.cockpitScale} min={0.15} max={1.5} step={0.05} unit="x" onChange={(v) => setXrSettings((s) => ({ ...s, cockpitScale: v }))} />
+            <XrSlider label="HUD" title="the HUD's width as a share of the game's view (the reticle and target brackets are drawn in the world, not on it)" value={xrSettings.hudScale} min={0.3} max={1} step={0.05} unit="%" onChange={(v) => setXrSettings((s) => ({ ...s, hudScale: v }))} />
+            <XrSlider label="detail" title="how far out the detail steps are pushed in VR (1 = the original's)" value={xrSettings.detail} min={1} max={8} step={0.5} unit="x" onChange={(v) => setXrSettings((s) => ({ ...s, detail: v }))} />
+            <XrSlider label="at" title="how far ahead of your eye the HUD stands" value={xrSettings.hudDistance} min={0.5} max={5} step={0.1} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, hudDistance: v }))} />
+          </>
+        )}
       </div>
     </div>
+  );
+}
+
+/** One of the VR sizes: a slider and its value. */
+function XrSlider(p: { label: string; title: string; value: number; min: number; max: number; step: number; unit: 'x' | '%' | 'm'; onChange: (v: number) => void }) {
+  const shown = p.unit === '%' ? `${Math.round(p.value * 100)}%` : p.unit === 'x' ? `${p.value.toFixed(2)}x` : `${p.value.toFixed(1)} m`;
+  return (
+    <label className="xr-slider" title={p.title}>
+      {p.label}
+      <input type="range" min={p.min} max={p.max} step={p.step} value={p.value} onChange={(e) => p.onChange(Number(e.target.value))} />
+      <span>{shown}</span>
+    </label>
   );
 }
 
@@ -402,6 +628,13 @@ function viewUpdateFrom(eye: THREE.Vector3): void {
     [v.posX, v.posY, v.posZ] = saved;
   }
   if (before.some((d, i) => d !== mechs.mechTable[i]!.detailLevel)) engineStore.bump();
+}
+
+/** The topmost ancestor of a three.js object (the scene it is in). */
+function rootOf3(o: THREE.Object3D): THREE.Object3D {
+  let r = o;
+  while (r.parent) r = r.parent;
+  return r;
 }
 
 function rootOf(n: SceneNode): SceneNode {
