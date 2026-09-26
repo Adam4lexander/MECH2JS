@@ -32,8 +32,14 @@ Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
   `` ` `` reverse, Space fires the selected weapon, Enter cycles weapons,
   `\` toggles chain / group fire, `;` fires the selected group, Num Lock,
   keypad `/` and `*` fire groups 1-3, Shift+1..3 add the selected weapon to
-  a group, `k` jettisons its ammo, Alt+P or Pause to pause. Click the view to give the game
+  a group, `k` jettisons its ammo, `t` / `e` cycle targets / pick the
+  nearest enemy, `x` / Shift+`x` zoom the radar, F1..F12 the cockpit displays
+  (F2 radar mode, F3 map, F4 target display, F5 damage display, F11 HUD, F12
+  objectives - the browser keeps some F-keys for itself), Alt+P or Pause to pause. Click the view to give the game
   the mouse (MOUSE.DLL: it steers the torso like a centring joystick).
+  The cockpit HUD is the game's own: its widgets, radar, tapes and reticle
+  draw into the game's 640x480 indexed window, which is laid over the 3D view
+  through the palette.
 - **Edit** - no frame runs and time stands still; the editor shows the scene
   hierarchy, the game's tables, an inspector over every struct field with its
   offset and C type, a free camera, the asset browser and the console. Step

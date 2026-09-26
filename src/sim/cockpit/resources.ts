@@ -24,14 +24,16 @@ import { i16 } from '../../core/int/cint.ts';
 import { divergence } from '../../core/provenance.ts';
 import type { StreamRef } from '../../data/bwd/stream.ts';
 import { registerGlobals } from '../../engine/globals.ts';
-import { imageI32, imageI32s } from '../../engine/image.ts';
+import { bootImage, imageI32, imageI32s } from '../../engine/image.ts';
+import { imageCanvas } from '../display/video.ts';
 import { loadResourceRef } from '../../engine/resources/preload.ts';
 
 function bootWindows(addr: number, count: number): ViewWindow[] {
   return Array.from({ length: count }, (_, i) => {
     const w = new ViewWindow();
     const at = addr + i * 0x14;
-    // canvas (+0) is &defaultCanvas (0xa46bc) in the image - a pointer, left null
+    // canvas (+0) is &defaultCanvas (0xa46bc) in the image
+    w.canvas = imageCanvas(at);
     w.left = imageI32(at + 4, 0);
     w.top = imageI32(at + 8, 0);
     w.right = imageI32(at + 0xc, 0);
@@ -40,31 +42,101 @@ function bootWindows(addr: number, count: number): ViewWindow[] {
   });
 }
 
+/**
+ * A pane transition (see HudWidget.paneTransition and pane_transition_step):
+ * the state record {now, before, elapsed} and the parameters {duration,
+ * from, to, out}. @portOnly the two records the image holds, as objects
+ */
+export interface PaneTransition {
+  /** state +0: 1 while running */
+  now: number;
+  /** state +1: now as the last step left it */
+  before: number;
+  /** state +2: ticks run */
+  elapsed: number;
+  /** params +0: ticks the transition takes (0xb6 in both records) */
+  duration: number;
+  from: ViewWindow;
+  to: ViewWindow;
+  out: ViewWindow;
+}
+
+function paneAt(addr: number): ViewWindow {
+  const w = new ViewWindow();
+  w.canvas = imageCanvas(addr);
+  w.left = imageI32(addr + 4, 0);
+  w.top = imageI32(addr + 8, 0);
+  w.right = imageI32(addr + 0xc, 0);
+  w.bottom = imageI32(addr + 0x10, 0);
+  return w;
+}
+
+function bootTransitions(): (PaneTransition | null)[] {
+  const out: (PaneTransition | null)[] = [];
+  for (let i = 0; i < 24; i++) {
+    const rec = imageI32(0x96bc0 + i * 4, 0);
+    if (rec === 0) {
+      out.push(null);
+      continue;
+    }
+    const state = imageI32(rec, 0);
+    const params = imageI32(rec + 4, 0);
+    const img = bootImage();
+    out.push({
+      now: img ? img.u8(state) : 0,
+      before: img ? img.u8(state + 1) : 0,
+      elapsed: imageI32(state + 2, 0),
+      duration: imageI32(params, 0),
+      from: paneAt(imageI32(params + 4, 0)),
+      to: paneAt(imageI32(params + 8, 0)),
+      out: paneAt(imageI32(params + 0xc, 0)),
+    });
+  }
+  return out;
+}
+
 function bootCockpit() {
   return {
     /**
      * 0x955e8: ViewWindow[5] (the label in the C is PTR_defaultCanvas_000955e8).
-     * res_load_cockpit writes the rectangles; vfx_font_sub_014950 rescales all
+     * res_load_cockpit writes the rectangles; layout_rescale_all rescales all
      * five exactly as it rescales viewportModes. Zero rectangles in the image.
      */
     dat000955e8: bootWindows(0x955e8, 5),
     /**
-     * 0x968e0: ViewWindow[15]; res_load_cockpit writes the rectangles. The
-     * image already holds a layout here ({13,10,80,60}, {260,145,312,197} ...).
+     * 0x968e0: ViewWindow[24], one per HudWidget (hud_widgets_install hands
+     * pane i to widget i); res_load_cockpit writes the first fifteen. The
+     * image already holds a layout for all 24 ({13,10,80,60},
+     * {260,145,312,197} ...), in 320x200 design pixels until
+     * hud_widget_panes_rescale.
      */
-    dat000968e0: bootWindows(0x968e0, 15),
+    dat000968e0: bootWindows(0x968e0, 24),
+    /**
+     * 0x96ac0: {x, y} per widget, 16.16 fractions of its pane - where its
+     * text goes (HudWidget.textPos); hud_widget_panes_rescale makes them
+     * pixels relative to the pane.
+     */
+    dat00096ac0: Int32Array.from(imageI32s(0x96ac0, 48, new Array<number>(48).fill(0))),
+    /**
+     * 0x96bc0: per widget, its pane transition (HudWidget.paneTransition) -
+     * only widgets 2 (damage display, 0x96bb8) and 13 (target display,
+     * 0x96ba0) have one.
+     */
+    paneTransitions: bootTransitions(),
     /**
      * 0x9572c: two ints, reached through the pointer at 0x95740 -
-     * res_load_cockpit's fourth argument. vfx_font_sub_014950 rescales them as
+     * res_load_cockpit's fourth argument. layout_rescale_all rescales them as
      * a point.
      */
     dat0009572c: Int32Array.from(imageI32s(0x9572c, 2, [0, 0])),
     /**
-     * 0x9623c: five {int, int} pairs from res_load_hdi. vfx_font_sub_014950
+     * 0x9623c: five {int, int} pairs from res_load_hdi. layout_rescale_all
      * rescales SIX pairs from here as points; the sixth (0x96264) is not
-     * written by the loader. The image holds {277,22}, {8,116}, {4,64}, {4,116}, {0,0}.
+     * written by the loader. The image holds {115,16}, {8,74}, {4,40},
+     * {4,74}, {0,0}, {0,0}. (CORRECTION: this said {277,22}, {8,116},
+     * {4,64}, {4,116} - the same numbers read as hex.)
      */
-    dat0009623c: Int32Array.from(imageI32s(0x9623c, 10, new Array<number>(10).fill(0))),
+    dat0009623c: Int32Array.from(imageI32s(0x9623c, 12, new Array<number>(12).fill(0))),
     /**
      * 0xfe0e8: three ints from res_load_hdi. The first is an SHP resource id:
      * the damage diagram set-up (sim/damage.c) loads cache_load_resource(it +

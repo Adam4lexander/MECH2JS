@@ -30,8 +30,8 @@ import { simTablesReset } from '../sim/effects/simTables.ts';
 import { groupReset, groupsStartMission } from '../sim/groups/groups.ts';
 import { mechDispatchHook0 } from '../sim/mech/hooks.ts';
 import { thingNodes } from '../sim/mech/spawn.ts';
-import { viewerUpdateProjection } from '../sim/camera/projection.ts';
-import { cameraGlobals } from '../sim/camera/viewer.ts';
+import { layoutRescaleAll } from '../sim/display/rescale.ts';
+import { videoInit } from '../sim/display/video.ts';
 import { setMekSource } from '../sim/mech/looseFiles.ts';
 import { destructiblesReset } from '../sim/things/destructibles.ts';
 import { gamethingTableReset } from '../sim/things/gameThings.ts';
@@ -105,6 +105,7 @@ export function bootMission(opts: MissionBootOptions): boolean {
   setDosFiles(opts.looseFiles ?? new Map());
   // sim_options_load happens before this in main; the timer comes up here
   audioTimerInit();
+  videoInit();
   // static_arena_init: the DTBL pre-pass sizes arenas; the port allocates on demand
   divergence('static_arena_init: no arena pre-pass; tables are allocated on demand', 'main');
   randomTablesInit(opts.randomSeed);
@@ -114,11 +115,11 @@ export function bootMission(opts: MissionBootOptions): boolean {
   gamethingTableReset();
   destructiblesReset();
   const ok = simLoadByName(opts.mission);
+  // project_scan_dev_dir: the loose files are the host's overlay
+  layoutRescaleAll();
   dayCycleInit();
   worldRecordsBuildAll();
   simPreloadData();
-  // the frame renderer runs viewer_update_projection before drawing; done once here so lodScale is set for the editor
-  viewerUpdateProjection(cameraGlobals.mainViewer);
   // sim_count_mechs_by_status, terrain_table_reset, camera_init, input_init: Phase 2
   // sim_count_mechs_by_status: the allegiance tallies (0xa5668..) feed the results screen, Phase 6
   divergence('sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)', 'main');

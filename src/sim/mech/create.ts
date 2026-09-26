@@ -8,16 +8,15 @@
  *   mech_alt_create  class 3 (the artillery turrets)
  *   door_create      class 7 (doors)
  */
-import { cameraGlobals } from '../camera/viewer.ts';
 import type { MechEntity, MechLoadout } from '../../generated/classes.gen.ts';
 import { sdivShl } from '../../core/int/i64.ts';
-import { divergence } from '../../core/provenance.ts';
 import { rampStart } from '../../core/ramp.ts';
 import { registerCode } from '../../engine/codePtr.ts';
 import { clock } from '../../engine/clock.ts';
 import { sceneNodeGetWorldEuler, sceneNodeGetWorldPos, sceneNodeLinkSubtree, sceneNodeTranslate, sceneNodeWalk } from '../../engine/scene/sceneGraph.ts';
 import { planet } from '../world/planet.ts';
 import { mechAiSetup } from './aiSetup.ts';
+import { hudWidgetsInstall } from '../cockpit/hud.ts';
 import { mechs } from './mechGlobals.ts';
 import { thingNodeQueuePop } from './spawn.ts';
 
@@ -32,22 +31,6 @@ export function mechAnimInit(e: MechEntity): void {
   if (mechs.playerMechIndex !== e.index) e.animSoundId = 0x103;
   e.gaitBand = 0;
   e.animTarget = -1;
-}
-
-/**
- * Builds the player's 24 HUD widgets, regroups the weapons for them
- * (loadout_regroup_weapons: stamps originalIndex and reorders
- * loadout->weapons by side), and points the cockpit at the loadout's eye
- * offset and torso pan.
- *
- * @mw2 hud_widgets_install 0x00032a70
- * @fidelity partial
- * @divergence Phase 4 (HUD): only the last two stores are made - playerEyeOffsetY = &loadout->eyeOffsetY (the cockpit camera's eye height) and the torso pan pointer; no widget is built and the player's weapons stay in chassis order (loadout_regroup_weapons is driven by the widgets)
- */
-export function hudWidgetsInstall(entity: MechEntity, _playerIndex: number): void {
-  divergence('hud_widgets_install is Phase 4 (HUD): no widgets, and the player weapons are not regrouped', 'hud_widgets_install');
-  cameraGlobals.playerEyeOffsetY = entity.loadout;
-  cameraGlobals.playerTorsoPanPtr = entity.loadout;
 }
 
 /** Lift by rideHeight, walk, read the pose back into the entity, zero the torso angles - the part all three create hooks share. */
@@ -77,7 +60,7 @@ function placeOnNode(l: MechLoadout): void {
  *
  * @mw2 mech_std_create 0x000266e0
  * @fidelity partial
- * @divergence hud_widgets_install and mech_ai_setup's rule tables are Phase 2 stubs; the loadout dwords at +0x90 and +0xf0 (header padding, no port fields) are zeroed in the original
+ * @divergence mech_ai_setup's rule tables are Phase 5 stubs; the loadout dwords at +0x90 and +0xf0 (header padding, no port fields) are zeroed in the original
  */
 export const mechStdCreate = registerCode('mech_std_create', 0x266e0, (entity: MechEntity): void => {
   const l = entity.loadout;
@@ -85,7 +68,7 @@ export const mechStdCreate = registerCode('mech_std_create', 0x266e0, (entity: M
   const t = clock.simTick;
   l.torsoNode = thingNodeQueuePop();
   l.weaponAimNode = thingNodeQueuePop();
-  if (mechs.playerMechIndex === l.entity!.index) hudWidgetsInstall(l.entity!, mechs.playerMechIndex);
+  if (mechs.playerMechIndex === l.entity!.index) hudWidgetsInstall();
   rampStart(l.ramps[0]!, 0, 0, l.entity!.index === mechs.playerMechIndex ? 0.2 : 0.6, t);
   rampStart(l.ramps[2]!, 0, 0, 0.2, t);
   rampStart(l.ramps[3]!, 0, 0, 0.3, t);

@@ -18,15 +18,15 @@
  * index running from (groundColour - 1) on the line to skyColour at the top.
  * band = horizonBandHeight * cos(roll) (transform_point of (0, h, 0) by the
  * roll rows), horizonBandHeight having been rescaled once by main
- * (vfx_font_sub_014950) from 320-wide design pixels: trunc((h << 16) / 319)
- * * canvas width field >> 16, rounded. The filler's pixels are the integer
+ * (layout_rescale_all, sim/display/rescale.ts) from 320-wide design pixels
+ * to the game's screen. The filler's pixels are the integer
  * part of the index plus 0x8000 and then +0x7fff or -0x8000 on alternate
  * pixels, swapped each scanline (see materials/indexedMaterial.ts, mode
  * 0x4000).
  *
- * DIVERGENCES: the band height is rescaled per frame from the render
- * target's width (the canvas width field taken as width - 1, the maximum x),
- * not once in place; the dither's phase follows the screen.
+ * DIVERGENCES: the band height is taken from the game's screen to the render
+ * target's width (the same when both are 640); the dither's phase follows the
+ * screen.
  *
  * @portOnly the result of render_sky_and_ground, computed per pixel
  */
@@ -75,8 +75,10 @@ export interface SkyGroundState {
   ground: number;
   skyOn: boolean;
   groundOn: boolean;
-  /** horizonBandHeight as the mission set it (320-wide design pixels) */
+  /** horizonBandHeight: game-screen pixels, after layout_rescale_all */
   bandHeight: number;
+  /** the game's screen width (defaultCanvas xMax + 1) */
+  screenWidth: number;
   /** horizonBandEnabled && shadedFillEnabled */
   bandOn: boolean;
 }
@@ -115,8 +117,8 @@ export class SkyGround {
     const b = (m[5]! * tanY * 2) / height;
     const c = -m[1]! * tanX - m[5]! * tanY - m[9]!;
     this.u.uUpPlane.value.set(a, b, c);
-    // vfx_font_sub_014950's rescale, then transform_point's cos(roll)
-    const scaled = Math.round((Math.trunc((s.bandHeight * 65536) / 319) * (width - 1)) / 65536);
+    // screen pixels to render-target pixels, then transform_point's cos(roll)
+    const scaled = (s.bandHeight * width) / s.screenWidth;
     e.setFromQuaternion(camera.quaternion, 'YXZ');
     this.u.uBand.value = s.bandOn ? Math.max(0, scaled * Math.cos(e.z)) : 0;
     this.u.uSky.value = s.sky;

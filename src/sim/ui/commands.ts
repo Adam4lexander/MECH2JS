@@ -22,6 +22,10 @@ import { missileCamFollowLast } from '../weapons/projectiles.ts';
 import { playerWeaponSetFireGroup } from '../weapons/weapons.ts';
 import { net } from '../net/netplay.ts';
 import { soundPlay } from '../sound/sound.ts';
+import { hud } from '../cockpit/hud.ts';
+import { damageDisplayModeCycle } from '../cockpit/damageDisplay.ts';
+import { objectivesHud } from '../cockpit/objectivesHud.ts';
+import { vfxVideoSub012330, vfxVideoSub012370, vfxVideoSub012390, vfxVideoSub0123d0, vfxVideoSub012410 } from '../cockpit/radar.ts';
 import { ui, uiContextActive } from './uiContext.ts';
 
 export const commandGlobals = registerGlobals(
@@ -78,7 +82,7 @@ export function keyPauseEnd(): void {
  *
  * @mw2 command_execute 0x00046060
  * @fidelity partial
- * @divergence the HUD, radar, menu, screenshot and vision commands are Phase 4 and reported, not run; debug commands (hangAround) are not ported
+ * @divergence the menu (0x33..0x37), screenshot (0x52) and vision (0x9d INFRARED, 0x9e ENHANCED_VISION) commands are reported, not run; debug commands (hangAround) are not ported
  */
 export function commandExecute(cmd: number): void {
   const pc = mechs.playerControls;
@@ -98,11 +102,12 @@ export function commandExecute(cmd: number): void {
       pc.eyepoint_pan_reset = 1;
       break;
     case 9:
-      // vfx_video_sub_012370 (video state 4) is never true in the port
-      if (cameraGetMode() === 0) {
+      // COCKPIT_VIEW: out to the tracking view, unless the map is up, which it closes
+      if (cameraGetMode() === 0 && !vfxVideoSub012370()) {
         cameraSetMode(1);
         cameraTrackCycle(0, 1);
       } else {
+        vfxVideoSub012390();
         cameraSetMode(0);
         pc.pilot_tilt_reset = 1;
         pc.pilot_pan_reset = 1;
@@ -258,23 +263,47 @@ export function commandExecute(cmd: number): void {
     case 5:
     case 6:
     case 7:
-    case 8:
-      later('MFD and damage display, Phase 4');
-      if (((mechs.mechTable[mechs.playerMechIndex]!.flags >> 8) & 0x20) !== 0) soundPlay(0xdc, 100, 0x40, cmd - 2, 0x32);
+    case 8: {
+      // MFD_CYCLE, then TOGGLE_HTAL / REAR_VIEW / DOWN_VIEW / WEAPON_DISPLAY
+      // (damage display modes 2..5, each toggling with 0), TOGGLE_DAMAGE_DISPLAY
+      // (0 <-> 1) and TOGGLE_TARGET_DISPLAY (0, 1, 2 round); each clicks with
+      // sound 0xdc when the player's entity flags have bit 13
+      const h = hud;
+      if (cmd === 2) damageDisplayModeCycle();
+      else if (cmd <= 6) h.damageDisplayMode = h.damageDisplayMode === cmd - 1 ? 0 : cmd - 1;
+      else if (cmd === 7) h.damageDisplayMode = h.damageDisplayMode !== 1 ? 1 : 0;
+      else {
+        h.targetDisplayMode = (h.targetDisplayMode + 1) | 0;
+        if (h.targetDisplayMode > 2) h.targetDisplayMode = 0;
+      }
+      if (((mechs.mechTable[mechs.playerMechIndex]!.flags >> 8) & 0x20) !== 0) soundPlay(0xdc, 100, 0x40, cmd < 7 ? cmd - 2 : cmd - 1, 0x32);
       break;
+    }
     case 0xe:
       if (missileCamFollowLast() !== 0) cameraSetMode(3);
       break;
     case 0x13:
-      later('HUD toggle, Phase 4');
+      // TOGGLE_HUD
+      hud.hudEnabled = hud.hudEnabled === 0 ? 1 : 0;
+      if (((mechs.mechTable[mechs.playerMechIndex]!.flags >> 8) & 0x20) !== 0) soundPlay(0xdc, 100, 0x40, 8, 0x32);
       break;
     case 0x27:
+      aiGroupSub02a080();
+      break;
     case 0x2e:
+      vfxVideoSub012330();
+      break;
     case 0x2f:
+      vfxVideoSub012410(1);
+      break;
     case 0x30:
+      vfxVideoSub012410(2);
+      break;
     case 0x31:
+      vfxVideoSub012410(0);
+      break;
     case 0x32:
-      later('targeting and radar, Phase 4');
+      vfxVideoSub0123d0();
       break;
     case 0x33:
     case 0x34:
@@ -284,7 +313,8 @@ export function commandExecute(cmd: number): void {
       later('menus, Phase 4');
       break;
     case 0x41:
-      later('objectives display, Phase 4');
+      // DISPLAY_OBJECTIVES
+      objectivesHud.objectivesDisplayOn = objectivesHud.objectivesDisplayOn === 0 ? 1 : 0;
       break;
     case 0x52:
       later('screenshot');
@@ -310,4 +340,17 @@ export function commandExecute(cmd: number): void {
     pc.throttle_set = 1;
     pc.throttle = Math.imul(throttle, 0x71);
   }
+}
+
+/**
+ * RESET_TARGETTING (command 0x27): sets bit 0x1000 of the player's
+ * targetHandle, which hud_target_marker_draw tests and skips on - the
+ * marker goes while the target stays.
+ *
+ * @mw2 target_marker_hide 0x0002a080
+ * @fidelity exact
+ */
+export function aiGroupSub02a080(): void {
+  const e = mechs.mechTable[mechs.playerMechIndex]!;
+  e.targetHandle = (e.targetHandle | 0x1000) >>> 0;
 }

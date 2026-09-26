@@ -1135,6 +1135,12 @@ export class HudWidget {
   label: string = '';
   /** +0x030 void * */
   window: unknown = null;
+  /** +0x034 void * */
+  textPos: unknown = null;
+  /** +0x038 void * */
+  paneTransition: unknown = null;
+  /** +0x03c int */
+  lastStatus: number = 0;
   /** +0x040 short */
   left: number = 0;
   /** +0x042 short */

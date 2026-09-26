@@ -69,13 +69,13 @@ export const cam = registerGlobals(
     cameraModeBeforeMissile: 0,
     /** 0x96ee4: the mode camera_init starts in */
     dat00096ee4: 0,
-    /** 0x96ef0: set by camera_pilot_view_pose; its readers were not traced */
+    /** 0x96ef0: 1 while the pilot's own view is up (camera_pilot_view_pose sets it, camera_update and camera_cockpit_view clear it); player_cockpit_frame passes it to hud_overlay_draw, which draws the reticle only while it is set */
     dat00096ef0: 0,
     /** 0x96f18: no glance key was held last frame */
     dat00096f18: 0,
     /** 0x97020: cleared by camera_update each frame; what reads it is not established */
     dat00097020: 0,
-    /** 0x954ec: raised by camera_apply_zoom on a change; what reads it is not established */
+    /** 0x954ec: raised by camera_apply_zoom on a change and by viewport_select; layout_rescale_all clears it; what reads it is not established */
     dat000954ec: 0,
     /** 0x96efc: the mech the camera follows */
     cameraSubject: null as MechEntity | null,
@@ -667,7 +667,7 @@ export function cameraTrackCycle(forward: number, fromPlayer: number): void {
  *
  * @mw2 billboards_face_viewer 0x00039fa0
  * @fidelity partial
- * @divergence the video-state-4 case (vfx_video_sub_012370: a fixed yaw of 180 and pitch of -45) is not reproduced; the port is never in that state
+ * @divergence the video-state-4 case (radar_map_up: a fixed yaw of 180 and pitch of -45) is not reproduced; the port is never in that state
  */
 export function billboardsFaceViewer(): void {
   const v = vp();

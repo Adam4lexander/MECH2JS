@@ -66,3 +66,39 @@ export function radioLanceMessage(message: number, _addressee: number): void {
   if (message === -1 || message >= 0xb) return;
   divergence(`radio_lance_message: no audio yet (message ${message})`, 'radio_lance_message');
 }
+
+/**
+ * @mw2 engine_note_start 0x00041570
+ * @fidelity stub
+ * @divergence Phase 7 (audio): no engine note
+ */
+export function engineNoteStart(): void {
+  divergence('engine_note_start: no audio yet', 'engine_note_start');
+}
+
+/**
+ * @mw2 engine_note_update 0x000416b0
+ * @fidelity stub
+ * @divergence Phase 7 (audio): no engine note
+ */
+export function engineNoteUpdate(): void {
+  divergence('engine_note_update: no audio yet', 'engine_note_update');
+}
+
+/**
+ * @mw2 engine_note_stop 0x00041760
+ * @fidelity stub
+ * @divergence Phase 7 (audio): no engine note
+ */
+export function engineNoteStop(): void {
+  divergence('engine_note_stop: no audio yet', 'engine_note_stop');
+}
+
+/**
+ * @mw2 engine_note_mute 0x000417c0
+ * @fidelity stub
+ * @divergence Phase 7 (audio): no engine note
+ */
+export function engineNoteMute(): void {
+  divergence('engine_note_mute: no audio yet', 'engine_note_mute');
+}

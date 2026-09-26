@@ -32,6 +32,9 @@ import { select, selected } from '../store/selection.ts';
 import { FreeFly } from '../viewport/freeFly.ts';
 import { syncFieldsFromNode } from '../inspector/poseSync.ts';
 import { SkyGround } from '../../render/passes/skyGround.ts';
+import { defaultCanvas, display } from '../../sim/display/video.ts';
+import { HudOverlay } from '../../render/passes/hudOverlay.ts';
+import { vfxWindowClearPane } from '../../engine/vfx/vfx.ts';
 import { renderOptions } from '../../render/shading/polygonColour.ts';
 import { lighting } from '../../sim/world/environment.ts';
 import { structOf } from './Inspector.tsx';
@@ -64,6 +67,7 @@ export function Viewport({ game }: { game: Game }) {
     const drawSize = new THREE.Vector2();
     const skyGround = new SkyGround(sr.uniforms);
     sr.backdropScene.add(skyGround.mesh);
+    const hudOverlay = new HudOverlay(sr.uniforms);
     renderer.autoClear = false;
     const fly = new FreeFly(camera, el);
     // start at the player's mech, else the mission's start view (VWST)
@@ -160,7 +164,10 @@ export function Viewport({ game }: { game: Game }) {
     // DAT_00097074, the frame's render call inside main's loop: its sim half
     // (vfx_video_sub_010490's projection refresh and viewer_build_transform);
     // the drawing itself happens once the loop pass returns
+    // It also paints the 3D viewport over whatever 2D was in the window there
+    // (vfxWindowClearPane), which the HUD then draws over again.
     mainLoop.renderHook = () => {
+      vfxWindowClearPane(display.currentViewport);
       const v = viewer();
       if (cam.dat000954ec !== 0) {
         viewerUpdateProjection(v);
@@ -220,6 +227,7 @@ export function Viewport({ game }: { game: Game }) {
         skyOn: lighting.skyEnabled !== 0,
         groundOn: lighting.groundEnabled !== 0,
         bandHeight: lighting.horizonBandHeight,
+        screenWidth: Math.max(1, defaultCanvas.xMax + 1),
         bandOn: lighting.horizonBandEnabled !== 0 && renderOptions.shadedFillEnabled !== 0,
       });
       sr.setViewport(drawSize.x, drawSize.y);
@@ -237,6 +245,8 @@ export function Viewport({ game }: { game: Game }) {
       renderer.render(sr.cockpitScene, camera);
       camera.near = near;
       camera.updateProjectionMatrix();
+      // the game's 2D (HUD, radar, cockpit text) over it all, in Play
+      if (playing && hudOverlay.update(defaultCanvas, drawSize.x, drawSize.y)) renderer.render(hudOverlay.scene, hudOverlay.camera);
       if (now - lastInfo > 250) {
         lastInfo = now;
         setInfo(`${sr.stats.objects} objects · ${sr.stats.polygons} polygons · eye ${eye.map((c) => (c * CM_TO_UNITS).toFixed(0)).join(', ')} m`);
@@ -252,6 +262,7 @@ export function Viewport({ game }: { game: Game }) {
       renderer.domElement.removeEventListener('click', onClick);
       detachInput();
       mainLoop.renderHook = null;
+      hudOverlay.dispose();
       gizmo.dispose();
       fly.dispose();
       sr.clear();

@@ -7,13 +7,13 @@
  */
 import { cmod } from '../../core/int/cint.ts';
 import { transformPoint } from '../../core/math/matrix.ts';
-import { divergence, quirk } from '../../core/provenance.ts';
+import { quirk } from '../../core/provenance.ts';
 import type { MechEntity, Ray } from '../../generated/classes.gen.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import { raySetPoints } from '../../engine/collision/ray.ts';
 import { imageI32 } from '../../engine/image.ts';
 import { sceneNodeTransform } from '../../engine/scene/sceneGraph.ts';
-import { aiValidateCurrentTarget } from '../mech/laterPhases.ts';
+import { aiValidateCurrentTarget } from './targeting.ts';
 
 /**
  * desiredHeading - heading, wrapped once into -180..180 degrees (both are
@@ -49,15 +49,11 @@ export function mechCanJump(mech: MechEntity, maxHeat: number): number {
  * callers read next.
  *
  * @mw2 ai_bearing_to_target 0x00022850
- * @fidelity partial
- * @divergence ai_validate_current_target is a Phase 4 stub that returns nothing: its result is taken as 0 (no valid target) and desiredHeading is left as it was
+ * @fidelity exact
  */
 export function aiBearingToTarget(mech: MechEntity, handle: number): boolean {
   mech.targetHandle = (handle << 16) >> 16;
-  aiValidateCurrentTarget(mech);
-  divergence('ai_bearing_to_target: ai_validate_current_target is a stub; the target counts as not valid', 'ai_bearing_to_target');
-  const result = 0;
-  return 0 < result;
+  return 0 < aiValidateCurrentTarget(mech);
 }
 
 /** probeDirections (0x96374): 16 {dx, dz} dword pairs, read from the image */

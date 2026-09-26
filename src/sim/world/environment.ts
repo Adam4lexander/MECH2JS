@@ -65,7 +65,7 @@ function bootLighting() {
     groundColour: imageI32(LABEL.groundColour, 239),
     /** 0x96ea8: palette index of the above-horizon fill (SKYM); 224 in the image */
     skyColour: imageI32(LABEL.skyColour, 224),
-    /** 0x97088: HRZM +0xc, the horizon gradient band's height in 320x200 pixels; 36 in the image */
+    /** 0x97088: HRZM +0xc, the horizon gradient band's height - 320x200 design pixels as HRZM sets it, screen pixels after layout_rescale_all; 36 in the image */
     horizonBandHeight: imageI32(LABEL.horizonBandHeight, 36),
     /** 0x96eb0: HRZM +8. WRITE-ONLY - no reader in the image */
     hrzmChunkValue: imageI32(LABEL.hrzmChunkValue, 234),

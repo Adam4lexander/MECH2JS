@@ -44,7 +44,7 @@
  * at P's depth.
  *
  * TRANSPARENCY: the texture span loops (clib_core_sub_05b549 at 0x5baa6..,
- * clib_sub_06a13b, vfx_lib_sub_057e93) look each texel up through the shade
+ * clib_sub_06a13b, vfx_character_draw) look each texel up through the shade
  * row and skip the store when the result is 0xff. All three LUMA tables keep
  * 0xff as 0xff at every shade and map nothing else to it, so a texel of 0xff
  * is transparent, lit or not.

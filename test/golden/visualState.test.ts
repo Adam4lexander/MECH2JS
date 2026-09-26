@@ -421,7 +421,8 @@ describe.runIf(hasGameData && hasDecompiled)('mission VM visual state (contract 
       expect(resLoadCockpit({ id, name: '' })).toBe(1);
       const rect = (o: number) => [s(o), s(o + 2), s(o) + s(o + 4) - 1, s(o + 2) + s(o + 6) - 1];
       cockpit.dat000955e8.forEach((w, i) => expect([w.left, w.top, w.right, w.bottom]).toEqual(rect(i * 8)));
-      cockpit.dat000968e0.forEach((w, i) => expect([w.left, w.top, w.right, w.bottom]).toEqual(rect(40 + i * 8)));
+      // CPIT writes the first fifteen of the 24 widget panes
+      cockpit.dat000968e0.slice(0, 15).forEach((w, i) => expect([w.left, w.top, w.right, w.bottom]).toEqual(rect(40 + i * 8)));
       expect(Array.from(cockpit.dat0009572c)).toEqual([s(160), s(162)]);
     }
     const hudIds = Array.from({ length: 100 }, (_, i) => i).filter((i) => prj.resourceSize('HUD', i) > 0);
@@ -431,7 +432,8 @@ describe.runIf(hasGameData && hasDecompiled)('mission VM visual state (contract 
       const dv = new DataView(b.buffer, b.byteOffset, b.byteLength);
       const n = (o: number) => dv.getInt32(o, true);
       expect(resLoadHdi({ id, name: '' })).toBe(1);
-      expect(Array.from(cockpit.dat0009623c)).toEqual(Array.from({ length: 10 }, (_, k) => n(k * 4)));
+      // five of the six points; the sixth is not the loader's
+      expect(Array.from(cockpit.dat0009623c).slice(0, 10)).toEqual(Array.from({ length: 10 }, (_, k) => n(k * 4)));
       expect(Array.from(cockpit.dat000fe0e8)).toEqual([n(0x28), n(0x2c), n(0x30)]);
       for (let r = 0; r < 15; r++) {
         const v = [0, 4, 8, 12].map((k) => n(0x34 + r * 16 + k));

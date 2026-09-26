@@ -9,6 +9,8 @@
  */
 import type { MechLoadout } from '../../generated/classes.gen.ts';
 import { registerCode } from '../../engine/codePtr.ts';
+import { playerCockpitFrame, playerCockpitRelease } from '../cockpit/hud.ts';
+import { mechs } from './mechGlobals.ts';
 // hook slots 1, 2 and 3 of the standard class live with their bodies
 import './mechTickAi.ts';
 import './mechTickTerrain.ts';
@@ -18,20 +20,22 @@ import './mechTickTerrain.ts';
  * when the loadout is non-null.
  *
  * @mw2 mech_std_cockpit 0x00028660
- * @fidelity stub
- * @divergence Phase 2 (HUD): player_cockpit_frame is not ported
+ * @fidelity exact
  */
-export const mechStdCockpit = registerCode('mech_std_cockpit', 0x28660, (_l: MechLoadout | null): void => {});
+export const mechStdCockpit = registerCode('mech_std_cockpit', 0x28660, (l: MechLoadout | null): void => {
+  if (l) playerCockpitFrame(l);
+});
 
 /**
  * Hook 5 of the standard classes, once after the mission loop: for the
  * player's mech, player_cockpit_release.
  *
  * @mw2 mech_std_cockpit_release 0x00028670
- * @fidelity stub
- * @divergence Phase 2 (HUD): player_cockpit_release is not ported
+ * @fidelity exact
  */
-export const mechStdCockpitRelease = registerCode('mech_std_cockpit_release', 0x28670, (_l: MechLoadout | null, _index: number): void => {});
+export const mechStdCockpitRelease = registerCode('mech_std_cockpit_release', 0x28670, (l: MechLoadout | null, _index: number): void => {
+  if (l && mechs.playerMechIndex === l.entity!.index) playerCockpitRelease();
+});
 
 /**
  * Hook 1 of class 3.

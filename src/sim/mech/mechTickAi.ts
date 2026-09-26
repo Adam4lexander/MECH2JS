@@ -30,17 +30,17 @@ import { paletteStartFade } from '../world/palettes.ts';
 import { planet } from '../world/planet.ts';
 import { sceneNodeGetWorldPos } from '../../engine/scene/sceneGraph.ts';
 import { mechAnimClearRequest, mechAnimSelectGait } from './animTask.ts';
+import { aiRulesRun, groupAssignObjectiveTask } from './laterPhases.ts';
 import {
   aiCycleFriendly,
   aiCycleGamepiece,
   aiCycleGamething,
   aiCycleNavpoint,
   aiCycleTarget,
-  aiRulesRun,
   aiTargetNearestEnemy,
   aiValidateCurrentTarget,
-  groupAssignObjectiveTask,
-} from './laterPhases.ts';
+  playerTargetReticle,
+} from '../ai/targeting.ts';
 import { mechDamageSlot, mechEject, mechOnDestroyed } from './damage.ts';
 import { mechUpdateMissileLock, mechWeaponsTick, weaponCycleGroup, weaponCycleNext, weaponJettisonAmmo } from '../weapons/weapons.ts';
 import { loadoutAmmo, loadoutSections, loadoutWeapons } from './loadout.ts';
@@ -410,7 +410,7 @@ export const mechStdTickAi = registerCode('mech_std_tick_ai', 0x27780, (l: MechL
       pc.previous_gamepiece = 0;
     }
     if (pc.target_reticle !== 0) {
-      // player_target_reticle is Phase 4
+      playerTargetReticle();
       pc.target_reticle = 0;
     }
     if ((e.targetHandle & 0x1000) === 0) aiValidateCurrentTarget(e);

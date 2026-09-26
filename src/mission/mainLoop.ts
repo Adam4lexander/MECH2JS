@@ -41,6 +41,7 @@ import { divergence } from '../core/provenance.ts';
 import { simSlotsUpdate } from '../sim/effects/effects.ts';
 import { destructiblesUpdate } from '../sim/things/destructibles.ts';
 import { projectilesUpdateAll } from '../sim/weapons/projectiles.ts';
+import { radarFlipRestore } from '../sim/cockpit/radar.ts';
 import {
   missionResultsUpdate,
   soundConfigSub043dd0,
@@ -83,12 +84,14 @@ export function mainLoopRunning(): boolean {
  *
  * @mw2 vfx_video_sub_0106d0 0x000106d0
  * @fidelity partial
- * @divergence vfx_video_font_handler_2, input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; only the palette steps run here
+ * @divergence vfx_video_font_handler_2, input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the palette steps and the map transition's restore (0xa46d0) run here
  */
 export function vfxVideoSub0106d0(): void {
   divergence('the page flip and font/input housekeeping of vfx_video_sub_0106d0 are the host renderer\'s', 'vfx_video_sub_0106d0');
   paletteFadeStep();
   paletteApplyPending();
+  // after the flip (DAT_0009fd74): a map transition's currentViewport and hudEnabled go back
+  radarFlipRestore();
 }
 
 /**

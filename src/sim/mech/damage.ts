@@ -12,7 +12,7 @@
 import { fixedAtan2 } from '../../core/angle/trig.ts';
 import { cdiv, i16 } from '../../core/int/cint.ts';
 import { mulDiv64 } from '../../core/int/fx16.ts';
-import { divergence, quirk, unestablished } from '../../core/provenance.ts';
+import { quirk, unestablished } from '../../core/provenance.ts';
 import { randomRange } from '../../core/random.ts';
 import type { MechLoadout, MechSection, SceneNode, WorldObject } from '../../generated/classes.gen.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
@@ -35,6 +35,7 @@ import { lighting } from '../world/environment.ts';
 import { collision } from '../world/collisionGlobals.ts';
 import { mechAiReset } from './aiSetup.ts';
 import { mechConfig } from './config.ts';
+import { hudWidgetTable } from '../cockpit/hudWidgetTable.ts';
 import { loadoutAmmo, loadoutSections, loadoutWeapons } from './loadout.ts';
 import { mechs } from './mechGlobals.ts';
 import { mechRuntime } from './mechRuntime.ts';
@@ -419,14 +420,16 @@ function equipmentSlot(
  * 5700 (1).
  *
  * @mw2 sound_res_sub_032f70 0x00032f70
- * @fidelity partial
- * @divergence the HUD widgets are Phase 4: the 24 rolls are drawn (the random stream stays the original's) but no widget method runs
+ * @fidelity exact
  */
 export function soundResSub032f70(l: MechLoadout, sensors: number): void {
   if (mechs.playerMechIndex !== l.entity!.index) return;
   const odds = sensors === 0 ? 2 : 5;
   for (let i = 0; i < 0x18; i++) {
-    if (randomRange(10) < odds) divergence('sound_res_sub_032f70: hudWidgets[i]->methods[9] is Phase 4 (HUD)', 'sound_res_sub_032f70');
+    if (randomRange(10) < odds) {
+      const w = hudWidgetTable[i]!;
+      w.methods[9]!(w, (w.field_0x6 + 1) | 0);
+    }
   }
 }
 

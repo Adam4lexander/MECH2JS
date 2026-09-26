@@ -1063,6 +1063,12 @@ export interface RawHudWidget {
   label: string;
   /** +0x030 void * */
   window: number;
+  /** +0x034 void * */
+  textPos: number;
+  /** +0x038 void * */
+  paneTransition: number;
+  /** +0x03c int */
+  lastStatus: number;
   /** +0x040 short */
   left: number;
   /** +0x042 short */
@@ -2528,7 +2534,9 @@ export const STRUCTS = {
       { name: 'weaponIndex', offset: 0xc, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'label', offset: 0x10, size: 1, count: 32, ctype: "char", kind: 'char' },
       { name: 'window', offset: 0x30, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
-      { name: 'pad_034', offset: 0x34, size: 1, count: 12, ctype: "uint8_t", kind: 'pad' },
+      { name: 'textPos', offset: 0x34, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'paneTransition', offset: 0x38, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'lastStatus', offset: 0x3c, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'left', offset: 0x40, size: 2, count: 1, ctype: "short", kind: 'short' },
       { name: 'top', offset: 0x42, size: 2, count: 1, ctype: "short", kind: 'short' },
       { name: 'width', offset: 0x44, size: 2, count: 1, ctype: "short", kind: 'short' },
