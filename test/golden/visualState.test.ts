@@ -13,7 +13,8 @@ import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { Chunk } from '../../src/data/bwd/stream.ts';
 import { parseAnim } from '../../src/data/formats/anim.ts';
 import { LABEL } from '../../src/generated/labels.gen.ts';
-import { MeshBlock, MeshVertex, Projectile, SceneNode, SimSlot, WorldObject, MechEntity } from '../../src/generated/classes.gen.ts';
+import { HudWidget, MeshBlock, MeshVertex, Projectile, SceneNode, SimSlot, WorldObject, MechEntity } from '../../src/generated/classes.gen.ts';
+import { hud } from '../../src/sim/cockpit/hud.ts';
 import { resetAllGlobals } from '../../src/engine/globals.ts';
 import { setBootImage } from '../../src/engine/image.ts';
 import { clock } from '../../src/engine/clock.ts';
@@ -473,6 +474,8 @@ describe.runIf(hasGameData && hasDecompiled)('mission VM visual state (contract 
     planet.gravity = 1940;
     for (let k = 0; k < 20; k++) palettes.paletteResourceIds[k] = 1 + k;
     clock.tickDelta = 2;
+    // day_cycle_tick first checks the sensors widget (infrared ends when they are damaged)
+    hud.hudWidgets[0] = new HudWidget();
     dayCycleInit();
     expect(Array.from(dayCycle.dayPhaseStart)).toEqual([500, 700, 1700, 1900]);
     expect(planet.gravitySetting).toBe(Math.trunc((1940 * 65536) / 0x794));

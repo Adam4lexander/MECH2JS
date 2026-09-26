@@ -6,7 +6,7 @@ Every ported function carries `@mw2 <name> <address>`; this file is built from t
 against `decompiled/mw2/listing/functions.csv`, so a function renamed upstream fails the build rather
 than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 
-**Game functions:** 1158  |  **ported exact:** 712  |  **partial:** 59  |  **stub:** 18  |  library functions ported: 8
+**Game functions:** 1158  |  **ported exact:** 724  |  **partial:** 61  |  **stub:** 20  |  library functions ported: 8
 
 ## By original module
 
@@ -14,34 +14,34 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 |---|---|---:|---:|---:|---:|---:|
 | ai_combat | ai | 31 | 31 | 0 | 0 | 0 |
 | ai_debug | ai | 2 | 0 | 0 | 0 | 2 |
-| ai_group | ai | 98 | 90 | 5 | 0 | 3 |
+| ai_group | ai | 98 | 90 | 6 | 0 | 2 |
 | ai_state | ai | 17 | 17 | 0 | 0 | 0 |
 | game_boot | boot | 18 | 6 | 3 | 0 | 9 |
 | main | boot | 15 | 10 | 2 | 0 | 3 |
-| geom_luma | geometry | 67 | 51 | 1 | 0 | 15 |
+| geom_luma | geometry | 67 | 53 | 1 | 0 | 13 |
 | geom_poly | geometry | 20 | 18 | 1 | 0 | 1 |
 | geom_table | geometry | 46 | 24 | 3 | 0 | 19 |
 | input | input | 27 | 16 | 1 | 0 | 10 |
-| mission_config | mission | 5 | 3 | 0 | 0 | 2 |
+| mission_config | mission | 5 | 4 | 1 | 0 | 0 |
 | mission_log | mission | 28 | 24 | 2 | 0 | 2 |
 | mission_result | mission | 7 | 7 | 0 | 0 | 0 |
 | objectives | mission | 8 | 8 | 0 | 0 | 0 |
 | netplay | netplay | 13 | 1 | 1 | 0 | 11 |
-| project_entry | project | 31 | 23 | 1 | 0 | 7 |
+| project_entry | project | 31 | 27 | 2 | 0 | 2 |
 | project_file | project | 34 | 14 | 4 | 0 | 16 |
-| project_tables | project | 39 | 8 | 1 | 0 | 30 |
+| project_tables | project | 39 | 9 | 1 | 0 | 29 |
 | stream_seen | project | 3 | 3 | 0 | 0 | 0 |
 | render_asm | render | 74 | 36 | 11 | 0 | 27 |
 | res_cache | resource | 25 | 0 | 1 | 2 | 22 |
 | res_loaders | resource | 9 | 4 | 1 | 0 | 4 |
-| cockpit | sim | 12 | 10 | 1 | 0 | 1 |
+| cockpit | sim | 12 | 10 | 2 | 0 | 0 |
 | damage | sim | 54 | 53 | 1 | 0 | 0 |
 | mech_config | sim | 20 | 17 | 1 | 0 | 2 |
-| sim_objects | sim | 29 | 26 | 2 | 0 | 1 |
+| sim_objects | sim | 29 | 27 | 1 | 0 | 1 |
 | weapons | sim | 15 | 14 | 0 | 0 | 1 |
 | sound_config | sound | 11 | 0 | 0 | 2 | 9 |
 | sound_res | sound | 14 | 13 | 1 | 0 | 0 |
-| sound_seq | sound | 59 | 3 | 0 | 10 | 46 |
+| sound_seq | sound | 59 | 3 | 0 | 12 | 44 |
 | sound_sfx | sound | 14 | 0 | 0 | 3 | 11 |
 | terrain | terrain | 103 | 91 | 3 | 0 | 9 |
 | cheats | ui | 14 | 0 | 3 | 0 | 11 |
@@ -50,7 +50,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | ui_callbacks | ui | 33 | 0 | 0 | 0 | 33 |
 | screenshot | util | 3 | 1 | 0 | 0 | 2 |
 | time_format | util | 3 | 3 | 0 | 0 | 0 |
-| vfx_font | vfx | 47 | 33 | 2 | 0 | 12 |
+| vfx_font | vfx | 47 | 36 | 1 | 0 | 10 |
 | vfx_lib | vfx | 42 | 15 | 1 | 0 | 26 |
 | vfx_video | vfx | 51 | 38 | 5 | 1 | 7 |
 
@@ -134,9 +134,11 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00014ae0 | pane_lerp | vfx_font | exact | `paneLerp` src/sim/cockpit/hud.ts:261 |
 | 0x00014b80 | pane_transition_step | vfx_font | exact | `paneTransitionStep` src/sim/cockpit/hud.ts:289 |
 | 0x00014c50 | pane_transition_step_split | vfx_font | exact | `paneTransitionStepSplit` src/sim/cockpit/hud.ts:323 |
-| 0x00014ee0 | day_cycle_init | vfx_font | exact | `dayCycleInit` src/sim/world/dayCycle.ts:56 |
-| 0x00014f80 | day_cycle_tick | vfx_font | partial | `dayCycleTick` src/sim/world/dayCycle.ts:77 |
-| 0x00015070 | day_cycle_set_phase | vfx_font | exact | `dayCycleSetPhase` src/sim/world/dayCycle.ts:106 |
+| 0x00014ee0 | day_cycle_init | vfx_font | exact | `dayCycleInit` src/sim/world/dayCycle.ts:57 |
+| 0x00014f80 | day_cycle_tick | vfx_font | exact | `dayCycleTick` src/sim/world/dayCycle.ts:78 |
+| 0x00015070 | day_cycle_set_phase | vfx_font | exact | `dayCycleSetPhase` src/sim/world/dayCycle.ts:111 |
+| 0x000150e0 | vfx_font_sub_0150e0 | vfx_font | exact | `vfxFontSub0150e0` src/sim/world/dayCycle.ts:135 |
+| 0x000150f0 | vfx_font_sub_0150f0 | vfx_font | exact | `vfxFontSub0150f0` src/sim/world/dayCycle.ts:149 |
 | 0x00015690 | audio_timer_init | game_boot | partial | `audioTimerInit` src/engine/clock.ts:76 |
 | 0x00015760 | sim_clock_step | game_boot | exact | `simClockStep` src/engine/clock.ts:119 |
 | 0x000159e0 | sim_clock_reset | game_boot | exact | `simClockReset` src/engine/clock.ts:98 |
@@ -153,13 +155,16 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00016720 | objective_evaluate | mission_result | exact | `objectiveEvaluate` src/mission/results.ts:282 |
 | 0x00016e80 | mission_results_update | mission_result | exact | `missionResultsUpdate` src/mission/results.ts:388 |
 | 0x000170c0 | mission_clock_update | mission_result | exact | `missionClockUpdate` src/mission/missionClock.ts:25 |
+| 0x000170e0 | mission_save_results | mission_config | partial | `missionSaveResults` src/mission/end.ts:91 |
 | 0x00017280 | mission_event_nop | mission_config | exact | `missionEventNop` src/sim/things/gameThingDamage.ts:135 |
 | 0x00017290 | mission_stub_true | mission_config | exact | `missionStubTrue` src/mission/tables/missionTables.ts:182 |
 | 0x000172a0 | group_identify_target | mission_config | exact | `groupIdentifyTarget` src/mission/objectives.ts:218 |
+| 0x00017300 | task_current | mission_config | exact | `taskCurrent` src/engine/tasks/taskList.ts:133 |
 | 0x00017310 | task_create | project_tables | exact | `taskCreate` src/engine/tasks/taskList.ts:51 |
 | 0x000173a0 | task_remove | project_tables | exact | `taskRemove` src/engine/tasks/taskList.ts:73 |
 | 0x00017400 | task_list_clear | project_tables | exact | `taskListClear` src/engine/tasks/taskList.ts:90 |
 | 0x00017450 | task_list_notify_rebuilt | project_tables | exact | `taskListNotifyRebuilt` src/engine/tasks/taskList.ts:102 |
+| 0x00017490 | task_data | project_tables | exact | `taskData` src/engine/tasks/taskList.ts:144 |
 | 0x000174a0 | task_list_run | project_tables | exact | `taskListRun` src/engine/tasks/taskList.ts:112 |
 | 0x00017570 | ui_context_register | project_tables | exact | `uiContextRegister` src/sim/ui/uiContext.ts:78 |
 | 0x00017cd0 | menu_poll_key | project_tables | exact | `menuPollKey` src/sim/ui/uiContext.ts:133 |
@@ -170,6 +175,11 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0001b190 | anim_scale_by_gait | project_entry | exact | `animScaleByGait` src/sim/mech/animTask.ts:78 |
 | 0x0001b1c0 | anim_ensure_loaded | project_entry | exact | `animEnsureLoaded` src/sim/mech/anim.ts:72 |
 | 0x0001b250 | anim_track_base | project_entry | exact | `animTrackBase` src/sim/mech/anim.ts:96 |
+| 0x0001b270 | task_object_colour_cycle | project_entry | exact | `taskObjectColourCycle` src/sim/world/objectTasks.ts:113 |
+| 0x0001b400 | task_object_rotate | project_entry | exact | `taskObjectRotate` src/sim/world/objectTasks.ts:198 |
+| 0x0001b5e0 | task_object_drive | project_entry | exact | `taskObjectDrive` src/sim/world/objectTasks.ts:263 |
+| 0x0001b810 | task_object_sound | project_entry | exact | `taskObjectSound` src/sim/world/objectTasks.ts:320 |
+| 0x0001b970 | task_object_track | project_entry | partial | `taskObjectTrack` src/sim/world/objectTasks.ts:422 |
 | 0x0001c070 | object_set_class | project_entry | exact | `objectSetClass` src/engine/scene/worldObject.ts:431 |
 | 0x0001c090 | poly_surface_height | project_entry | exact | `polySurfaceHeight` src/sim/world/meshQueries.ts:141 |
 | 0x0001c120 | world_ground_height_near | project_entry | exact | `worldGroundHeightNear` src/sim/world/collision.ts:353 |
@@ -374,6 +384,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00028810 | render_view_from_pose | ai_group | exact | `renderViewFromPose` src/sim/display/insetView.ts:68 |
 | 0x00028910 | death_flash | ai_group | exact | `deathFlash` src/sim/mech/mechTickAi.ts:87 |
 | 0x00028930 | damage_flash | ai_group | exact | `damageFlash` src/sim/cockpit/hud.ts:600 |
+| 0x00028980 | palette_fade_screen_to_preset | ai_group | partial | `paletteFadeScreenToPreset` src/mission/end.ts:58 |
 | 0x000289f0 | mech_death_update | ai_group | exact | `mechDeathUpdate` src/sim/mech/mechTickAi.ts:157 |
 | 0x00028ae0 | mech_jump_jet_effects | ai_group | exact | `mechJumpJetEffects` src/sim/mech/mechTickAi.ts:128 |
 | 0x00028be0 | mech_play_landing | ai_group | exact | `mechPlayLanding` src/sim/mech/mechTickTerrain.ts:50 |
@@ -393,7 +404,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00029c90 | tracked_object_create | ai_group | exact | `trackedObjectCreate` src/sim/ai/tracked.ts:38 |
 | 0x00029d10 | tracked_object_remove | ai_group | exact | `trackedObjectRemove` src/sim/ai/tracked.ts:68 |
 | 0x00029e90 | ai_cycle_target | ai_group | exact | `aiCycleTarget` src/sim/ai/targeting.ts:192 |
-| 0x0002a080 | target_marker_hide | ai_group | exact | `aiGroupSub02a080` src/sim/ui/commands.ts:350 |
+| 0x0002a080 | target_marker_hide | ai_group | exact | `aiGroupSub02a080` src/sim/ui/commands.ts:362 |
 | 0x0002a0a0 | ai_validate_tracked | ai_group | exact | `aiValidateTracked` src/sim/ai/targeting.ts:75 |
 | 0x0002a210 | ai_validate_target | ai_group | exact | `aiValidateTarget` src/sim/ai/targeting.ts:109 |
 | 0x0002a460 | ai_validate_gamething | ai_group | exact | `aiValidateGamething` src/sim/ai/targeting.ts:151 |
@@ -603,6 +614,8 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00038730 | object_set_index | geom_luma | exact | `objectSetIndex` src/engine/scene/worldObject.ts:386 |
 | 0x00038770 | object_get_pos_radius | geom_luma | exact | `objectGetPosRadius` src/engine/scene/worldObject.ts:394 |
 | 0x000387a0 | mesh_finish | geom_luma | exact | `meshFinish` src/engine/scene/worldObject.ts:343 |
+| 0x00038800 | object_mesh_counts | geom_luma | exact | `objectMeshCounts` src/sim/world/objectTasks.ts:160 |
+| 0x00038950 | poly_set_code | geom_luma | exact | `polySetCode` src/sim/world/objectTasks.ts:172 |
 | 0x00038980 | object_get_node | geom_luma | exact | `objectGetNode` src/engine/scene/worldObject.ts:402 |
 | 0x00038990 | object_set_node | geom_luma | exact | `objectSetNode` src/engine/scene/worldObject.ts:410 |
 | 0x000389c0 | object_apply_load_flags | geom_luma | exact | `objectApplyLoadFlags` src/engine/scene/worldObject.ts:420 |
@@ -680,29 +693,31 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0003ff00 | camera_keys_clear | render_asm | exact | `cameraKeysClear` src/sim/camera/cameraUpdate.ts:166 |
 | 0x0003ff40 | camera_key_add | render_asm | exact | `cameraKeyAdd` src/sim/camera/cameraUpdate.ts:189 |
 | 0x0003ffb0 | camera_keys_active | render_asm | exact | `cameraKeysActive` src/sim/camera/cameraUpdate.ts:179 |
-| 0x00040c50 | sound_play | sound_sfx | stub | `soundPlay` src/sim/sound/sound.ts:10 |
-| 0x00040c90 | sound_play_delayed | sound_sfx | stub | `soundPlayDelayed` src/sim/sound/sound.ts:37 |
-| 0x00040cf0 | sound_play_at | sound_sfx | stub | `soundPlayAt` src/sim/sound/sound.ts:19 |
-| 0x00041570 | engine_note_start | sound_seq | stub | `engineNoteStart` src/sim/sound/sound.ts:72 |
-| 0x000416b0 | engine_note_update | sound_seq | stub | `engineNoteUpdate` src/sim/sound/sound.ts:81 |
-| 0x00041760 | engine_note_stop | sound_seq | stub | `engineNoteStop` src/sim/sound/sound.ts:90 |
-| 0x000417c0 | engine_note_mute | sound_seq | stub | `engineNoteMute` src/sim/sound/sound.ts:99 |
+| 0x00040c50 | sound_play | sound_sfx | stub | `soundPlay` src/sim/sound/sound.ts:11 |
+| 0x00040c90 | sound_play_delayed | sound_sfx | stub | `soundPlayDelayed` src/sim/sound/sound.ts:38 |
+| 0x00040cf0 | sound_play_at | sound_sfx | stub | `soundPlayAt` src/sim/sound/sound.ts:20 |
+| 0x00040df0 | sound_emitter_update | sound_seq | stub | `soundEmitterUpdate` src/sim/sound/sound.ts:171 |
+| 0x00041070 | sound_emitter_stop | sound_seq | stub | `soundEmitterStop` src/sim/sound/sound.ts:183 |
+| 0x00041570 | engine_note_start | sound_seq | stub | `engineNoteStart` src/sim/sound/sound.ts:73 |
+| 0x000416b0 | engine_note_update | sound_seq | stub | `engineNoteUpdate` src/sim/sound/sound.ts:82 |
+| 0x00041760 | engine_note_stop | sound_seq | stub | `engineNoteStop` src/sim/sound/sound.ts:91 |
+| 0x000417c0 | engine_note_mute | sound_seq | stub | `engineNoteMute` src/sim/sound/sound.ts:100 |
 | 0x00041854 | sflx_decode_blocks | sound_seq | exact | `sflxDecodeBlocks` src/data/formats/sflx.ts:171 |
 | 0x00041a93 | sflx_upsample_x4 | sound_seq | exact | `sflxUpsampleX4` src/data/formats/sflx.ts:123 |
 | 0x00041aeb | sflx_upsample_x2 | sound_seq | exact | `sflxUpsampleX2` src/data/formats/sflx.ts:97 |
 | 0x00041dd0 | sound_seq_sub_041dd0 | sound_seq | stub | `soundSeqSub041dd0` src/mission/laterPhases.ts:27 |
-| 0x00042080 | sound_seq_sub_042080 | sound_seq | stub | `soundSeqSub042080` src/sim/sound/sound.ts:139 |
-| 0x000422a0 | radio_lance_message | sound_seq | stub | `radioLanceMessage` src/sim/sound/sound.ts:62 |
-| 0x00042340 | sound_cue_play | sound_seq | stub | `soundCuePlay` src/sim/sound/sound.ts:28 |
-| 0x00042390 | damage_callout_play | sound_seq | stub | `damageCalloutPlay` src/sim/sound/sound.ts:49 |
-| 0x000423d0 | sound_seq_sub_0423d0 | sound_seq | stub | `soundSeqSub0423d0` src/sim/sound/sound.ts:127 |
+| 0x00042080 | sound_seq_sub_042080 | sound_seq | stub | `soundSeqSub042080` src/sim/sound/sound.ts:140 |
+| 0x000422a0 | radio_lance_message | sound_seq | stub | `radioLanceMessage` src/sim/sound/sound.ts:63 |
+| 0x00042340 | sound_cue_play | sound_seq | stub | `soundCuePlay` src/sim/sound/sound.ts:29 |
+| 0x00042390 | damage_callout_play | sound_seq | stub | `damageCalloutPlay` src/sim/sound/sound.ts:50 |
+| 0x000423d0 | sound_seq_sub_0423d0 | sound_seq | stub | `soundSeqSub0423d0` src/sim/sound/sound.ts:128 |
 | 0x00043dd0 | sound_config_sub_043dd0 | sound_config | stub | `soundConfigSub043dd0` src/mission/laterPhases.ts:36 |
 | 0x00043e50 | sound_config_sub_043e50 | sound_config | stub | `soundConfigSub043e50` src/mission/laterPhases.ts:18 |
 | 0x00044720 | netplay_frame_exchange | netplay | partial | `netplayFrameExchange` src/sim/net/netplay.ts:28 |
 | 0x00045720 | cheat_match | netplay | exact | `cheatMatch` src/data/exe/tables/cheats.ts:47 |
 | 0x00045d80 | key_command_update | cheats | partial | `keyCommandUpdate` src/sim/ui/uiContext.ts:216 |
-| 0x00046060 | command_execute | cheats | partial | `commandExecute` src/sim/ui/commands.ts:83 |
-| 0x00046ac0 | cheats_sub_046ac0 | cheats | partial | `cheatsSub046ac0` src/sim/ui/commands.ts:63 |
+| 0x00046060 | command_execute | cheats | partial | `commandExecute` src/sim/ui/commands.ts:85 |
+| 0x00046ac0 | cheats_sub_046ac0 | cheats | partial | `cheatsSub046ac0` src/sim/ui/commands.ts:65 |
 | 0x00047650 | input_torso_tilt | target_ui | exact | `inputTorsoTilt` src/data/exe/tables/controlChannels.ts:94 |
 | 0x000476a0 | input_open_device | input | exact | `inputOpenDevice` src/sim/controls/input.ts:263 |
 | 0x000478a0 | input_bind_channel | input | exact | `inputBindChannel` src/sim/controls/input.ts:296 |
@@ -781,7 +796,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x0004e130 | project_obj_exec | sim_objects | partial | `projectObjExec` src/mission/vm/objExec.ts:29 |
 | 0x0004e540 | thing_node_queue_pop | sim_objects | exact | `thingNodeQueuePop` src/sim/mech/spawn.ts:45 |
 | 0x0004e570 | gamething_alloc | sim_objects | exact | `gamethingAlloc` src/sim/things/gameThings.ts:52 |
-| 0x0004e5d0 | project_chunk_exec | sim_objects | partial | `projectChunkExec` src/mission/vm/chunkExec.ts:109 |
+| 0x0004e5d0 | project_chunk_exec | sim_objects | exact | `projectChunkExec` src/mission/vm/chunkExec.ts:110 |
 | 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:52 |
 | 0x0004fde0 | poly_resolve_code | sim_objects | exact | `polyResolveCode` src/engine/scene/wtboLoader.ts:80 |
 | 0x0004fe80 | poly_set_vertex_offset | sim_objects | exact | `polySetVertexOffset` src/engine/scene/wtboLoader.ts:99 |
@@ -806,6 +821,7 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 | 0x00051aa0 | gamething_destroy | sim_objects | exact | `gamethingDestroy` src/sim/things/gameThingDamage.ts:61 |
 | 0x00051b70 | gamething_apply_damage | sim_objects | exact | `gamethingApplyDamage` src/sim/things/gameThingDamage.ts:30 |
 | 0x00051c50 | effect_spawn_fragments | sim_objects | exact | `effectSpawnFragments` src/sim/effects/effects.ts:249 |
+| 0x00051d20 | cockpit_save_config | cockpit | partial | `cockpitSaveConfig` src/mission/end.ts:75 |
 | 0x00051d40 | environment_heat_update | cockpit | exact | `environmentHeatUpdate` src/sim/effects/effects.ts:469 |
 | 0x00051e90 | nuke_detonate | cockpit | exact | `nukeDetonate` src/sim/effects/effects.ts:439 |
 | 0x00051f50 | nuke_blast_update | cockpit | exact | `nukeBlastUpdate` src/sim/effects/effects.ts:419 |
@@ -929,6 +945,9 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/engine/vfx/vfx.ts:173 - takes window coordinates and the clip vfx_shape_draw has set up, not (pane, shape, x, y, pitch)
 - src/engine/vfx/vfx.ts:212 - takes window coordinates and the clip vfx_shape_remap_draw has set up
 - src/engine/vfx/vfx.ts:307 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
+- src/mission/end.ts:60 - palette_fade_used_colours' blocking 0x5a-tick DAC fade and palette_apply_slot's upload are the host's; the port makes the slot the current one, which is what the host draws the screen in
+- src/mission/end.ts:77 - the port never writes the game's cfg files: the block is returned to the host instead
+- src/mission/end.ts:93 - the record is returned to the host rather than written to mw2msn.cfg
 - src/mission/laterPhases.ts:11 - ${name} is not ported yet (${phase}); the step does nothing
 - src/mission/laterPhases.ts:20 - Phase 7 (audio)
 - src/mission/laterPhases.ts:29 - Phase 7 (audio): the sound sequence queue does not advance
@@ -944,7 +963,6 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/mission/results.ts:151 - no development ('keating') directory exists for the port, as none ships with the game: always null, which is what the shipped game gets
 - src/mission/tables/missionTables.ts:98 - a slot outside 0..15 is refused (the original writes outside the array); MW2.PRJ has none
 - src/mission/tables/missionTables.ts:104 - MTBL slot ${slot} outside the 16 missionTables slots; not installed
-- src/mission/vm/chunkExec.ts:111 - of the TSK handlers only anim_player_step (type 3) is ported; the others (Phase 6) create tasks with no callback
 - src/mission/vm/objExec.ts:31 - the loose-file path for an OBJ with no POLY id (poly -1) is not ported; no shipped OBJ uses it
 - src/mission/vm/projectWalk.ts:182 - mech_loadout_size (0x287b0) and task_node_size (0x17520) are not ported in their own modules yet; their constant answers, 0x852 and 0x18, are used here
 - src/mission/vm/streams.ts:121 - loose files are read from a map pre-loaded before the load (setLooseFiles), not from disk
@@ -1029,34 +1047,38 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/mech/spawn.ts:71 - cannot fail (the original returns 0 when static_malloc does)
 - src/sim/mech/spawn.ts:86 - the dwords at +0x24, +0xe0 and +0xe4 (padding in the header, no port fields) are zeroed in the original
 - src/sim/net/netplay.ts:30 - netplay is out of scope: only the single-player early return is ported
-- src/sim/sound/sound.ts:12 - Phase 7 (audio): nothing plays
-- src/sim/sound/sound.ts:15 - sound_play: no audio yet (sound 0x${id.toString(16)})
-- src/sim/sound/sound.ts:21 - Phase 7 (audio): nothing plays
-- src/sim/sound/sound.ts:24 - sound_play_at: no audio yet (sound 0x${id.toString(16)})
-- src/sim/sound/sound.ts:30 - Phase 7 (audio): no voice cue plays
-- src/sim/sound/sound.ts:33 - sound_cue_play: no audio yet (cue 0x${cue.toString(16)})
-- src/sim/sound/sound.ts:39 - Phase 7 (audio): nothing plays
-- src/sim/sound/sound.ts:42 - sound_play_delayed: no audio yet (sound 0x${id.toString(16)})
-- src/sim/sound/sound.ts:51 - Phase 7 (audio): sound_seq_queue_message is not ported; no callout plays
-- src/sim/sound/sound.ts:54 - damage_callout_play: no audio yet (callout ${id})
-- src/sim/sound/sound.ts:64 - Phase 7 (audio): sound_seq_queue_message is not ported; no radio message plays
-- src/sim/sound/sound.ts:68 - radio_lance_message: no audio yet (message ${message})
-- src/sim/sound/sound.ts:74 - Phase 7 (audio): no engine note
-- src/sim/sound/sound.ts:77 - engine_note_start: no audio yet
-- src/sim/sound/sound.ts:83 - Phase 7 (audio): no engine note
-- src/sim/sound/sound.ts:86 - engine_note_update: no audio yet
-- src/sim/sound/sound.ts:92 - Phase 7 (audio): no engine note
-- src/sim/sound/sound.ts:95 - engine_note_stop: no audio yet
-- src/sim/sound/sound.ts:101 - Phase 7 (audio): no engine note
-- src/sim/sound/sound.ts:104 - engine_note_mute: no audio yet
-- src/sim/sound/sound.ts:129 - Phase 7 (audio): sound_seq_queue_message is not ported; the announcement is logged, not played
-- src/sim/sound/sound.ts:132 - sound_seq_sub_0423d0: no audio yet (sound ${m.sound}, "${m.text}")
-- src/sim/sound/sound.ts:141 - Phase 7 (audio): the sequencer is not ported
-- src/sim/sound/sound.ts:144 - sound_seq_sub_042080: the sound sequencer is not ported yet
+- src/sim/sound/sound.ts:13 - Phase 7 (audio): nothing plays
+- src/sim/sound/sound.ts:16 - sound_play: no audio yet (sound 0x${id.toString(16)})
+- src/sim/sound/sound.ts:22 - Phase 7 (audio): nothing plays
+- src/sim/sound/sound.ts:25 - sound_play_at: no audio yet (sound 0x${id.toString(16)})
+- src/sim/sound/sound.ts:31 - Phase 7 (audio): no voice cue plays
+- src/sim/sound/sound.ts:34 - sound_cue_play: no audio yet (cue 0x${cue.toString(16)})
+- src/sim/sound/sound.ts:40 - Phase 7 (audio): nothing plays
+- src/sim/sound/sound.ts:43 - sound_play_delayed: no audio yet (sound 0x${id.toString(16)})
+- src/sim/sound/sound.ts:52 - Phase 7 (audio): sound_seq_queue_message is not ported; no callout plays
+- src/sim/sound/sound.ts:55 - damage_callout_play: no audio yet (callout ${id})
+- src/sim/sound/sound.ts:65 - Phase 7 (audio): sound_seq_queue_message is not ported; no radio message plays
+- src/sim/sound/sound.ts:69 - radio_lance_message: no audio yet (message ${message})
+- src/sim/sound/sound.ts:75 - Phase 7 (audio): no engine note
+- src/sim/sound/sound.ts:78 - engine_note_start: no audio yet
+- src/sim/sound/sound.ts:84 - Phase 7 (audio): no engine note
+- src/sim/sound/sound.ts:87 - engine_note_update: no audio yet
+- src/sim/sound/sound.ts:93 - Phase 7 (audio): no engine note
+- src/sim/sound/sound.ts:96 - engine_note_stop: no audio yet
+- src/sim/sound/sound.ts:102 - Phase 7 (audio): no engine note
+- src/sim/sound/sound.ts:105 - engine_note_mute: no audio yet
+- src/sim/sound/sound.ts:130 - Phase 7 (audio): sound_seq_queue_message is not ported; the announcement is logged, not played
+- src/sim/sound/sound.ts:133 - sound_seq_sub_0423d0: no audio yet (sound ${m.sound}, "${m.text}")
+- src/sim/sound/sound.ts:142 - Phase 7 (audio): the sequencer is not ported
+- src/sim/sound/sound.ts:145 - sound_seq_sub_042080: the sound sequencer is not ported yet
+- src/sim/sound/sound.ts:173 - Phase 7 (audio): no mixer, nothing plays
+- src/sim/sound/sound.ts:176 - sound_emitter_update: no audio yet (sound ${e.soundId})
+- src/sim/sound/sound.ts:185 - Phase 7 (audio): no sample is ever loaded, so there is nothing to end
+- src/sim/sound/sound.ts:188 - sound_emitter_stop: no audio yet
 - src/sim/things/gameThingDamage.ts:93 - the original sets 0x200 on worldRecords[geomIndex] before testing geomIndex for -1, and reads gameThings[-1] for a replacement with no gamething; the port skips both out-of-table accesses (the first cannot happen - a thing with geomIndex -1 already has flags 4)
-- src/sim/ui/commands.ts:65 - the wait is split across host frames (keyPauseActive) instead of a blocking loop; the PAUSED shape is not drawn and the sounds are Phase 7
-- src/sim/ui/commands.ts:85 - the menu (0x33..0x37), screenshot (0x52) and vision (0x9d INFRARED, 0x9e ENHANCED_VISION) commands are reported, not run; debug commands (hangAround) are not ported
-- src/sim/ui/commands.ts:92 - command 0x${cmd.toString(16)} (${what}) is not ported yet
+- src/sim/ui/commands.ts:67 - the wait is split across host frames (keyPauseActive) instead of a blocking loop; the PAUSED shape is not drawn and the sounds are Phase 7
+- src/sim/ui/commands.ts:87 - the menu (0x33..0x37) and screenshot (0x52) commands are reported, not run; debug commands (hangAround) are not ported
+- src/sim/ui/commands.ts:94 - command 0x${cmd.toString(16)} (${what}) is not ported yet
 - src/sim/ui/uiContext.ts:80 - the node is a JS object rather than malloc(0x12)
 - src/sim/ui/uiContext.ts:115 - the sound pause and resume (sound_config_sub_043f70 / _043fd0) are Phase 7
 - src/sim/ui/uiContext.ts:196 - Phase 4 (menus): no context is ever requested, so the handlers (project_tables_sub_017b40, project_tables_font_handler_2, project_tables_sub_017f30) are not ported; a request is reported and dropped
@@ -1071,12 +1093,12 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/world/bitmap3d.ts:181 - the CEL pointers are dropped without release, as in the original (the port's cache has nothing to release)
 - src/sim/world/collision.ts:762 - the knock-over sound (0xb5 at the object) is Phase 7
 - src/sim/world/collision.ts:802 - mech_collide_obstacles: the knock-over sound 0xb5 is not played
-- src/sim/world/dayCycle.ts:79 - the first test - hudWidgets[0] +6 above 0 while infrared is on turns infrared off through vfx_font_sub_0150f0 - needs the HUD, which is not ported; infraredOn is only set by that HUD path, so it stays 0 and the branch cannot run
-- src/sim/world/dayCycle.ts:85 - day_cycle_tick: hudWidgets[0] check for leaving infrared not ported
 - src/sim/world/detailRecords.ts:48 - nodes are JS objects rather than one static_malloc'd pool
 - src/sim/world/detailRecords.ts:180 - no cache purge-and-retry loop: the in-memory container cannot run out
 - src/sim/world/groundQuadtree.ts:21 - a JS object; the 'Not enough memory' path cannot happen
 - src/sim/world/groundQuadtree.ts:273 - nothing to free in JS; kept so object_free_bounds' class-5 branch has its callee
+- src/sim/world/objectTasks.ts:265 - INIT's two products are evaluated in doubles, not the x87's 80 bits (0x1b66e..0x1b6ae); every shipped lap is a small integer, which leaves them far from a rounding boundary
+- src/sim/world/objectTasks.ts:424 - the -1 arm: task_list_notify_rebuilt neither sets currentTask nor passes an argument (0x17450..0x17477), so the C works on whatever task last ran (usually none: address 4) and atoi's a null pointer; the port answers 0 with the task untouched when there is no current task, and otherwise keeps the object slot rather than atoi'ing nothing
 - src/sim/world/palettes.ts:70 - palette_slot_set_resource: a slot outside the 20-entry table writes past it in the original; ignored
 - src/sim/world/palettes.ts:92 - the state is exact; the colour interpolation table clib_sub_063a70 builds (paletteFadeState) is left to the renderer
 - src/sim/world/palettes.ts:140 - the colour step (clib_sub_063b50) and the 0x970bc-guarded clib_sub_0639b0 call are the renderer's
@@ -1119,12 +1141,14 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/mech/tickHooks.ts:252 - door_tick_ai: within a step of the nav point the ramps aim at a step-long offset from the world origin
 - src/sim/weapons/weapons.ts:78 - weapons[-1].fireGroup: reads the loadout dword at +0xb2 (throttleScale >> 16 | weaponCycleLock << 16)
 - src/sim/weapons/weapons.ts:565 - player_weapon_set_fire_group with no weapon selected writes loadout +0xb2 (throttleScale high word, weaponCycleLock low word)
+- src/sim/world/objectTasks.ts:336 - task_object_sound: INIT never sets the gate, so a chunk without it leaves the heap\
 
 ## Unestablished (gaps the decompilation has not closed)
 
 - src/core/random.ts:60 - random seed: the original uses the argv pointer address; a fixed default is used
 - src/engine/resources/preload.ts:112 - sim_preload_data: ai_rule_tables_load is not installed
 - src/engine/vfx/vfx.ts:313 - vfx_line_draw: a callback mode (above 1) is not ported
+- src/mission/end.ts:125 - mission_save_results: an objective text runs past the end of the record, onto the stack
 - src/mission/vm/objExec.ts:45 - OBJ with no POLY id loads a loose .wtb file; not ported
 - src/render/pipeline/fillDispatch.ts:76 - polygonFillHook 0x${h.toString(16)} is not ported; render_asm_sub_03bb80 used
 - src/render/pipeline/hooks.ts:43 - objectCullHook 0x${a.toString(16)} is not ported; object_cull_main_view used
@@ -1177,3 +1201,14 @@ than drifting. Library code (Watcom clib, Miles) is excluded from the totals.
 - src/sim/weapons/weapons.ts:307 - mech_weapon_fire: a weapon with ammo has no bin (the C would dereference null)
 - src/sim/weapons/weapons.ts:315 - mech_weapon_fire: the next ammo bin is past the loadout\
 - src/sim/weapons/weapons.ts:543 - weapon_set_fire_group: weapons[${weaponIndex}] is outside the ten slots
+- src/sim/world/objectTasks.ts:148 - task_object_colour_cycle: no values - the C divides by the count (0) and faults
+- src/sim/world/objectTasks.ts:209 - task_object_rotate: fewer than four values - the rest are uninitialised stack in the C (0 here)
+- src/sim/world/objectTasks.ts:217 - task_object_rotate: no parameters - the angles and period stay as malloc left them (0 here)
+- src/sim/world/objectTasks.ts:230 - task_object_rotate: a period of 0 faults the divide in the C
+- src/sim/world/objectTasks.ts:236 - task_object_rotate: the object has no node, and the C rotates through a null pointer
+- src/sim/world/objectTasks.ts:275 - task_object_drive: fewer than three values - the rest are uninitialised stack in the C (0 here)
+- src/sim/world/objectTasks.ts:296 - task_object_drive: the object has no node, and the C moves through a null pointer
+- src/sim/world/objectTasks.ts:430 - task_object_track: REBUILT with no current task - the C reads the data word at address 4
+- src/sim/world/objectTasks.ts:441 - task_object_track: REBUILT looks its object up by atoi(NULL); the port keeps the slot it has
+- src/sim/world/objectTasks.ts:465 - task_object_track: fewer than three words - the rest are uninitialised stack buffers in the C (empty here)
+- src/sim/world/objectTasks.ts:528 - task_object_track: a point with duration 0 faults the divide in the C

@@ -216,7 +216,7 @@ export function arenaBudgetBytes(index: number): number {
 const isDigit = (c: number): boolean => c >= 0x30 && c <= 0x39;
 
 /** clib_sub_0628fa, Watcom atoi: skip ctype spaces, a sign, then digits. @portOnly clib */
-function clibAtoi(s: string): number {
+export function clibAtoi(s: string): number {
   let i = 0;
   const sp = (c: number) => c === 0x20 || (c >= 0x09 && c <= 0x0d);
   while (i < s.length && sp(s.charCodeAt(i))) i++;

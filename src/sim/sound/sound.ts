@@ -5,6 +5,7 @@
  */
 import { divergence } from '../../core/provenance.ts';
 import { registerGlobals } from '../../engine/globals.ts';
+import type { SceneNode, WorldObject } from '../../generated/classes.gen.ts';
 
 /**
  * @mw2 sound_play 0x00040c50
@@ -142,4 +143,47 @@ export function soundSeqSub0423d0(m: SoundSeqMessage): void {
  */
 export function soundSeqSub042080(_arg: number): void {
   divergence('sound_seq_sub_042080: the sound sequencer is not ported yet', 'sound_seq_sub_042080');
+}
+
+/**
+ * The 0x1e-byte state task_object_sound builds for a positional sound: its
+ * cutoff range (cm), mixer channel (8..15, -1 none), loaded SNDS resource,
+ * object slot and node, gate, first-call skip flag and SNDS id.
+ *
+ * @portOnly the emitter record as named fields
+ */
+export interface SoundEmitter {
+  cutoff: number;
+  channel: number;
+  resource: number;
+  slot: { get(): WorldObject | null } | null;
+  node: SceneNode | null;
+  gate: number;
+  skipFirst: number;
+  soundId: number;
+}
+
+/**
+ * One tick of a positional sound: past its cutoff it stops; otherwise it
+ * takes a mixer channel, loads and loops the sample, and sets volume
+ * 100 * (1 - (d / 500 m)^2) and pan from the bearing.
+ *
+ * @mw2 sound_emitter_update 0x00040df0
+ * @fidelity stub
+ * @divergence Phase 7 (audio): no mixer, nothing plays
+ */
+export function soundEmitterUpdate(e: SoundEmitter): void {
+  divergence(`sound_emitter_update: no audio yet (sound ${e.soundId})`, 'sound_emitter_update');
+}
+
+/**
+ * Ends an emitter's sample when it has one loaded (resource non-zero):
+ * frees its channel and unlocks the SNDS resource.
+ *
+ * @mw2 sound_emitter_stop 0x00041070
+ * @fidelity stub
+ * @divergence Phase 7 (audio): no sample is ever loaded, so there is nothing to end
+ */
+export function soundEmitterStop(e: SoundEmitter): void {
+  if (e.resource !== 0) divergence('sound_emitter_stop: no audio yet', 'sound_emitter_stop');
 }

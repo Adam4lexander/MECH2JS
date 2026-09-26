@@ -14,12 +14,14 @@ import { AssetBrowser } from './panels/AssetBrowser.tsx';
 import { Toolbar } from './panels/Toolbar.tsx';
 import { Viewport } from './panels/Viewport.tsx';
 import { ErrorBoundary } from './ErrorBoundary.tsx';
+import { Debrief } from '../app/Debrief.tsx';
 
 export function EditorRoot({ game, onBack }: { game: Game; onBack: () => void }) {
   const [bottom, setBottom] = useState<'console' | 'assets'>('console');
   return (
     <div className="editor">
       <Toolbar game={game} onBack={onBack} />
+      <Debrief game={game} onBack={onBack} />
       <Group orientation="vertical" className="editor-main">
         <Panel defaultSize="68" minSize="20">
           <Group orientation="horizontal">

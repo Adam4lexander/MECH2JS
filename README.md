@@ -49,7 +49,12 @@ Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
   evaluation are the game's own (src/sim/ai, src/sim/groups/orders.ts,
   src/mission/results.ts). Enemy stars start shut down on their start
   objective and wake as the mission's objectives open - in AMY_SCN1 the
-  first star powers up and comes for the player straight away.
+  first star powers up and comes for the player straight away. When the
+  mission is decided, 'Press any key to exit...' follows after 3 s and the
+  mission ends after 20; the debriefing shows the result record MW2.EXE
+  would have left in mw2msn.cfg (the port never writes the game's cfg
+  files). The objects mission scripts animate - spinning, blinking,
+  driving and path-following - run their scheduled tasks.
 - **Edit** - no frame runs and time stands still; the editor shows the scene
   hierarchy, the game's tables, an inspector over every struct field with its
   offset and C type, a free camera, the asset browser and the console. Step

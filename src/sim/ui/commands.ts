@@ -21,7 +21,9 @@ import { mechRuntime } from '../mech/mechRuntime.ts';
 import { missileCamFollowLast } from '../weapons/projectiles.ts';
 import { playerWeaponSetFireGroup } from '../weapons/weapons.ts';
 import { net } from '../net/netplay.ts';
-import { soundPlay } from '../sound/sound.ts';
+import { soundCuePlay, soundPlay } from '../sound/sound.ts';
+import { dayCycle, vfxFontSub0150f0 } from '../world/dayCycle.ts';
+import { renderOptions } from '../display/renderState.ts';
 import { hud } from '../cockpit/hud.ts';
 import { damageDisplayModeCycle } from '../cockpit/damageDisplay.ts';
 import { objectivesHud } from '../cockpit/objectivesHud.ts';
@@ -82,7 +84,7 @@ export function keyPauseEnd(): void {
  *
  * @mw2 command_execute 0x00046060
  * @fidelity partial
- * @divergence the menu (0x33..0x37), screenshot (0x52) and vision (0x9d INFRARED, 0x9e ENHANCED_VISION) commands are reported, not run; debug commands (hangAround) are not ported
+ * @divergence the menu (0x33..0x37) and screenshot (0x52) commands are reported, not run; debug commands (hangAround) are not ported
  */
 export function commandExecute(cmd: number): void {
   const pc = mechs.playerControls;
@@ -329,9 +331,19 @@ export function commandExecute(cmd: number): void {
       playerWeaponSetFireGroup(2);
       break;
     case 0x9d:
-    case 0x9e:
-      later('vision modes, Phase 4');
+      vfxFontSub0150f0(0, dayCycle.infraredOn === 0 ? 1 : 0);
       break;
+    case 0x9e: {
+      // ENHANCED_VISION: hidden-line wireframe for the whole view, only while the player's mech runs (flags 0x2000)
+      const r = renderOptions;
+      if (r.wireframeMode === 1 || (mechs.mechTable[mechs.playerMechIndex]!.flags & 0x2000) === 0) r.wireframeMode = 0;
+      else {
+        r.wireframeMode = 1;
+        r.wireframeColourScheme = 0;
+        soundCuePlay(0x1b, 1);
+      }
+      break;
+    }
     default:
       if (g.hangAround !== 0) later('debug commands');
       break;

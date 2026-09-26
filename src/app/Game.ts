@@ -21,6 +21,7 @@ import { BitmapAtlas } from '../render/textures/bitmapAtlas.ts';
 import { clock } from '../engine/clock.ts';
 import { timerInterrupt } from '../engine/timer.ts';
 import { mainLoopRunning, mainLoopStep } from '../mission/mainLoop.ts';
+import { missionEnd, type MissionResults } from '../mission/end.ts';
 
 export type Mode = 'edit' | 'play';
 
@@ -28,12 +29,15 @@ export class Game {
   mode: Mode = 'edit';
   mission: string | null = null;
   loadError: string | null = null;
+  /** main's results once its loop has ended (the debriefing's data), else null */
+  results: MissionResults | null = null;
 
   constructor(readonly data: GameData) {}
 
   loadMission(stream: string): boolean {
     this.mission = stream;
     this.loadError = null;
+    this.results = null;
     const t0 = performance.now();
     let ok = false;
     try {
@@ -153,6 +157,12 @@ export class Game {
     if (!mainLoopRunning()) return false;
     try {
       mainLoopStep();
+      if (!mainLoopRunning()) {
+        // main's shutdown after its loop: the results the debriefing shows
+        this.results = missionEnd();
+        this.mode = 'edit';
+        engineStore.bump();
+      }
     } catch (e) {
       this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
       logError('frame', this.loadError);

@@ -9,13 +9,14 @@
 import { LABEL } from '../../generated/labels.gen.ts';
 import { cdiv, cmod, i8 } from '../../core/int/cint.ts';
 import { sdivShl } from '../../core/int/i64.ts';
-import { divergence } from '../../core/provenance.ts';
 import { clock } from '../../engine/clock.ts';
 import { registerGlobals } from '../../engine/globals.ts';
 import { imageI32, imageI32s, imageU8 } from '../../engine/image.ts';
 import { lighting } from './environment.ts';
 import { paletteFadeToNewBase } from './palettes.ts';
 import { planet } from './planet.ts';
+import { hud } from '../cockpit/hud.ts';
+import { soundCuePlay, soundPlay } from '../sound/sound.ts';
 
 function bootDayCycle() {
   // dayPhasePaletteSlot and dayPhaseFadeTicks are one interleaved table of
@@ -75,14 +76,18 @@ export function dayCycleInit(): void {
  * the last phase whose start is not after it (3 when none is).
  *
  * @mw2 day_cycle_tick 0x00014f80
- * @fidelity partial
- * @divergence the first test - hudWidgets[0] +6 above 0 while infrared is on turns infrared off through vfx_font_sub_0150f0 - needs the HUD, which is not ported; infraredOn is only set by that HUD path, so it stays 0 and the branch cannot run
+ * First, infrared goes off when the sensors (hudWidgets[0]) are damaged.
+ *
+ * @fidelity exact
  */
 export function dayCycleTick(): void {
   const d = dayCycle;
   const L = lighting;
   let phase = 3;
-  if (d.infraredOn === 1) divergence('day_cycle_tick: hudWidgets[0] check for leaving infrared not ported');
+  if (0 < hud.hudWidgets[0]!.field_0x6 && d.infraredOn === 1) {
+    vfxFontSub0150f0(0, 0);
+    d.infraredOn = 0;
+  }
   if (d.dayCycleWarmup < 2) {
     d.dayCycleNextTick = 0;
     d.dayCycleWarmup = d.dayCycleWarmup + 1;
@@ -122,4 +127,43 @@ export function dayCycleSetPhase(phase: number): void {
   }
   paletteFadeToNewBase(d.dayPhasePaletteSlot[phase]!, duration);
   d.dayPhase = phase;
+}
+
+/**
+ * Whether infrared vision is on.
+ *
+ * @mw2 vfx_font_sub_0150e0 0x000150e0
+ * @fidelity exact
+ */
+export function vfxFontSub0150e0(): number {
+  return dayCycle.infraredOn;
+}
+
+/**
+ * Sets infrared vision. On - only while the sensors (hudWidgets[0]) are
+ * undamaged: the day cycle stops and the palette fades over a second to slot
+ * 0xc as the new base, with sound 0xb2 and voice cue 0x1c. Off: the cycle
+ * restarts and re-evaluates at once (dayPhase -1); infraredOn itself stays 1
+ * until day_cycle_set_phase clears it on its one-second fade back.
+ *
+ * @mw2 vfx_font_sub_0150f0 0x000150f0
+ * @fidelity exact
+ */
+export function vfxFontSub0150f0(_unused: number, on: number): void {
+  const d = dayCycle;
+  on &= 0xff;
+  if (on === d.infraredOn) return;
+  if (on === 1) {
+    if (hud.hudWidgets[0]!.field_0x6 < 1) {
+      d.infraredOn = 1;
+      d.dayCycleEnabled = 0;
+      paletteFadeToNewBase(0xc, 0xb6);
+      soundPlay(0xb2, 100, 0x40, 5, 0x50);
+      soundCuePlay(0x1c, 1);
+    }
+  } else if (on === 0) {
+    d.dayCycleEnabled = 1;
+    d.dayPhase = -1;
+    d.dayCycleNextTick = 0;
+  }
 }

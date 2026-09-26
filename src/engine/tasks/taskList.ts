@@ -126,3 +126,31 @@ export function taskListRun(list: TaskList): void {
     t = taskGlobals.currentTask!.next;
   }
 }
+
+/**
+ * The node whose callback is running (currentTask).
+ *
+ * @mw2 task_current 0x00017300
+ * @fidelity exact
+ */
+export function taskCurrent(): TaskNode | null {
+  return taskGlobals.currentTask;
+}
+
+/**
+ * &task->data: the task's own record, as a reference its callback reads and
+ * writes.
+ *
+ * @mw2 task_data 0x00017490
+ * @fidelity exact
+ */
+export function taskData(task: TaskNode): { value: unknown } {
+  return {
+    get value() {
+      return task.data;
+    },
+    set value(v: unknown) {
+      task.data = v;
+    },
+  };
+}
