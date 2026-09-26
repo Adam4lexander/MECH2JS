@@ -216,6 +216,25 @@ export const mechStdTickTerrain = registerCode('mech_std_tick_terrain', 0x26990,
       velY = l.velocityY;
       velZ = l.velocityZ;
       const firstBlocked = l.blockedSteps;
+      // DIVERGENCE, an uninitialised local (checked 2026-09-26). The recheck's
+      // hit object is [ebp+0x4e], which nothing here initialises: the prologue
+      // zeroes only hitObject and hitMech (0x269ab). mech_move_step leaves it
+      // unwritten when it returns blocked from a solid obstacle sphere
+      // (0x1fd97) or a zero step with blockedSteps set (0x1fdd6), and the
+      // compare at 0x27112 then reads stack residue: the mech sticks (reset to
+      // the old position) when the residue differs from hitObject, and slides
+      // when it matches. The slot lies at main's esp - 0x64, the depth every
+      // hook1 runs at (mech_dispatch_hook1 calls them all at one esp), so it
+      // holds whatever last reached that depth - for the player, first in the
+      // dispatch, the last task task_list_run ran. An ANIM track step leaves
+      // there the ebx that scene_node_rebuild_subtree pushes: 0 for pitch and
+      // roll rotations and x / z moves, the step's value for yaw and y moves
+      // (0x1ad72..0x1ad93, 0x1e400); object tasks and other paths leave
+      // other values. The port takes the residue as null, the slide - the
+      // common case for mech animations. Measured in the port: AI mechs meet
+      // the case about once in ten minutes; the player pushing into a solid
+      // obstacle sphere (the training missions' 3 m posts) on up to 1 frame
+      // in 6, where the original may stick instead of sliding round.
       const recheck: { v: WorldObject | null } = { v: null };
       if (mechMoveStep(l, recheck, hitMech, stepX, stepY, stepZ, { x: 0, y: 0, z: 0 }) !== 0) {
         if (recheck.v !== hitObject.v) {

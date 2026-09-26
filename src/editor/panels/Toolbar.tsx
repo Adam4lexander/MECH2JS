@@ -5,7 +5,7 @@
  *
  * @portOnly
  */
-import type { Game } from '../../app/Game.ts';
+import { LOOP_RATES, type Game } from '../../app/Game.ts';
 import { clock } from '../../engine/clock.ts';
 import { mechs } from '../../sim/mech/mechGlobals.ts';
 import { world } from '../../sim/world/worldRecords.ts';
@@ -27,6 +27,17 @@ export function Toolbar({ game, onBack }: { game: Game; onBack: () => void }) {
       <button title="Step: one pass of main's loop in the clock's fixed-step mode (12 ticks)" onClick={() => game.step()}>
         ▷| Step
       </button>
+      <select
+        title="Loop rate: passes of main's loop a second in Play. The original ran as fast as its PC allowed (about 15-25); several movement terms act once per pass, so the display rate (one pass a frame) moves differently"
+        value={game.loopRate ?? 'display'}
+        onChange={(e) => game.setLoopRate(e.target.value === 'display' ? null : Number(e.target.value))}
+      >
+        {LOOP_RATES.map((r) => (
+          <option key={r ?? 'display'} value={r ?? 'display'}>
+            {r === null ? 'display rate' : `${r} fps`}
+          </option>
+        ))}
+      </select>
       <button
         className={game.audio.enabled ? 'active' : ''}
         title="Sound: the game's mixer, voice and engine note, and the CD music from the install's CD image"

@@ -27,6 +27,21 @@ import { buildUserStar, type StarSetup } from '../data/config/userStar.ts';
 
 export type Mode = 'edit' | 'play';
 
+/** The loop rates the toolbar offers: passes of main's loop per second, or null for one per display frame. */
+export const LOOP_RATES: ReadonlyArray<number | null> = [15, 20, 30, null];
+const LOOP_RATE_KEY = 'mw2.loopRate';
+
+function recallLoopRate(): number | null {
+  try {
+    const s = localStorage.getItem(LOOP_RATE_KEY);
+    if (s === 'display') return null;
+    const n = s === null ? NaN : Number(s);
+    return LOOP_RATES.includes(n) ? n : 20;
+  } catch {
+    return 20;
+  }
+}
+
 export class Game {
   mode: Mode = 'edit';
   mission: string | null = null;
@@ -190,6 +205,8 @@ export class Game {
       // leave the fixed-step mode Step uses; the next frame steps its last 12 ticks and hands back to real time
       clock.dat00095828 = 0;
       this.pending = 0;
+      // the first display frame runs a pass
+      this.passDue = this.loopRate === null ? 0 : 1000 / this.loopRate;
     }
     this.mode = m;
     engineStore.bump();
@@ -201,11 +218,41 @@ export class Game {
   private static readonly MAX_TICKS_PER_FRAME = 45;
 
   /**
-   * Play: feeds the 182 Hz timer for `ms` of real time, then runs one pass of
-   * main's loop (the original runs as fast as it can; the port runs one pass
-   * per display frame). Returns false once the loop has ended (quit).
+   * Passes of main's loop per second in Play, or null for one per display
+   * frame. The original has no frame cap - it runs a pass as fast as the PC
+   * allows, about 15-25 a second on its hardware, so each pass covers 7-12
+   * of its 182 Hz ticks - and several of its movement terms act once per
+   * pass or truncate small per-pass amounts: the 0x1000 velocity snap in
+   * mech_std_tick_terrain, jump fuel's tickDelta / 4 refill, the push-back
+   * off walls, the keyboard's analog ramps. At one pass per 60 Hz display
+   * frame (tickDelta 3) those behave differently, so the port paces the loop
+   * at a period-like rate by default. This is the original's own -F option
+   * (simFrameMinTicks, sim_clock_step) done by the host, which waits real
+   * time instead of busy-waiting on the timer.
    */
-  playFrame(ms: number): boolean {
+  loopRate: number | null = recallLoopRate();
+
+  setLoopRate(rate: number | null): void {
+    this.loopRate = rate;
+    this.passDue = rate === null ? 0 : 1000 / rate;
+    try {
+      localStorage.setItem(LOOP_RATE_KEY, rate === null ? 'display' : String(rate));
+    } catch {
+      /* private window: not remembered */
+    }
+    engineStore.bump();
+  }
+
+  /** real time, in ms, owed toward the next pass of main's loop */
+  private passDue = 0;
+
+  /**
+   * Play: feeds the 182 Hz timer for `ms` of real time (the sound runs on
+   * it, every display frame), then runs one pass of main's loop when one is
+   * due at the loop rate - `onPass` first. The pass's tickDelta is the ticks
+   * since the last one. Returns false once the loop has ended (quit).
+   */
+  playFrame(ms: number, onPass?: () => void): boolean {
     if (this.showPlayback()) return true;
     if (this.pendingResults) {
       // the end fade has been shown: the debriefing
@@ -220,6 +267,17 @@ export class Game {
       ailTimerService();
       this.pending -= 1;
     }
+    if (this.loopRate !== null) {
+      const period = 1000 / this.loopRate;
+      this.passDue += ms;
+      if (this.passDue < period) {
+        this.audio.pump();
+        return true;
+      }
+      // keep the remainder so the rate holds on average; never owe more than one pass (a hidden tab)
+      this.passDue = Math.min(this.passDue - period, period);
+    }
+    onPass?.();
     const ok = this.runFrame();
     this.audio.pump();
     return ok;

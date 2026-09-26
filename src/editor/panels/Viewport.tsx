@@ -197,9 +197,9 @@ export function Viewport({ game }: { game: Game }) {
       const elapsedMs = now - last;
       last = now;
       const playing = game.mode === 'play';
-      views.beginFrame();
       if (playing) {
-        if (!game.playFrame(elapsedMs)) game.setMode('edit');
+        // the game's render requests are per pass of its loop: between passes the last one is drawn again
+        if (!game.playFrame(elapsedMs, () => views.beginFrame())) game.setMode('edit');
         engineStore.bumpThrottled();
       }
       // after the frame: the loop may have ended and left Edit

@@ -38,8 +38,13 @@ install, and sorts the missions by which of them each includes:
 
 ## Modes
 
-- **Play** - a mission starts in Play. main's frame loop runs, one pass per
-  display frame, with the 182 Hz timer fed from real time. The view is the
+- **Play** - a mission starts in Play. main's frame loop runs with the
+  182 Hz timer fed from real time, at the toolbar's loop rate: 20 passes a
+  second by default (15, 20, 30 or one per display frame). The original ran
+  as fast as its PC allowed, about 15-25 a second, and several of its
+  movement terms act once per pass - the velocity snap that holds a slow
+  start to the axes, the jump-fuel refill, the push-back off walls, the
+  keyboard's ramps - so at 60 passes a second the mech moves differently. The view is the
   game's own camera (`camera_update`), with its cockpit and HUD; nothing in
   it is the editor's (no picking, no gizmo). The keyboard and mouse go to the game through its own
   input layer: the browser's keys become PC scancodes for `GIDDI\KEYBOARD.DLL`,
