@@ -121,3 +121,40 @@ input, select { background: var(--panel2); color: var(--text); border: 1px solid
 .debrief-card .ok { color: #6fd36f; }
 .debrief-card .no { color: #e06a6a; }
 .debrief-card .actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ---- the game as MECH2 runs it: the front end's 640x480 screen and the mission view */
+.shell-frame,
+.play-frame,
+.shell-start {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.shell-screen {
+  image-rendering: pixelated;
+  width: min(100vw, calc(100vh * 4 / 3));
+  height: min(100vh, calc(100vw * 3 / 4));
+  cursor: none;
+}
+.shell-start {
+  flex-direction: column;
+  gap: 12px;
+  color: #d8c890;
+  font-size: 28px;
+  cursor: pointer;
+  user-select: none;
+}
+.shell-start .hint {
+  font-size: 14px;
+  color: #8a8060;
+}
+.shell-start a {
+  color: #d8c890;
+}
+.play-frame > * {
+  width: 100%;
+  height: 100%;
+}

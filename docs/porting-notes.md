@@ -110,6 +110,23 @@ offsets come from the generated schemas (`fieldOffset`). Heap objects stay
 JS objects. String constants the code copies get a label in
 Mw2shellTypes.java like any other global - never a literal typed in.
 
+### The shell's blocking loops
+
+Every screen and modal helper of MW2SHELL.EXE is a loop that owns the
+machine until it returns. The port writes each as a generator with the
+original's control flow (`shell/host/blocking.ts`) and composes them with
+`yield*`; a function that can block - anything that reaches
+`mouse_update`, a Smacker wait, or a file read off the CD - is
+`function*` and returns `Blocking<T>`. `mouse_update` yields between its
+present and its read of the mouse, which is the shell's frame boundary.
+`shell/host/pump.ts` resumes the generator from the host's frames at a
+fixed number of passes a second (a `@divergence`: the original ran as fast
+as the PC could, and some timings count passes). The hardware the shell's
+drivers talk to - the screen and DAC, int 33h, the BIOS keyboard buffer, the
+250 Hz timer, the sound card - is `shell/host/hardware.ts`; the browser
+side (`app/shell/`) feeds it input and presents it. `?dev` in the address
+opens the mission picker and editor instead of the game.
+
 ## Numbers
 
 - The sim is exact fixed-point. Positions are cm, angles 16.16 degrees

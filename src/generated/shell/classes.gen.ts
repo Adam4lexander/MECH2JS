@@ -109,6 +109,25 @@ export class ChassisEntry {
   nameSound: number = 0;
 }
 
+/** ButtonDef - 28 (0x1c) bytes. */
+export class ButtonDef {
+  static readonly schema = STRUCTS.ButtonDef;
+  /** +0x000 int */
+  x0: number = 0;
+  /** +0x004 int */
+  y0: number = 0;
+  /** +0x008 int */
+  x1: number = 0;
+  /** +0x00c int */
+  y1: number = 0;
+  /** +0x010 int */
+  labelX: number = 0;
+  /** +0x014 int */
+  labelY: number = 0;
+  /** +0x018 char * */
+  label: string | null = null;
+}
+
 /** StarMember - 36 (0x24) bytes. */
 export class StarMember {
   static readonly schema = STRUCTS.StarMember;
@@ -355,6 +374,14 @@ export class InputDevice {
 /** Mouse - 67 (0x43) bytes. */
 export class Mouse {
   static readonly schema = STRUCTS.Mouse;
+  /** +0x000 void * */
+  cursor: unknown = null;
+  /** +0x004 int */
+  driver: number = 0;
+  /** +0x008 void * */
+  font: unknown = null;
+  /** +0x00c int */
+  readoutWidth: number = 0;
   /** +0x010 int */
   leftClicked: number = 0;
   /** +0x014 int */

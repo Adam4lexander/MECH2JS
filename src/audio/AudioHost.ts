@@ -41,6 +41,12 @@ export class AudioHost {
     return this.ctx && this.master && this.enabled ? { ctx: this.ctx, out: this.master } : null;
   }
 
+  /** The audio output other hosts (the front end's sound card) play into; enables sound (call inside a user gesture). */
+  output(): { ctx: AudioContext; out: AudioNode } {
+    this.enable();
+    return { ctx: this.ctx!, out: this.master! };
+  }
+
   /** Must run inside a user gesture the first time (the browser's autoplay rule). */
   enable(): void {
     if (!this.ctx) {

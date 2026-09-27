@@ -1,7 +1,9 @@
 /**
  * The Miles VFX library's 2D drawing, as MW2.EXE links it (vfx_lib): the
  * HUD, the cockpit text and the radar draw through these into the VFX window
- * main's frame loop presents.
+ * main's frame loop presents. MW2SHELL.EXE links the same routines byte for
+ * byte (decompiled/mw2shell/build/matched.csv), so the ones it calls carry
+ * an @mw2shell tag too.
  *
  * A WINDOW is {buffer, xMax, yMax} (+0, +4, +8: every routine takes xMax + 1
  * and yMax + 1 as the width and height, and gives up with -1 when either is
@@ -151,6 +153,7 @@ function shapePlacement(t: Uint8Array, n: number, x: number, y: number): number 
  * outside, -4 when its own rectangle is empty.
  *
  * @mw2 vfx_shape_draw 0x0005435c
+ * @mw2shell vfx_shape_draw 0x00043e2c
  * @fidelity exact
  */
 export function vfxShapeDraw(pane: ViewWindow, table: Uint8Array, shapeNumber: number, x: number, y: number): number {
@@ -192,6 +195,7 @@ export function vfxShapeRemapSet(table: Uint8Array): void {
  * vfx_shape_draw with every pixel replaced by shapeRemap[pixel].
  *
  * @mw2 vfx_shape_remap_draw 0x00054846
+ * @mw2shell vfx_shape_remap_draw 0x00044316
  * @fidelity exact
  */
 export function vfxShapeRemapDraw(pane: ViewWindow, table: Uint8Array, shapeNumber: number, x: number, y: number): number {
@@ -218,6 +222,7 @@ export function vfxShapeRemapDrawUnclipped(table: Uint8Array, shapeNumber: numbe
 
 /**
  * @mw2 vfx_shape_count 0x00058a43
+ * @mw2shell vfx_shape_count 0x00048513
  * @fidelity exact
  */
 export function vfxShapeCount(table: Uint8Array): number {
@@ -228,6 +233,7 @@ export function vfxShapeCount(table: Uint8Array): number {
  * Width << 16 | height of shape n.
  *
  * @mw2 vfx_shape_size 0x00058908
+ * @mw2shell vfx_shape_size 0x000483d8
  * @fidelity exact
  */
 export function vfxShapeSize(table: Uint8Array, n: number): number {
@@ -251,6 +257,7 @@ export function vfxShapeOrigin(table: Uint8Array, n: number): number {
  * Shape n's +0 dword.
  *
  * @mw2 vfx_shape_bounds 0x000588c3
+ * @mw2shell vfx_shape_bounds 0x00048393
  * @fidelity exact
  */
 export function vfxShapeBounds(table: Uint8Array, n: number): number {
@@ -261,6 +268,7 @@ export function vfxShapeBounds(table: Uint8Array, n: number): number {
  * Fills the pane, clipped to its window, with one colour. Returns 0, -1 or -2.
  *
  * @mw2 vfx_pane_wipe 0x000561f0
+ * @mw2shell vfx_pane_wipe 0x00045cc0
  * @fidelity exact
  */
 export function vfxPaneWipe(pane: ViewWindow, colour: number): number {
@@ -303,6 +311,7 @@ function linePixel(x: number, y: number, mode: number, colour: number | Uint8Arr
  * inside, -1 / -2 for an empty window / pane.
  *
  * @mw2 vfx_line_draw 0x00053821
+ * @mw2shell vfx_line_draw 0x000432f1
  * @fidelity partial
  * @divergence a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
  */
@@ -365,6 +374,7 @@ export function vfxLineDraw(pane: ViewWindow, x0: number, y0: number, x1: number
  * The glyph height: the dword at font + 8.
  *
  * @mw2 vfx_font_height 0x00057e60
+ * @mw2shell vfx_font_height 0x00047930
  * @fidelity exact
  */
 export function vfxFontHeight(font: Uint8Array): number {
@@ -375,6 +385,7 @@ export function vfxFontHeight(font: Uint8Array): number {
  * Glyph ch's width.
  *
  * @mw2 vfx_character_width 0x00057e73
+ * @mw2shell vfx_character_width 0x00047943
  * @fidelity exact
  */
 export function vfxCharacterWidth(font: Uint8Array, ch: number): number {
@@ -388,6 +399,7 @@ export function vfxCharacterWidth(font: Uint8Array, ch: number): number {
  * clipped or not; -1 / -2 for an empty window / pane.
  *
  * @mw2 vfx_character_draw 0x00057e93
+ * @mw2shell vfx_character_draw 0x00047963
  * @fidelity exact
  */
 export function vfxCharacterDraw(pane: ViewWindow, x: number, y: number, font: Uint8Array, ch: number, colourTable: Uint8Array | null): number {
@@ -445,6 +457,7 @@ export function vfxCharacterDraw(pane: ViewWindow, x: number, y: number, font: U
  * Draws a NUL-terminated string, each character's advance added to x.
  *
  * @mw2 vfx_string_draw 0x00058026
+ * @mw2shell vfx_string_draw 0x00047af6
  * @fidelity exact
  */
 export function vfxStringDraw(pane: ViewWindow, x: number, y: number, font: Uint8Array, text: string, colourTable: Uint8Array | null): void {

@@ -141,6 +141,36 @@ export function dosFindFiles(pattern: string): string[] {
   return [...names].sort();
 }
 
+/** The CD drive: its letter and a reader for paths on it ('SMK\MINTRO.SMK'). */
+let cd: { letter: string; read: (path: string) => Promise<Uint8Array | null> } | null = null;
+
+/** @portOnly the host's CD drive (the game CD's image), or null for none */
+export function setCdDrive(drive: { letter: string; read: (path: string) => Promise<Uint8Array | null> } | null): void {
+  cd = drive ? { letter: drive.letter.toUpperCase(), read: drive.read } : null;
+}
+
+/** @portOnly the CD drive's letter, or '' */
+export function cdDriveLetter(): string {
+  return cd?.letter ?? '';
+}
+
+/**
+ * A file anywhere a program can open one: the disk, or - for a path on the
+ * CD's drive ("D:\smk\mintro.smk") - the CD, which the host reads
+ * asynchronously (the image is far too big to hold).
+ *
+ * @portOnly fopen+fread across the hard disk and the CD
+ */
+export async function dosFileLoadAsync(path: string): Promise<Uint8Array | null> {
+  const key = dosPathKey(path);
+  const m = /^([A-Z]):\/?(.*)$/.exec(key);
+  if (m) {
+    if (cd && m[1] === cd.letter) return cd.read(m[2]!);
+    return null;
+  }
+  return lookup(key) ?? null;
+}
+
 /** @portOnly every file the programs can see, merged top layer first (for the sim's loose-file maps) */
 export function dosDiskSnapshot(): Map<string, Uint8Array> {
   return new Map([...dosFiles.files, ...dosFiles.own, ...(dosFiles.overlay ?? new Map())]);

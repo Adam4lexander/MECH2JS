@@ -62,6 +62,34 @@ export class Game {
 
   private catalog: MissionEntry[] | null = null;
 
+  /** MECH2's loop waits on this: called once when a mission's results are in (main has ended) */
+  onMissionEnd: ((r: MissionResults) => void) | null = null;
+
+  /**
+   * MW2.EXE run the way MECH2 runs it: with the command line the shell left
+   * in mw2prm.cfg, on the disk as the shell left it. Starts in Play.
+   */
+  launch(argv: string[]): boolean {
+    this.audio.pause();
+    this.mission = argv[1] ?? null;
+    this.setup = null;
+    this.loadError = null;
+    this.results = null;
+    this.pendingResults = null;
+    this.playbackShown = null;
+    let ok = false;
+    try {
+      ok = bootMission({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, argv });
+    } catch (e) {
+      this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
+      logError('mission', this.loadError);
+    }
+    this.mode = 'edit';
+    if (this.loadError === null) this.setMode('play');
+    engineStore.bump();
+    return ok;
+  }
+
   /** the player's star the last mission was set up with (Replay reuses it), or null for a mission that takes none */
   setup: StarSetup | null = null;
 
@@ -272,6 +300,7 @@ export class Game {
       this.pendingResults = null;
       this.mode = 'edit';
       engineStore.bump();
+      this.onMissionEnd?.(this.results);
       return false;
     }
     this.pending = Math.min(this.pending + (ms * 182) / 1000, Game.MAX_TICKS_PER_FRAME);
@@ -325,6 +354,7 @@ export class Game {
         this.results = r;
         this.mode = 'edit';
         engineStore.bump();
+        this.onMissionEnd?.(r);
       }
     } catch (e) {
       this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);

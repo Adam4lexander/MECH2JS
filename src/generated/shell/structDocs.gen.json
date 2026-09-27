@@ -105,6 +105,18 @@
    "nameSound": "a DATABASE.MW2 WAV item (83..99; -1 for the Tarantula): screen_mechlab loads it as a sample (0xa6370) whenever NEXT / PREV CHASSIS changes the chassis. (Was '+0x10: no consumer read yet' when the table was typed 4 bytes late.)"
   }
  },
+ "ButtonDef": {
+  "doc": "",
+  "fields": {
+   "x0": "hotspot left (button_init +0x18 rectangle)",
+   "y0": "hotspot top",
+   "x1": "hotspot right, inclusive (button_bar_hit)",
+   "y1": "hotspot bottom, inclusive",
+   "labelX": "where the label is drawn",
+   "labelY": "likewise",
+   "label": "the label: '<' first = always drawn, else only on hover; NULL for none"
+  }
+ },
  "ProjectDirectory": {
   "doc": "",
   "fields": {
@@ -269,6 +281,10 @@
  "Mouse": {
   "doc": "",
   "fields": {
+   "cursor": "mouse_init's fourth argument: main passes DATABASE.MW2 item 0x19 (VFX shapes), which shell_input_sub_01b010 puts up as the pointer",
+   "driver": "the video driver object (main's videoDriver): mouse_update presents it (video_driver_sub_03e1f0) and draws the readout through it",
+   "font": "a FontHolder (main passes uiFont); the readout draws with its +0x408 drawFont and restores with its +0x40c height",
+   "readoutWidth": "the width of the last '(%d,%d)' readout, restored from the background before the next is drawn; 0 when none is up",
    "leftClicked": "mouse_update: 1 on the frame the left button goes down; mouse_left_clicked returns it",
    "rightClicked": "the same for the right button; mouse_right_clicked returns it",
    "middleClicked": "the same for the middle button",

@@ -8,6 +8,10 @@ import { MissionPicker } from './MissionPicker.tsx';
 import { attachDiskStore } from './diskStore.ts';
 import { dosFileExists, dosFileWrite } from '../engine/dosFiles.ts';
 import { SHELL_LABEL } from '../generated/shell/labels.gen.ts';
+import { GameShell } from './GameShell.tsx';
+
+/** The developer's route: the mission picker and the editor (?dev in the address). */
+const DEV = new URLSearchParams(window.location.search).has('dev');
 
 /**
  * The port's own files on a first run. MW2DIF.CFG (the rule options) starts
@@ -57,6 +61,8 @@ export function App() {
       </div>
     );
   if (!data || !game) return <div className="boot">{status}…</div>;
+  // The game, as MECH2 runs it; ?dev opens the mission picker and the editor instead.
+  if (!DEV) return <GameShell data={data} game={game} />;
   if (!inMission)
     return (
       <MissionPicker

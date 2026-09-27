@@ -970,22 +970,22 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00053330 | weapon_get_aim_direction | weapons | exact | `weaponGetAimDirection` src/sim/weapons/aim.ts:34 |
 | 0x000533c0 | effect_align_to_mount | weapons | exact | `effectAlignToMount` src/sim/effects/effects.ts:276 |
 | 0x00053410 | projectile_place_on_fire | weapons | exact | `projectilePlaceOnFire` src/sim/weapons/weapons.ts:379 |
-| 0x00053821 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:305 |
-| 0x0005435c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:153 |
-| 0x00054760 | vfx_shape_draw_unclipped | vfx_lib | exact | `vfxShapeDrawUnclipped` src/engine/vfx/vfx.ts:171 |
-| 0x00054827 | vfx_shape_remap_set | vfx_lib | exact | `vfxShapeRemapSet` src/engine/vfx/vfx.ts:184 |
-| 0x00054846 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:194 |
-| 0x00054d1e | vfx_shape_remap_draw_unclipped | vfx_lib | exact | `vfxShapeRemapDrawUnclipped` src/engine/vfx/vfx.ts:210 |
-| 0x000561f0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:263 |
+| 0x00053821 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:313 |
+| 0x0005435c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:155 |
+| 0x00054760 | vfx_shape_draw_unclipped | vfx_lib | exact | `vfxShapeDrawUnclipped` src/engine/vfx/vfx.ts:174 |
+| 0x00054827 | vfx_shape_remap_set | vfx_lib | exact | `vfxShapeRemapSet` src/engine/vfx/vfx.ts:187 |
+| 0x00054846 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:197 |
+| 0x00054d1e | vfx_shape_remap_draw_unclipped | vfx_lib | exact | `vfxShapeRemapDrawUnclipped` src/engine/vfx/vfx.ts:214 |
+| 0x000561f0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:270 |
 | 0x00056868 | vfx_ellipse_draw | vfx_lib | exact | `vfxEllipseDraw` src/sim/cockpit/radar.ts:1290 |
-| 0x00057e60 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:367 |
-| 0x00057e73 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:377 |
-| 0x00057e93 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:390 |
-| 0x00058026 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:447 |
-| 0x000588c3 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:253 |
-| 0x000588e5 | vfx_shape_origin | vfx_lib | exact | `vfxShapeOrigin` src/engine/vfx/vfx.ts:243 |
-| 0x00058908 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:230 |
-| 0x00058a43 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:220 |
+| 0x00057e60 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:376 |
+| 0x00057e73 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:387 |
+| 0x00057e93 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:401 |
+| 0x00058026 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:459 |
+| 0x000588c3 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:259 |
+| 0x000588e5 | vfx_shape_origin | vfx_lib | exact | `vfxShapeOrigin` src/engine/vfx/vfx.ts:249 |
+| 0x00058908 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:235 |
+| 0x00058a43 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:224 |
 | 0x00058e0d | palette_fade_used_colours | vfx_lib | partial | `paletteFadeUsedColours` src/sim/world/palettes.ts:387 |
 | 0x0005dc10 | AIL_install_DIG_driver_file | miles_ail | stub | `ailInstallDigDriverFile` src/engine/miles/ail.ts:168 |
 | 0x0005dd90 | AIL_allocate_sample_handle | miles_ail | partial | `ailAllocateSampleHandle` src/engine/miles/ail.ts:186 |
@@ -1066,7 +1066,7 @@ Library groups left out of the totals: `clib`, `miles`.
 
 ## MW2SHELL.EXE
 
-**Game functions:** 428  |  **ported exact:** 22  |  **partial:** 1  |  **stub:** 0  |  library functions ported: 0
+**Game functions:** 430  |  **ported exact:** 124  |  **partial:** 12  |  **stub:** 0  |  library functions ported: 0
 
 Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code left out: `wasm`.
 
@@ -1076,9 +1076,9 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 |---|---|---:|---:|---:|---:|---:|
 | archive_db | archive | 2 | 0 | 0 | 0 | 2 |
 | mpack_db | archive | 7 | 6 | 0 | 0 | 1 |
-| shell_main | boot | 1 | 0 | 0 | 0 | 1 |
+| shell_main | boot | 3 | 0 | 1 | 0 | 2 |
 | career | career | 3 | 2 | 0 | 0 | 1 |
-| pilots | career | 5 | 0 | 1 | 0 | 4 |
+| pilots | career | 5 | 1 | 1 | 0 | 3 |
 | ready_room | career | 1 | 0 | 0 | 0 | 1 |
 | register | career | 10 | 0 | 0 | 0 | 10 |
 | controls | controls | 42 | 0 | 0 | 0 | 42 |
@@ -1086,31 +1086,39 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | mission_result | handoff | 1 | 0 | 0 | 0 | 1 |
 | prm | handoff | 2 | 2 | 0 | 0 | 0 |
 | star_files | handoff | 4 | 4 | 0 | 0 | 0 |
-| shell_input | input | 36 | 0 | 0 | 0 | 36 |
+| shell_input | input | 36 | 2 | 6 | 0 | 28 |
 | mechlab | mechlab | 1 | 0 | 0 | 0 | 1 |
 | star_select | mechlab | 10 | 3 | 0 | 0 | 7 |
-| movies | movies | 25 | 0 | 0 | 0 | 25 |
+| movies | movies | 25 | 18 | 0 | 0 | 7 |
 | res_cache | resource | 15 | 0 | 0 | 0 | 15 |
 | credits | screens | 1 | 0 | 0 | 0 | 1 |
-| options | screens | 19 | 1 | 0 | 0 | 18 |
-| shell_263d0 | screens | 12 | 0 | 0 | 0 | 12 |
-| shell_2a5e0 | screens | 73 | 0 | 0 | 0 | 73 |
+| options | screens | 19 | 1 | 1 | 0 | 17 |
+| shell_263d0 | screens | 12 | 7 | 0 | 0 | 5 |
+| shell_2a5e0 | screens | 73 | 2 | 0 | 0 | 71 |
 | shell_3d980 | screens | 1 | 0 | 0 | 0 | 1 |
 | stats | screens | 2 | 0 | 0 | 0 | 2 |
-| text_markup | screens | 21 | 0 | 0 | 0 | 21 |
-| shell_sound | sound | 14 | 2 | 0 | 0 | 12 |
-| sound_detect | sound | 15 | 0 | 0 | 0 | 15 |
-| button_bar | ui | 9 | 0 | 0 | 0 | 9 |
-| mouse | ui | 8 | 0 | 0 | 0 | 8 |
+| text_markup | screens | 21 | 11 | 0 | 0 | 10 |
+| shell_sound | sound | 14 | 11 | 0 | 0 | 3 |
+| sound_detect | sound | 15 | 1 | 1 | 0 | 13 |
+| button_bar | ui | 9 | 9 | 0 | 0 | 0 |
+| mouse | ui | 8 | 8 | 0 | 0 | 0 |
 | picture | ui | 4 | 0 | 0 | 0 | 4 |
 | collection | util | 20 | 0 | 0 | 0 | 20 |
-| vfx_lib | vfx | 30 | 0 | 0 | 0 | 30 |
-| video_driver | vfx | 24 | 0 | 0 | 0 | 24 |
+| vfx_lib | vfx | 30 | 12 | 2 | 0 | 16 |
+| video_driver | vfx | 24 | 22 | 0 | 0 | 2 |
 
 ### Ported functions
 
 | address | original | module | fidelity | port |
 |---|---|---|---|---|
+| 0x0001af70 | shell_input_sub_01af70 | shell_input | partial | `cursorShow` src/shell/video/cursor.ts:62 |
+| 0x0001b010 | shell_input_sub_01b010 | shell_input | partial | `cursorSetShape` src/shell/video/cursor.ts:50 |
+| 0x0001b0e0 | mouse_read_state | shell_input | exact | `mouseReadState` src/shell/video/cursor.ts:111 |
+| 0x0001b130 | mouse_driver_set_position | shell_input | exact | `mouseDriverSetPosition` src/shell/video/cursor.ts:99 |
+| 0x0001b1f0 | shell_input_sub_01b1f0 | shell_input | partial | `cursorRefresh` src/shell/video/cursor.ts:38 |
+| 0x0001b850 | shell_input_sub_01b850 | shell_input | partial | `screenBlit` src/shell/video/cursor.ts:21 |
+| 0x0001be20 | shell_input_sub_01be20 | shell_input | partial | `mouseDriverStart` src/shell/video/cursor.ts:86 |
+| 0x0001c000 | shell_input_sub_01c000 | shell_input | partial | `cursorShutdown` src/shell/video/cursor.ts:73 |
 | 0x0001cf40 | project_stream_load | mission_prep | exact | `projectStreamLoad` src/shell/career/brf2.ts:20 |
 | 0x0001cfd0 | brf2_find_chunk | mission_prep | exact | `brf2FindChunk` src/shell/career/brf2.ts:37 |
 | 0x0001d140 | bwd_build_begin | star_files | exact | `bwdBuildBegin` src/shell/handoff/starFiles.ts:59 |
@@ -1126,14 +1134,119 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x00021d50 | mpack_db_read_line | mpack_db | exact | `mpackDbReadLine` src/data/formats/mpack.ts:160 |
 | 0x00021de0 | mpack_db_read_string | mpack_db | exact | `mpackDbReadString` src/data/formats/mpack.ts:184 |
 | 0x000255f0 | sim_options_read | options | exact | `simOptionsRead` src/shell/options/simOptions.ts:13 |
+| 0x000258e0 | shell_menu | options | partial | `shellMenu` src/shell/ui/shellMenu.ts:117 |
+| 0x000263d0 | message_box | shell_263d0 | exact | `messageBox` src/shell/ui/messageBox.ts:57 |
+| 0x000267f0 | font_holder_init | shell_263d0 | exact | `fontHolderInit` src/shell/ui/labels.ts:28 |
+| 0x00026830 | text_width | shell_263d0 | exact | `textWidth` src/shell/ui/labels.ts:42 |
+| 0x00026890 | label_create_under | shell_263d0 | exact | `labelCreateUnder` src/shell/ui/labels.ts:263 |
+| 0x000268e0 | label_create | shell_263d0 | exact | `labelCreate` src/shell/ui/labels.ts:276 |
+| 0x00026980 | font_holder_draw_text | shell_263d0 | exact | `fontHolderDrawText` src/shell/ui/labels.ts:55 |
+| 0x000269a0 | font_holder_draw_char | shell_263d0 | exact | `fontHolderDrawChar` src/shell/ui/labels.ts:65 |
+| 0x00028680 | button_bar_create | button_bar | exact | `buttonBarCreate` src/shell/ui/buttonBar.ts:133 |
+| 0x000287a0 | button_bar_destroy | button_bar | exact | `buttonBarDestroy` src/shell/ui/buttonBar.ts:167 |
+| 0x00028820 | button_bar_truncate | button_bar | exact | `buttonBarTruncate` src/shell/ui/buttonBar.ts:179 |
+| 0x000288d0 | button_bar_hit | button_bar | exact | `buttonBarHit` src/shell/ui/buttonBar.ts:196 |
+| 0x00028a60 | button_bar_remove | button_bar | exact | `buttonBarRemove` src/shell/ui/buttonBar.ts:221 |
+| 0x00028ad0 | button_bar_add | button_bar | exact | `buttonBarAdd` src/shell/ui/buttonBar.ts:235 |
+| 0x00028b60 | button_enable | button_bar | exact | `buttonEnable` src/shell/ui/buttonBar.ts:253 |
+| 0x00028bc0 | button_disable | button_bar | exact | `buttonDisable` src/shell/ui/buttonBar.ts:271 |
+| 0x00028c30 | button_init | button_bar | exact | `buttonInit` src/shell/ui/buttonBar.ts:87 |
 | 0x000291b0 | mission_brf2_load | pilots | partial | `missionBrf2Load` src/shell/career/brf2.ts:90 |
+| 0x0002a410 | screen_title | pilots | exact | `screenTitle` src/shell/screens/title.ts:26 |
+| 0x0002a5e0 | input_init | shell_2a5e0 | exact | `inputInit` src/shell/ui/keys.ts:29 |
+| 0x0002a6f0 | input_poll_key | shell_2a5e0 | exact | `inputPollKey` src/shell/ui/keys.ts:46 |
+| 0x00036700 | main | shell_main | partial | `shellMain` src/shell/main.ts:103 |
 | 0x000374c0 | prm_load | prm | exact | `prmLoad` src/shell/handoff/prm.ts:40 |
 | 0x000375a0 | prm_save | prm | exact | `prmSave` src/shell/handoff/prm.ts:70 |
+| 0x000376a0 | mouse_init | mouse | exact | `mouseInit` src/shell/ui/mouse.ts:57 |
+| 0x00037740 | mouse_set_position | mouse | exact | `mouseSetPosition` src/shell/ui/mouse.ts:87 |
+| 0x00037760 | mouse_shutdown | mouse | exact | `mouseShutdown` src/shell/ui/mouse.ts:97 |
+| 0x00037780 | mouse_double_clicked | mouse | exact | `mouseDoubleClicked` src/shell/ui/mouse.ts:106 |
+| 0x000377a0 | mouse_left_clicked | mouse | exact | `mouseLeftClicked` src/shell/ui/mouse.ts:117 |
+| 0x000377b0 | mouse_right_clicked | mouse | exact | `mouseRightClicked` src/shell/ui/mouse.ts:125 |
+| 0x00037880 | mouse_inject_click | mouse | exact | `mouseInjectClick` src/shell/ui/mouse.ts:135 |
+| 0x000378a0 | mouse_update | mouse | exact | `mouseUpdate` src/shell/ui/mouse.ts:157 |
+| 0x00038c70 | movie_play | movies | exact | `moviePlay` src/shell/anim/movies.ts:43 |
+| 0x00039270 | anim_update_all | movies | exact | `animUpdateAll` src/shell/anim/anims.ts:323 |
+| 0x00039590 | anim_is_running | movies | exact | `animIsRunning` src/shell/anim/anims.ts:247 |
+| 0x000395d0 | anim_set_flags | movies | exact | `animSetFlags` src/shell/anim/anims.ts:259 |
+| 0x00039610 | anim_unhide | movies | exact | `animUnhide` src/shell/anim/anims.ts:271 |
+| 0x00039650 | anim_free | movies | exact | `animFree` src/shell/anim/anims.ts:223 |
+| 0x000396f0 | anim_free_all | movies | exact | `animFreeAll` src/shell/anim/anims.ts:237 |
+| 0x00039710 | anim_move | movies | exact | `animMove` src/shell/anim/anims.ts:283 |
+| 0x00039780 | anim_open_smk | movies | exact | `animOpenSmk` src/shell/anim/anims.ts:84 |
+| 0x000398d0 | anim_open_shp | movies | exact | `animOpenShp` src/shell/anim/anims.ts:125 |
+| 0x000399b0 | anim_start | movies | exact | `animStart` src/shell/anim/anims.ts:172 |
+| 0x00039ad0 | anim_start_free | movies | exact | `animStartFree` src/shell/anim/anims.ts:197 |
+| 0x00039fb0 | anim_set_frame | movies | exact | `animSetFrame` src/shell/anim/anims.ts:301 |
+| 0x00039ff0 | music_create | movies | exact | `musicCreate` src/shell/sound/music.ts:73 |
+| 0x0003a0d0 | music_destroy | movies | exact | `musicDestroy` src/shell/sound/music.ts:97 |
+| 0x0003a110 | music_start | movies | exact | `musicStart` src/shell/sound/music.ts:115 |
+| 0x0003a1a0 | music_is_playing | movies | exact | `musicIsPlaying` src/shell/sound/music.ts:128 |
+| 0x0003a200 | sound_system_init | movies | exact | `soundSystemInit` src/shell/sound/music.ts:55 |
+| 0x0003a340 | sound_sample_create | shell_sound | exact | `soundSampleCreate` src/shell/sound/samples.ts:41 |
+| 0x0003a400 | sound_sample_destroy | shell_sound | exact | `soundSampleDestroy` src/shell/sound/samples.ts:63 |
+| 0x0003a440 | sound_sample_ramp | shell_sound | exact | `soundSampleRamp` src/shell/sound/samples.ts:128 |
+| 0x0003a4a0 | sound_sample_ramp_step | shell_sound | exact | `soundSampleRampStep` src/shell/sound/samples.ts:147 |
+| 0x0003a530 | sound_sample_set_looping | shell_sound | exact | `soundSampleSetLooping` src/shell/sound/samples.ts:78 |
+| 0x0003a560 | sound_sample_play | shell_sound | exact | `soundSamplePlay` src/shell/sound/samples.ts:91 |
+| 0x0003a690 | sound_sample_stop | shell_sound | exact | `soundSampleStop` src/shell/sound/samples.ts:105 |
+| 0x0003a6e0 | sound_sample_set_volume | shell_sound | exact | `soundSampleSetVolume` src/shell/sound/samples.ts:115 |
+| 0x0003a7b0 | music_apply_volume | shell_sound | exact | `musicApplyVolume` src/shell/sound/music.ts:139 |
 | 0x0003a810 | stars_save_to_prm | shell_sound | exact | `starsSaveToPrm` src/shell/handoff/stars.ts:133 |
 | 0x0003a850 | stars_restore_from_prm | shell_sound | exact | `starsRestoreFromPrm` src/shell/handoff/stars.ts:146 |
 | 0x0003a8a0 | star_set_member | star_select | exact | `starSetMember` src/shell/handoff/stars.ts:92 |
 | 0x0003ab50 | star_configure | star_select | exact | `starConfigure` src/shell/handoff/stars.ts:70 |
 | 0x0003abb0 | star_launch_prepare | star_select | exact | `starLaunchPrepare` src/shell/handoff/stars.ts:167 |
+| 0x0003bea0 | label_list_add | text_markup | exact | `labelListAdd` src/shell/ui/labels.ts:354 |
+| 0x0003beb0 | label_list_remove | text_markup | exact | `labelListRemove` src/shell/ui/labels.ts:362 |
+| 0x0003bed0 | label_list_clear | text_markup | exact | `labelListClear` src/shell/ui/labels.ts:381 |
+| 0x0003bf10 | label_list_redraw | text_markup | exact | `labelListRedraw` src/shell/ui/labels.ts:371 |
+| 0x0003bf40 | text_remap_init | text_markup | exact | `textRemapInit` src/shell/ui/labels.ts:118 |
+| 0x0003bfa0 | label_set_typewriter | text_markup | exact | `labelSetTypewriter` src/shell/ui/labels.ts:253 |
+| 0x0003bfb0 | text_label_redraw | text_markup | exact | `textLabelRedraw` src/shell/ui/labels.ts:237 |
+| 0x0003c040 | text_label_type_char | text_markup | exact | `textLabelTypeChar` src/shell/ui/labels.ts:181 |
+| 0x0003c2c0 | text_label_init | text_markup | exact | `textLabelInit` src/shell/ui/labels.ts:142 |
+| 0x0003c370 | label_hide | text_markup | exact | `labelHide` src/shell/ui/labels.ts:289 |
+| 0x0003c3c0 | label_destroy | text_markup | exact | `labelDestroy` src/shell/ui/labels.ts:304 |
+| 0x0003dd90 | video_driver_sub_03dd90 | video_driver | exact | `videoDriverInit` src/shell/video/driver.ts:94 |
+| 0x0003dfe0 | video_driver_sub_03dfe0 | video_driver | exact | `videoDriverSuspend` src/shell/video/driver.ts:137 |
+| 0x0003e020 | video_driver_sub_03e020 | video_driver | exact | `videoDriverResume` src/shell/video/driver.ts:149 |
+| 0x0003e0a0 | video_driver_sub_03e0a0 | video_driver | exact | `videoDriverFree` src/shell/video/driver.ts:164 |
+| 0x0003e130 | video_driver_sub_03e130 | video_driver | exact | `videoDriverMarkDirty` src/shell/video/driver.ts:176 |
+| 0x0003e1f0 | video_driver_sub_03e1f0 | video_driver | exact | `videoDriverPresent` src/shell/video/driver.ts:190 |
+| 0x0003e310 | video_driver_sub_03e310 | video_driver | exact | `videoDriverPaletteSave` src/shell/video/driver.ts:220 |
+| 0x0003e340 | video_driver_sub_03e340 | video_driver | exact | `videoDriverPaletteRestore` src/shell/video/driver.ts:230 |
+| 0x0003e500 | screen_load_background | video_driver | exact | `screenLoadBackground` src/shell/video/background.ts:38 |
+| 0x0003e690 | video_driver_sub_03e690 | video_driver | exact | `videoDriverLine` src/shell/video/driver.ts:287 |
+| 0x0003e710 | video_driver_sub_03e710 | video_driver | exact | `videoDriverPut` src/shell/video/driver.ts:299 |
+| 0x0003e7c0 | video_driver_sub_03e7c0 | video_driver | exact | `videoDriverPutIfDirty` src/shell/video/driver.ts:316 |
+| 0x0003e9c0 | video_driver_sub_03e9c0 | video_driver | exact | `videoDriverErase` src/shell/video/driver.ts:327 |
+| 0x0003ea60 | video_driver_sub_03ea60 | video_driver | exact | `screenPaintPicture` src/shell/video/background.ts:65 |
+| 0x0003eac0 | video_driver_sub_03eac0 | video_driver | exact | `videoDriverShape` src/shell/video/driver.ts:339 |
+| 0x0003eb30 | video_driver_sub_03eb30 | video_driver | exact | `videoDriverShapeIfDirty` src/shell/video/driver.ts:350 |
+| 0x0003ebe0 | screen_draw_text | video_driver | exact | `screenDrawText` src/shell/video/driver.ts:367 |
+| 0x0003ed10 | video_driver_sub_03ed10 | video_driver | exact | `screenDrawChar` src/shell/video/driver.ts:387 |
+| 0x0003ee10 | labels_add | video_driver | exact | `labelsAdd` src/shell/ui/labels.ts:314 |
+| 0x0003ee30 | labels_remove | video_driver | exact | `labelsRemove` src/shell/ui/labels.ts:322 |
+| 0x0003ee50 | labels_redraw | video_driver | exact | `labelsRedraw` src/shell/ui/labels.ts:333 |
+| 0x0003ee80 | labels_clear | video_driver | exact | `labelsClear` src/shell/ui/labels.ts:345 |
+| 0x0003f4a0 | timer_start | sound_detect | partial | `timerStart` src/shell/host/timer.ts:12 |
+| 0x0003f508 | timer_read | sound_detect | exact | `timerRead` src/shell/host/timer.ts:23 |
+| 0x000432f1 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:314 |
+| 0x00043e2c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:156 |
+| 0x00044316 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:198 |
+| 0x00045cc0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:271 |
+| 0x00045d9f | vfx_lib_sub_045d9f | vfx_lib | partial | `vfxPaneCopy` src/shell/video/driver.ts:243 |
+| 0x00047930 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:377 |
+| 0x00047943 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:388 |
+| 0x00047963 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:402 |
+| 0x00047af6 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:460 |
+| 0x00047ea3 | vfx_lib_sub_047ea3 | vfx_lib | exact | `pcxDecode` src/data/formats/pcx.ts:38 |
+| 0x00047f25 | vfx_lib_sub_047f25 | vfx_lib | exact | `pcxPalette` src/data/formats/pcx.ts:24 |
+| 0x00048393 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:260 |
+| 0x000483d8 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:236 |
+| 0x00048513 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:225 |
 
 
 ## Divergences (deliberate differences)
@@ -1177,9 +1290,9 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/systemErrors.ts:31 - a FATAL code throws SystemErrorFatal instead of tearing the game down and exiting
 - src/engine/tasks/taskList.ts:53 - the node is a JS object rather than static_malloc(0x18) from the TLIS arena
 - src/engine/timer.ts:71 - the scan stops at the table's 64 entries; the original scans on for a zero or -1 word, which only matters past 64 live stopwatches
-- src/engine/vfx/vfx.ts:173 - takes window coordinates and the clip vfx_shape_draw has set up, not (pane, shape, x, y, pitch)
-- src/engine/vfx/vfx.ts:212 - takes window coordinates and the clip vfx_shape_remap_draw has set up
-- src/engine/vfx/vfx.ts:307 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
+- src/engine/vfx/vfx.ts:176 - takes window coordinates and the clip vfx_shape_draw has set up, not (pane, shape, x, y, pitch)
+- src/engine/vfx/vfx.ts:216 - takes window coordinates and the clip vfx_shape_remap_draw has set up
+- src/engine/vfx/vfx.ts:316 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
 - src/mission/commandLine.ts:89 - -M / -X's mono display, -Q's quadtree switch-off, -E's mw2debug.txt and the version text are not ported; their flags are still set
 - src/mission/commandLine.ts:93 - This program must be launched from MECH2.EXE
 - src/mission/load.ts:139 - no mw2dif.cfg on the disk: the port's DEFAULT_RULES, not the original's all-off record
@@ -1208,9 +1321,25 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/render/pipeline/fillDispatch.ts:56 - the pixels are the GPU's (SceneRenderer); with shadedFillEnabled clear the flat filler 0x59180 would fill from one vertex's index, where the port drops the dither and interpolates (as for mode 0x4000 elsewhere); the vertex loop writes the indices through mapVertexIndex; returns nothing when the current radar mode has no record, as the original does
 - src/render/pipeline/fillDispatch.ts:89 - 1- and 2-vertex polygons (points while 0x97038 is set, vfx_line_draw lines while 0x97034 is set, else the filler) are not drawn: SceneRenderer builds no geometry for them
 - src/render/pipeline/viewLatch.ts:62 - only the fields the object cull, clipper and shading read are latched: the projection (rows 0-1 premultiplied by projScale, centre, viewport bounds) is done by the GPU from the same viewer; viewerPosition itself is left to the caller, so the editor can draw from its own viewer without handing it to the simulation
+- src/shell/anim/movies.ts:45 - Smacker's full-screen output is the host's movie surface (hardware.movie), scaled to the display
 - src/shell/career/brf2.ts:22 - the resource comes from the port's MW2.PRJ reader, not the shell's cache (project_stream_release has nothing to free)
 - src/shell/career/brf2.ts:92 - the planet branch's animation and labels are drawn by the calling screen from the returned Brf2Planet
 - src/shell/handoff/starFiles.ts:227 - the bytes after each BMPJ name's NUL are uninitialised stack in the original; the port writes zeros (the shipped instmap1.bwd has zeros there)
+- src/shell/host/pump.ts:30 - the shell's loops run at ${passRate} passes a second (the original: as fast as the PC allowed)
+- src/shell/host/timer.ts:14 - the host's clock is the timer; AIL's start-up is the host's audio
+- src/shell/main.ts:105 - the mouse, CD (MSCDEX), interrupt hooks and Miles are the port's host; unported screens show a placeholder
+- src/shell/sound/music.ts:57 - the drivers are the host's synth and card (hardware.midi, hardware.digital), not MDI.INI / DIG.INI
+- src/shell/ui/mouse.ts:159 - yields to the host between presenting the frame and reading the mouse
+- src/shell/ui/shellMenu.ts:119 - COMBAT VARIABLES, COCKPIT CONTROLS, HALL OF HONOR and THE KESHIK run through menuScreens, filled in as those screens are ported
+- src/shell/video/cursor.ts:23 - the pointer is composited by the host over the displayed screen, not blitted into it
+- src/shell/video/cursor.ts:40 - the host redraws its pointer overlay every frame
+- src/shell/video/cursor.ts:52 - the shape is handed to the host, which draws it at the mouse position less the origin
+- src/shell/video/cursor.ts:64 - the hide count is a flag: the shell shows it once and hides it only around movies
+- src/shell/video/cursor.ts:75 - the DPMI call and buffers are the original's; the port hides the host's pointer
+- src/shell/video/cursor.ts:88 - the host's pointer is the mouse; it is always present, and the range is the canvas
+- src/shell/video/driver.ts:96 - the VFX driver (DATABASE item 0x21) is the port's hardware layer, a fixed 640x480 mode
+- src/shell/video/driver.ts:99 - the VFX display driver (DATABASE.MW2 item 0x21) is the port’s own 640x480 screen
+- src/shell/video/driver.ts:245 - the fill behaviour outside the source window is inferred from the VFX API, not read (924 bytes of assembly); every shell call copies within bounds
 - src/sim/ai/behaviours.ts:344 - a gamething with a node leaves the caller's y uninitialised in the C; the port gives 0. A handle that is neither a mech nor a gamething transforms by an uninitialised node pointer; the port reports it and answers [0, 0, 0]
 - src/sim/camera/cameraUpdate.ts:670 - the video-state-4 case (radar_map_up: a fixed yaw of 180 and pitch of -45) is not reproduced; the port is never in that state
 - src/sim/camera/projection.ts:49 - the fields +0xa8 and +0xac (secant terms from the atan tables) are not computed
@@ -1368,13 +1497,14 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/miles/xmidiSequencer.ts:544 - XMIDI: callback prefix (cc 108) with no callback; passed to the device
 - src/engine/miles/xmidiSequencer.ts:551 - XMIDI: channel lock controller ${d1} is not reproduced (the port's device has no other users)
 - src/engine/resources/preload.ts:112 - sim_preload_data: ai_rule_tables_load is not installed
-- src/engine/vfx/vfx.ts:313 - vfx_line_draw: a callback mode (above 1) is not ported
+- src/engine/vfx/vfx.ts:322 - vfx_line_draw: a callback mode (above 1) is not ported
 - src/mission/commandLine.ts:118 - -E: mw2debug.txt is not opened; the trace goes to the port log
 - src/mission/end.ts:133 - mission_save_results: an objective text runs past the end of the record, onto the stack
 - src/mission/vm/objExec.ts:45 - OBJ with no POLY id loads a loose .wtb file; not ported
 - src/render/pipeline/fillDispatch.ts:76 - polygonFillHook 0x${h.toString(16)} is not ported; render_asm_sub_03bb80 used
 - src/render/pipeline/hooks.ts:43 - objectCullHook 0x${a.toString(16)} is not ported; object_cull_main_view used
 - src/render/pipeline/hooks.ts:52 - polygonDrawHook 0x${a.toString(16)} is not ported; polygon_resolve_colour used
+- src/shell/main.ts:249 - main: state ${current} has no screen
 - src/sim/ai/behaviours.ts:144 - ai_choose_behaviour: no behaviour set for gamepieceClass ${mech.gamepieceClass}
 - src/sim/ai/behaviours.ts:365 - point_around_target: a gamething with a node leaves y uninitialised (0 here)
 - src/sim/ai/behaviours.ts:368 - point_around_target: handle 0x${targetHandle.toString(16)} is neither a mech nor a gamething, and the C uses an uninitialised node

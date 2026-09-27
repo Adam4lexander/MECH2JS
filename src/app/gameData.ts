@@ -69,6 +69,15 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
     progress(n);
     loose.set(n.toUpperCase(), await src.read(n));
   }
+  // the front end's archives: its screens, fonts, music and samples, and the Clan archives
+  for (const n of ['DATABASE.MW2', 'ARCHWO.MW2', 'ARCHJF.MW2']) {
+    progress(n);
+    try {
+      loose.set(n, await src.read(n));
+    } catch {
+      /* the front end reports a missing archive itself */
+    }
+  }
   let cue: GameData['cue'] = null;
   const cueName = (await listDir('')).find((n) => /\.CUE$/i.test(n));
   if (cueName) cue = { name: cueName, text: new TextDecoder().decode(await src.read(cueName)) };

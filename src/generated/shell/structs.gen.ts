@@ -143,6 +143,24 @@ export interface RawChassisEntry {
   nameSound: number;
 }
 
+/** ButtonDef - 28 (0x1c) bytes, as read raw from memory (pointers are addresses). */
+export interface RawButtonDef {
+  /** +0x000 int */
+  x0: number;
+  /** +0x004 int */
+  y0: number;
+  /** +0x008 int */
+  x1: number;
+  /** +0x00c int */
+  y1: number;
+  /** +0x010 int */
+  labelX: number;
+  /** +0x014 int */
+  labelY: number;
+  /** +0x018 char * */
+  label: number;
+}
+
 /** ProjectDirectory - 30 (0x1e) bytes, as read raw from memory (pointers are addresses). */
 export interface RawProjectDirectory {
   /** +0x000 byte[22] */
@@ -399,6 +417,14 @@ export interface RawInputDevice {
 
 /** Mouse - 67 (0x43) bytes, as read raw from memory (pointers are addresses). */
 export interface RawMouse {
+  /** +0x000 void * */
+  cursor: number;
+  /** +0x004 int */
+  driver: number;
+  /** +0x008 void * */
+  font: number;
+  /** +0x00c int */
+  readoutWidth: number;
   /** +0x010 int */
   leftClicked: number;
   /** +0x014 int */
@@ -687,6 +713,19 @@ export const STRUCTS = {
       { name: 'nameSound', offset: 0x14, size: 4, count: 1, ctype: "int", kind: 'int' },
     ],
   },
+  ButtonDef: {
+    name: 'ButtonDef',
+    size: 0x1c,
+    fields: [
+      { name: 'x0', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'y0', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'x1', offset: 0x8, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'y1', offset: 0xc, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'labelX', offset: 0x10, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'labelY', offset: 0x14, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'label', offset: 0x18, size: 4, count: 1, ctype: "char *", kind: 'ptr' },
+    ],
+  },
   ProjectDirectory: {
     name: 'ProjectDirectory',
     size: 0x1e,
@@ -888,7 +927,10 @@ export const STRUCTS = {
     name: 'Mouse',
     size: 0x43,
     fields: [
-      { name: 'pad_000', offset: 0x0, size: 1, count: 16, ctype: "uint8_t", kind: 'pad' },
+      { name: 'cursor', offset: 0x0, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'driver', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'font', offset: 0x8, size: 4, count: 1, ctype: "void *", kind: 'ptr' },
+      { name: 'readoutWidth', offset: 0xc, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'leftClicked', offset: 0x10, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'rightClicked', offset: 0x14, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'middleClicked', offset: 0x18, size: 4, count: 1, ctype: "int", kind: 'int' },
