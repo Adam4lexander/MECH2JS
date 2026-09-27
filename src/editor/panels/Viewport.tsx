@@ -118,6 +118,8 @@ export function Viewport({ game }: { game: Game }) {
   const paletteDirty = useRef(false);
   const [xrSupported, setXrSupported] = useState(false);
   const [xrOn, setXrOn] = useState(false);
+  /** the view alone over the whole browser window, for recording (the bar's Fill) */
+  const [filled, setFilled] = useState(false);
   /** VR asked for and the headset not yet given it (the browser and the XR runtime can take a minute) */
   const [xrPending, setXrPending] = useState(false);
   /** enters VR, or leaves it while in it (set by the renderer's effect) */
@@ -147,6 +149,15 @@ export function Viewport({ game }: { game: Game }) {
     spectatorSettingsRef.current = spectatorSettings;
     storeSpectatorSettings(spectatorSettings);
   }, [spectatorSettings]);
+  // Esc leaves the filled view - unless the game is playing, when Esc is the game's (its main menu)
+  useEffect(() => {
+    if (!filled) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && game.mode !== 'play') setFilled(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [filled, game]);
   useEffect(() => {
     faithfulRef.current = faithful;
     storeFaithful(faithful);
@@ -900,7 +911,12 @@ export function Viewport({ game }: { game: Game }) {
   const playing = game.mode === 'play';
   const view: EditView = playing ? 'game' : editView;
   return (
-    <div className={`viewport${playing ? ' playing' : ''}`} ref={host}>
+    <div className={`viewport${playing ? ' playing' : ''}${filled ? ' filled' : ''}`} ref={host}>
+      {filled && (
+        <button className="unfill" onClick={() => setFilled(false)} title="back to the editor">
+          ×
+        </button>
+      )}
       <div className="viewport-overlay">
         {playing ? 'PLAY' : 'EDIT'} · {view === 'game' ? 'game camera' : 'scene camera'} · {info}
         <div className="hint">
@@ -971,8 +987,8 @@ export function Viewport({ game }: { game: Game }) {
             </div>
           )}
         </div>
-        <button onClick={() => void host.current?.requestFullscreen()} title="the view alone, full screen, without this bar - for recording (Esc leaves)">
-          Full
+        <button onClick={() => setFilled(true)} title="the view alone over the whole browser window, without this bar - for recording. Esc, or the corner button, leaves">
+          Fill
         </button>
         {xrSupported && (
           <button

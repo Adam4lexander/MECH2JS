@@ -158,10 +158,12 @@ sliders picks it, and it is remembered:
   from the chase camera, or it would miss most of the mech.
 
 Each spectator frame is drawn a second time, on top of the headset's two
-eyes, at the viewport's size (up to about 3 megapixels). **Full** on the
-viewport bar makes the view fill the screen, without the bar or text;
-Esc leaves. To record, go Full and capture the screen or the browser
-window in OBS, with desktop audio for the game's sound.
+eyes, at the viewport's size (up to about 3 megapixels). **Fill** on the
+viewport bar makes the view fill the browser window, without the bar or
+text. Esc leaves it while the game is paused; while it plays, Esc is the
+game's, so use the button in the top-right corner, which shows only while
+the mouse is over it. To record, size the browser window, Fill, and
+capture it in OBS, with desktop audio for the game's sound.
 
 Three things are specific to stereo:
 
