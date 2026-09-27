@@ -12,6 +12,7 @@
     "test:unit": "vitest run --project unit",
     "test:golden": "vitest run --project golden",
     "gen": "tsx tools/gen-structs.ts && tsx tools/gen-labels.ts && tsx tools/porting-map.ts",
+    "fetch-soundfont": "tsx tools/fetch-soundfont.ts",
     "typecheck": "tsc -p tsconfig.engine.json && tsc -p tsconfig.app.json && tsc -p tsconfig.node.json",
     "lint": "eslint ."
   },
@@ -19,6 +20,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-resizable-panels": "^4.13.3",
+    "spessasynth_lib": "^4.3.14",
     "three": "^0.186.1"
   },
   "devDependencies": {

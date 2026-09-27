@@ -1,0 +1,4 @@
+# The General MIDI SoundFont (npm run fetch-soundfont) is not game data and
+# is not kept in git; see tools/fetch-soundfont.ts for its source and license.
+*
+!.gitignore
