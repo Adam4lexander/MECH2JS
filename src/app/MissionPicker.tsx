@@ -1,14 +1,14 @@
 /**
- * Choosing a mission: every *SCN1 stream in MW2.PRJ, in three groups by the
- * loose files it includes - the shell's side of the game (MW2SHELL.EXE, not
- * ported) is replaced by a small setup of the port's own:
+ * The dev route's mission picker: every *SCN1 stream in MW2.PRJ, in three
+ * groups by the loose files it includes. Launching one runs the shell's
+ * handoff code (shell/devLaunch.ts) - its stars from the mission's BRF2, the
+ * command line - into a scratch overlay of the disk:
  *
  *   ready      the mission fixes the player's 'Mech itself: launch
  *   star       it includes USERSTAR.BWD: pick a pilot name, a 'Mech and up
  *              to four starmates, from which the port builds that file
  *   opponents  it also includes the opponent stars (EN01..05STAR) and, for
- *              some, INSTMAP1 - what only the shell's opponent setup
- *              provides: listed, not offered
+ *              the Trials of Grievance, INSTMAP1: launch, with the BRF2 stars
  *
  * @portOnly
  */
@@ -111,9 +111,8 @@ export function MissionPicker({ data, onPick }: { data: GameData; onPick: (strea
   const item = (m: MissionEntry) => (
     <button
       key={m.stream}
-      className={`picker-item${m.needs === 'opponents' ? ' unavailable' : ''}`}
-      disabled={m.needs === 'opponents'}
-      title={m.needs === 'opponents' ? `needs ${m.loose.filter((n) => n !== 'USERSTAR.BWD').join(', ')} - the shell's opponent setup` : undefined}
+      className="picker-item"
+      title={m.needs === 'opponents' ? `the shell writes ${m.loose.join(', ')} from the mission's BRF2 stars` : undefined}
       onClick={() => (m.needs === 'star' ? setSetting(m) : onPick(m.stream, null))}
     >
       <span className="picker-name">{m.stream}</span>
@@ -158,8 +157,8 @@ export function MissionPicker({ data, onPick }: { data: GameData; onPick: (strea
       {section('star', 'Choose pilot and ’Mech', 'The mission takes the player’s star (USERSTAR.BWD): you name the pilot and pick the ’Mech and any starmates.')}
       {section(
         'opponents',
-        'Needs opponents',
-        'These take opponent stars (EN01..EN05STAR.BWD, and for some INSTMAP1.BWD) that only the shell’s opponent setup writes - not available in the port yet.',
+        'Opponents',
+        'These take opponent stars (EN01..EN05STAR.BWD, and for the Trials of Grievance INSTMAP1.BWD): the shell’s own code writes both stars as the mission’s briefing (BRF2) sets them, and Wolf against Jade Falcon insignia.',
       )}
     </div>
   );

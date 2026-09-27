@@ -2,6 +2,11 @@
 // Addresses of the globals the decompilation has labelled; notes in labelDocs.gen.json.
 
 export const SHELL_LABEL = {
+  brf2Suffix: 0x7688c,
+  optionLaunchAnim: 0x77b76,
+  stdSuffix: 0x77df0,
+  optionFormationPlayer: 0x77df7,
+  optionFormationEnemy: 0x77dfd,
   mainProject: 0x7988c,
   projectAllocHook: 0x79894,
   projectFreeHook: 0x79898,
@@ -9,9 +14,11 @@ export const SHELL_LABEL = {
   wasmTags: 0x799b4,
   inputDeviceCount: 0x7a164,
   inputDevices: 0x7a16c,
+  chunkTags: 0x7a688,
   briefingTags: 0x7a780,
   enemySkillTable: 0x7a7a8,
   opponentStarSkill: 0x7a804,
+  insigniaNames: 0x7a808,
   controlsSelectedControl: 0x7a820,
   controlsDevice: 0x7a824,
   controlNames: 0x7a828,
@@ -67,6 +74,7 @@ export const SHELL_LABEL = {
   musicByStateGrievance: 0x83880,
   musicByStateWolf: 0x838c8,
   musicByStateJadeFalcon: 0x83910,
+  launchAnimName: 0x8395c,
   registerPilotInfoPanel: 0x83970,
   registerMissionListPanel: 0x83ad0,
   midiDriverSets: 0x83e14,
@@ -194,6 +202,11 @@ export const SHELL_LABEL = {
 export type ShellLabelName = keyof typeof SHELL_LABEL;
 
 export const SHELL_LABEL_KIND: Record<ShellLabelName, 'int' | 'raw' | 'ptr'> = {
+  brf2Suffix: 'raw',
+  optionLaunchAnim: 'raw',
+  stdSuffix: 'raw',
+  optionFormationPlayer: 'raw',
+  optionFormationEnemy: 'raw',
   mainProject: 'int',
   projectAllocHook: 'raw',
   projectFreeHook: 'raw',
@@ -201,9 +214,11 @@ export const SHELL_LABEL_KIND: Record<ShellLabelName, 'int' | 'raw' | 'ptr'> = {
   wasmTags: 'raw',
   inputDeviceCount: 'int',
   inputDevices: 'ptr',
+  chunkTags: 'raw',
   briefingTags: 'raw',
   enemySkillTable: 'raw',
   opponentStarSkill: 'int',
+  insigniaNames: 'raw',
   controlsSelectedControl: 'int',
   controlsDevice: 'int',
   controlNames: 'raw',
@@ -259,6 +274,7 @@ export const SHELL_LABEL_KIND: Record<ShellLabelName, 'int' | 'raw' | 'ptr'> = {
   musicByStateGrievance: 'raw',
   musicByStateWolf: 'raw',
   musicByStateJadeFalcon: 'raw',
+  launchAnimName: 'raw',
   registerPilotInfoPanel: 'raw',
   registerMissionListPanel: 'raw',
   midiDriverSets: 'raw',

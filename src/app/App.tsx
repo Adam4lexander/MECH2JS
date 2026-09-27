@@ -5,6 +5,18 @@ import { EditorRoot } from '../editor/EditorRoot.tsx';
 import { Game } from './Game.ts';
 import { type GameData, loadGameData } from './gameData.ts';
 import { MissionPicker } from './MissionPicker.tsx';
+import { attachDiskStore } from './diskStore.ts';
+import { dosFileExists, dosFileWrite } from '../engine/dosFiles.ts';
+import { SHELL_LABEL } from '../generated/shell/labels.gen.ts';
+
+/**
+ * The port's own files on a first run. MW2DIF.CFG (the rule options) starts
+ * as the shell's own defaults - the simOptions its image holds, which its
+ * options screen would write - so MW2.EXE never meets a missing file.
+ */
+function seedOwnFiles(d: GameData): void {
+  if (!dosFileExists('MW2DIF.CFG')) dosFileWrite('MW2DIF.CFG', d.shellExe.slice(SHELL_LABEL.simOptions, 8));
+}
 
 installConsoleSinks();
 
@@ -27,7 +39,10 @@ export function App() {
 
   useEffect(() => {
     loadGameData((m) => setStatus(`loading ${m}`))
-      .then((d) => {
+      .then(async (d) => {
+        setStatus('restoring your files');
+        await attachDiskStore();
+        seedOwnFiles(d);
         setData(d);
         setGame(new Game(d));
       })

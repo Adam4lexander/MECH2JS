@@ -10,7 +10,9 @@ import { SystemErrorFatal } from '../core/systemError.ts';
 import { error as logError, log } from '../core/log.ts';
 import { bootMission } from '../mission/load.ts';
 import { engineStore } from '../editor/store/store.ts';
-import type { GameData } from './gameData.ts';
+import { missionCatalog, type GameData, type MissionEntry } from './gameData.ts';
+import { setDosFiles } from '../engine/dosFiles.ts';
+import { prepareDevMission } from '../shell/devLaunch.ts';
 import { parseLuma } from '../data/formats/image.ts';
 import { cacheLoadResource } from '../engine/resources/cache.ts';
 import { palettes, paletteSlotRgb } from '../sim/world/palettes.ts';
@@ -55,7 +57,10 @@ export class Game {
 
   constructor(readonly data: GameData) {
     this.audio = new AudioHost(data.cue);
+    setDosFiles(data.loose);
   }
+
+  private catalog: MissionEntry[] | null = null;
 
   /** the player's star the last mission was set up with (Replay reuses it), or null for a mission that takes none */
   setup: StarSetup | null = null;
@@ -70,8 +75,6 @@ export class Game {
     this.audio.pause();
     this.mission = stream;
     this.setup = setup;
-    const loose = new Map(this.data.loose);
-    if (setup) loose.set('USERSTAR.BWD', buildUserStar(setup));
     this.loadError = null;
     this.results = null;
     this.pendingResults = null;
@@ -79,7 +82,16 @@ export class Game {
     const t0 = performance.now();
     let ok = false;
     try {
-      ok = bootMission({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, looseFiles: loose, mission: stream });
+      // the shell's part, done by the ported shell code into a scratch overlay: the stars, the launch animation, the command line
+      const entry = (this.catalog ??= missionCatalog(this.data.prj)).find((m) => m.stream === stream);
+      const argv = prepareDevMission({
+        shellExe: this.data.shellExe,
+        prj: this.data.prj,
+        stream,
+        insignia: entry?.loose.includes('INSTMAP1.BWD') ?? false,
+        userStar: setup ? buildUserStar(setup) : null,
+      });
+      ok = bootMission({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, argv });
     } catch (e) {
       this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
       logError('mission', this.loadError);

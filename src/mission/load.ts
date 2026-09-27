@@ -11,7 +11,8 @@ import { musicStartMissionTrack, soundConfigLoad, soundInitAll } from '../sim/so
 import { randomTablesInit } from '../core/random.ts';
 import { audioTimerInit, simClockReset } from '../engine/clock.ts';
 import { uiContextRegister } from '../sim/ui/uiContext.ts';
-import { setDosFiles } from '../engine/dosFiles.ts';
+import { dosDiskSnapshot, dosFileLoad, setDosFiles, setOverlayFiles, setOwnFiles } from '../engine/dosFiles.ts';
+import { checkLaunchedByShell } from './commandLine.ts';
 import { inputInit } from '../sim/controls/input.ts';
 import { cameraInit } from '../sim/camera/cameraUpdate.ts';
 import { terrainTableReset } from '../sim/mech/animTask.ts';
@@ -35,7 +36,7 @@ import { layoutRescaleAll } from '../sim/display/rescale.ts';
 import { defaultCanvas, videoInit } from '../sim/display/video.ts';
 import { vfxVideoSub010320 } from '../sim/display/mainView.ts';
 import { setMekSource } from '../sim/mech/looseFiles.ts';
-import { DEFAULT_RULES, simOptionsLoad, type SimRules } from '../sim/mech/simOptions.ts';
+import { DEFAULT_RULES, rulesToBytes, simOptionsLoad, type SimRules } from '../sim/mech/simOptions.ts';
 import { destructiblesReset } from '../sim/things/destructibles.ts';
 import { gamethingTableReset } from '../sim/things/gameThings.ts';
 import { dayCycleInit } from '../sim/world/dayCycle.ts';
@@ -84,14 +85,22 @@ export interface MissionBootOptions {
   prj: ProjectFile;
   ini?: IniFile | null;
   /**
-   * the install's loose files (USERSTAR.BWD, EN0?STAR.BWD, MEK/*.MEK,
-   * INPUT.MAP, GAMEKEY.MAP, GIDDI/*.DLL ...), upper-case keys with '/'
+   * The whole disk for this run (USERSTAR.BWD, EN0?STAR.BWD, MEK/*.MEK,
+   * INPUT.MAP, GAMEKEY.MAP, GIDDI/*.DLL ...), upper-case keys with '/' -
+   * tests' way of supplying files. Omitted, the mission reads the disk as
+   * the host has set it up (engine/dosFiles.ts).
    */
   looseFiles?: Map<string, Uint8Array>;
-  /** the rule toggles (mw2dif.cfg's record in the original); DEFAULT_RULES when omitted, null for the original's no-file zeroes */
+  /**
+   * The rule toggles to use instead of the disk's mw2dif.cfg; null for the
+   * original's no-file zeroes. Omitted: mw2dif.cfg from the disk, or
+   * DEFAULT_RULES when the disk has none.
+   */
   rules?: SimRules | null;
-  /** the mission stream to load, e.g. 'AMY_SCN1' */
-  mission: string;
+  /** MW2.EXE's argv, as MECH2 spawns it (argv[0] 'mw2.exe', then the command line mw2prm.cfg carries) */
+  argv?: readonly string[];
+  /** the mission stream to load, e.g. 'AMY_SCN1', when there is no argv (the dev route and tests) */
+  mission?: string;
   /** the RNG seed (the original's is the argv pointer; see core/random.ts) */
   randomSeed?: number;
 }
@@ -108,13 +117,27 @@ export function bootMission(opts: MissionBootOptions): boolean {
   installSystemErrorHandler(opts.exe, opts.ini ?? null);
   // project_open
   setMainProject(opts.prj);
-  setLooseFiles(opts.looseFiles ?? new Map());
-  setMekSource(opts.looseFiles ?? new Map());
-  setDosFiles(opts.looseFiles ?? new Map());
+  if (opts.looseFiles) {
+    setDosFiles(opts.looseFiles);
+    setOwnFiles(new Map());
+    setOverlayFiles(null);
+  }
+  const disk = dosDiskSnapshot();
+  setLooseFiles(disk);
+  setMekSource(disk);
   // main reads mw2snd.cfg before anything else it brings up
   soundConfigLoad();
   brightnessLoad();
-  simOptionsLoad(opts.rules === undefined ? DEFAULT_RULES : opts.rules);
+  // check_launched_by_shell: the scenario and the shell's options
+  let mission = opts.mission ?? '';
+  if (opts.argv) {
+    const r = checkLaunchedByShell(opts.argv);
+    if (!r.ok) return false;
+    mission = r.args;
+  }
+  const dif = dosFileLoad('mw2dif.cfg');
+  if (opts.rules === undefined && !dif) divergence("no mw2dif.cfg on the disk: the port's DEFAULT_RULES, not the original's all-off record", 'sim_options_load');
+  simOptionsLoad(opts.rules === undefined ? (dif ?? rulesToBytes(DEFAULT_RULES)) : opts.rules ? rulesToBytes(opts.rules) : null);
   audioTimerInit();
   videoInit();
   // static_arena_init: the DTBL pre-pass sizes arenas; the port allocates on demand
@@ -126,7 +149,7 @@ export function bootMission(opts: MissionBootOptions): boolean {
   simTablesReset();
   gamethingTableReset();
   destructiblesReset();
-  const ok = simLoadByName(opts.mission);
+  const ok = simLoadByName(mission);
   // project_scan_dev_dir: the loose files are the host's overlay
   layoutRescaleAll();
   dayCycleInit();

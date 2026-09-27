@@ -9,7 +9,7 @@ than drifting. Library code (Watcom clib, Miles, Smacker) is excluded from the t
 
 ## MW2.EXE
 
-**Game functions:** 1159  |  **ported exact:** 857  |  **partial:** 63  |  **stub:** 3  |  library functions ported: 36
+**Game functions:** 1159  |  **ported exact:** 860  |  **partial:** 61  |  **stub:** 3  |  library functions ported: 36
 
 Library groups left out of the totals: `clib`, `miles`.
 
@@ -27,19 +27,19 @@ Library groups left out of the totals: `clib`, `miles`.
 | geom_poly | geometry | 20 | 18 | 1 | 0 | 1 |
 | geom_table | geometry | 46 | 24 | 3 | 0 | 19 |
 | input | input | 27 | 17 | 1 | 0 | 9 |
-| mission_config | mission | 5 | 4 | 1 | 0 | 0 |
+| mission_config | mission | 5 | 5 | 0 | 0 | 0 |
 | mission_log | mission | 28 | 24 | 2 | 0 | 2 |
 | mission_result | mission | 7 | 7 | 0 | 0 | 0 |
 | objectives | mission | 8 | 8 | 0 | 0 | 0 |
-| netplay | netplay | 13 | 1 | 1 | 0 | 11 |
+| netplay | netplay | 13 | 1 | 2 | 0 | 10 |
 | project_entry | project | 31 | 27 | 2 | 0 | 2 |
 | project_file | project | 34 | 14 | 4 | 0 | 16 |
 | project_tables | project | 39 | 32 | 0 | 1 | 6 |
 | stream_seen | project | 3 | 3 | 0 | 0 | 0 |
 | render_asm | render | 74 | 42 | 9 | 0 | 23 |
 | res_cache | resource | 25 | 0 | 1 | 2 | 22 |
-| res_loaders | resource | 9 | 4 | 2 | 0 | 3 |
-| cockpit | sim | 12 | 10 | 2 | 0 | 0 |
+| res_loaders | resource | 9 | 5 | 1 | 0 | 3 |
+| cockpit | sim | 12 | 11 | 1 | 0 | 0 |
 | damage | sim | 54 | 53 | 1 | 0 | 0 |
 | mech_config | sim | 20 | 17 | 1 | 0 | 2 |
 | sim_objects | sim | 29 | 27 | 1 | 0 | 1 |
@@ -168,7 +168,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00016720 | objective_evaluate | mission_result | exact | `objectiveEvaluate` src/mission/results.ts:282 |
 | 0x00016e80 | mission_results_update | mission_result | exact | `missionResultsUpdate` src/mission/results.ts:388 |
 | 0x000170c0 | mission_clock_update | mission_result | exact | `missionClockUpdate` src/mission/missionClock.ts:25 |
-| 0x000170e0 | mission_save_results | mission_config | partial | `missionSaveResults` src/mission/end.ts:94 |
+| 0x000170e0 | mission_save_results | mission_config | exact | `missionSaveResults` src/mission/end.ts:100 |
 | 0x00017280 | mission_event_nop | mission_config | exact | `missionEventNop` src/sim/things/gameThingDamage.ts:135 |
 | 0x00017290 | mission_stub_true | mission_config | exact | `missionStubTrue` src/mission/tables/missionTables.ts:182 |
 | 0x000172a0 | group_identify_target | mission_config | exact | `groupIdentifyTarget` src/mission/objectives.ts:218 |
@@ -451,7 +451,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00028810 | render_view_from_pose | ai_group | exact | `renderViewFromPose` src/sim/display/insetView.ts:68 |
 | 0x00028910 | death_flash | ai_group | exact | `deathFlash` src/sim/mech/mechTickAi.ts:87 |
 | 0x00028930 | damage_flash | ai_group | exact | `damageFlash` src/sim/cockpit/hud.ts:600 |
-| 0x00028980 | palette_fade_screen_to_preset | ai_group | exact | `paletteFadeScreenToPreset` src/mission/end.ts:60 |
+| 0x00028980 | palette_fade_screen_to_preset | ai_group | exact | `paletteFadeScreenToPreset` src/mission/end.ts:64 |
 | 0x000289f0 | mech_death_update | ai_group | exact | `mechDeathUpdate` src/sim/mech/mechTickAi.ts:157 |
 | 0x00028ae0 | mech_jump_jet_effects | ai_group | exact | `mechJumpJetEffects` src/sim/mech/mechTickAi.ts:128 |
 | 0x00028be0 | mech_play_landing | ai_group | exact | `mechPlayLanding` src/sim/mech/mechTickTerrain.ts:50 |
@@ -828,11 +828,12 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00043e10 | sound_init_all | sound_config | exact | `soundInitAll` src/sim/sound/music.ts:295 |
 | 0x00043e50 | sound_frame_update | sound_config | exact | `soundFrameUpdate` src/sim/sound/mixer.ts:571 |
 | 0x00043f20 | sound_save_config | sound_config | partial | `soundSaveConfig` src/sim/sound/music.ts:311 |
-| 0x00043f70 | sound_pause | sound_config | exact | `soundPause` src/sim/sound/music.ts:326 |
-| 0x00043fd0 | sound_resume | sound_config | exact | `soundResume` src/sim/sound/music.ts:343 |
+| 0x00043f70 | sound_pause | sound_config | exact | `soundPause` src/sim/sound/music.ts:331 |
+| 0x00043fd0 | sound_resume | sound_config | exact | `soundResume` src/sim/sound/music.ts:348 |
 | 0x00044020 | sound_install_dig_driver | sound_config | partial | `soundInstallDigDriver` src/sim/sound/mixer.ts:151 |
 | 0x00044030 | sound_install_mdi_driver | sound_config | partial | `soundInstallMdiDriver` src/sim/sound/engineNote.ts:46 |
 | 0x000441b0 | sound_settings_init | sound_config | exact | `soundSettingsInit` src/sim/sound/mixer.ts:128 |
+| 0x00044290 | check_launched_by_shell | netplay | partial | `checkLaunchedByShell` src/mission/commandLine.ts:87 |
 | 0x00044720 | netplay_frame_exchange | netplay | partial | `netplayFrameExchange` src/sim/net/netplay.ts:28 |
 | 0x00045720 | cheat_match | netplay | exact | `cheatMatch` src/data/exe/tables/cheats.ts:47 |
 | 0x00045d80 | key_command_update | cheats | partial | `keyCommandUpdate` src/sim/ui/uiContext.ts:173 |
@@ -892,7 +893,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0004be00 | res_load_hdi | res_loaders | exact | `resLoadHdi` src/sim/cockpit/resources.ts:206 |
 | 0x0004bf70 | res_load_cockpit | res_loaders | exact | `resLoadCockpit` src/sim/cockpit/resources.ts:168 |
 | 0x0004c170 | res_load_file | res_loaders | partial | `resLoadFile` src/sim/mech/looseFiles.ts:75 |
-| 0x0004c2c0 | sim_options_load | res_loaders | partial | `simOptionsLoad` src/sim/mech/simOptions.ts:37 |
+| 0x0004c2c0 | sim_options_load | res_loaders | exact | `simOptionsLoad` src/sim/mech/simOptions.ts:55 |
 | 0x0004c4b0 | screenshot_sub_04c4b0 | screenshot | exact | `screenshotSub04c4b0` src/sim/mech/looseFiles.ts:62 |
 | 0x0004c5d0 | stream_seen_add | stream_seen | exact | `streamSeenAdd` src/mission/vm/streams.ts:306 |
 | 0x0004c650 | stream_seen_find | stream_seen | exact | `streamSeenFind` src/mission/vm/streams.ts:319 |
@@ -919,7 +920,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0004e540 | thing_node_queue_pop | sim_objects | exact | `thingNodeQueuePop` src/sim/mech/spawn.ts:45 |
 | 0x0004e570 | gamething_alloc | sim_objects | exact | `gamethingAlloc` src/sim/things/gameThings.ts:52 |
 | 0x0004e5d0 | project_chunk_exec | sim_objects | exact | `projectChunkExec` src/mission/vm/chunkExec.ts:110 |
-| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:57 |
+| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:58 |
 | 0x0004fde0 | poly_resolve_code | sim_objects | exact | `polyResolveCode` src/engine/scene/wtboLoader.ts:80 |
 | 0x0004fe80 | poly_set_vertex_offset | sim_objects | exact | `polySetVertexOffset` src/engine/scene/wtboLoader.ts:99 |
 | 0x0004fea0 | poly_set_vertex_scale | sim_objects | exact | `polySetVertexScale` src/engine/scene/wtboLoader.ts:109 |
@@ -943,7 +944,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00051aa0 | gamething_destroy | sim_objects | exact | `gamethingDestroy` src/sim/things/gameThingDamage.ts:61 |
 | 0x00051b70 | gamething_apply_damage | sim_objects | exact | `gamethingApplyDamage` src/sim/things/gameThingDamage.ts:30 |
 | 0x00051c50 | effect_spawn_fragments | sim_objects | exact | `effectSpawnFragments` src/sim/effects/effects.ts:249 |
-| 0x00051d20 | cockpit_save_config | cockpit | partial | `cockpitSaveConfig` src/mission/end.ts:78 |
+| 0x00051d20 | cockpit_save_config | cockpit | exact | `cockpitSaveConfig` src/mission/end.ts:82 |
 | 0x00051d40 | environment_heat_update | cockpit | exact | `environmentHeatUpdate` src/sim/effects/effects.ts:469 |
 | 0x00051e90 | nuke_detonate | cockpit | exact | `nukeDetonate` src/sim/effects/effects.ts:439 |
 | 0x00051f50 | nuke_blast_update | cockpit | exact | `nukeBlastUpdate` src/sim/effects/effects.ts:419 |
@@ -1065,7 +1066,7 @@ Library groups left out of the totals: `clib`, `miles`.
 
 ## MW2SHELL.EXE
 
-**Game functions:** 428  |  **ported exact:** 0  |  **partial:** 0  |  **stub:** 0  |  library functions ported: 0
+**Game functions:** 428  |  **ported exact:** 22  |  **partial:** 1  |  **stub:** 0  |  library functions ported: 0
 
 Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code left out: `wasm`.
 
@@ -1074,30 +1075,30 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | module | group | functions | exact | partial | stub | not started |
 |---|---|---:|---:|---:|---:|---:|
 | archive_db | archive | 2 | 0 | 0 | 0 | 2 |
-| mpack_db | archive | 7 | 0 | 0 | 0 | 7 |
+| mpack_db | archive | 7 | 6 | 0 | 0 | 1 |
 | shell_main | boot | 1 | 0 | 0 | 0 | 1 |
-| career | career | 3 | 0 | 0 | 0 | 3 |
-| pilots | career | 5 | 0 | 0 | 0 | 5 |
+| career | career | 3 | 2 | 0 | 0 | 1 |
+| pilots | career | 5 | 0 | 1 | 0 | 4 |
 | ready_room | career | 1 | 0 | 0 | 0 | 1 |
 | register | career | 10 | 0 | 0 | 0 | 10 |
 | controls | controls | 42 | 0 | 0 | 0 | 42 |
-| mission_prep | handoff | 10 | 0 | 0 | 0 | 10 |
+| mission_prep | handoff | 10 | 2 | 0 | 0 | 8 |
 | mission_result | handoff | 1 | 0 | 0 | 0 | 1 |
-| prm | handoff | 2 | 0 | 0 | 0 | 2 |
-| star_files | handoff | 4 | 0 | 0 | 0 | 4 |
+| prm | handoff | 2 | 2 | 0 | 0 | 0 |
+| star_files | handoff | 4 | 4 | 0 | 0 | 0 |
 | shell_input | input | 36 | 0 | 0 | 0 | 36 |
 | mechlab | mechlab | 1 | 0 | 0 | 0 | 1 |
-| star_select | mechlab | 10 | 0 | 0 | 0 | 10 |
+| star_select | mechlab | 10 | 3 | 0 | 0 | 7 |
 | movies | movies | 25 | 0 | 0 | 0 | 25 |
 | res_cache | resource | 15 | 0 | 0 | 0 | 15 |
 | credits | screens | 1 | 0 | 0 | 0 | 1 |
-| options | screens | 19 | 0 | 0 | 0 | 19 |
+| options | screens | 19 | 1 | 0 | 0 | 18 |
 | shell_263d0 | screens | 12 | 0 | 0 | 0 | 12 |
 | shell_2a5e0 | screens | 73 | 0 | 0 | 0 | 73 |
 | shell_3d980 | screens | 1 | 0 | 0 | 0 | 1 |
 | stats | screens | 2 | 0 | 0 | 0 | 2 |
 | text_markup | screens | 21 | 0 | 0 | 0 | 21 |
-| shell_sound | sound | 14 | 0 | 0 | 0 | 14 |
+| shell_sound | sound | 14 | 2 | 0 | 0 | 12 |
 | sound_detect | sound | 15 | 0 | 0 | 0 | 15 |
 | button_bar | ui | 9 | 0 | 0 | 0 | 9 |
 | mouse | ui | 8 | 0 | 0 | 0 | 8 |
@@ -1110,7 +1111,29 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 
 | address | original | module | fidelity | port |
 |---|---|---|---|---|
-| | none yet | | | |
+| 0x0001cf40 | project_stream_load | mission_prep | exact | `projectStreamLoad` src/shell/career/brf2.ts:20 |
+| 0x0001cfd0 | brf2_find_chunk | mission_prep | exact | `brf2FindChunk` src/shell/career/brf2.ts:37 |
+| 0x0001d140 | bwd_build_begin | star_files | exact | `bwdBuildBegin` src/shell/handoff/starFiles.ts:59 |
+| 0x0001d310 | star_bwd_add_mech | star_files | exact | `starBwdAddMech` src/shell/handoff/starFiles.ts:115 |
+| 0x0001d540 | star_files_write | star_files | exact | `starFilesWrite` src/shell/handoff/starFiles.ts:177 |
+| 0x0001d6c0 | instmap_write | star_files | exact | `instmapWrite` src/shell/handoff/starFiles.ts:225 |
+| 0x0001da70 | career_registry_load | career | exact | `careerRegistryLoad` src/shell/career/registry.ts:23 |
+| 0x0001db50 | career_registry_save | career | exact | `careerRegistrySave` src/shell/career/registry.ts:48 |
+| 0x00021810 | mpack_db_open | mpack_db | exact | `mpackDbOpen` src/data/formats/mpack.ts:35 |
+| 0x00021a30 | mpack_db_get_item | mpack_db | exact | `mpackDbGetItem` src/data/formats/mpack.ts:64 |
+| 0x00021ad0 | mpack_db_get_item_unpacked | mpack_db | exact | `mpackDbGetItemUnpacked` src/data/formats/mpack.ts:82 |
+| 0x00021cf0 | mpack_db_read_at | mpack_db | exact | `mpackDbReadAt` src/data/formats/mpack.ts:146 |
+| 0x00021d50 | mpack_db_read_line | mpack_db | exact | `mpackDbReadLine` src/data/formats/mpack.ts:160 |
+| 0x00021de0 | mpack_db_read_string | mpack_db | exact | `mpackDbReadString` src/data/formats/mpack.ts:184 |
+| 0x000255f0 | sim_options_read | options | exact | `simOptionsRead` src/shell/options/simOptions.ts:13 |
+| 0x000291b0 | mission_brf2_load | pilots | partial | `missionBrf2Load` src/shell/career/brf2.ts:90 |
+| 0x000374c0 | prm_load | prm | exact | `prmLoad` src/shell/handoff/prm.ts:40 |
+| 0x000375a0 | prm_save | prm | exact | `prmSave` src/shell/handoff/prm.ts:70 |
+| 0x0003a810 | stars_save_to_prm | shell_sound | exact | `starsSaveToPrm` src/shell/handoff/stars.ts:133 |
+| 0x0003a850 | stars_restore_from_prm | shell_sound | exact | `starsRestoreFromPrm` src/shell/handoff/stars.ts:146 |
+| 0x0003a8a0 | star_set_member | star_select | exact | `starSetMember` src/shell/handoff/stars.ts:92 |
+| 0x0003ab50 | star_configure | star_select | exact | `starConfigure` src/shell/handoff/stars.ts:70 |
+| 0x0003abb0 | star_launch_prepare | star_select | exact | `starLaunchPrepare` src/shell/handoff/stars.ts:167 |
 
 
 ## Divergences (deliberate differences)
@@ -1124,6 +1147,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/data/exe/tables/cheats.ts:49 - takes the ring as an array; the original reads the global buffer, and reads before its start for a code longer than it
 - src/data/exe/tables/controlChannels.ts:96 - returns the record instead of its address
 - src/data/exe/tables/menus.ts:92 - memory source only (flags bit 0), and the block is addressed from 0 (dest = 0), so every relocated value is a block offset; null for 'LX' missing or a rejected fixup
+- src/data/formats/mpack.ts:37 - takes the archive's bytes rather than fopen-ing the path (a missing archive is the host's error)
 - src/data/formats/sflx.ts:173 - a read past the end of src throws; the original reads whatever memory follows the resource
 - src/data/prj/ProjectFile.ts:47 - reads from an in-memory buffer; only mode 0 (the one project_open uses)
 - src/data/prj/ProjectFile.ts:124 - returns a view instead of copying into a caller's buffer
@@ -1156,10 +1180,11 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/vfx/vfx.ts:173 - takes window coordinates and the clip vfx_shape_draw has set up, not (pane, shape, x, y, pitch)
 - src/engine/vfx/vfx.ts:212 - takes window coordinates and the clip vfx_shape_remap_draw has set up
 - src/engine/vfx/vfx.ts:307 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
-- src/mission/end.ts:80 - the port never writes the game's cfg files: the block is returned to the host instead
-- src/mission/end.ts:96 - the record is returned to the host rather than written to mw2msn.cfg
-- src/mission/load.ts:121 - static_arena_init: no arena pre-pass; tables are allocated on demand
-- src/mission/load.ts:137 - sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)
+- src/mission/commandLine.ts:89 - -M / -X's mono display, -Q's quadtree switch-off, -E's mw2debug.txt and the version text are not ported; their flags are still set
+- src/mission/commandLine.ts:93 - This program must be launched from MECH2.EXE
+- src/mission/load.ts:139 - no mw2dif.cfg on the disk: the port's DEFAULT_RULES, not the original's all-off record
+- src/mission/load.ts:144 - static_arena_init: no arena pre-pass; tables are allocated on demand
+- src/mission/load.ts:160 - sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)
 - src/mission/mainLoop.ts:87 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
 - src/mission/mainLoop.ts:91 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
 - src/mission/objectives.ts:62 - ${what} longer than its ${destSize}-byte field; the original overruns into the next field
@@ -1183,6 +1208,9 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/render/pipeline/fillDispatch.ts:56 - the pixels are the GPU's (SceneRenderer); with shadedFillEnabled clear the flat filler 0x59180 would fill from one vertex's index, where the port drops the dither and interpolates (as for mode 0x4000 elsewhere); the vertex loop writes the indices through mapVertexIndex; returns nothing when the current radar mode has no record, as the original does
 - src/render/pipeline/fillDispatch.ts:89 - 1- and 2-vertex polygons (points while 0x97038 is set, vfx_line_draw lines while 0x97034 is set, else the filler) are not drawn: SceneRenderer builds no geometry for them
 - src/render/pipeline/viewLatch.ts:62 - only the fields the object cull, clipper and shading read are latched: the projection (rows 0-1 premultiplied by projScale, centre, viewport bounds) is done by the GPU from the same viewer; viewerPosition itself is left to the caller, so the editor can draw from its own viewer without handing it to the simulation
+- src/shell/career/brf2.ts:22 - the resource comes from the port's MW2.PRJ reader, not the shell's cache (project_stream_release has nothing to free)
+- src/shell/career/brf2.ts:92 - the planet branch's animation and labels are drawn by the calling screen from the returned Brf2Planet
+- src/shell/handoff/starFiles.ts:227 - the bytes after each BMPJ name's NUL are uninitialised stack in the original; the port writes zeros (the shipped instmap1.bwd has zeros there)
 - src/sim/ai/behaviours.ts:344 - a gamething with a node leaves the caller's y uninitialised in the C; the port gives 0. A handle that is neither a mech nor a gamething transforms by an uninitialised node pointer; the port reports it and answers [0, 0, 0]
 - src/sim/camera/cameraUpdate.ts:670 - the video-state-4 case (radar_map_up: a fixed yaw of 180 and pitch of -45) is not reproduced; the port is never in that state
 - src/sim/camera/projection.ts:49 - the fields +0xa8 and +0xac (secant terms from the atan tables) are not computed
@@ -1240,7 +1268,6 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/mech/mechTickAi.ts:115 - the two netplay weapon-fired arrays it zeroes are not kept by the port
 - src/sim/mech/mechTickAi.ts:306 - the monochrome-screen AI debug display (mission_log_sub_0214a0, run for the player's mech while monoDebugPresent) is not ported
 - src/sim/mech/resourceRef.ts:30 - no static-arena copy (arenaTag): the port's buffers need no arena, so the arenaTag path returns the bytes it loaded
-- src/sim/mech/simOptions.ts:39 - the record is the host's rules, not the file mw2dif.cfg
 - src/sim/mech/spawn.ts:71 - cannot fail (the original returns 0 when static_malloc does)
 - src/sim/mech/spawn.ts:86 - the dwords at +0x24, +0xe0 and +0xe4 (padding in the header, no port fields) are zeroed in the original
 - src/sim/net/netplay.ts:30 - netplay is out of scope: only the single-player early return is ported
@@ -1255,7 +1282,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/sound/music.ts:193 - the MSCDEX play request (from the track's start sector, length computed from the table) is the drive interface's play(n)
 - src/sim/sound/music.ts:211 - a paused drive at the very start of the first track is replayed rather than resumed in the original; the port resumes
 - src/sim/sound/music.ts:227 - one stop request to the drive interface
-- src/sim/sound/music.ts:313 - the port never writes the game's cfg files: mw2snd.cfg is left as it was; sound_release_sequences has no sequence to release
+- src/sim/sound/music.ts:313 - sound_release_sequences has no sequence to release (no XMIDI is loaded in a mission)
 - src/sim/things/gameThingDamage.ts:93 - the original sets 0x200 on worldRecords[geomIndex] before testing geomIndex for -1, and reads gameThings[-1] for a replacement with no gamething; the port skips both out-of-table accesses (the first cannot happen - a thing with geomIndex -1 already has flags 4)
 - src/sim/ui/commands.ts:91 - the wait is split across host frames (keyPauseActive) instead of a blocking loop
 - src/sim/ui/commands.ts:129 - the screenshot (0x52) command is reported, not run; debug commands (hangAround) are not ported
@@ -1294,6 +1321,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/data/config/ini.ts:110 - ini_find_section dereferences strtok NULL on a blank line; read as "not a section"
 - src/data/config/ini.ts:155 - ini_get_value drops the last character of a value with no line end
 - src/engine/clock.ts:163 - time compression/expansion advances simTick by the adjusted delta on top of the real one
+- src/engine/miles/xmidiSequencer.ts:449 - XMIDI serve: a 33rd pending note overflows the note queue; the sequence stops (Miles 0x5ec1d)
 - src/mission/objectives.ts:205 - group_apply_objective reads objectives[-1].restraint when the group has no current objective
 - src/mission/tables/missionTables.ts:86 - the marking loops read all 48 records, past the table copy
 - src/mission/vm/chunkExec.ts:346 - GP with no object: the original clears the PREVIOUS gamepiece node
@@ -1331,11 +1359,18 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 ## Unestablished (gaps the decompilation has not closed)
 
 - src/core/random.ts:60 - random seed: the original uses the argv pointer address; a fixed default is used
+- src/data/formats/mpack.ts:54 - mpack_db: id 0 passes the bounds test and reads collection element -1
+- src/data/formats/mpack.ts:171 - mpack_db_read_line: the file ends before a newline or NUL
 - src/engine/miles/ail.ts:436 - AIL mixer: sample format ${s.format} is not mixed (MW2 only plays format 0)
 - src/engine/miles/ail.ts:481 - AIL mixer: a double-buffered sample starved; the port ends it
+- src/engine/miles/xmidiSequencer.ts:389 - XMIDI serve: the EVNT data ended without an end-of-sequence event; the port ends the sequence
+- src/engine/miles/xmidiSequencer.ts:530 - XMIDI: an indirect controller (cc 115) value is pending; the port has no controller array and sends the value as it is
+- src/engine/miles/xmidiSequencer.ts:544 - XMIDI: callback prefix (cc 108) with no callback; passed to the device
+- src/engine/miles/xmidiSequencer.ts:551 - XMIDI: channel lock controller ${d1} is not reproduced (the port's device has no other users)
 - src/engine/resources/preload.ts:112 - sim_preload_data: ai_rule_tables_load is not installed
 - src/engine/vfx/vfx.ts:313 - vfx_line_draw: a callback mode (above 1) is not ported
-- src/mission/end.ts:128 - mission_save_results: an objective text runs past the end of the record, onto the stack
+- src/mission/commandLine.ts:118 - -E: mw2debug.txt is not opened; the trace goes to the port log
+- src/mission/end.ts:133 - mission_save_results: an objective text runs past the end of the record, onto the stack
 - src/mission/vm/objExec.ts:45 - OBJ with no POLY id loads a loose .wtb file; not ported
 - src/render/pipeline/fillDispatch.ts:76 - polygonFillHook 0x${h.toString(16)} is not ported; render_asm_sub_03bb80 used
 - src/render/pipeline/hooks.ts:43 - objectCullHook 0x${a.toString(16)} is not ported; object_cull_main_view used

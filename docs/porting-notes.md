@@ -81,6 +81,35 @@ by an address or reset at start-up is therefore keyed by executable
   process would. Library groups (clib, Miles, Smacker) and the shell's dead
   WASM compiler are left out of PORTING.md's totals.
 
+### The disk: what the two programs share
+
+In the original the shell and the sim are separate processes and the files
+are the whole contract between them (decompiled/mech2/README.md). The port
+keeps that contract: `engine/dosFiles.ts` is a virtual DOS disk both read
+and write through the ported fopen/fread/fwrite sites, in three layers -
+read-only content from the install (the key maps, the GIDDI drivers), the
+port's own files (everything a program writes: MW2REG.CFG, mw2prm.cfg,
+MW2DIF/MW2SND/MW2CAR/mw2msn.cfg, the star BWDs, user MEKs; persisted in
+IndexedDB by `app/diskStore.ts`), and a scratch overlay (the dev mission
+picker's launches, never persisted). **The port never reads the install's
+config or player files at run time**; tests read them as the expected
+output of the ported writers (`installShellFixtures`).
+
+`src/launcher/mech2.ts` is MECH2.EXE's loop (shell intro -> mw2prm.cfg ->
+mw2.exe -> shell sim, until an exit status of 0xff); MW2.EXE takes its argv
+through `check_launched_by_shell` (`mission/commandLine.ts`).
+
+### The shell's memory
+
+MW2SHELL.EXE is mostly a file editor, and writes its globals to disk with a
+single fwrite of the struct, residue bytes and all. So its static data is a
+byte-for-byte copy of its image (`shell/memory.ts`, reset on each start):
+`prmBlock`, `playerStar`, `pilotRegistry`, `bwdBuffer` live at their own
+addresses, pointers into the image are followed where they point, and field
+offsets come from the generated schemas (`fieldOffset`). Heap objects stay
+JS objects. String constants the code copies get a label in
+Mw2shellTypes.java like any other global - never a literal typed in.
+
 ## Numbers
 
 - The sim is exact fixed-point. Positions are cm, angles 16.16 degrees

@@ -7,5 +7,5 @@
     "lib": ["ES2022"],
     "types": []
   },
-  "include": ["src/core", "src/data", "src/engine", "src/sim", "src/ai", "src/mission", "src/generated"]
+  "include": ["src/core", "src/data", "src/engine", "src/sim", "src/ai", "src/mission", "src/shell", "src/launcher", "src/generated"]
 }

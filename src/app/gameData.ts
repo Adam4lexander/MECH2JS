@@ -1,12 +1,12 @@
 /**
  * Everything the port reads from the install, fetched once: MW2.PRJ, MW2.EXE,
- * MW2.INI and the loose files beside them that are settings and drivers - the
- * input maps, MW2SND.CFG and the GIDDI input drivers.
+ * MW2SHELL.EXE, MW2.INI and the loose content beside them - the key maps and
+ * the GIDDI input drivers - which become the disk's read-only layer
+ * (engine/dosFiles.ts).
  *
- * NOT the player's data the shell leaves there - the star BWD files
- * (USERSTAR, EN01..05STAR, INSTMAP1) and the mech lab's MEK\ variants: the
- * port builds the player's star from its own mission setup (userStar.ts), and
- * a mission that wants what only the shell sets up is not offered.
+ * NOT the config and player files the programs write - the star BWD files
+ * (USERSTAR, EN01..05STAR, INSTMAP1), MW2*.CFG, the mech lab's MEK\ variants:
+ * the port keeps its own (app/diskStore.ts).
  */
 import { ExeImage } from '../data/exe/ExeImage.ts';
 import { IniFile } from '../data/config/ini.ts';
@@ -17,6 +17,8 @@ import { walkStream } from '../data/bwd/stream.ts';
 export interface GameData {
   prj: ProjectFile;
   exe: ExeImage;
+  /** MW2SHELL.EXE, the front end */
+  shellExe: ExeImage;
   ini: IniFile;
   /** loose files by upper-case name ('INPUT.MAP', 'GIDDI/KEYBOARD.DLL') */
   loose: Map<string, Uint8Array>;
@@ -49,6 +51,8 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
   const prj = new ProjectFile(await src.read('MW2.PRJ'));
   progress('MW2.EXE');
   const exe = ExeImage.fromExe(await src.read('MW2.EXE'));
+  progress('MW2SHELL.EXE');
+  const shellExe = ExeImage.fromExe(await src.read('MW2SHELL.EXE'));
   progress('MW2.INI');
   let ini = new IniFile(null);
   try {
@@ -58,7 +62,7 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
   }
   const loose = new Map<string, Uint8Array>();
   const names = [
-    ...(await listDir('')).filter((n) => /\.MAP$/i.test(n) || /^MW2SND\.CFG$/i.test(n)),
+    ...(await listDir('')).filter((n) => /\.MAP$/i.test(n)),
     ...(await listDir('GIDDI')),
   ];
   for (const n of names) {
@@ -68,7 +72,7 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
   let cue: GameData['cue'] = null;
   const cueName = (await listDir('')).find((n) => /\.CUE$/i.test(n));
   if (cueName) cue = { name: cueName, text: new TextDecoder().decode(await src.read(cueName)) };
-  return { prj, exe, ini, loose, cue };
+  return { prj, exe, shellExe, ini, loose, cue };
 }
 
 /**

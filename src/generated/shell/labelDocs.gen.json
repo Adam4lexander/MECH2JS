@@ -1,4 +1,29 @@
 {
+ "brf2Suffix": {
+  "address": "0x7688c",
+  "kind": "raw",
+  "doc": "mission_brf2_load: appended to the scenario name's first 4 letters (yellscn1 -> yellbrf2)"
+ },
+ "optionLaunchAnim": {
+  "address": "0x77b76",
+  "kind": "raw",
+  "doc": "String constants the handoff code copies (xrefs in prm_save, star_set_member, star_launch_prepare)."
+ },
+ "stdSuffix": {
+  "address": "0x77df0",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionFormationPlayer": {
+  "address": "0x77df7",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionFormationEnemy": {
+  "address": "0x77dfd",
+  "kind": "raw",
+  "doc": ""
+ },
  "mainProject": {
   "address": "0x7988c",
   "kind": "int",
@@ -34,6 +59,11 @@
   "kind": "ptr",
   "doc": ""
  },
+ "chunkTags": {
+  "address": "0x7a688",
+  "kind": "raw",
+  "doc": "The BWD chunk tags packed 4 bytes apart, from 'BWD' up to briefingTags (which continues the same run): BWD, REV, DTBL, PLNT, ... BMPJ (+0x38), BMID (+0x3c), ... GPS (+0xd0). bwd_build_begin copies BWD/REV/DTBL from here, instmap_write BMPJ/BMID, star_bwd_add_mech GPS."
+ },
  "briefingTags": {
   "address": "0x7a780",
   "kind": "raw",
@@ -48,6 +78,11 @@
   "address": "0x7a804",
   "kind": "int",
   "doc": "mission_brf2_load: the second SDSC chunk's +8, the opponent star's skill. star_files_write starts the enemy files' skill rows at this - 2."
+ },
+ "insigniaNames": {
+  "address": "0x7a808",
+  "kind": "raw",
+  "doc": "instmap_write: the six Clans' insignia bitmap names (l1wolfcl, l1jadefn, l1gostbr, l1smojag, l1novact, l1steelv). Indexed by its two arguments; each name is looked up in TABL 8 and written as a BMPJ. The -1 after them (0x7a820) is not a terminator: it is controlsSelectedControl's initial value (a 7-entry array here made controls.c read it as insigniaNames[6])."
  },
  "controlsSelectedControl": {
   "address": "0x7a820",
@@ -323,6 +358,11 @@
   "address": "0x83910",
   "kind": "raw",
   "doc": ""
+ },
+ "launchAnimName": {
+  "address": "0x8395c",
+  "kind": "raw",
+  "doc": "mission_brf2_load copies the BRF2 stream's SUPS string here (the launch animation stem); prm_save appends it to MW2's command line after \" -b=\". 13 bytes: the image holds the 8.3 template \"xxxxxxxx.xxx\"."
  },
  "registerPilotInfoPanel": {
   "address": "0x83970",

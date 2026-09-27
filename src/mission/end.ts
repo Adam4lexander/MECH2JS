@@ -7,9 +7,9 @@
  *   mission_clock_update(); mission_save_results(); exit.
  * The original writes its results to MW2CAR.CFG (the tallies) and
  * mw2msn.cfg (the mission record) and exits; the shell program shows the
- * debriefing from them. The port never writes those files: the same bytes
- * come back to the host as a MissionResults, and the host shows the
- * debriefing (src/app).
+ * debriefing from them. The port writes them to its own disk
+ * (engine/dosFiles.ts) for the shell, and hands the same bytes to the host
+ * as a MissionResults (the dev route's debriefing, src/app).
  */
 import { soundSaveConfig } from '../sim/sound/music.ts';
 import { cacheLoadResource, cacheUnlock } from '../engine/resources/cache.ts';
@@ -22,6 +22,8 @@ import { paletteApplySlot, paletteFadeUsedColours, palettes } from '../sim/world
 import { defaultCanvas } from '../sim/display/video.ts';
 import { unestablished } from '../core/provenance.ts';
 import { missionClockUpdate } from './missionClock.ts';
+import { dosFileWrite } from '../engine/dosFiles.ts';
+import { ui } from '../sim/ui/uiContext.ts';
 import { objectives } from './objectives.ts';
 
 /** mw2msn.cfg's record: 0x9d4 bytes. */
@@ -51,6 +53,8 @@ export interface MissionResults {
   /** the 0x50 bytes at 0xa5630 - the tallies and missionEndCode - as MW2CAR.CFG gets them */
   career: Uint8Array;
   missionEndCode: number;
+  /** main's exit status: 0xff after Flee to DOS (MECH2 then quits the game), else 0 */
+  exitStatus: number;
 }
 
 /**
@@ -76,11 +80,13 @@ export function paletteFadeScreenToPreset(ejectRefused: number): void {
  * missionEndCode - to MW2CAR.CFG.
  *
  * @mw2 cockpit_save_config 0x00051d20
- * @fidelity partial
- * @divergence the port never writes the game's cfg files: the block is returned to the host instead
+ * @fidelity exact
  */
 export function cockpitSaveConfig(): Uint8Array {
-  return simTables.dat000a5630.slice(0, 0x50);
+  const block = simTables.dat000a5630.slice(0, 0x50);
+  // cockpit_config_write: open, write 0x50 bytes, close
+  dosFileWrite('MW2CAR.CFG', block);
+  return block;
 }
 
 /**
@@ -92,8 +98,7 @@ export function cockpitSaveConfig(): Uint8Array {
  * that record then overwrites.
  *
  * @mw2 mission_save_results 0x000170e0
- * @fidelity partial
- * @divergence the record is returned to the host rather than written to mw2msn.cfg
+ * @fidelity exact
  */
 export function missionSaveResults(): MissionResults {
   const b = new Uint8Array(MISSION_RECORD_SIZE);
@@ -134,6 +139,7 @@ export function missionSaveResults(): MissionResults {
     n++;
   }
   dv.setInt32(4, n, true);
+  dosFileWrite('mw2msn.cfg', b);
   return {
     record: b,
     result: T.result & 0xff,
@@ -142,6 +148,7 @@ export function missionSaveResults(): MissionResults {
     objectives: list,
     career: new Uint8Array(0),
     missionEndCode: 0,
+    exitStatus: 0,
   };
 }
 
@@ -163,5 +170,7 @@ export function missionEnd(): MissionResults {
   const r = missionSaveResults();
   r.career = career;
   r.missionEndCode = missionEndCode();
+  // realmode_selectors_free, then exit(fleeToDos ? 0xff : 0)
+  r.exitStatus = ui.fleeToDos !== 0 ? 0xff : 0;
   return r;
 }

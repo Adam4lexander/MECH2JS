@@ -1,32 +1,76 @@
 /**
- * The install directory as the original's fopen and file_load see it: files
- * addressed by DOS paths relative to the game directory ("input.map",
- * "giddi\keyboard.dll"), case-insensitively. The host reads them before a
- * load (app/gameData.ts, test/support) and hands them over as a map keyed by
- * the upper-cased path with '/' separators; nothing here touches a disk.
+ * The game directory as the original programs' fopen, fread, fwrite and
+ * file_load see it: files addressed by DOS paths relative to the game
+ * directory ("input.map", "giddi\keyboard.dll", "mek\tbr00usr.mek"),
+ * case-insensitively. MW2.EXE and MW2SHELL.EXE share it - in the original
+ * the files are the whole contract between them (mw2prm.cfg, the star BWDs,
+ * mw2msn.cfg...).
  *
- * @portOnly the C runtime's file access, over an in-memory copy of the install
+ * Three layers, looked up top first:
+ *   overlay  - scratch files nothing persists (the dev mission picker's stars)
+ *   own      - the port's own files: everything the programs write (the
+ *              pilot registry, mw2prm.cfg, the cfg files, the stars, user
+ *              MEKs...). The host persists them (app/diskStore.ts) through
+ *              the hook set with setDiskPersistence.
+ *   assets   - what the host read from the install before a load: the
+ *              GIDDI drivers and other read-only content.
+ * The port never reads the install's config or player files (see
+ * docs/porting-notes.md): a file a program writes lives in `own`.
+ *
+ * Keys are the upper-cased path with '/' separators; nothing here touches a
+ * real disk.
+ *
+ * @portOnly the C runtime's file access, over an in-memory file system
  */
 import { registerGlobals } from './globals.ts';
 
 export const dosFiles = registerGlobals(
   'dosFiles',
   {
+    /** read-only content from the install */
     files: new Map<string, Uint8Array>(),
+    /** the port's own files: what the programs have written */
+    own: new Map<string, Uint8Array>(),
+    /** scratch files over both, or null */
+    overlay: null as Map<string, Uint8Array> | null,
   },
   () => {
-    // the install does not change with a mission load; the map is kept
+    // the disk is not process state: a program starting keeps it
   },
 );
 
-/** @portOnly */
+let persist: ((key: string, bytes: Uint8Array | null) => void) | null = null;
+
+/** @portOnly the read-only layer (the install's assets the host read) */
 export function setDosFiles(files: Map<string, Uint8Array>): void {
-  dosFiles.files = files;
+  dosFiles.files = new Map([...files].map(([k, v]) => [dosPathKey(k), v]));
+}
+
+/** @portOnly the port's own files, as the host restored them (e.g. from IndexedDB) */
+export function setOwnFiles(files: Map<string, Uint8Array>): void {
+  dosFiles.own = new Map([...files].map(([k, v]) => [dosPathKey(k), v]));
+}
+
+/**
+ * @portOnly scratch files over the disk (null removes them). While an
+ * overlay is set, writes land in it and are not persisted.
+ */
+export function setOverlayFiles(files: Map<string, Uint8Array> | null): void {
+  dosFiles.overlay = files ? new Map([...files].map(([k, v]) => [dosPathKey(k), v])) : null;
+}
+
+/** @portOnly the host's hook, told of every write (bytes) and removal (null) in the own layer */
+export function setDiskPersistence(fn: ((key: string, bytes: Uint8Array | null) => void) | null): void {
+  persist = fn;
 }
 
 /** @portOnly the key a DOS path is stored under */
 export function dosPathKey(path: string): string {
   return path.replace(/\\/g, '/').replace(/^\.\//, '').toUpperCase();
+}
+
+function lookup(key: string): Uint8Array | undefined {
+  return dosFiles.overlay?.get(key) ?? dosFiles.own.get(key) ?? dosFiles.files.get(key);
 }
 
 /**
@@ -36,7 +80,70 @@ export function dosPathKey(path: string): string {
  * @portOnly the result of file_load / fopen+fread on the install
  */
 export function dosFileLoad(path: string): Uint8Array | null {
-  return dosFiles.files.get(dosPathKey(path)) ?? null;
+  return lookup(dosPathKey(path)) ?? null;
+}
+
+/** @portOnly whether fopen(path, "rb") would succeed */
+export function dosFileExists(path: string): boolean {
+  return lookup(dosPathKey(path)) !== undefined;
+}
+
+/**
+ * Writes a whole file - fopen(path, "wb"), fwrite, fclose. A copy is kept.
+ *
+ * @portOnly the C runtime's file writes, into the port's own layer
+ */
+export function dosFileWrite(path: string, bytes: Uint8Array): void {
+  const key = dosPathKey(path);
+  const copy = bytes.slice();
+  if (dosFiles.overlay) {
+    dosFiles.overlay.set(key, copy);
+    return;
+  }
+  dosFiles.own.set(key, copy);
+  persist?.(key, copy);
+}
+
+/**
+ * Deletes a file - remove(path). Only the port's own files can be removed;
+ * returns whether one was.
+ *
+ * @portOnly the C runtime's remove
+ */
+export function dosFileRemove(path: string): boolean {
+  const key = dosPathKey(path);
+  if (dosFiles.overlay?.delete(key)) return true;
+  if (!dosFiles.own.delete(key)) return false;
+  persist?.(key, null);
+  return true;
+}
+
+/**
+ * The file names (without their directory, upper-cased as DOS reports
+ * them) matching a DOS wildcard pattern such as "mek\tbr??usr.mek", in name
+ * order - what a findfirst / findnext walk returns.
+ *
+ * @portOnly the C runtime's directory search
+ */
+export function dosFindFiles(pattern: string): string[] {
+  const key = dosPathKey(pattern);
+  const slash = key.lastIndexOf('/');
+  const dir = slash < 0 ? '' : key.slice(0, slash + 1);
+  const re = new RegExp('^' + key.slice(slash + 1).replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*').replace(/\?/g, '[^/]') + '$');
+  const names = new Set<string>();
+  for (const layer of [dosFiles.files, dosFiles.own, dosFiles.overlay ?? new Map()]) {
+    for (const k of layer.keys()) {
+      if (!k.startsWith(dir)) continue;
+      const rest = k.slice(dir.length);
+      if (!rest.includes('/') && re.test(rest)) names.add(rest);
+    }
+  }
+  return [...names].sort();
+}
+
+/** @portOnly every file the programs can see, merged top layer first (for the sim's loose-file maps) */
+export function dosDiskSnapshot(): Map<string, Uint8Array> {
+  return new Map([...dosFiles.files, ...dosFiles.own, ...(dosFiles.overlay ?? new Map())]);
 }
 
 /**
