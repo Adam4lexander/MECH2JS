@@ -106,6 +106,9 @@ input, select { background: var(--panel2); color: var(--text); border: 1px solid
 .viewport { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #000; }
 .viewport canvas { display: block; }
 .viewport.playing { box-shadow: inset 0 0 0 2px var(--accent); }
+/* full screen (the bar's Full, for recording): the view alone */
+.viewport:fullscreen { box-shadow: none; }
+.viewport:fullscreen .viewport-bar, .viewport:fullscreen .viewport-overlay { display: none; }
 .viewport-overlay { position: absolute; left: 6px; top: 4px; font-family: var(--mono); font-size: 11px; color: #cfd3da; text-shadow: 0 0 3px #000; pointer-events: none; }
 /* right-aligned, wrapping onto more rows when the view is narrow; the gaps between the controls stay the view's */
 .viewport-bar { position: absolute; left: 6px; right: 6px; top: 4px; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px; pointer-events: none; }

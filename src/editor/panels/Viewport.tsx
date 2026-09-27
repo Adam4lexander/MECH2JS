@@ -66,6 +66,8 @@ import { projectionGlobals, viewerRefreshLodScale } from '../../sim/camera/proje
 import { GroundField } from '../../render/enhance/groundField.ts';
 import { lightDirection, Shadows } from '../../render/enhance/shadows.ts';
 import { OwnChassis } from '../../render/enhance/ownChassis.ts';
+import { SHADOW_LAYER } from '../../render/enhance/shadows.ts';
+import { recallSpectatorSettings, Spectator, storeSpectatorSettings, type SpectatorMode, type SpectatorSettings } from '../../render/xr/spectator.ts';
 import { renderView } from '../../render/pipeline/viewLatch.ts';
 import { commonRamps, CockpitRenderer, darkestIndex, nearestIndex, slotPanes } from '../../render/cockpit/cockpit.ts';
 import { cockpitChassis } from '../../render/cockpit/chassis.ts';
@@ -124,6 +126,8 @@ export function Viewport({ game }: { game: Game }) {
   const xrSettingsRef = useRef(xrSettings);
   const [viewSettings, setViewSettings] = useState<ViewSettings>(recallViewSettings);
   const viewSettingsRef = useRef(viewSettings);
+  const [spectatorSettings, setSpectatorSettings] = useState<SpectatorSettings>(recallSpectatorSettings);
+  const spectatorSettingsRef = useRef(spectatorSettings);
   const [enhance, setEnhance] = useState<EnhanceSettings>(recallEnhanceSettings);
   const [enhanceOpen, setEnhanceOpen] = useState(false);
   const enhanceRef = useRef(enhance);
@@ -139,6 +143,10 @@ export function Viewport({ game }: { game: Game }) {
     viewSettingsRef.current = viewSettings;
     storeViewSettings(viewSettings);
   }, [viewSettings]);
+  useEffect(() => {
+    spectatorSettingsRef.current = spectatorSettings;
+    storeSpectatorSettings(spectatorSettings);
+  }, [spectatorSettings]);
   useEffect(() => {
     faithfulRef.current = faithful;
     storeFaithful(faithful);
@@ -215,6 +223,12 @@ export function Viewport({ game }: { game: Game }) {
     let skyChoiceFor = '';
     const xrInput = new XrInput();
     const xrViewer = new Viewer();
+    /** the spectator camera (render/xr/spectator.ts), and the headset passes it draws again: this frame's */
+    const spectator = new Spectator();
+    const xrPasses: Array<{ draw: (c: THREE.Camera) => void; world: boolean }> = [];
+    let xrFrameDt = 0;
+    let xrFar = 1;
+    const chaseViewer = new Viewer();
     /** the pass's eye to the interpolated rig, for the mech's own parts (SceneRenderer.carryOwned) */
     const carry = new THREE.Matrix4();
     /** the cockpit scene carries the rig's matrix (reset on leaving VR) */
@@ -522,6 +536,7 @@ export function Viewport({ game }: { game: Game }) {
         head = renderer.xr.getCamera();
         // the game's viewer standing at the head: what a turned head sees is culled from there
         sr.sync(rig.cullViewer(head, viewer(), xrViewer, far.viewDistance));
+        xrFar = far.viewDistance;
         // the mech's own arms and guns ride with the cockpit (a pass behind), not with the world
         if (cameraGlobals.cockpitViewActive !== 0) sr.carryOwned(mechs.playerMechIndex, rig.cockpitMatrix(gameCam, carry, 1));
         const vp = head.cameras[0]?.viewport;
@@ -593,28 +608,46 @@ export function Viewport({ game }: { game: Game }) {
         cockpitMoved = false;
       }
       const view = xr ? rig.camera : camera;
+      // a headset's passes, run through its camera and kept for the spectator camera to run again (spectate)
+      xrPasses.length = 0;
+      const xrPass = (draw: (c: THREE.Camera) => void, world = false) => {
+        draw(view);
+        xrPasses.push({ draw, world });
+      };
+      xrFrameDt = dt;
       const hudReady = !scene && hudOverlay.update(defaultCanvas, drawSize.x, drawSize.y);
       /** the HUD layers drawn apart this frame, in the world (a headset only) */
       let lifted = 0;
       renderer.clear();
       if (!playing || views.mainRequested) {
         // the sky and the backdrop, then the world over them
-        renderer.render(sr.backdropScene, view);
-        renderer.clearDepth();
-        renderer.render(sr.scene, view);
+        const world = (c: THREE.Camera) => {
+          renderer.render(sr.backdropScene, c);
+          renderer.clearDepth();
+          renderer.render(sr.scene, c);
+        };
+        if (xr) xrPass(world, true);
+        else world(view);
         if (xr) {
           // the reticle and the target marker, across the game's field of view far out from the pass's
           // eye, so they lie on what they mark; no depth test against the world, and the cockpit covers them
           if (hudReady) {
             lifted = liftHudLayers(tanH, dt);
             if (lifted) {
-              hudOverlay.worldMesh.visible = false;
-              renderer.render(rig.hudScene, rig.camera);
+              const marker = hudOverlay.markerMesh.visible;
+              xrPass((c) => {
+                hudOverlay.worldMesh.visible = false;
+                hudOverlay.reticleMesh.visible = true;
+                hudOverlay.markerMesh.visible = marker;
+                renderer.render(rig.hudScene, c);
+              });
             }
           }
           // scaled, the shell's nearest parts stay well beyond the headset's 10 cm near plane
-          renderer.clearDepth();
-          renderer.render(sr.cockpitScene, view);
+          xrPass((c) => {
+            renderer.clearDepth();
+            renderer.render(sr.cockpitScene, c);
+          });
         } else if (!scene) {
           // the cockpit shell, painted over the world (empty outside the cockpit view). Its near clip
           // is 8 cm, inside three's 50 cm near plane, so the pass runs with the plane pulled in
@@ -645,7 +678,7 @@ export function Viewport({ game }: { game: Game }) {
         if (radar.mode !== 1) panes.radar = null;
         const seat = new THREE.Matrix4().makeTranslation(0, -xrSettingsRef.current.dashDrop, 0);
         cockpit.update((xr ? rig.rig.matrixWorld : gameCam.matrixWorld).clone().multiply(seat), panes, { throttle, turn: n(pc?.legsPan), tilt: n(pc?.torso_tilt) });
-        if (xr) renderer.render(cockpit.scene, view);
+        if (xr) xrPass((c) => renderer.render(cockpit.scene, c));
         else if (scene) {
           if (cockpitXray) renderer.clearDepth();
           renderer.render(cockpit.scene, sceneCam);
@@ -663,13 +696,16 @@ export function Viewport({ game }: { game: Game }) {
       // the game's 2D (HUD, radar, cockpit text) over it all, through the game's camera - in a headset on a plane ahead
       if (hudReady) {
         if (xr) {
-          hudOverlay.reticleMesh.visible = false;
-          hudOverlay.markerMesh.visible = false;
-          hudOverlay.worldMesh.visible = true;
-          hudOverlay.setWorldLayers(0b111 & ~lifted);
           // the satellite map takes the whole view, as in the original: the HUD plane at the game's full field of view
           rig.placeHud(hudOverlay.worldMesh, tanH, hudOverlay.aspect, mapUp ? 1 : undefined);
-          renderer.render(rig.hudScene, rig.camera);
+          const layers = 0b111 & ~lifted;
+          xrPass((c) => {
+            hudOverlay.reticleMesh.visible = false;
+            hudOverlay.markerMesh.visible = false;
+            hudOverlay.worldMesh.visible = true;
+            hudOverlay.setWorldLayers(layers);
+            renderer.render(rig.hudScene, c);
+          });
         } else renderer.render(hudOverlay.scene, hudOverlay.camera);
       }
       if (now - lastInfo > 250) {
@@ -766,12 +802,73 @@ export function Viewport({ game }: { game: Game }) {
       state.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
       state.bindFramebuffer(gl.DRAW_FRAMEBUFFER, fb);
     };
+    /**
+     * The spectator camera (render/xr/spectator.ts): this frame's headset passes drawn again through a
+     * camera of its own, into a target the page box's shape, and copied onto the canvas the way the mirror
+     * copies an eye (stretched over the headset-sized buffer, which the page's scaling undoes). The chase
+     * camera draws the world alone, and sees the shadow layer too: the torso the headset does not draw
+     * (render/enhance/ownChassis.ts).
+     */
+    let spectatorTarget: THREE.WebGLRenderTarget | null = null;
+    let spectatorMode: SpectatorMode | null = null;
+    const spectate = (xrTarget: THREE.WebGLRenderTarget) => {
+      const s = spectatorSettingsRef.current;
+      const head = renderer.xr.getCamera();
+      const gl = renderer.getContext();
+      const boxW = renderer.domElement.clientWidth;
+      const boxH = renderer.domElement.clientHeight;
+      if (!(gl instanceof WebGL2RenderingContext) || boxW <= 0 || boxH <= 0) return;
+      if (s.mode !== spectatorMode) {
+        spectatorMode = s.mode;
+        spectator.reset();
+      }
+      // the page box at the screen's pixel density, up to half as many pixels again as 1920 x 1080: each is
+      // drawn a second time, on top of the headset's two eyes
+      const k = Math.min(window.devicePixelRatio || 1, Math.sqrt((1920 * 1080 * 1.5) / (boxW * boxH)));
+      const w = Math.max(1, Math.round(boxW * k));
+      const h = Math.max(1, Math.round(boxH * k));
+      if (!spectatorTarget) spectatorTarget = new THREE.WebGLRenderTarget(w, h, { depthBuffer: true });
+      else if (spectatorTarget.width !== w || spectatorTarget.height !== h) spectatorTarget.setSize(w, h);
+      const cam = spectator.place(s, head, rig.rig, xrFrameDt, w / h);
+      const chase = s.mode === 'chase';
+      cam.layers.set(0);
+      if (chase) {
+        cam.layers.enable(SHADOW_LAYER);
+        // the world as the chase camera sees it: the cull and the clipper's facing were the head's, and from
+        // behind the mech they drop what lies behind the head and every face turned from it - most of the
+        // mech. The headset's frame is drawn already; the next frame syncs for the head again
+        sr.sync(farther(viewerFromCamera(cam, viewer(), chaseViewer), xrFar));
+        if (cameraGlobals.cockpitViewActive !== 0) sr.carryOwned(mechs.playerMechIndex, carry);
+      }
+      const viewport = sr.uniforms.uViewport.value.clone();
+      renderer.xr.enabled = false;
+      renderer.setRenderTarget(spectatorTarget);
+      sr.setViewport(w, h);
+      renderer.clear();
+      for (const p of xrPasses) if (!chase || p.world) p.draw(cam);
+      sr.uniforms.uViewport.value.copy(viewport);
+      renderer.xr.enabled = true;
+      renderer.setRenderTarget(xrTarget);
+      const fb = (renderer.properties.get(spectatorTarget) as { __webglFramebuffer?: WebGLFramebuffer }).__webglFramebuffer;
+      const xrFb = (renderer.properties.get(xrTarget) as { __webglFramebuffer?: WebGLFramebuffer }).__webglFramebuffer;
+      if (!fb) return;
+      const state = renderer.state;
+      state.bindFramebuffer(gl.READ_FRAMEBUFFER, fb);
+      state.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+      state.setScissorTest(false);
+      gl.blitFramebuffer(0, 0, w, h, 0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight, gl.COLOR_BUFFER_BIT, gl.LINEAR);
+      state.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+      if (xrFb) state.bindFramebuffer(gl.DRAW_FRAMEBUFFER, xrFb);
+    };
     renderer.setAnimationLoop((now: number) => {
       const start = performance.now();
       // the headset's framebuffer for this frame: three binds it before calling back
       const xrTarget = renderer.xr.isPresenting ? renderer.getRenderTarget() : null;
       frame(now);
-      if (xrTarget) mirrorEye(xrTarget);
+      if (xrTarget) {
+        if (spectatorSettingsRef.current.mode === 'mirror') mirrorEye(xrTarget);
+        else if (mirror.on) spectate(xrTarget);
+      }
       timeXrFrame(start);
     });
     return () => {
@@ -874,6 +971,9 @@ export function Viewport({ game }: { game: Game }) {
             </div>
           )}
         </div>
+        <button onClick={() => void host.current?.requestFullscreen()} title="the view alone, full screen, without this bar - for recording (Esc leaves)">
+          Full
+        </button>
         {xrSupported && (
           <button
             className={xrOn ? 'active' : xrPending ? 'pending' : ''}
@@ -890,6 +990,21 @@ export function Viewport({ game }: { game: Game }) {
             <Slider label="HUD" title="the HUD's width as a share of the game's view (the reticle and target brackets are drawn in the world, not on it)" value={xrSettings.hudScale} min={0.3} max={1} step={0.05} unit="%" onChange={(v) => setXrSettings((s) => ({ ...s, hudScale: v }))} />
             <Slider label="seat" title="VR cockpit: how far the cockpit sits below its place (a taller or shorter pilot)" value={xrSettings.dashDrop} min={-0.3} max={0.3} step={0.02} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, dashDrop: v }))} />
             <Slider label="at" title="how far ahead of your eye the HUD stands" value={xrSettings.hudDistance} min={0.5} max={5} step={0.1} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, hudDistance: v }))} />
+            <select
+              title="what the page shows while you play in the headset, for recording: the left eye as you see it, your view with the head's shake eased out, or a camera behind the mech"
+              value={spectatorSettings.mode}
+              onChange={(e) => setSpectatorSettings((s) => ({ ...s, mode: e.target.value as SpectatorMode }))}
+            >
+              <option value="mirror">page: eye</option>
+              <option value="smooth">page: smooth</option>
+              <option value="chase">page: chase</option>
+            </select>
+            {spectatorSettings.mode !== 'mirror' && (
+              <>
+                <Slider label="fov" title="the page camera's horizontal field of view" value={spectatorSettings.fov} min={50} max={120} step={5} unit="deg" onChange={(v) => setSpectatorSettings((s) => ({ ...s, fov: v }))} />
+                <Slider label="ease" title="how slowly the page camera turns after your head (or the mech, chasing it): seconds" value={spectatorSettings.smooth} min={0} max={1.5} step={0.05} unit="s" onChange={(v) => setSpectatorSettings((s) => ({ ...s, smooth: v }))} />
+              </>
+            )}
           </>
         )}
       </div>
@@ -898,8 +1013,17 @@ export function Viewport({ game }: { game: Game }) {
 }
 
 /** One of the view's or the VR sizes: a slider and its value. */
-function Slider(p: { label: string; title: string; value: number; min: number; max: number; step: number; unit: 'x' | '%' | 'm'; onChange: (v: number) => void }) {
-  const shown = p.unit === '%' ? `${Math.round(p.value * 100)}%` : p.unit === 'x' ? `${p.value.toFixed(2)}x` : `${p.value.toFixed(1)} m`;
+function Slider(p: { label: string; title: string; value: number; min: number; max: number; step: number; unit: 'x' | '%' | 'm' | 'deg' | 's'; onChange: (v: number) => void }) {
+  const shown =
+    p.unit === '%'
+      ? `${Math.round(p.value * 100)}%`
+      : p.unit === 'x'
+        ? `${p.value.toFixed(2)}x`
+        : p.unit === 'deg'
+          ? `${Math.round(p.value)}\u00b0`
+          : p.unit === 's'
+            ? `${p.value.toFixed(2)} s`
+            : `${p.value.toFixed(1)} m`;
   return (
     <label className="xr-slider" title={p.title}>
       {p.label}

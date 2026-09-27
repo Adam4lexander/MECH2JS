@@ -140,9 +140,28 @@ rate the rig is drawn one loop pass behind, interpolated between passes, so
 the cockpit doesn't judder at 20 Hz. At "display rate" every frame is a
 pass, so the rig stands at the last one.
 
-While you're in VR, the page's viewport mirrors the headset's left eye,
-cropped to the viewport's shape. It is copied from the headset's
-framebuffer after each frame, not drawn again.
+While you're in VR, the page's viewport shows a spectator camera, for
+recording (`src/render/xr/spectator.ts`). The **page** menu by the VR
+sliders picks it, and it is remembered:
+
+- **eye**: the headset's left eye, cropped to the viewport's shape. It is
+  copied from the headset's framebuffer, not drawn again, so it costs
+  nothing, but every glance and shake of your head is in it.
+- **smooth** (the default): your view from the cockpit, HUD and all. It
+  turns after your head, eased over **ease** seconds (0.35 by default),
+  with the head's roll left out, at its own **fov** (90 degrees across).
+  It stands at your head every frame; only the turn is eased.
+- **chase**: a camera 16 m behind and 4 m above you, looking over the mech
+  the way its torso faces and swinging round after it. It shows the whole
+  mech (the "whole mech" enhancement), without the cockpit or HUD. The
+  renderer's cull and facing are the head's, so it syncs a second time
+  from the chase camera, or it would miss most of the mech.
+
+Each spectator frame is drawn a second time, on top of the headset's two
+eyes, at the viewport's size (up to about 3 megapixels). **Full** on the
+viewport bar makes the view fill the screen, without the bar or text;
+Esc leaves. To record, go Full and capture the screen or the browser
+window in OBS, with desktop audio for the game's sound.
 
 Three things are specific to stereo:
 
