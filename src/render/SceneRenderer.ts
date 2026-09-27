@@ -74,6 +74,7 @@ import { objectCullCockpit, objectCullHook, polygonDrawHook, type ColourFn } fro
 import { FillKind, polyFillDispatch, type PolyDraw } from './pipeline/fillDispatch.ts';
 import { makeIndexedMaterial, makeLineMaterial, makeUniforms, NOT_DRAWN, setLuma, setPalette, type IndexedUniforms } from './materials/indexedMaterial.ts';
 import { isShadowCaster, SHADOW_LAYER } from './enhance/shadows.ts';
+import type { OwnChassisDraw } from './enhance/ownChassis.ts';
 
 /** A polygon's outline slots: (vertex count + 1) segments, enough for a near-clipped shape. */
 export interface LineEntry {
@@ -157,6 +158,11 @@ export class SceneRenderer {
   private readonly cockpitEntries = new Map<WorldObject, ObjEntry>();
   private readonly byMesh = new Map<THREE.Object3D, WorldObject>();
   readonly stats: FrameStats = { objects: 0, polygons: 0 };
+  /**
+   * @portOnly the enhancements (render/enhance/ownChassis.ts): the player's mech at level 0 round the
+   * cockpit view, drawn in the world pass in place of its level-4 parts; null for none. Set before sync.
+   */
+  ownChassis: OwnChassisDraw | null = null;
   private pass = 0;
 
   /** `uniforms`: a view's own set (makeViewUniforms) sharing the textures of the main one; the main view makes its own. */
@@ -428,6 +434,7 @@ export class SceneRenderer {
       renderView.polySortFlags = obj.flags & 0xffff;
       polys += this.drawObject(obj, e, L, colour);
     }
+    if (this.ownChassis) this.drawOwnChassis(this.ownChassis, seen, L, colour);
     // the cockpit shell: while cockpitViewActive, after the world, cockpitHeadNode's tree with
     // the near clip at 8 (viewer_set_near_clip) and the cull hook at 0x3f970, which rejects an
     // object with flags bit 0x1000 and nothing else - no depth, far or side test, and it does
@@ -518,6 +525,33 @@ export class SceneRenderer {
     };
     walk(root);
     this.endViewPass(drawn, polys);
+  }
+
+  /**
+   * @portOnly the player's mech at level 0 (render/enhance/ownChassis.ts): its level-4 parts in the world
+   * pass hidden (and so casting nothing), and each copy drawn in their place at the finest mesh - on the
+   * shadow layer only, or in view too. It leaves the globals the cockpit pass reads from the world pass
+   * (objectViewDepth, polySortFlags) as the world pass left them, and is not counted in the stats.
+   */
+  private drawOwnChassis(own: OwnChassisDraw, seen: Set<WorldObject>, L: LightLatch, colour: ColourFn): void {
+    const copies = new Set(own.parts.map((p) => p.obj));
+    for (const [obj, e] of this.entries) {
+      if (e.group.parent === this.scene && !copies.has(obj) && ((obj.type >> 8) & 0xf) === 1 && (obj.index & 0xffff) === own.owner) e.group.visible = false;
+    }
+    const depth = renderView.objectViewDepth;
+    renderView.objectViewDepth = 0;
+    for (const p of own.parts) {
+      seen.add(p.obj);
+      const e = this.entry(p.obj, this.scene);
+      e.group.visible = true;
+      const mask = p.view ? 1 | (1 << SHADOW_LAYER) : 1 << SHADOW_LAYER;
+      for (const m of e.meshes) {
+        m.mesh.layers.mask = mask;
+        if (m.lines) m.lines.mesh.layers.mask = p.view ? 1 : 0;
+      }
+      this.drawObject(p.obj, e, L, colour);
+    }
+    renderView.objectViewDepth = depth;
   }
 
   /** Hides what this pass did not draw; forgets what no pass has drawn for a while. */

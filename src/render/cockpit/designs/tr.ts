@@ -14,6 +14,6 @@ export const tarantula: CockpitDesign = {
   key: 'TR',
   name: 'Tarantula',
   build(k: Kit, glass: Glass) {
-    standard(k, glass, { box: { halfWidth: 0.7, floor: -0.85, roof: 0.45, front: 0.9, back: 0.4 }, layout: 'wrap', style: 'is', console: { dist: 0.6, halfWidth: 0.21, wing: 0.27, turn: 42 } });
+    standard(k, glass, { box: { halfWidth: 1.8, floor: -0.85, roof: 0.6, front: 1.85, back: 2.1 }, layout: 'wrap', style: 'is', console: { dist: 0.6, halfWidth: 0.21, wing: 0.27, turn: 42 } });
   },
 };

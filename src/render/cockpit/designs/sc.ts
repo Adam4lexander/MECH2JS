@@ -11,6 +11,6 @@ export const stormcrow: CockpitDesign = {
   key: 'SC',
   name: 'Stormcrow',
   build(k: Kit, glass: Glass) {
-    standard(k, glass, { box: { halfWidth: 0.8, floor: -0.9, roof: 0.5, front: 1.0, back: 0.45 }, layout: 'wrap', style: 'clan', console: { dist: 0.62 } });
+    standard(k, glass, { box: { halfWidth: 0.8, floor: -0.9, roof: 0.55, front: 1.25, back: 0.45 }, layout: 'wrap', style: 'clan', console: { dist: 0.62 } });
   },
 };

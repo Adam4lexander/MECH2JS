@@ -19,6 +19,9 @@
  *   cockpit      a hand-built cockpit for each chassis, the game's displays on
  *                its screens (render/cockpit), in the headset and on the flat
  *                screen
+ *   ownChassis   the player's mech whole round the cockpit view, at full
+ *                detail: its legs in view below, and its whole shadow
+ *                (ownChassis.ts)
  *
  * @portOnly
  */
@@ -29,9 +32,10 @@ export interface EnhanceSettings {
   sky: boolean;
   shadows: boolean;
   cockpit: boolean;
+  ownChassis: boolean;
 }
 
-export const ENHANCE_DEFAULTS: EnhanceSettings = { mechPanels: true, mechsAllTop: true, ground: true, sky: true, shadows: true, cockpit: true };
+export const ENHANCE_DEFAULTS: EnhanceSettings = { mechPanels: true, mechsAllTop: true, ground: true, sky: true, shadows: true, cockpit: true, ownChassis: true };
 
 export const ENHANCE_LABELS: Record<keyof EnhanceSettings, string> = {
   mechPanels: 'armour panels',
@@ -40,6 +44,7 @@ export const ENHANCE_LABELS: Record<keyof EnhanceSettings, string> = {
   sky: 'sky gradient and stars',
   shadows: 'shadows',
   cockpit: 'cockpits',
+  ownChassis: 'your whole mech from the cockpit',
 };
 
 const KEY = 'mw2.enhance';

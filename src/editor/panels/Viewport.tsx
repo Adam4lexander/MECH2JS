@@ -65,6 +65,7 @@ import { HUD_LAYER } from '../../engine/vfx/vfx.ts';
 import { projectionGlobals, viewerRefreshLodScale } from '../../sim/camera/projection.ts';
 import { GroundField } from '../../render/enhance/groundField.ts';
 import { lightDirection, Shadows } from '../../render/enhance/shadows.ts';
+import { OwnChassis } from '../../render/enhance/ownChassis.ts';
 import { renderView } from '../../render/pipeline/viewLatch.ts';
 import { commonRamps, CockpitRenderer, darkestIndex, nearestIndex, slotPanes } from '../../render/cockpit/cockpit.ts';
 import { cockpitChassis } from '../../render/cockpit/chassis.ts';
@@ -189,6 +190,8 @@ export function Viewport({ game }: { game: Game }) {
      * arms and guns - the cockpit is a box standing in the air above the legs, which is what it is.
      */
     let cockpitOutside = true;
+    /** debug: the scene camera sees the cockpit through the mech round it (drawn after a depth clear) */
+    let cockpitXray = false;
     let cockpitRampsOf: string | null = null;
     let hullRamps: number[] = [];
     const lampColours = { red: 0, amber: 0, green: 0, blank: 0 };
@@ -204,6 +207,8 @@ export function Viewport({ game }: { game: Game }) {
     sr.backdropScene.add(groundField.grid);
     sr.scene.add(groundField.field);
     const shadows = new Shadows();
+    const ownChassis = new OwnChassis();
+    const readPoly = (id: number) => game.data.prj.readResource('POLY', id);
     let skyChoice: SkyChoice | null = null;
     /** the ground grid's five shades of the ground colour (paletteRuns.ts groundShades) */
     let groundShadesNow: number[] = [0xef, 0xef, 0xef, 0xef, 0xef];
@@ -396,6 +401,10 @@ export function Viewport({ game }: { game: Game }) {
       set outside(on: boolean) {
         cockpitOutside = on;
       },
+      /** whether the scene camera sees the cockpit through the mech round it (off by default) */
+      set xray(on: boolean) {
+        cockpitXray = on;
+      },
     };
     if (dbg) dbg.view = { camera: sceneCam, gameCamera: gameCam, fly, renderer: sr, views, cockpit: cockpitDebug, hudOverlay };
 
@@ -503,6 +512,9 @@ export function Viewport({ game }: { game: Game }) {
       game.updateTextures(sr);
       const tanH = 0x10000 / Math.min(0x100000, Math.max(0x8000, viewer().zoom | 0));
       let head: THREE.ArrayCamera | null = null;
+      // the player's mech whole round the cockpit (render/enhance/ownChassis.ts): the torso in view too
+      // from the scene camera, which stands outside it
+      sr.ownChassis = ownChassis.update(en.ownChassis, cameraGlobals.cockpitViewActive !== 0, readPoly, scene);
       if (xr) {
         rig.settings = xrSettingsRef.current;
         rig.update(now, game.loopRate === null);
@@ -634,8 +646,10 @@ export function Viewport({ game }: { game: Game }) {
         const seat = new THREE.Matrix4().makeTranslation(0, -xrSettingsRef.current.dashDrop, 0);
         cockpit.update((xr ? rig.rig.matrixWorld : gameCam.matrixWorld).clone().multiply(seat), panes, { throttle, turn: n(pc?.legsPan), tilt: n(pc?.torso_tilt) });
         if (xr) renderer.render(cockpit.scene, view);
-        else if (scene) renderer.render(cockpit.scene, sceneCam);
-        else {
+        else if (scene) {
+          if (cockpitXray) renderer.clearDepth();
+          renderer.render(cockpit.scene, sceneCam);
+        } else {
           // nearer than three's 50 cm near plane, like the shell: drawn with the plane pulled in as the shell was
           const near = gameCam.near;
           gameCam.near = 0.04;

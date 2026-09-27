@@ -12,6 +12,6 @@ export const warhammer: CockpitDesign = {
   key: 'WH',
   name: 'Warhammer',
   build(k: Kit, glass: Glass) {
-    standard(k, glass, { box: { halfWidth: 0.9, floor: -0.95, roof: 0.55, front: 1.05, back: 0.5 }, layout: 'wrap', style: 'is', console: { dist: 0.64 } });
+    standard(k, glass, { box: { halfWidth: 1.05, floor: -0.95, roof: 0.55, front: 1.5, back: 0.5 }, layout: 'wrap', style: 'is', console: { dist: 0.64 } });
   },
 };

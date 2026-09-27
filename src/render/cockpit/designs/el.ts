@@ -13,6 +13,6 @@ export const elemental: CockpitDesign = {
   key: 'EL',
   name: 'Elemental',
   build(k: Kit, glass: Glass) {
-    standard(k, glass, { box: { halfWidth: 0.5, floor: -0.65, roof: 0.32, front: 0.62, back: 0.3 }, layout: 'wrap', style: 'clan', console: { pitch: -21, dist: 0.5, height: 0.2, halfWidth: 0.18, wing: 0.24, turn: 44 }, arms: { x: 0.3, y: -0.45 }, overhead: false });
+    standard(k, glass, { box: { halfWidth: 0.65, floor: -0.65, roof: 0.35, front: 0.62, back: 0.3 }, layout: 'wrap', style: 'clan', console: { pitch: -21, dist: 0.5, height: 0.2, halfWidth: 0.18, wing: 0.24, turn: 44 }, arms: { x: 0.3, y: -0.45 }, overhead: false });
   },
 };

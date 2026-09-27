@@ -12,6 +12,6 @@ export const rifleman: CockpitDesign = {
   key: 'RF',
   name: 'Rifleman',
   build(k: Kit, glass: Glass) {
-    standard(k, glass, { box: { halfWidth: 0.9, floor: -0.95, roof: 0.55, front: 1.05, back: 0.5 }, layout: 'wrap', style: 'is', console: { dist: 0.64, halfWidth: 0.24 } });
+    standard(k, glass, { box: { halfWidth: 0.9, floor: -0.95, roof: 0.7, front: 1.05, back: 0.5 }, layout: 'wrap', style: 'is', console: { dist: 0.64, halfWidth: 0.24 } });
   },
 };

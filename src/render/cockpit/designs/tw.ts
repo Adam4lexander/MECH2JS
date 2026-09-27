@@ -12,6 +12,6 @@ export const timberWolf: CockpitDesign = {
   key: 'TW',
   name: 'Timber Wolf',
   build(k: Kit, glass: Glass) {
-    standard(k, glass, { box: { halfWidth: 0.9, floor: -0.95, roof: 0.55, front: 1.05, back: 0.5 }, layout: 'wrap', style: 'clan' });
+    standard(k, glass, { box: { halfWidth: 1, floor: -0.95, roof: 1, front: 2.25, back: 0.5 }, layout: 'wrap', style: 'clan' });
   },
 };

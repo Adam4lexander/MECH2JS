@@ -258,6 +258,19 @@ back (target display, damage views, map) stay the original's.
       enlarged.
     - The Gargoyle's eye slits are joined across the nose, where the
       reticle is.
+  - **Size.** Each cabin is at least as big as its canopy: its walls stand
+    just outside the glass, so the glass lies in them at its true distance.
+    Before, they were a car-sized box 1.4-2 m across, and in half the chassis
+    the glass reached well beyond it; in a headset the cockpit looked
+    shrunken. The Timber Wolf's cabin now runs 2.25 m out to the tip of its
+    nose, the Tarantula's is 3.6 m across. The consoles and screens stay at
+    arm's reach; only the dash's top runs out to the front wall. The mechs
+    themselves are 8-15 m tall (the game works in centimetres). A box can't
+    follow a curved exterior, and the seated canopies above are moved from
+    where the exterior has them, so a cabin's rim can show a little outside
+    the hull. The editor's scene camera is the only place that sees it.
+    `window.mw2.view.cockpit.xray = true` draws the cabin through the mech
+    there, to compare the two.
   - **The Tarantula** wears the Kit Fox's cockpit shell in the original.
     Here it has its own cockpit, cut to its own exterior. Cockpits are
     filed under the exterior head (`TR1_HEAD`), not the shell.
@@ -289,6 +302,18 @@ back (target display, damage views, map) stay the original's.
     camera (F10) leaves the cockpit.
   - **Headset.** The **seat** slider in VR raises or lowers the whole
     cockpit.
+- **Your whole mech from the cockpit.** In the cockpit view the game builds
+  the player's mech at its cockpit detail level: coarse legs and arms, and
+  nothing for the hips, feet and guns. The original never showed them, but
+  the shadows cast from what is built, so the player's shadow was a couple of
+  blobs. A render-only copy of every part at full detail now rides the
+  game's own part nodes, so it walks, twists and aims with the mech
+  (`src/render/enhance/ownChassis.ts`). The legs and hips show, so in a
+  headset you can look down at them. The torso and arms cast their shadow
+  but aren't drawn, since the eye is inside them. The hand-built cockpit and
+  the game's own arms stand in for them. The editor's scene camera sees the
+  whole mech. The game's objects, lists and records are untouched
+  (`test/sim/ownChassis.test.ts`).
 
 ## Layout
 

@@ -12,6 +12,6 @@ export const jenner: CockpitDesign = {
   key: 'JN',
   name: 'Jenner',
   build(k: Kit, glass: Glass) {
-    standard(k, glass, { box: { halfWidth: 0.7, floor: -0.85, roof: 0.45, front: 0.9, back: 0.4 }, layout: 'wrap', style: 'is', console: { dist: 0.6, halfWidth: 0.21, wing: 0.27, turn: 42 } });
+    standard(k, glass, { box: { halfWidth: 1.55, floor: -0.85, roof: 0.45, front: 0.9, back: 0.4 }, layout: 'wrap', style: 'is', console: { dist: 0.6, halfWidth: 0.21, wing: 0.27, turn: 42 } });
   },
 };

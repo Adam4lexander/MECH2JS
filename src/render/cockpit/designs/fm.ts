@@ -12,6 +12,6 @@ export const fireMoth: CockpitDesign = {
   key: 'FM',
   name: 'Fire Moth',
   build(k: Kit, glass: Glass) {
-    standard(k, glass, { box: { halfWidth: 0.7, floor: -0.85, roof: 0.45, front: 0.9, back: 0.4 }, layout: 'wrap', style: 'clan', console: { dist: 0.6, halfWidth: 0.2, wing: 0.27, turn: 42 } });
+    standard(k, glass, { box: { halfWidth: 1, floor: -1.05, roof: 0.65, front: 1.65, back: 0.4 }, layout: 'wrap', style: 'clan', console: { dist: 0.6, halfWidth: 0.2, wing: 0.27, turn: 42 } });
   },
 };
