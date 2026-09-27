@@ -5,3 +5,5 @@
  *
  * @portOnly
  */
+import './credits.ts';
+import './hallOfHonor.ts';
