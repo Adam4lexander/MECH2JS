@@ -187,6 +187,8 @@ uniform int uMapFill;
 uniform int uIndexOut;        // write the palette index, not its colour
 uniform int uPanels;          // the armour-panel enhancement is on (the main view only)
 uniform int uPanel;           // this material draws mech parts
+uniform int uShadeMap;        // this material's mode-0x4000 indices are shade levels 0..4, looked up in uShades (the ground grid)
+uniform int uShades[5];
 flat in int vDraw;
 in vec3 vUvw;
 in vec2 vUvPersp;
@@ -262,6 +264,8 @@ void main() {
     if (abs(vIdx - r) < 1.0 / 512.0) vIdx = r;
     int V = int(floor(vIdx * 65536.0 + 0.5));
     idx = (V + (up ? 0xffff : 0)) >> 16;
+    // the ground grid's levels, dithered like indices, then each to its palette shade (enhance/groundField.ts)
+    if (uShadeMap != 0) idx = uShades[clamp(idx, 0, 4)];
   }
   if (mode == 0x3000) {
     int k = vDraw & 15;
@@ -375,6 +379,8 @@ export function makeUniforms(): IndexedUniforms {
     uIndexOut: { value: 0 },
     uPanels: { value: 0 },
     uPanel: { value: 0 },
+    uShadeMap: { value: 0 },
+    uShades: { value: [0, 0, 0, 0, 0] },
     uShadowOn: { value: 0 },
     uShadowMap: { value: null },
     uShadowMatrix: { value: new THREE.Matrix4() },
@@ -421,11 +427,14 @@ export function setLuma(u: IndexedUniforms, rows: Uint8Array): void {
   u.uLuma.value.needsUpdate = true;
 }
 
-/** `panel`: the material draws mech parts (the armour-panel enhancement's uPanel); it shares every other uniform holder with `u`. */
-export function makeIndexedMaterial(u: IndexedUniforms, opts: { behind?: boolean; panel?: boolean } = {}): THREE.ShaderMaterial {
+/**
+ * `panel`: the material draws mech parts (the armour-panel enhancement's uPanel); `shades`: its mode-0x4000
+ * indices are levels into its own uShades table (the ground grid). It shares every other uniform holder with `u`.
+ */
+export function makeIndexedMaterial(u: IndexedUniforms, opts: { behind?: boolean; panel?: boolean; shades?: boolean } = {}): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     glslVersion: THREE.GLSL3,
-    uniforms: opts.panel ? { ...u, uPanel: { value: 1 } } : u,
+    uniforms: opts.panel ? { ...u, uPanel: { value: 1 } } : opts.shades ? { ...u, uShadeMap: { value: 1 }, uShades: { value: [0, 0, 0, 0, 0] } } : u,
     vertexShader,
     fragmentShader,
     side: THREE.DoubleSide, // the clipper's back-face test (polyDepthKey) is the original's; the GPU does not add its own

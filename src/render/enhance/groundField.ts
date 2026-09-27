@@ -8,11 +8,16 @@
  * grid of the same kind on the ground plane - y 0, where the game drops the
  * scrounge patch and where world_ground_height_near falls back to - about
  * 1.3 km across in 16 m cells, re-centred on the camera's cell. Each vertex
- * carries a palette index near groundColour, moved a step or two by
- * world-anchored value noise but only within groundColour's hue run
- * (paletteRuns.ts: its row may hold other colours - PLUMSCN1's holds the
- * lakes' teal), and the material's checkerboard dither (the filler's own)
- * runs between them, through nothing but that run.
+ * carries a shade level, 0 to 4, moved off the middle (2, groundColour) by
+ * world-anchored value noise; the material's checkerboard dither (the
+ * filler's own) runs between the levels, and each level is drawn as its
+ * palette shade (paletteRuns.ts groundShades: groundColour at 80, 90, 110
+ * and 120 per cent, the nearest palette colours of its hue - from the whole
+ * palette, since every mission's ground is 0xef, the end of its row, and
+ * the row is seldom its ramp).
+ * (Correction: the vertices first carried palette indices moved along
+ * groundColour's row, dithered index to index; in 40 of the 59 missions the
+ * row held no shade of the ground, and in some it held other hues.)
  *
  * It is drawn with the backdrop (the backdrop pass, whose depth is cleared
  * before the world): the ground is the lowest thing there is, so the
@@ -76,15 +81,14 @@ function valueNoise(x: number, z: number, scale: number): number {
 }
 
 /**
- * The palette index for the ground vertex at world cell (x, z): groundColour
- * moved by up to two steps, never outside `run` (its hue run, [lo, hi]), and
- * by nothing at `fade` 0.
+ * The shade level (0..4; 2 is groundColour itself) for the ground vertex at
+ * world cell (x, z): moved off the middle by up to two, by nothing at `fade` 0.
  */
-export function groundIndex(groundColour: number, x: number, z: number, fade: number, run: [number, number]): number {
+export function groundLevel(x: number, z: number, fade: number): number {
   // broad patches only (80 m and 40 m): fewer dithered edges to crawl
   const n = 0.8 * (valueNoise(x, z, 5) - 0.5) + 0.2 * (valueNoise(x, z, 2.5) - 0.5);
   const shift = Math.round(n * 4.2 * fade);
-  return Math.min(run[1], Math.max(run[0], groundColour + shift));
+  return Math.min(4, Math.max(0, 2 + shift));
 }
 
 /** How much of the noise a vertex `r` cells from the eye's cell keeps: all within FADE_NEAR, none from FADE_FAR. */
@@ -109,8 +113,6 @@ export class GroundField {
   private readonly uv: Float32Array;
   private cellX = Number.NaN;
   private cellZ = Number.NaN;
-  private colour = -1;
-  private runKey = '';
   private readonly material: THREE.ShaderMaterial;
   /** per scrounge object: its copies, keyed by the patch's object */
   private readonly copies = new Map<WorldObject, { offsets: THREE.Group[]; meshes: Copy[] }>();
@@ -143,7 +145,7 @@ export class GroundField {
     g.setAttribute('aSpriteR', new THREE.BufferAttribute(new Float32Array(n * n * 3), 3));
     g.setIndex(index);
     g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), CELLS * CELL);
-    this.material = makeIndexedMaterial(uniforms);
+    this.material = makeIndexedMaterial(uniforms, { shades: true });
     this.grid = new THREE.Mesh(g, this.material);
     this.grid.frustumCulled = false;
     // over the sky, under the backdrop's objects
@@ -153,29 +155,28 @@ export class GroundField {
   }
 
   /**
-   * Places the grid under `eye` (three.js metres) and recolours it when its
-   * cell, the ground colour or its hue run (`run`) changes; `show` false
-   * hides it.
+   * Places the grid under `eye` (three.js metres), draws its levels as
+   * `shades` (the ground colour's five, paletteRuns.ts groundShades), and
+   * re-levels it when its cell changes; `show` false hides it.
    */
-  updateGrid(eye: THREE.Vector3, groundColour: number, run: [number, number], show: boolean): void {
+  updateGrid(eye: THREE.Vector3, shades: readonly number[], show: boolean): void {
     this.grid.visible = show;
     if (!show) return;
+    const table = this.material.uniforms.uShades!.value as number[];
+    for (let i = 0; i < 5; i++) table[i] = shades[i]!;
     const cx = Math.floor(eye.x / CELL);
     const cz = Math.floor(eye.z / CELL);
     this.grid.position.set(cx * CELL, 0, cz * CELL);
     this.grid.updateMatrixWorld();
-    const runKey = `${run[0]},${run[1]}`;
-    if (cx === this.cellX && cz === this.cellZ && groundColour === this.colour && runKey === this.runKey) return;
+    if (cx === this.cellX && cz === this.cellZ) return;
     this.cellX = cx;
     this.cellZ = cz;
-    this.colour = groundColour;
-    this.runKey = runKey;
     const n = CELLS + 1;
     const half = CELLS / 2;
     for (let j = 0; j < n; j++)
       for (let i = 0; i < n; i++) {
         const fade = groundFade(Math.hypot(i - half, j - half));
-        this.uv[(j * n + i) * 2] = groundIndex(groundColour, cx + i - half, cz + j - half, fade, run);
+        this.uv[(j * n + i) * 2] = groundLevel(cx + i - half, cz + j - half, fade);
       }
     (this.grid.geometry.getAttribute('aUv') as THREE.BufferAttribute).needsUpdate = true;
   }

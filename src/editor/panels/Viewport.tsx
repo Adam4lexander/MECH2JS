@@ -70,7 +70,7 @@ import { radar } from '../../sim/cockpit/radar.ts';
 import { viewScene } from '../../sim/world/viewScene.ts';
 import { hud } from '../../sim/cockpit/hud.ts';
 import { skyPaletteChoice, type SkyChoice } from '../../render/enhance/skyDetail.ts';
-import { hueRun } from '../../render/enhance/paletteRuns.ts';
+import { groundShades } from '../../render/enhance/paletteRuns.ts';
 import { ENHANCE_LABELS, recallEnhanceSettings, storeEnhanceSettings, type EnhanceSettings } from '../../render/enhance/enhanceSettings.ts';
 
 /** VR: the reticle's plane - out to this far with nothing under it, never nearer than the min, easing over RETICLE_EASE seconds (metres) */
@@ -84,10 +84,27 @@ const MARKER_MAX_DISTANCE = 3000;
 /** which camera Edit looks through */
 type EditView = 'scene' | 'game';
 
+/** Faithful (VGA) or Modern (native resolution), remembered (localStorage, as the loop rate is); Faithful at first. */
+const FAITHFUL_KEY = 'mw2.faithful';
+function recallFaithful(): boolean {
+  try {
+    return localStorage.getItem(FAITHFUL_KEY) !== 'modern';
+  } catch {
+    return true;
+  }
+}
+function storeFaithful(on: boolean): void {
+  try {
+    localStorage.setItem(FAITHFUL_KEY, on ? 'faithful' : 'modern');
+  } catch {
+    /* private window: not remembered */
+  }
+}
+
 export function Viewport({ game }: { game: Game }) {
   useRevision(engineStore);
   const host = useRef<HTMLDivElement>(null);
-  const [faithful, setFaithful] = useState(true);
+  const [faithful, setFaithful] = useState(recallFaithful);
   const [editView, setEditView] = useState<EditView>('scene');
   const [info, setInfo] = useState('');
   const faithfulRef = useRef(faithful);
@@ -114,6 +131,7 @@ export function Viewport({ game }: { game: Game }) {
   }, [xrSettings]);
   useEffect(() => {
     faithfulRef.current = faithful;
+    storeFaithful(faithful);
   }, [faithful]);
   useEffect(() => {
     navigator.xr
@@ -176,7 +194,8 @@ export function Viewport({ game }: { game: Game }) {
     sr.scene.add(groundField.field);
     const shadows = new Shadows();
     let skyChoice: SkyChoice | null = null;
-    let groundRun: [number, number] = [0, 255];
+    /** the ground grid's five shades of the ground colour (paletteRuns.ts groundShades) */
+    let groundShadesNow: number[] = [0xef, 0xef, 0xef, 0xef, 0xef];
     let skyChoiceFor = '';
     const xrInput = new XrInput();
     const xrViewer = new Viewer();
@@ -428,7 +447,8 @@ export function Viewport({ game }: { game: Game }) {
         skyChoiceFor = skyFor;
         const p = game.paletteRgb();
         skyChoice = p ? skyPaletteChoice(p, lighting.skyColour & 255) : null;
-        groundRun = p ? hueRun(p, lighting.groundColour & 255) : [lighting.groundColour & 255, lighting.groundColour & 255];
+        const g = lighting.groundColour & 255;
+        groundShadesNow = p ? groundShades(p, g) : [g, g, g, g, g];
         if (p) shadows.setPalette(p, sr.uniforms);
         if (p) {
           lampColours.blank = darkestIndex(p);
@@ -504,7 +524,7 @@ export function Viewport({ game }: { game: Game }) {
       xrSky.setDetail(en.sky && wipe === null ? skyChoice : null);
       // the ground surface under the eye, and the scrounge field round the game's patch
       const eyeAt = head ? new THREE.Vector3().setFromMatrixPosition(head.matrixWorld) : camera.position;
-      groundField.updateGrid(eyeAt, lighting.groundColour & 255, groundRun, en.ground && wipe === null && lighting.groundEnabled !== 0);
+      groundField.updateGrid(eyeAt, groundShadesNow, en.ground && wipe === null && lighting.groundEnabled !== 0);
       groundField.updateField(sr, en.ground);
       // the shadow map along the mission's light (the one sync just latched), round the eye
       if (en.shadows && (!playing || views.mainRequested)) {

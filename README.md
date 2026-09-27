@@ -207,13 +207,17 @@ back (target display, damage views, map) stay the original's.
   every mech in its nearest range, not only the nearest one. This is the
   port-only `lodAllNear` in `src/sim/camera/projection.ts`, marked as a
   divergence.
-- **Ground detail.** The flat ground becomes a dithered surface around the
-  ground colour, about 3 km across, fading back into the original fill at its
-  edge. It varies only within the ground colour's hue run
-  (`src/render/enhance/paletteRuns.ts`), because a palette row can hold other
-  colours: PLUMSCN1's ground row holds the lakes' teal, so its ground stays
-  flat. The game's scrounge patch (rocks and scrub) is repeated on the grid
-  cells round its own (`src/render/enhance/groundField.ts`).
+- **Ground detail.** The flat ground becomes a dithered surface of broad
+  patches, 1.3 km across, fading back into the original fill from about
+  200 m. Its five shades are the ground colour at 80, 90, 110 and 120 per
+  cent brightness, each the nearest palette colour of the same hue, found
+  anywhere in the palette for the palette on screen, so dawn, dusk, night
+  and infrared get their own (`groundShades`,
+  `src/render/enhance/paletteRuns.ts`). The ground's own palette row is no
+  use for this. Every mission's ground is index 0xef, the last of its row,
+  and in most palettes the row holds other hues or copies of the same
+  colour. The game's scrounge patch (rocks and scrub) is repeated on the
+  grid cells round its own (`src/render/enhance/groundField.ts`).
 - **Sky gradient and stars.** Above the haze band the sky keeps dithering up
   its ramp towards the zenith. At night there are stars in the palette's
   brightest grey (`src/render/enhance/skyDetail.ts`).

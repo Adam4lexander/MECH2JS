@@ -2,11 +2,11 @@
 // palette's own ramps, and the cockpit's screens come from the widget panes.
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { groundFade, groundIndex } from '../../src/render/enhance/groundField.ts';
+import { groundFade, groundLevel } from '../../src/render/enhance/groundField.ts';
 import { shadowTable } from '../../src/render/enhance/shadows.ts';
 import { skyPaletteChoice } from '../../src/render/enhance/skyDetail.ts';
 import { commonRamps, slotPanes } from '../../src/render/cockpit/cockpit.ts';
-import { hueRun, sameHue } from '../../src/render/enhance/paletteRuns.ts';
+import { groundShades, hueRun, luminance, sameHue } from '../../src/render/enhance/paletteRuns.ts';
 
 /** A palette whose ramps run dark to light (6-bit DAC), one hue per ramp. */
 function rampPalette(scale = 1): Uint8Array {
@@ -21,16 +21,51 @@ function rampPalette(scale = 1): Uint8Array {
 }
 
 describe('ground', () => {
-  it("keeps every vertex inside the ground colour's hue run, and on the colour itself at no fade", () => {
+  it('keeps every vertex on a shade level 0..4, and on the ground colour itself (2) at no fade', () => {
     fc.assert(
-      fc.property(fc.integer({ min: 2, max: 253 }), fc.integer({ min: -5000, max: 5000 }), fc.integer({ min: -5000, max: 5000 }), fc.double({ min: 0, max: 1, noNaN: true }), (g, x, z, fade) => {
-        const run: [number, number] = [g - 1, g + 2];
-        const i = groundIndex(g, x, z, fade, run);
-        expect(i).toBeGreaterThanOrEqual(run[0]);
-        expect(i).toBeLessThanOrEqual(run[1]);
-        expect(groundIndex(g, x, z, 0, run)).toBe(g);
+      fc.property(fc.integer({ min: -5000, max: 5000 }), fc.integer({ min: -5000, max: 5000 }), fc.double({ min: 0, max: 1, noNaN: true }), (x, z, fade) => {
+        const l = groundLevel(x, z, fade);
+        expect(Number.isInteger(l) && l >= 0 && l <= 4).toBe(true);
+        expect(groundLevel(x, z, 0)).toBe(2);
       }),
     );
+  });
+
+  it("finds the ground's shades anywhere in the palette, not in its row: 0xef ends its row, beside other hues", () => {
+    const rgb = new Uint8Array(768);
+    // the ground: a brown at the end of row 0xe0, whose other colours are blues
+    rgb.set([20, 14, 8], 0xef * 3);
+    for (let k = 0; k < 15; k++) rgb.set([4, 10, 30 + k], (0xe0 + k) * 3);
+    // its shades elsewhere, in row 0x60
+    const at = (i: number, c: number[]) => rgb.set(c, i * 3);
+    at(0x60, [16, 11, 6]);
+    at(0x61, [18, 13, 7]);
+    at(0x62, [22, 15, 9]);
+    at(0x63, [24, 17, 10]);
+    expect(groundShades(rgb, 0xef)).toEqual([0x60, 0x61, 0xef, 0x62, 0x63]);
+  });
+
+  it('never takes another hue, even among near-blacks (JACKSCN1: a blue beside its dark brown ground)', () => {
+    const rgb = new Uint8Array(768).fill(40);
+    rgb.set([4, 2, 0], 0xef * 3);
+    rgb.set([1, 5, 8], 0xed * 3);
+    rgb.set([1, 5, 9], 0xee * 3);
+    const s = groundShades(rgb, 0xef);
+    expect(s).not.toContain(0xed);
+    expect(s).not.toContain(0xee);
+  });
+
+  it('runs dark to light, and leaves the ground flat in a palette with no shades of it', () => {
+    fc.assert(
+      fc.property(fc.uint8Array({ minLength: 768, maxLength: 768 }), fc.integer({ min: 0, max: 254 }), (bytes, g) => {
+        const rgb = bytes.map((v) => v & 63);
+        const s = groundShades(rgb, g);
+        expect(s[2]).toBe(g);
+        for (let i = 1; i < 5; i++) expect(luminance(rgb, s[i]!)).toBeGreaterThanOrEqual(luminance(rgb, s[i - 1]!));
+      }),
+    );
+    const flat = new Uint8Array(768).fill(20);
+    expect(groundShades(flat, 0xef)).toEqual([0xef, 0xef, 0xef, 0xef, 0xef]);
   });
 
   it("stops a colour's run where its row turns another hue (PLUMSCN1's greens beside the lakes' teal)", () => {
