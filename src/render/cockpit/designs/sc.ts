@@ -1,6 +1,6 @@
 /**
- * Stormcrow (Ryoken): a 55-ton Clan medium. Its glass is a wide slot with a
- * post at its middle; a console under it that starts just below the glass.
+ * Stormcrow (Ryoken): a 55-ton Clan medium. A trapezoid windshield set into
+ * the front of its nose, sloping up over the pilot; a console under it.
  *
  * @portOnly
  */

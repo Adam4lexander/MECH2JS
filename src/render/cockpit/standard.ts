@@ -11,8 +11,9 @@
  *          status gauges left; weapons over damage and the speed right). For
  *          glass that stops above about 30 degrees down.
  *   split  two pods either side, the middle left open down to the floor:
- *          for glass that runs on down (the Mad Dog's and the Nova's nose
- *          glass), so looking down the pilot sees the ground. Left pod: the
+ *          for glass that runs on down (the Battlemaster's dome, the
+ *          Warhawk's band under its brim), so looking down the pilot sees
+ *          the ground. Left pod: the
  *          target display and the radar (inboard); right pod: weapons
  *          (inboard) and the speed over damage and the status gauges.
  *
@@ -28,7 +29,7 @@
  *
  * @portOnly
  */
-import { boxHit, dash, decorate, glassCabin, insideOutline, layoutScreens, pedalsAndFloor, pod, seat, topTrim, wallDetail, type CabinBox, type Dash, type FaceArea } from './archetypes.ts';
+import { boxHit, dash, decorate, glassCabin, layoutScreens, pedalsAndFloor, pod, seat, topTrim, wallDetail, type CabinBox, type Dash, type FaceArea } from './archetypes.ts';
 import { dir, facingEye, Kit, Mat, norm, type Glass, type SlotName, type V3 } from './kit.ts';
 
 export interface StandardSpec {
@@ -59,7 +60,7 @@ export interface Standard {
 
 export function standard(k: Kit, glass: Glass, s: StandardSpec): Standard {
   const b = s.box;
-  glassCabin(k, glass.outline, b);
+  glassCabin(k, glass, b);
   const faces: Array<[FaceArea, SlotName[][]]> = [];
   let d: Dash | null = null;
   let left: FaceArea | null = null;
@@ -95,8 +96,10 @@ export function standard(k: Kit, glass: Glass, s: StandardSpec): Standard {
   const arms = s.arms ?? {};
   seat(k, { armX: arms.x ?? 0.42, armY: arms.y ?? -0.52, floor: b.floor, style: s.style });
   pedalsAndFloor(k, b.floor, -0.45, -0.1, 0.35);
-  if ((s.ribs ?? 0.4) > 0) wallDetail(k, b, glass.outline, s.ribs ?? 0.4);
-  if (s.overhead !== false && !insideOutline(glass.outline, 0, 70)) {
+  if ((s.ribs ?? 0.4) > 0) wallDetail(k, b, glass, s.ribs ?? 0.4);
+  // an overhead panel where the roof is solid over the whole of it
+  const overAt: V3[] = [-0.2, 0.2].flatMap((x) => [-0.22, -0.38].map((z): V3 => [x, b.roof - 0.08, z]));
+  if (s.overhead !== false && !overAt.some((p) => glass.sees(p))) {
     const over = facingEye([0, b.roof - 0.08, -0.3], -60);
     k.slab(over, 0.36, 0.14, -0.04, Mat.panel);
     k.switches(over, 2, 6, 0.028, 0, 0.012, s.style === 'is' ? Mat.frame : Mat.trim);

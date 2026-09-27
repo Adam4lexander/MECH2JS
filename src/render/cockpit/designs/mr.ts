@@ -1,6 +1,7 @@
 /**
- * Marauder: the Inner Sphere's 75-ton heavy. A compact window with two slim
- * posts in its top; a heavy console, switch banks and pipes.
+ * Marauder: the Inner Sphere's 75-ton heavy. Its wedge head's face has one
+ * long six-sided slit of glass (brought nearer the eye, glass.ts); a heavy,
+ * closed cabin round it, switch banks and pipes.
  *
  * @portOnly
  */

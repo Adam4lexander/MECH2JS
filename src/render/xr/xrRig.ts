@@ -42,9 +42,17 @@
  *    in the rig, settings.hudScale of the game's field of view wide. The
  *    layers that mark the world (the reticle, the target marker) are not on
  *    it: placeLifted puts each on a plane of its own across the game's whole
- *    field of view, far out, posed at the pass's eye - not the interpolated
- *    rig - because the game drew them from that eye onto a world standing
- *    where that pass left it. So they lie on what they mark.
+ *    field of view, far out. The target marker is posed at the pass's eye -
+ *    not the interpolated rig - because the game drew it from that eye onto
+ *    a world standing where that pass left it, so it lies on its target.
+ *    The reticle is the mech's own aim, so it rides the rig with the
+ *    cockpit (placeCarried). (Correction: it was first posed at the pass's
+ *    eye too, and stood a pass ahead of the cockpit, jittering against it.)
+ *
+ *  - The mech's own parts. The player's arms and guns outside the cockpit
+ *    are world objects, drawn where the last pass left them; the view is a
+ *    pass behind, so they jumped ahead of the cockpit at every pass.
+ *    SceneRenderer.carryOwned moves them with the cockpit scene's carry.
  *
  * @portOnly
  */
@@ -114,10 +122,18 @@ export class XrRig {
     this.recordPass(eye, now);
   }
 
-  /** Poses the rig for a display frame at `now`: between the last two passes, one pass behind. */
-  update(now: number): void {
+  /**
+   * Poses the rig for a display frame at `now`: between the last two passes,
+   * one pass behind - or, with `everyFrame` (the loop running a pass every
+   * display frame), at the last pass itself: there is nothing between passes
+   * to smooth, and easing from the pass before only left the view a frame
+   * behind everything the pass drew (the mech's arms, the reticle, the
+   * world), which jittered against it as frame times varied. (Correction:
+   * the first cut eased at every loop rate.)
+   */
+  update(now: number, everyFrame = false): void {
     const span = this.cur.t - this.prev.t;
-    const a = span > 0 ? Math.min(1, Math.max(0, (now - this.cur.t) / span)) : 1;
+    const a = everyFrame ? 1 : span > 0 ? Math.min(1, Math.max(0, (now - this.cur.t) / span)) : 1;
     this.rig.position.lerpVectors(this.prev.pos, this.cur.pos, a);
     this.rig.quaternion.slerpQuaternions(this.prev.quat, this.cur.quat, a);
     this.rig.scale.set(1, 1, 1);
@@ -141,6 +157,16 @@ export class XrRig {
     this.passEye.quaternion.copy(eye.quaternion);
     this.passEye.updateMatrixWorld(true);
     place(this.passEye, mesh, distance, tanH, aspect);
+  }
+
+  /**
+   * A HUD layer that belongs to the cockpit, not to the world - the reticle,
+   * the mech's own aim: its plane `distance` metres out from the rig, as
+   * wide as the game's field of view there. Posed at the pass's eye it
+   * stood a pass ahead of the cockpit, and jittered against it.
+   */
+  placeCarried(mesh: THREE.Object3D, distance: number, tanH: number, aspect: number): void {
+    place(this.rig, mesh, distance, tanH, aspect);
   }
 
   /**

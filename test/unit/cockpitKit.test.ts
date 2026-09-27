@@ -1,10 +1,10 @@
-// The hand-built cockpits: every design builds round its mech's glass, its
+// The hand-built cockpits: every design builds round its mech's canopy, its
 // screens sit where the flat view and the headset both show them, and it
-// leaves the view straight ahead clear.
+// leaves the view straight ahead - and through its glass - clear.
 import { describe, expect, it } from 'vitest';
-import { GLASS } from '../../src/render/cockpit/glass.ts';
-import { anglesOf, cropRect, fitRect, Kit, Mat, SCREENS, type V3 } from '../../src/render/cockpit/kit.ts';
-import { insideOutline } from '../../src/render/cockpit/archetypes.ts';
+import { canopyOf, fittedTris } from '../../src/render/cockpit/canopy.ts';
+import { CANOPY } from '../../src/render/cockpit/glass.ts';
+import { anglesOf, cropRect, dir, fitRect, Kit, Mat, SCREENS, type V3 } from '../../src/render/cockpit/kit.ts';
 import { buildDesign, DESIGNS } from '../../src/render/cockpit/designs/index.ts';
 
 /** Whether the ray from the eye along `d` meets triangle abc (Moller-Trumbore). */
@@ -26,8 +26,8 @@ function rayHits(d: V3, a: V3, b: V3, c: V3): boolean {
 const tris = (k: Kit) => Array.from({ length: k.pos.length / 9 }, (_, i) => [0, 1, 2].map((j) => k.pos.slice(i * 9 + j * 3, i * 9 + j * 3 + 3) as V3) as [V3, V3, V3]);
 
 describe('cockpit designs', () => {
-  it('has a design for every measured glass, and a glass for every design', () => {
-    expect(Object.keys(DESIGNS).sort()).toEqual(Object.keys(GLASS).sort());
+  it('has a design for every canopy, and a canopy for every design', () => {
+    expect(Object.keys(DESIGNS).sort()).toEqual(Object.keys(CANOPY).sort());
   });
 
   for (const d of Object.values(DESIGNS)) {
@@ -61,18 +61,24 @@ describe('cockpit designs', () => {
         expect(hit).toBe(false);
       });
 
-      it('keeps its glass open: no wall across the middle of its window', () => {
-        const glass = GLASS[d.key]!;
-        // directions inside the outline, a third and two thirds of the way out from the centre, all round
-        const probes = glass.filter((_, i) => i % 4 === 0).flatMap(([y, p]): Array<[number, number]> => [[y * 0.35, p * 0.35], [y * 0.7, p * 0.7]]);
-        for (const [yaw, pitch] of probes) {
-          if (!insideOutline(glass, yaw, pitch) || pitch < -12) continue;
-          const r = (Math.PI / 180) * pitch;
-          const q = (Math.PI / 180) * yaw;
-          const dir: V3 = [Math.cos(r) * Math.sin(q), Math.sin(r), -Math.cos(r) * Math.cos(q)];
-          const blocked = tris(k).some(([a, b, c]) => rayHits(dir, a, b, c));
-          expect(blocked, `blocked at ${yaw.toFixed(0)}, ${pitch.toFixed(0)}`).toBe(false);
-        }
+      it('keeps its glass open: nothing but the canopy frame across it, above the console', () => {
+        const glass = canopyOf(CANOPY[d.key]!);
+        // every direction 6 degrees apart, from above the console up, with glass 4 degrees all round it (the
+        // walls are tiled in 5 cm squares, so the glass's very edge is the wall's); the frame follows the
+        // canopy's own edges across it, so its bars are allowed
+        const all = tris(k);
+        const solid = all.filter((_, i) => k.mat[i * 3] !== Mat.frame);
+        const clear = (yaw: number, pitch: number) => [[0, 0], [4, 0], [-4, 0], [0, 4], [0, -4]].every(([dy, dp]) => glass.sees(dir(yaw + dy!, pitch + dp!, 1)));
+        let probes = 0;
+        for (let pitch = -8; pitch <= 60; pitch += 6)
+          for (let yaw = -60; yaw <= 60; yaw += 6) {
+            const v = dir(yaw, pitch, 1);
+            if (!clear(yaw, pitch)) continue;
+            probes++;
+            const blocked = solid.some(([a, b, c]) => rayHits(v, a, b, c));
+            expect(blocked, `blocked at ${yaw}, ${pitch}`).toBe(false);
+          }
+        expect(probes).toBeGreaterThan(10);
       });
 
       it('colours every face with a known material and a shade on the ramp', () => {
@@ -152,5 +158,45 @@ describe('screen layout on a face', () => {
           expect(apart).toBe(true);
         }
     }
+  });
+});
+
+describe('canopies', () => {
+  it('see glass straight ahead, for every chassis', () => {
+    for (const [key, src] of Object.entries(CANOPY)) expect(canopyOf(src).sees([0, 0, -1]), key).toBe(true);
+  });
+
+  it('are seated as their fit says', () => {
+    const quad = [-1, 0, -1, 1, 0, -1, 1, 1, -2, -1, 0, -1, 1, 1, -2, -1, 1, -2];
+    // lifted 0.5 along the area-weighted normal (the plane y - z = 1, normal (0, 1, 1) / sqrt 2 as wound)
+    const lifted = fittedTris({ tris: quad, fit: { normal: 0.5 } });
+    const n = Math.SQRT1_2 * 0.5;
+    expect(lifted[1]).toBeCloseTo(n, 5);
+    expect(lifted[2]).toBeCloseTo(-1 + n, 5);
+    expect(Array.from(fittedTris({ tris: quad, fit: { move: [1, 2, 3] } })).slice(0, 3)).toEqual([0, 2, 2]);
+    // grown about its centre: the centre stays, the corners move out
+    const grown = fittedTris({ tris: quad, fit: { grow: 2 } });
+    const centre = (t: Float32Array, c: number) => t.filter((_, i) => i % 3 === c).reduce((s, v) => s + v, 0) / (t.length / 3);
+    for (const c of [0, 1, 2]) expect(centre(grown, c)).toBeCloseTo(centre(Float32Array.from(quad), c), 5);
+    expect(grown[0]).toBeCloseTo(-2, 5);
+    expect(fittedTris({ tris: quad, fit: { bridge: [0, 0, 0, 1, 0, 0, 0, 1, 0] } }).length).toBe(27);
+  });
+
+  it('frame a flat pane round its outline, and a folded one along its fold too', () => {
+    const pane = canopyOf({ tris: [-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1] });
+    expect(pane.edges.filter((e) => e.boundary).length).toBe(4);
+    expect(pane.edges.filter((e) => !e.boundary).length).toBe(0);
+    // two panes meeting at 90 degrees along x = 0
+    const folded = canopyOf({ tris: [-1, -1, -1, 0, -1, -2, 0, 1, -2, -1, -1, -1, 0, 1, -2, -1, 1, -1, 0, -1, -2, 1, -1, -1, 1, 1, -1, 0, -1, -2, 1, 1, -1, 0, 1, -2] });
+    expect(folded.edges.filter((e) => !e.boundary).length).toBe(1);
+    expect(canopyOf({ tris: [-1, -1, -1, 0, -1, -2, 0, 1, -2, -1, -1, -1, 0, 1, -2, -1, 1, -1, 0, -1, -2, 1, -1, -1, 1, 1, -1, 0, -1, -2, 1, 1, -1, 0, 1, -2], fit: { outlineOnly: true } }).edges.filter((e) => !e.boundary).length).toBe(0);
+  });
+
+  it('reach as far as the glass goes: a pane 45 degrees either side reaches 45', () => {
+    const pane = canopyOf({ tris: [-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1] });
+    expect(pane.right).toBe(45);
+    expect(pane.left).toBe(45);
+    expect(pane.up).toBe(45);
+    expect(pane.down).toBe(45);
   });
 });

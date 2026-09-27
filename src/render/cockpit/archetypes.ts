@@ -8,7 +8,7 @@
  *
  * @portOnly
  */
-import { add, dir, facingEye, frameAt, Kit, Mat, norm, on, scale, sub, type Frame, type SlotName, type V3 } from './kit.ts';
+import { add, dir, facingEye, frameAt, Kit, Mat, norm, on, scale, sub, type Frame, type Glass, type SlotName, type V3 } from './kit.ts';
 
 const RAD = Math.PI / 180;
 
@@ -264,11 +264,8 @@ export function pedalsAndFloor(k: Kit, floor: number, z0: number, z1: number, ha
  * the wall is solid - broken where the glass is, so a rib never crosses the
  * view - and fittings on the back wall: a hatch, an extinguisher.
  */
-export function wallDetail(k: Kit, b: CabinBox, outline: Array<[number, number]>, spacing = 0.4): void {
-  const solid = (p: V3) => {
-    const d = Math.hypot(p[0], p[1], p[2]);
-    return !insideOutline(outline, (Math.atan2(p[0], -p[2]) * 180) / Math.PI, (Math.asin(p[1] / d) * 180) / Math.PI);
-  };
+export function wallDetail(k: Kit, b: CabinBox, glass: Glass, spacing = 0.4): void {
+  const solid = (p: V3) => !glass.sees(p);
   /** a rib from a to b, in pieces where the wall behind is solid */
   const rib = (a: V3, c: V3, n: V3) => {
     const steps = Math.max(1, Math.round(Math.hypot(...sub(c, a)) / 0.05));
@@ -315,17 +312,6 @@ export interface CabinBox {
   back: number;
 }
 
-/** Whether (yaw, pitch) lies inside a polygon in angle space (even-odd rule). */
-export function insideOutline(outline: Array<[number, number]>, yaw: number, pitch: number): boolean {
-  let inside = false;
-  for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) {
-    const [xi, yi] = outline[i]!;
-    const [xj, yj] = outline[j]!;
-    if (yi > pitch !== yj > pitch && yaw < ((xj - xi) * (pitch - yi)) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside;
-}
-
 /** Where the ray from the eye along unit `d` leaves the box. */
 export function boxHit(b: CabinBox, d: V3): V3 {
   let t = Infinity;
@@ -346,20 +332,17 @@ export function boxHit(b: CabinBox, d: V3): V3 {
 
 /**
  * A cabin whose glass is the mech's own: the box's walls, tiled in `cell`
- * squares, with every square the eye sees through the glass outline (angle
- * space, shell.ts outline) left open - so the window has the original's
- * shape, and a view that runs round the side (an outline reaching 120)
- * opens the side walls too. A frame traces the outline on the walls,
- * hiding the squares' steps. Runs of wall squares merge into single quads.
+ * squares, with every square through which the eye sees the canopy
+ * (canopy.ts) left open - so the windows have the exterior's shape, a
+ * bubble canopy opens the roof and a wrap-round one the side walls. The
+ * frame follows the canopy's edges - its outline and the creases between its
+ * facets - carried out along the eye's rays onto the walls, so it lies
+ * where the openings' edges are and crosses them where the facets meet, and
+ * hides the squares' steps. Runs of wall squares merge into single quads.
  */
-export function glassCabin(k: Kit, outline: Array<[number, number]>, b: CabinBox, opts: { cell?: number; rim?: number; rimDepth?: number } = {}): void {
+export function glassCabin(k: Kit, glass: Glass, b: CabinBox, opts: { cell?: number; rim?: number; crease?: number; rimDepth?: number } = {}): void {
   const cell = opts.cell ?? 0.05;
-  const open = (p: V3) => {
-    const d = Math.hypot(p[0], p[1], p[2]);
-    const yaw = (Math.atan2(p[0], -p[2]) * 180) / Math.PI;
-    const pitch = (Math.asin(p[1] / d) * 180) / Math.PI;
-    return insideOutline(outline, yaw, pitch);
-  };
+  const open = (p: V3) => glass.sees(p);
   // each face: its origin corner and two edge vectors (u across, v up), tiled
   const W = b.halfWidth;
   const faces: Array<{ o: V3; u: V3; v: V3; m: Mat }> = [
@@ -388,17 +371,20 @@ export function glassCabin(k: Kit, outline: Array<[number, number]>, b: CabinBox
       }
     }
   }
-  // the frame round the glass, a little in from the walls
-  const rim = opts.rim ?? 0.045;
-  const pts = outline.map(([yaw, pitch]) => {
-    const r = Math.hypot(yaw, pitch);
-    const p = boxHit(b, norm(dir(yaw, pitch, 1)));
-    return { p: [p[0] * 0.985, p[1] * 0.985, p[2] * 0.985] as V3, open: r >= 119 };
-  });
-  for (let i = 0; i < pts.length; i++) {
-    const a = pts[i]!;
-    const c = pts[(i + 1) % pts.length]!;
-    if (a.open || c.open) continue;
-    k.beam(a.p, c.p, rim, opts.rimDepth ?? 0.04, Mat.frame, norm(a.p));
+  // the frame along the canopy's edges, on the walls and a little in from them: each edge in pieces a few
+  // centimetres long, so one that crosses from wall to roof bends with them. A crease is left out within
+  // CLEAR degrees of straight ahead, where the reticle is (the Timber Wolf's nose facets meet down the middle)
+  const CLEAR = 14;
+  const onWall = (p: V3): V3 => scale(boxHit(b, norm(p)), 0.985);
+  const offAxis = (p: V3) => (Math.acos(Math.max(-1, Math.min(1, -norm(p)[2]))) * 180) / Math.PI;
+  for (const e of glass.edges) {
+    const w = e.boundary ? (opts.rim ?? 0.045) : (opts.crease ?? 0.03);
+    const n = Math.max(1, Math.ceil(Math.hypot(...sub(e.b, e.a)) / 0.06));
+    let prev = e.a;
+    for (let i = 1; i <= n; i++) {
+      const next = add(e.a, scale(sub(e.b, e.a), i / n));
+      if (e.boundary || offAxis(add(prev, next)) > CLEAR) k.beam(onWall(prev), onWall(next), w, opts.rimDepth ?? 0.04, Mat.frame, norm(prev));
+      prev = next;
+    }
   }
 }

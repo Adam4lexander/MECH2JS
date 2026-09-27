@@ -1,7 +1,7 @@
 /**
- * Mad Dog (Vulture): a 60-ton Clan heavy with a nose of glass - the window
- * runs down to 70 degrees below the eye. The console splits into two pods so
- * the pilot sees the ground through the floor between them.
+ * Mad Dog (Vulture): a 60-ton Clan heavy. Its glass is a trapezoid panel at
+ * the top front of the central head block, between the taller blocks either
+ * side: a forward-and-up window, 25 degrees either side, over a console.
  *
  * @portOnly
  */
@@ -12,6 +12,6 @@ export const madDog: CockpitDesign = {
   key: 'MD',
   name: 'Mad Dog',
   build(k: Kit, glass: Glass) {
-    standard(k, glass, { box: { halfWidth: 0.8, floor: -0.9, roof: 0.5, front: 1.0, back: 0.45 }, layout: 'split', style: 'clan', pods: { yaw: 28, dist: 0.6 } });
+    standard(k, glass, { box: { halfWidth: 0.8, floor: -0.9, roof: 0.5, front: 1.0, back: 0.45 }, layout: 'wrap', style: 'clan', console: { dist: 0.6 } });
   },
 };

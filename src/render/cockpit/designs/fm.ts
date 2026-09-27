@@ -1,6 +1,7 @@
 /**
- * Fire Moth (Dasher): a 20-ton Clan scout. A small, upright window, a cramped
- * cabin, and a compact console tucked under it.
+ * Fire Moth (Dasher): a 20-ton Clan scout. A tall trapezoid windshield on the
+ * front of its head, wider at the top, runs from 32 degrees down to 69 up; a
+ * cramped cabin and a compact console under it.
  *
  * @portOnly
  */

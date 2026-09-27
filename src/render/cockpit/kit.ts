@@ -395,22 +395,19 @@ export function cropRect(r: { x: number; y: number; w: number; h: number }, crop
   return { x: x0, y: y0, w: Math.round(r.x + crop[2] * r.w) - x0, h: Math.round(r.y + crop[3] * r.h) - y0 };
 }
 
-/** What a design builds round: its mech's glass (glass.ts). */
+/** What a design builds round: its mech's canopy (glass.ts, canopy.ts). */
 export interface Glass {
-  /** the outline, [yaw, pitch] degrees round the view's centre, 48 points from straight right, anticlockwise */
-  outline: Array<[number, number]>;
-  /** how far the glass reaches straight down, up, left and right (degrees, magnitudes; 120: open) */
+  /** the canopy's triangles as seated about the eye, pilot space: nine numbers each */
+  tris: Float32Array;
+  /** whether the eye sees glass along `d` (pilot space, any length) */
+  sees(d: V3): boolean;
+  /** the edges its frame follows: the glass's outline (boundary) and the creases between its facets */
+  edges: Array<{ a: V3; b: V3; boundary: boolean }>;
+  /** how far the glass reaches from straight ahead straight down, up, left and right (degrees, magnitudes; 120: all the way round) */
   down: number;
   up: number;
   left: number;
   right: number;
-}
-
-/** A glass from its outline: the reach straight right, up, left and down are its points at 0, 90, 180 and 270 degrees round. */
-export function glassOf(outline: Array<[number, number]>): Glass {
-  const n = outline.length;
-  const r = (i: number) => Math.hypot(...outline[Math.round(i * n) % n]!);
-  return { outline, right: r(0), up: r(0.25), left: r(0.5), down: r(0.75) };
 }
 
 /** A design: one chassis's cockpit interior, built into its own shell. */

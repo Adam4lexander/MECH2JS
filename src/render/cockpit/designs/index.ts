@@ -3,8 +3,9 @@
  *
  * @portOnly
  */
-import { GLASS } from '../glass.ts';
-import { glassOf, Kit, type CockpitDesign } from '../kit.ts';
+import { canopyOf, PLAIN_CANOPY } from '../canopy.ts';
+import { CANOPY } from '../glass.ts';
+import { Kit, type CockpitDesign } from '../kit.ts';
 import { battlemaster } from './bm.ts';
 import { direWolf } from './dw.ts';
 import { elemental } from './el.ts';
@@ -19,16 +20,16 @@ import { nova } from './nv.ts';
 import { rifleman } from './rf.ts';
 import { stormcrow } from './sc.ts';
 import { summoner } from './su.ts';
+import { tarantula } from './tr.ts';
 import { timberWolf } from './tw.ts';
 import { warhammer } from './wh.ts';
 import { warhawk } from './wk.ts';
 
-export const DESIGNS: Record<string, CockpitDesign> = Object.fromEntries([battlemaster, direWolf, elemental, fireMoth, gargoyle, hellbringer, jenner, kitFox, madDog, marauder, nova, rifleman, stormcrow, summoner, timberWolf, warhammer, warhawk].map((d) => [d.key, d]));
+export const DESIGNS: Record<string, CockpitDesign> = Object.fromEntries([battlemaster, direWolf, elemental, fireMoth, gargoyle, hellbringer, jenner, kitFox, madDog, marauder, nova, rifleman, stormcrow, summoner, tarantula, timberWolf, warhammer, warhawk].map((d) => [d.key, d]));
 
-/** Builds a design's kit round its mech's glass (glass.ts; a design without one gets a plain window). */
+/** Builds a design's kit round its mech's canopy (glass.ts; a design without one gets a plain window). */
 export function buildDesign(d: CockpitDesign): Kit {
   const k = new Kit();
-  const outline = GLASS[d.key] ?? Array.from({ length: 48 }, (_, i): [number, number] => [40 * Math.cos((i / 48) * Math.PI * 2), 25 * Math.sin((i / 48) * Math.PI * 2)]);
-  d.build(k, glassOf(outline));
+  d.build(k, canopyOf(CANOPY[d.key] ?? PLAIN_CANOPY));
   return k;
 }

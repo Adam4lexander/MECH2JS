@@ -1,7 +1,7 @@
 /**
- * Dire Wolf (Daishi): the Clans' 100-ton assault. Its glass is a narrow
- * forward slot that opens up into the roof, so there is no overhead panel;
- * instead two grab bars run under the open canopy, and the console is broad.
+ * Dire Wolf (Daishi): the Clans' 100-ton assault. A broad six-sided canopy
+ * caps its forward-sloping head, open overhead and all the way round above
+ * the horizon; two grab bars run under it, and the console is broad.
  *
  * @portOnly
  */

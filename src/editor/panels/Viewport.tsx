@@ -154,8 +154,12 @@ export function Viewport({ game }: { game: Game }) {
     const cockpit = new CockpitRenderer(hudOverlay.windowUniforms);
     let cockpitKey: string | null = null;
     let previewKey: string | null = null;
-    /** debug: also draw the cockpit, at the game's eye, when looking through the scene camera */
-    let cockpitOutside = false;
+    /**
+     * The hand-built cockpit through the scene camera too, where it stands: at the game's eye. In the
+     * cockpit view the player's mech is built at its cockpit level, so round it there is only the head's
+     * arms and guns - the cockpit is a box standing in the air above the legs, which is what it is.
+     */
+    let cockpitOutside = true;
     let cockpitRampsOf: string | null = null;
     let hullRamps: number[] = [];
     const lampColours = { red: 0, amber: 0, green: 0, blank: 0 };
@@ -176,6 +180,8 @@ export function Viewport({ game }: { game: Game }) {
     let skyChoiceFor = '';
     const xrInput = new XrInput();
     const xrViewer = new Viewer();
+    /** the pass's eye to the interpolated rig, for the mech's own parts (SceneRenderer.carryOwned) */
+    const carry = new THREE.Matrix4();
     /** the cockpit scene carries the rig's matrix (reset on leaving VR) */
     let cockpitMoved = false;
     const onXrEnd = () => {
@@ -356,7 +362,7 @@ export function Viewport({ game }: { game: Game }) {
       get current() {
         return cockpit.current?.key ?? null;
       },
-      /** debug: see the cockpit from the scene camera too */
+      /** whether the scene camera sees the cockpit (on by default) */
       set outside(on: boolean) {
         cockpitOutside = on;
       },
@@ -466,11 +472,13 @@ export function Viewport({ game }: { game: Game }) {
       let head: THREE.ArrayCamera | null = null;
       if (xr) {
         rig.settings = xrSettingsRef.current;
-        rig.update(now);
+        rig.update(now, game.loopRate === null);
         renderer.xr.updateCamera(rig.camera);
         head = renderer.xr.getCamera();
         // the game's viewer standing at the head: what a turned head sees is culled from there
         sr.sync(rig.cullViewer(head, viewer(), xrViewer));
+        // the mech's own arms and guns ride with the cockpit (a pass behind), not with the world
+        if (cameraGlobals.cockpitViewActive !== 0) sr.carryOwned(mechs.playerMechIndex, rig.cockpitMatrix(gameCam, carry, 1));
         const vp = head.cameras[0]?.viewport;
         drawSize.set(vp?.z ?? 1, vp?.w ?? 1);
       } else {
@@ -651,7 +659,7 @@ export function Viewport({ game }: { game: Game }) {
       }
       const want = targetDepth ?? aimDepthNow();
       reticleInvDepth += (1 / want - reticleInvDepth) * (1 - Math.exp(-dt / RETICLE_EASE));
-      rig.placeLifted(hudOverlay.reticleMesh, gameCam, 1 / reticleInvDepth, tanH, aspect);
+      rig.placeCarried(hudOverlay.reticleMesh, 1 / reticleInvDepth, tanH, aspect);
       hudOverlay.reticleMesh.visible = true;
       bits |= 1 << HUD_LAYER.reticle;
       return bits;

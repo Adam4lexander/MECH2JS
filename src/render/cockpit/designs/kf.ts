@@ -1,7 +1,7 @@
 /**
- * Kit Fox (Uller): a 30-ton Clan light. Its glass is a diamond that runs out
- * to the sides at eye level and up into a peak; a compact console and an
- * overhead strip under the peak's sides.
+ * Kit Fox (Uller): a 30-ton Clan light. A sloped rectangular canopy sits on
+ * top of its head, open round the left and over the front; a compact
+ * console under it.
  *
  * @portOnly
  */

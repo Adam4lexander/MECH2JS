@@ -1,6 +1,8 @@
 /**
- * Warhawk (Masakari): an 85-ton Clan assault with a broad panoramic glass,
- * 73 degrees either side; a wide console and a wide overhead panel.
+ * Warhawk (Masakari): an 85-ton Clan assault. Its glass is a band under the
+ * head's wide flat brim, wrapping round the sides and reaching down to 54
+ * degrees in front, so the console splits into pods; the brim is a wide
+ * overhead panel.
  *
  * @portOnly
  */
@@ -11,7 +13,7 @@ export const warhawk: CockpitDesign = {
   key: 'WK',
   name: 'Warhawk',
   build(k: Kit, glass: Glass) {
-    const s = standard(k, glass, { box: { halfWidth: 1.0, floor: -1.0, roof: 0.6, front: 1.15, back: 0.55 }, layout: 'wrap', style: 'clan', console: { halfWidth: 0.25, wing: 0.3, turn: 40 } });
+    const s = standard(k, glass, { box: { halfWidth: 1.0, floor: -1.0, roof: 0.6, front: 1.15, back: 0.55 }, layout: 'split', style: 'clan', pods: { yaw: 32, dist: 0.64 } });
     const over = facingEye([0, s.box.roof - 0.1, -0.1], -75);
     k.slab(over, 0.6, 0.12, -0.03, Mat.panel);
     k.lamps(over, [Mat.lampGreen, Mat.lampGreen, Mat.lampAmber, Mat.lampGreen, Mat.lampGreen], 0.05);

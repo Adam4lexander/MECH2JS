@@ -1,7 +1,8 @@
 /**
- * Elemental: Clan battle armour, not a mech - the pilot wears it. The glass is
- * a wide visor, so this is a helmet's worth of space: a small console close
- * under the visor, the armrests the suit's own arms.
+ * Elemental: Clan battle armour, not a mech - the pilot wears it. Its helmet's
+ * visor is a chevron (grown to see through, glass.ts), so this is a helmet's
+ * worth of space: a small console close under the visor, the armrests the
+ * suit's own arms.
  *
  * @portOnly
  */

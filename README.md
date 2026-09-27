@@ -118,9 +118,10 @@ the game's own `mech_lod_update`, evaluated from the editor camera.
 
 With a WebXR headset the viewport bar shows **VR** (Play only): you sit in
 the cockpit. Nothing of the game changes. The game's viewer poses a rig and
-your head moves inside it (`src/render/xr/xrRig.ts`). The rig is drawn one
-loop pass behind, interpolated between passes, so the cockpit doesn't
-judder at the 20 Hz loop rate.
+your head moves inside it (`src/render/xr/xrRig.ts`). At a fixed loop
+rate the rig is drawn one loop pass behind, interpolated between passes, so
+the cockpit doesn't judder at 20 Hz. At "display rate" every frame is a
+pass, so the rig stands at the last one.
 
 While you're in VR, the page's viewport mirrors the headset's left eye,
 cropped to the viewport's shape. It is copied from the headset's
@@ -223,18 +224,38 @@ back (target display, damage views, map) stay the original's.
   whole ramps unchanged, AMY_SCN1's ground among them. Edges are dithered.
 - **Cockpits.** Every chassis gets a hand-built cockpit in MW2's own style:
   low-poly, flat-shaded, palette-coloured (`src/render/cockpit`).
-  - **The glass.** Each cockpit is cut to its mech's own glass: the window's
-    outline as the original shell shows it from the pilot's eye, measured
-    for every chassis (`glass.ts`, checked against the shells by
-    `test/sim/cockpits.test.ts`). The Mad Dog keeps its nose glass, the Nova
-    its tall slot, the Timber Wolf its wrap-round canopy.
+  - **The glass.** Each cockpit is cut to its mech's canopy as the outside
+    of the mech shows it: the glass polygons of its exterior model, placed
+    around the pilot's eye (`glass.ts`, `canopy.ts`;
+    `test/sim/cockpits.test.ts` measures them again from the game). The
+    original's cockpit shells often disagree with their own exteriors, and
+    are not used. The windows are wherever the eye sees that glass, and the
+    frame follows its outline and the seams between its facets. So the
+    Timber Wolf sits under a faceted bubble on its nose, the Gargoyle looks
+    out through its face's eye slits, and the Marauder through a slit in
+    its wedge head. The Hellbringer and the Warhammer get a windshield
+    between the shoulders, the Warhawk a band under its brim.
+  - **Seating.** The game's eye is only roughly placed against its exterior,
+    so a few canopies are seated around it. Each fit is recorded with its
+    reason in `glass.ts`.
+    - Canopies the eye sits on or pokes out of are lifted or moved:
+      Hellbringer, Mad Dog, Stormcrow, Warhammer, Kit Fox, Summoner,
+      Tarantula.
+    - The Marauder's slit is brought nearer, and the Elemental's visor
+      enlarged.
+    - The Gargoyle's eye slits are joined across the nose, where the
+      reticle is.
+  - **The Tarantula** wears the Kit Fox's cockpit shell in the original.
+    Here it has its own cockpit, cut to its own exterior. Cockpits are
+    filed under the exterior head (`TR1_HEAD`), not the shell.
   - **Layout.** Inside, a console runs across under the glass. Its centre
     face carries the target display and the radar, where the flat view
     keeps them whole. The left wing carries the heat and jump-jet gauges;
     the right wing carries the weapon list over the damage display and
-    speed. Where the glass runs on down, the console splits into two pods
-    and the floor stays open: target and radar on the left pod, weapons,
-    speed, damage and gauges on the right.
+    speed. Where the glass runs on down (the Battlemaster's dome, the
+    Warhawk's band), the console splits into two pods and the floor stays
+    open: target and radar on the left pod, weapons, speed, damage and
+    gauges on the right.
   - **Screens.** The console carries six screens: radar, speed and
     throttle, heat and jump-jet status, target display, weapon list and
     damage display. Each shows the game's own pixels, and the HUD keeps only

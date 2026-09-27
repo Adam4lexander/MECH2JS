@@ -1,7 +1,7 @@
 /**
- * Hellbringer (Loki): a 65-ton Clan heavy. Its glass starts low, only 16
- * degrees down, and opens into the roof; a console under it and no overhead
- * panel.
+ * Hellbringer (Loki): a 65-ton Clan heavy. Its cockpit is in the torso: a
+ * trapezoid windshield sloping back between the shoulder blocks, narrow at
+ * the top and open over the pilot's head; a console under it.
  *
  * @portOnly
  */

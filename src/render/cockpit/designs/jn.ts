@@ -1,6 +1,7 @@
 /**
- * Jenner: a 35-ton Inner Sphere striker. The glass widens upwards into the
- * roof; a tight cabin with switch banks and pipes.
+ * Jenner: a 35-ton Inner Sphere striker. A wide oval band of glass wraps the
+ * front of its forward pod, 90 degrees either side; a tight cabin with
+ * switch banks and pipes.
  *
  * @portOnly
  */

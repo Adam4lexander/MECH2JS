@@ -199,6 +199,20 @@ export class SceneRenderer {
     return this.cockpitEntries.get(obj) ?? null;
   }
 
+  /**
+   * @portOnly the VR view (render/xr/xrRig.ts): mech `owner`'s parts in the world pass - its own mech's
+   * arms and guns, seen from the cockpit - moved by `m` (the pass's eye to the interpolated rig), so they
+   * stay with the cockpit rather than a pass ahead of it. Until the next sync, which poses them afresh.
+   */
+  carryOwned(owner: number, m: THREE.Matrix4): void {
+    for (const [obj, e] of this.entries) {
+      // a mech's part: type 0x1xx, its index the mech (detail_record_build)
+      if (((obj.type >> 8) & 0xf) !== 1 || (obj.index & 0xffff) !== owner || e.group.parent !== this.scene) continue;
+      e.group.matrix.premultiply(m);
+      e.group.matrixWorldNeedsUpdate = true;
+    }
+  }
+
   pickables(): THREE.Object3D[] {
     return [...this.byMesh.keys()].filter((m) => m.visible && m.parent?.visible);
   }

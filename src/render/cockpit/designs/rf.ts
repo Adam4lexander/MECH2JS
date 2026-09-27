@@ -1,6 +1,7 @@
 /**
- * Rifleman: a 60-ton Inner Sphere anti-aircraft mech. Its glass is a wide
- * band, 60 degrees either side; a long console, switch banks and pipes.
+ * Rifleman: a 60-ton Inner Sphere anti-aircraft mech. A tall, narrow window
+ * under the flat brim of its head - 30 degrees either side, 28 down to 39 up,
+ * for watching the sky; a long console, switch banks and pipes.
  *
  * @portOnly
  */

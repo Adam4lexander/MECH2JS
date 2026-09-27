@@ -1,7 +1,7 @@
 /**
- * Timber Wolf (Mad Cat): a 75-ton Clan heavy. Its glass wraps round - past
- * 90 degrees either side - so the cabin's side walls open too; a low
- * wrap-around console under it.
+ * Timber Wolf (Mad Cat): a 75-ton Clan heavy. The cockpit is in its nose,
+ * under a faceted bubble canopy - glass overhead and round the upper sides,
+ * down to 14 degrees in front; a low wrap-round console under it.
  *
  * @portOnly
  */
