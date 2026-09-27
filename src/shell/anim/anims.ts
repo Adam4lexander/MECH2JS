@@ -22,6 +22,7 @@ import { timerRead } from '../host/timer.ts';
 import { registerGlobals } from '../../engine/globals.ts';
 import { videoDriverErase, videoDriverPut, videoDriverPutIfDirty, videoDriverShape, videoDriverShapeIfDirty } from '../video/driver.ts';
 import { labelsRedraw } from '../ui/labels.ts';
+import { mouseUpdate } from '../ui/mouse.ts';
 import { smackClose, smackDoFrame, smackGoto, smackNextFrame, smackOpen, smackToBuffer, smackWait, type Smack } from '../video/smack.ts';
 
 /** @portOnly an AnimSlot (0x3c bytes) as a live object */
@@ -411,4 +412,22 @@ function advanced(s: AnimSlot): void {
   smackDoFrame(s.smk!);
   s.flags |= 0x100;
   if ((s.flags & 2) !== 0) s.flags |= 0x10;
+}
+
+/**
+ * Plays one slot through: its loop flag cleared, then anim_update_all's two
+ * passes and a present, until that slot stops or is freed - the Jade Falcon
+ * doors, the holoprojector, the training intro.
+ *
+ * @mw2shell anim_play_to_end 0x00039c20
+ * @fidelity exact
+ */
+export function* animPlayToEnd(i: number): Blocking<void> {
+  if (i >= 0 && i < 0x20) anims.animSlots[i]!.flags &= ~8;
+  for (;;) {
+    animUpdateAll();
+    yield* mouseUpdate(shell.shellMouse!);
+    const s = i >= 0 && i < 0x20 ? anims.animSlots[i]! : null;
+    if (!s || (s.flags & ACTIVE) === 0 || (s.flags & 1) !== 0) return;
+  }
 }
