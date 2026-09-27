@@ -1,12 +1,14 @@
 // The headset's cull viewer: the game's viewer standing at the head, its far
-// distance pushed out by the VR view setting - and the game's own viewer left
-// as it was, since the flat view and the game's sim read it. And what rides
-// with the cockpit rather than the world: the reticle, the mech's own parts.
+// distance pushed out as the Modern view's is (viewSettings.ts) - and the
+// game's own viewer left as it was, since the flat view and the game's sim
+// read it. And what rides with the cockpit rather than the world: the
+// reticle, the mech's own parts.
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
 import { Viewer } from '../../src/generated/classes.gen.ts';
+import { copyViewer } from '../../src/render/bridge/cameraViewer.ts';
+import { farther } from '../../src/render/viewSettings.ts';
 import { XrRig } from '../../src/render/xr/xrRig.ts';
-import { XR_DEFAULTS } from '../../src/render/xr/xrSettings.ts';
 
 function gameViewer(): Viewer {
   const v = new Viewer();
@@ -23,11 +25,9 @@ function head(): THREE.Camera {
 }
 
 describe('XrRig.cullViewer', () => {
-  it("pushes the far distance out by viewDistance, and leaves the game's viewer alone", () => {
-    const rig = new XrRig();
-    rig.settings = { ...XR_DEFAULTS, viewDistance: 3 };
+  it("pushes the far distance out, and leaves the game's viewer alone", () => {
     const src = gameViewer();
-    const out = rig.cullViewer(head(), src, new Viewer());
+    const out = new XrRig().cullViewer(head(), src, new Viewer(), 3);
     expect(out.farClip).toBe(450000);
     expect(out.field_0xb4).toBe(450000);
     expect(src.farClip).toBe(150000);
@@ -35,20 +35,26 @@ describe('XrRig.cullViewer', () => {
   });
 
   it("keeps the original's far distance at 1", () => {
-    const rig = new XrRig();
-    rig.settings = { ...XR_DEFAULTS, viewDistance: 1 };
-    const out = rig.cullViewer(head(), gameViewer(), new Viewer());
+    const out = new XrRig().cullViewer(head(), gameViewer(), new Viewer(), 1);
     expect(out.farClip).toBe(150000);
     expect(out.field_0xb4).toBe(150000);
   });
+});
+
+describe('the Modern view distance (farther)', () => {
+  it("pushes a copy's far distance out, not the game's viewer's", () => {
+    const src = gameViewer();
+    const out = farther(copyViewer(src, new Viewer()), 2.5);
+    expect(out.farClip).toBe(375000);
+    expect(out.field_0xb4).toBe(375000);
+    expect(src.farClip).toBe(150000);
+  });
 
   it('keeps the far distance under 2^29 cm, so the clipper latching it times 4 does not overflow', () => {
-    const rig = new XrRig();
-    rig.settings = { ...XR_DEFAULTS, viewDistance: 8 };
     const src = gameViewer();
     src.farClip = 0x10000000;
     src.field_0xb4 = 0x10000000;
-    const out = rig.cullViewer(head(), src, new Viewer());
+    const out = farther(src, 8);
     expect(out.farClip).toBe(0x1fffffff);
     expect(Math.imul(out.farClip, 4)).toBeGreaterThan(0);
   });

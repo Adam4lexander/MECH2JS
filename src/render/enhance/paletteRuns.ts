@@ -58,16 +58,19 @@ const SHADE_TOLERANCE = 2;
  * row's other colours are other hues or the same colour) - taken only if
  * every channel lies within SHADE_TOLERANCE of the target (which keeps the
  * hue: a near-black of another hue is several units off), it is not `g`'s
- * colour, and it lies on the right side of it. A step with no such colour
- * takes the one nearer the middle, so the five run dark to light and a
- * palette without shades of the ground leaves it flat. (The first cut moved
+ * colour, and it lies on the right side of it - and of the step nearer the
+ * middle, which a tolerance round two nearby targets could otherwise pass
+ * (a random palette found one). A step with no such colour takes the one
+ * nearer the middle, so the five run dark to light and a palette without
+ * shades of the ground leaves it flat. (The first cut moved
  * the index along its row, within hueRun: in 40 of the 59 missions that gave
  * nothing, and in some - near-blacks passing the hue test - blue on brown.)
  */
 export function groundShades(rgb: Uint8Array, g: number): number[] {
   const c = [rgb[g * 3]!, rgb[g * 3 + 1]!, rgb[g * 3 + 2]!];
   const lg = luminance(rgb, g);
-  const pick = (k: number): number | null => {
+  /** the step at brightness `k`, darker (k < 1) or lighter than `from`'s luminance */
+  const pick = (k: number, from = lg): number | null => {
     const t = c.map((v) => Math.min(63, v * k));
     let best: number | null = null;
     let bestD = Infinity;
@@ -77,15 +80,15 @@ export function groundShades(rgb: Uint8Array, g: number): number[] {
       if (d > SHADE_TOLERANCE || d >= bestD) continue;
       if (rgb[j * 3] === c[0] && rgb[j * 3 + 1] === c[1] && rgb[j * 3 + 2] === c[2]) continue;
       const lj = luminance(rgb, j);
-      if (k < 1 ? lj >= lg : lj <= lg) continue;
+      if (k < 1 ? lj >= from : lj <= from) continue;
       best = j;
       bestD = d;
     }
     return best;
   };
   const d1 = pick(GROUND_STEPS[1]) ?? g;
-  const d0 = pick(GROUND_STEPS[0]) ?? d1;
+  const d0 = pick(GROUND_STEPS[0], luminance(rgb, d1)) ?? d1;
   const l1 = pick(GROUND_STEPS[3]) ?? g;
-  const l2 = pick(GROUND_STEPS[4]) ?? l1;
+  const l2 = pick(GROUND_STEPS[4], luminance(rgb, l1)) ?? l1;
   return [d0, d1, g, l1, l2];
 }

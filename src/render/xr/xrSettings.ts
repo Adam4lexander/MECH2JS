@@ -22,18 +22,9 @@
  * dashDrop: how far below its place the hand-built cockpit sits
  * (render/cockpit), metres - for a pilot sitting taller or shorter.
  *
- * detail: how far out every LOD step is pushed (projection.ts
- * lodDistanceScale) while in VR - the meshes' detail steps and
- * mech_lod_update's ranges. 1 is the original's; its steps, chosen for a
- * 320- or 640-wide screen, pop close in at a headset's resolution.
- *
- * viewDistance: how far out things are drawn while in VR, as a multiple of
- * the mission's far distance (Viewer.farClip, which the chunk sets per
- * mission): the object cull's far sphere and the clipper's far limit, on the
- * viewer the headset culls for (xrRig.ts cullViewer) - the game's own viewer
- * and the flat view keep the original's. 1 is the original's: tuned for a
- * small screen, where what pops in at the far distance is a few pixels, and
- * in a headset it is a building appearing out of thin air.
+ * How far out things are drawn, and the detail steps, are the Modern view's
+ * (render/viewSettings.ts), which a headset uses too. (Correction: they
+ * were first VR settings here, detail and viewDistance.)
  *
  * @portOnly
  */
@@ -41,12 +32,10 @@ export interface XrSettings {
   cockpitScale: number;
   hudScale: number;
   hudDistance: number;
-  detail: number;
   dashDrop: number;
-  viewDistance: number;
 }
 
-export const XR_DEFAULTS: XrSettings = { cockpitScale: 0.35, hudScale: 0.6, hudDistance: 1.2, detail: 3, dashDrop: 0, viewDistance: 3 };
+export const XR_DEFAULTS: XrSettings = { cockpitScale: 0.35, hudScale: 0.6, hudDistance: 1.2, dashDrop: 0 };
 
 const KEY = 'mw2.vr';
 
@@ -58,8 +47,6 @@ export function recallXrSettings(): XrSettings {
       cockpitScale: num(s.cockpitScale, XR_DEFAULTS.cockpitScale),
       hudScale: num(s.hudScale, XR_DEFAULTS.hudScale),
       hudDistance: num(s.hudDistance, XR_DEFAULTS.hudDistance),
-      detail: num(s.detail, XR_DEFAULTS.detail),
-      viewDistance: num(s.viewDistance, XR_DEFAULTS.viewDistance),
       dashDrop: typeof s.dashDrop === 'number' && Number.isFinite(s.dashDrop) ? s.dashDrop : XR_DEFAULTS.dashDrop,
     };
   } catch {

@@ -14,7 +14,9 @@
  * paused frame). The scene camera keeps its own place across Play.
  *
  * Faithful mode renders at VGA resolution (640 x 480 aspect-fitted) and
- * scales up with nearest filtering; Modern renders at native resolution.
+ * scales up with nearest filtering, at the original's draw and detail
+ * distances; Modern renders at native resolution and draws further out
+ * (render/viewSettings.ts), as a headset does.
  *
  * VR (WebXR, where the browser has a headset): the game's camera with the
  * pilot's head inside it - the world, the cockpit shell and the HUD drawn
@@ -33,7 +35,7 @@ import { SceneNode as SceneNodeClass, Viewer } from '../../generated/classes.gen
 import type { Game } from '../../app/Game.ts';
 import { SceneRenderer } from '../../render/SceneRenderer.ts';
 import { fromThree, toThree, CM_TO_UNITS } from '../../render/bridge/space.ts';
-import { cameraFromViewer, viewerFromCamera } from '../../render/bridge/cameraViewer.ts';
+import { cameraFromViewer, copyViewer, viewerFromCamera } from '../../render/bridge/cameraViewer.ts';
 import { attachHostInput } from '../../app/hostInput.ts';
 import { sceneNodeSetOrigin, sceneNodeWalk } from '../../engine/scene/sceneGraph.ts';
 import { cameraGlobals, viewer } from '../../sim/camera/viewer.ts';
@@ -56,6 +58,7 @@ import { XrRig } from '../../render/xr/xrRig.ts';
 import { XrSky } from '../../render/xr/xrSky.ts';
 import { XrInput } from '../../app/xrInput.ts';
 import { recallXrSettings, storeXrSettings, type XrSettings } from '../../render/xr/xrSettings.ts';
+import { farther, recallViewSettings, storeViewSettings, type ViewSettings } from '../../render/viewSettings.ts';
 import { playerTargetPosition } from '../../render/xr/xrRig.ts';
 import { aimDepth } from '../../render/xr/aim.ts';
 import { HUD_LAYER } from '../../engine/vfx/vfx.ts';
@@ -118,6 +121,8 @@ export function Viewport({ game }: { game: Game }) {
   const toggleXr = useRef<(() => void) | null>(null);
   const [xrSettings, setXrSettings] = useState<XrSettings>(recallXrSettings);
   const xrSettingsRef = useRef(xrSettings);
+  const [viewSettings, setViewSettings] = useState<ViewSettings>(recallViewSettings);
+  const viewSettingsRef = useRef(viewSettings);
   const [enhance, setEnhance] = useState<EnhanceSettings>(recallEnhanceSettings);
   const [enhanceOpen, setEnhanceOpen] = useState(false);
   const enhanceRef = useRef(enhance);
@@ -129,6 +134,10 @@ export function Viewport({ game }: { game: Game }) {
     xrSettingsRef.current = xrSettings;
     storeXrSettings(xrSettings);
   }, [xrSettings]);
+  useEffect(() => {
+    viewSettingsRef.current = viewSettings;
+    storeViewSettings(viewSettings);
+  }, [viewSettings]);
   useEffect(() => {
     faithfulRef.current = faithful;
     storeFaithful(faithful);
@@ -164,6 +173,8 @@ export function Viewport({ game }: { game: Game }) {
     /** true while the editor's scene camera is the one shown (Edit, scene view) */
     const sceneView = () => game.mode === 'edit' && editViewRef.current === 'scene';
     const editorViewer = new Viewer();
+    /** the game's viewer as the Modern view culls for it: its far distance pushed out (viewSettings.ts) */
+    const modernViewer = new Viewer();
     const drawSize = new THREE.Vector2();
     const skyGround = new SkyGround(sr.uniforms);
     sr.backdropScene.add(skyGround.mesh);
@@ -398,12 +409,14 @@ export function Viewport({ game }: { game: Game }) {
       const xr = session !== null;
       // the controllers are read before the pass, as the keyboard's interrupts arrive before it
       if (session) xrInput.poll(session, game.mode === 'play');
-      // the LOD distances: pushed out in a headset, the original's otherwise - set before the pass, whose mech_lod_update reads them
+      // the draw and LOD distances: pushed out in Modern and in a headset, the original's in Faithful - set
+      // before the pass, whose mech_lod_update reads them
       const en = enhanceRef.current;
+      const far = xr || !faithfulRef.current ? viewSettingsRef.current : { viewDistance: 1, detail: 1 };
       // the enhancements (render/enhance): the main view's uniforms, and mech_lod_update's policy before the pass reads it
       sr.uniforms.uPanels.value = en.mechPanels ? 1 : 0;
       projectionGlobals.lodAllNear = en.mechsAllTop ? 1 : 0;
-      const lodScale = xr ? xrSettingsRef.current.detail : 1;
+      const lodScale = far.detail;
       if (projectionGlobals.lodDistanceScale !== lodScale) {
         projectionGlobals.lodDistanceScale = lodScale;
         for (const v of new Set([cameraGlobals.mainViewer, cameraGlobals.viewerPosition])) if (v) viewerRefreshLodScale(v);
@@ -496,14 +509,17 @@ export function Viewport({ game }: { game: Game }) {
         renderer.xr.updateCamera(rig.camera);
         head = renderer.xr.getCamera();
         // the game's viewer standing at the head: what a turned head sees is culled from there
-        sr.sync(rig.cullViewer(head, viewer(), xrViewer));
+        sr.sync(rig.cullViewer(head, viewer(), xrViewer, far.viewDistance));
         // the mech's own arms and guns ride with the cockpit (a pass behind), not with the world
         if (cameraGlobals.cockpitViewActive !== 0) sr.carryOwned(mechs.playerMechIndex, rig.cockpitMatrix(gameCam, carry, 1));
         const vp = head.cameras[0]?.viewport;
         drawSize.set(vp?.z ?? 1, vp?.w ?? 1);
       } else {
-        // the game's viewer as the cull, LOD and clipper see it: its own, or standing at the scene camera
-        sr.sync(scene ? viewerFromCamera(sceneCam, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer) : viewer());
+        // the game's viewer as the cull, LOD and clipper see it: its own, or standing at the scene camera -
+        // a copy whenever its far distance is pushed out, the sim reading the game's own
+        const k = far.viewDistance;
+        if (scene) sr.sync(farther(viewerFromCamera(sceneCam, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer), k));
+        else sr.sync(k === 1 ? viewer() : farther(copyViewer(viewer(), modernViewer), k));
         renderer.getDrawingBufferSize(drawSize);
       }
       // Play: the main view only when the game's render hook asked for it this frame (not while the
@@ -820,9 +836,15 @@ export function Viewport({ game }: { game: Game }) {
         <button className={faithful ? 'active' : ''} onClick={() => setFaithful(true)} title="VGA resolution, nearest upscale">
           Faithful
         </button>
-        <button className={!faithful ? 'active' : ''} onClick={() => setFaithful(false)} title="native resolution">
+        <button className={!faithful ? 'active' : ''} onClick={() => setFaithful(false)} title="native resolution, drawn further out">
           Modern
         </button>
+        {(!faithful || xrOn) && (
+          <>
+            <Slider label="view" title="Modern and VR: how far out things are drawn, as a multiple of the mission's far distance (1 = the original's)" value={viewSettings.viewDistance} min={1} max={8} step={0.5} unit="x" onChange={(v) => setViewSettings((s) => ({ ...s, viewDistance: v }))} />
+            <Slider label="detail" title="Modern and VR: how far out the detail steps are pushed (1 = the original's)" value={viewSettings.detail} min={1} max={8} step={0.5} unit="x" onChange={(v) => setViewSettings((s) => ({ ...s, detail: v }))} />
+          </>
+        )}
         <div className="enhance">
           <button className={enhanceOpen ? 'active' : ''} onClick={() => setEnhanceOpen((o) => !o)} title="detail added in the game's own palette terms (the inset displays stay the original's)">
             Enhance
@@ -850,12 +872,10 @@ export function Viewport({ game }: { game: Game }) {
         )}
         {xrSupported && (
           <>
-            <XrSlider label="cockpit" title="the cockpit's size about your eye (1 = the mech's own scale)" value={xrSettings.cockpitScale} min={0.15} max={1.5} step={0.05} unit="x" onChange={(v) => setXrSettings((s) => ({ ...s, cockpitScale: v }))} />
-            <XrSlider label="HUD" title="the HUD's width as a share of the game's view (the reticle and target brackets are drawn in the world, not on it)" value={xrSettings.hudScale} min={0.3} max={1} step={0.05} unit="%" onChange={(v) => setXrSettings((s) => ({ ...s, hudScale: v }))} />
-            <XrSlider label="view" title="how far out things are drawn in VR, as a multiple of the mission's far distance (1 = the original's)" value={xrSettings.viewDistance} min={1} max={8} step={0.5} unit="x" onChange={(v) => setXrSettings((s) => ({ ...s, viewDistance: v }))} />
-            <XrSlider label="detail" title="how far out the detail steps are pushed in VR (1 = the original's)" value={xrSettings.detail} min={1} max={8} step={0.5} unit="x" onChange={(v) => setXrSettings((s) => ({ ...s, detail: v }))} />
-            <XrSlider label="seat" title="VR cockpit: how far the cockpit sits below its place (a taller or shorter pilot)" value={xrSettings.dashDrop} min={-0.3} max={0.3} step={0.02} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, dashDrop: v }))} />
-            <XrSlider label="at" title="how far ahead of your eye the HUD stands" value={xrSettings.hudDistance} min={0.5} max={5} step={0.1} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, hudDistance: v }))} />
+            <Slider label="cockpit" title="the cockpit's size about your eye (1 = the mech's own scale)" value={xrSettings.cockpitScale} min={0.15} max={1.5} step={0.05} unit="x" onChange={(v) => setXrSettings((s) => ({ ...s, cockpitScale: v }))} />
+            <Slider label="HUD" title="the HUD's width as a share of the game's view (the reticle and target brackets are drawn in the world, not on it)" value={xrSettings.hudScale} min={0.3} max={1} step={0.05} unit="%" onChange={(v) => setXrSettings((s) => ({ ...s, hudScale: v }))} />
+            <Slider label="seat" title="VR cockpit: how far the cockpit sits below its place (a taller or shorter pilot)" value={xrSettings.dashDrop} min={-0.3} max={0.3} step={0.02} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, dashDrop: v }))} />
+            <Slider label="at" title="how far ahead of your eye the HUD stands" value={xrSettings.hudDistance} min={0.5} max={5} step={0.1} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, hudDistance: v }))} />
           </>
         )}
       </div>
@@ -863,8 +883,8 @@ export function Viewport({ game }: { game: Game }) {
   );
 }
 
-/** One of the VR sizes: a slider and its value. */
-function XrSlider(p: { label: string; title: string; value: number; min: number; max: number; step: number; unit: 'x' | '%' | 'm'; onChange: (v: number) => void }) {
+/** One of the view's or the VR sizes: a slider and its value. */
+function Slider(p: { label: string; title: string; value: number; min: number; max: number; step: number; unit: 'x' | '%' | 'm'; onChange: (v: number) => void }) {
   const shown = p.unit === '%' ? `${Math.round(p.value * 100)}%` : p.unit === 'x' ? `${p.value.toFixed(2)}x` : `${p.value.toFixed(1)} m`;
   return (
     <label className="xr-slider" title={p.title}>

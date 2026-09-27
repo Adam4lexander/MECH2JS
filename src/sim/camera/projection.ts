@@ -23,8 +23,8 @@ export const projectionGlobals = registerGlobals(
     /**
      * @portOnly the host's multiplier on lodScale - how far every LOD step
      * (the meshes' lodKey thresholds, mech_lod_update's ranges) is pushed out.
-     * 1 is the original. The VR view raises it: at a headset's resolution the
-     * original's steps pop close in. Apply a change with viewerRefreshLodScale.
+     * 1 is the original. The Modern and VR views raise it: at their resolutions
+     * the original's steps pop close in. Apply a change with viewerRefreshLodScale.
      */
     lodDistanceScale: 1,
     /**
@@ -60,7 +60,7 @@ function normalise(product: number): [number, number] {
  * @mw2 viewer_update_projection 0x0003ef30
  * @fidelity partial
  * @divergence the fields +0xa8 and +0xac (secant terms from the atan tables) are not computed
- * @divergence lodScale is multiplied by the host's lodDistanceScale when that is not 1 (the VR view's detail setting)
+ * @divergence lodScale is multiplied by the host's lodDistanceScale when that is not 1 (the Modern and VR views' detail setting, render/viewSettings.ts)
  */
 export function viewerUpdateProjection(v: Viewer): void {
   let zoom = v.zoom | 0;

@@ -107,7 +107,9 @@ input, select { background: var(--panel2); color: var(--text); border: 1px solid
 .viewport canvas { display: block; }
 .viewport.playing { box-shadow: inset 0 0 0 2px var(--accent); }
 .viewport-overlay { position: absolute; left: 6px; top: 4px; font-family: var(--mono); font-size: 11px; color: #cfd3da; text-shadow: 0 0 3px #000; pointer-events: none; }
-.viewport-bar { position: absolute; right: 6px; top: 4px; display: flex; gap: 4px; }
+/* right-aligned, wrapping onto more rows when the view is narrow; the gaps between the controls stay the view's */
+.viewport-bar { position: absolute; left: 6px; right: 6px; top: 4px; display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px; pointer-events: none; }
+.viewport-bar > * { pointer-events: auto; }
 .viewport-bar button.pending { border-color: #c9a227; color: #e8c547; animation: xr-pending 1s ease-in-out infinite alternate; }
 @keyframes xr-pending { from { opacity: 1; } to { opacity: 0.45; } }
 .xr-pending { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 6; max-width: 380px; padding: 14px 18px; background: rgba(20, 22, 26, 0.92); border: 1px solid #c9a227; border-radius: 6px; font-size: 13px; line-height: 1.45; color: #ddd; text-align: center; }

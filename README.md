@@ -114,6 +114,23 @@ posX/posY/posZ/heading in the inspector, keeps its entity fields and scene
 node in step, which the tick hooks do in play. Mech detail levels come from
 the game's own `mech_lod_update`, evaluated from the editor camera.
 
+The viewport bar's **Faithful** / **Modern** buttons pick how the view is
+drawn, and the choice is remembered. Faithful renders at 640x480, scaled up
+with nearest filtering, at the original's draw and detail distances. Modern
+renders at native resolution and draws further out, as a headset always
+does (`src/render/viewSettings.ts`). The original's distances were tuned for
+a small screen; at higher resolutions buildings and hills pop in plainly.
+Two sliders beside Modern set how far, and are remembered:
+
+- **view**: how far out things are drawn, as a multiple of the mission's far
+  distance (3x by default). It scales the object cull's far sphere and the
+  clipper's far limit, on a copy of the game's viewer that the renderer culls
+  for. The game's own viewer, which the sim reads, keeps the mission's
+  distance.
+- **detail**: how far out every LOD step is pushed (3x by default,
+  `lodDistanceScale`, `src/sim/camera/projection.ts`). That covers the
+  meshes' detail steps and the mechs' detail levels.
+
 ## VR
 
 With a WebXR headset the viewport bar shows **VR** (Play only): you sit in
@@ -144,22 +161,14 @@ Three things are specific to stereo:
     Otherwise it takes the nearest of what the ray under it meets, out to
     300 m (`src/render/xr/aim.ts`): the drawn world, the terrain the mechs
     walk on, or the flat ground. Its depth eases between them.
-- **Detail**: every LOD step is pushed 3x further out while in VR
-  (`lodDistanceScale`, `src/sim/camera/projection.ts`). That covers the
-  meshes' detail steps and the mechs' detail levels. The flat view keeps the
-  original's distances.
-- **View distance**: things are drawn 3x further out than the mission's far
-  distance while in VR (`viewDistance`, `src/render/xr/xrRig.ts`
-  `cullViewer`). This scales both the object cull's far sphere and the
-  clipper's far limit, on the viewer the headset culls for. The flat view
-  and the game's own viewer keep the mission's distance.
+- **Detail and view distance** are the Modern view's (see Modes): a headset
+  always draws that far out, whichever of Faithful and Modern is chosen.
 - **The sky and ground** are drawn on a sphere about the eye
   (`src/render/xr/xrSky.ts`). The cull runs from your head, so a turned head
   sees what is behind the game's viewer.
 
 When a headset is present, sliders next to **VR** tune these sizes live:
-cockpit size, HUD width, view distance, detail, seat height and HUD
-distance. They are remembered.
+cockpit size, HUD width, seat height and HUD distance. They are remembered.
 
 Controllers (`src/app/xrInput.ts`) press the game's own keys:
 
