@@ -29,6 +29,7 @@ import { starConfigure, starSetMember } from './handoff/stars.ts';
 import { missionBrf2Load } from './career/brf2.ts';
 import { screenTitle } from './screens/title.ts';
 import { shellScreens, type MainLocals } from './screens/registry.ts';
+import './screens/index.ts';
 import { screenLoadBackground } from './video/background.ts';
 import { fieldOffset } from './memory.ts';
 
