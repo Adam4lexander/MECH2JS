@@ -50,7 +50,9 @@ export async function attachShellAudio(game: Game): Promise<void> {
   const { ctx, out } = game.audio.output();
   const synth = new GmSynth(ctx, out);
   hardware.midi = synth;
+  let playing = 0;
   hardware.digital = {
+    activeCount: () => playing,
     sample(wav: Uint8Array): SampleVoice | null {
       const buf = wavBuffer(ctx, wav);
       if (!buf) return null;
@@ -70,14 +72,20 @@ export async function attachShellAudio(game: Game): Promise<void> {
           src.buffer = buf;
           src.loop = loops === 0;
           src.connect(gain);
+          if (ended) playing++;
           ended = false;
+          const mine = src;
           src.onended = () => {
-            ended = true;
+            if (src === mine && !ended) {
+              ended = true;
+              playing--;
+            }
           };
           src.start();
         },
         stop: () => {
           src?.stop();
+          if (!ended) playing--;
           ended = true;
         },
         done: () => ended,

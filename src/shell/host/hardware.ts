@@ -67,6 +67,8 @@ export interface SampleVoice {
 /** @portOnly the digital driver: AIL_allocate_sample_handle + AIL_set_sample_file */
 export interface DigitalCard {
   sample(wav: Uint8Array): SampleVoice | null;
+  /** AIL_active_sample_count */
+  activeCount(): number;
 }
 
 /** @portOnly a mouse move the host reports, clamped to the screen as the driver's range (set by shell_input_sub_01be20) clamps it */

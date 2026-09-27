@@ -5,6 +5,7 @@
  * there is no handle and every call does nothing, as in the original.
  */
 import { hardware, type SampleVoice } from '../host/hardware.ts';
+import { WAIT, type Blocking } from '../host/blocking.ts';
 
 /** @portOnly the sound system main builds (sound_system_init): +4 is the digital driver */
 export interface SoundSystem {
@@ -159,4 +160,17 @@ export function soundSampleRampStep(s: Sample): void {
     s.volume = clampVolume(s.volume);
     s.handle.setVolume(s.volume);
   }
+}
+
+/**
+ * Plays it like sound_sample_play, then waits until no sample is playing
+ * (at once without a digital driver).
+ *
+ * @mw2shell sound_sample_play_wait 0x0003a5e0
+ * @fidelity exact
+ */
+export function* soundSamplePlayWait(s: Sample): Blocking<void> {
+  if (!s.handle) return;
+  soundSamplePlay(s);
+  while (s.system?.digital && (hardware.digital?.activeCount() ?? 0) !== 0) yield WAIT;
 }

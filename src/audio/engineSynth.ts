@@ -7,6 +7,11 @@
  * oscillators through a low-pass filter: the pitch and level follow the
  * game exactly; the timbre is invented.
  *
+ * It is NOT routed to the front end's General MIDI synth (audio/gmSynth.ts):
+ * on a GM card program 3 is a honky-tonk piano, so a GM engine hum would be
+ * faithful to that hardware and wrong for the game, whose sound is the FM
+ * driver's own patch. Decided 2026-09-28 while porting the shell's music.
+ *
  * @portOnly
  */
 
