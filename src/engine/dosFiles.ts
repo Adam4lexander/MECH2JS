@@ -70,6 +70,7 @@ export function dosPathKey(path: string): string {
 }
 
 function lookup(key: string): Uint8Array | undefined {
+  if (/^[A-Z]:/.test(key)) return cdCache.get(key);
   return dosFiles.overlay?.get(key) ?? dosFiles.own.get(key) ?? dosFiles.files.get(key);
 }
 
@@ -139,6 +140,19 @@ export function dosFindFiles(pattern: string): string[] {
     }
   }
   return [...names].sort();
+}
+
+/**
+ * Files read off the CD ahead of a synchronous reader (MW2.EXE's file_load
+ * of the launch pictures): 'D:/LAUNCH/SUPANM.SHP' -> bytes.
+ */
+const cdCache = new Map<string, Uint8Array>();
+
+/** @portOnly reads a CD file into the cache dosFileLoad serves drive paths from; false when it is not there */
+export async function dosFilePrefetch(path: string): Promise<boolean> {
+  const b = await dosFileLoadAsync(path);
+  if (b) cdCache.set(dosPathKey(path), b);
+  return b !== null;
 }
 
 /** The CD drive: its letter and a reader for paths on it ('SMK\MINTRO.SMK'). */

@@ -189,6 +189,11 @@
   "kind": "raw",
   "doc": "per-mission, and the whole of the ejection outcome hangs on it. sim_objects sets it from the mission record as (record[0xe] == 0), in a run of six flags all inverted the same way. When it is set, mech_eject refuses: it plays cue 0x20 and leaves status alone instead of writing 5, and the status-5 tick rewrites 5 (ej) to 4 (dd) and sets missionEndCode to 4 rather than 2. ui_callbacks_sub_019da0 deliberately forces it to 0 around an command_execute (formerly option_toggle)(0x3b) call and puts it back afterwards, which is what establishes the direction - that path wants the ejection to go through. ONE READER was unexplained: ai_group_part1 at the 0x170d threshold gates a mech_on_destroyed (formerly ai_log_new_leader) call on this being non-zero. With that function now known to be the mech-destroyed handler, the reading is: when ejection is disabled, the path that would eject the mech destroys it instead. That is consistent with the rest of this note, but the 0x170d site itself has not been re-read."
  },
+ "launchGreyRamp": {
+  "address": "0x957e8",
+  "kind": "raw",
+  "doc": "16 RGB triples, a grey ramp (0,0,0 206,210,218 ... 7,7,8), 8-bit: boot_load_launch_anims shifts each byte right by 2 in place and writes them to DAC entries 0..15 once the launch picture has faded in"
+ },
  "simTick": {
   "address": "0x9581c",
   "kind": "raw",

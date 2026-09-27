@@ -8,7 +8,10 @@
  */
 import { SystemErrorFatal } from '../core/systemError.ts';
 import { error as logError, log } from '../core/log.ts';
-import { bootMission } from '../mission/load.ts';
+import { bootMission, bootMissionStart } from '../mission/load.ts';
+import { dosFilePrefetch } from '../engine/dosFiles.ts';
+import { launchAnimPath } from '../sim/display/launchScreen.ts';
+import { launchNamesFromArgv } from '../mission/commandLine.ts';
 import { engineStore } from '../editor/store/store.ts';
 import { missionCatalog, type GameData, type MissionEntry } from './gameData.ts';
 import { setDosFiles } from '../engine/dosFiles.ts';
@@ -66,10 +69,12 @@ export class Game {
   onMissionEnd: ((r: MissionResults) => void) | null = null;
 
   /**
-   * MW2.EXE run the way MECH2 runs it: with the command line the shell left
-   * in mw2prm.cfg, on the disk as the shell left it. Starts in Play.
+   * MW2.EXE run the way MECH2 runs it, first half: the launch pictures
+   * fetched off the CD (MW2.EXE reads them synchronously), then main's
+   * start-up up to its launch screen. Returns the rest of the start-up, or
+   * null when it stopped. The host shows the launch screen meanwhile.
    */
-  launch(argv: string[]): boolean {
+  async launchStart(argv: string[]): Promise<(() => boolean) | null> {
     this.audio.pause();
     this.mission = argv[1] ?? null;
     this.setup = null;
@@ -77,17 +82,35 @@ export class Game {
     this.results = null;
     this.pendingResults = null;
     this.playbackShown = null;
+    const names = launchNamesFromArgv(argv);
+    // both art variants: which one MW2.EXE opens depends on the screen mode its start-up picks
+    for (const n of names) for (const variant of ['', '6']) await dosFilePrefetch(launchAnimPath(n, variant));
+    try {
+      const finish = bootMissionStart({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, argv });
+      return finish || null;
+    } catch (e) {
+      this.failed(e);
+      return null;
+    }
+  }
+
+  /** Second half: the rest of main's start-up, then Play. */
+  launchFinish(finish: () => boolean): boolean {
     let ok = false;
     try {
-      ok = bootMission({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, argv });
+      ok = finish();
     } catch (e) {
-      this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
-      logError('mission', this.loadError);
+      this.failed(e);
     }
     this.mode = 'edit';
     if (this.loadError === null) this.setMode('play');
     engineStore.bump();
     return ok;
+  }
+
+  private failed(e: unknown): void {
+    this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
+    logError('mission', this.loadError);
   }
 
   /** the player's star the last mission was set up with (Replay reuses it), or null for a mission that takes none */

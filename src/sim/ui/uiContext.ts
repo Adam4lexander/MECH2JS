@@ -6,7 +6,6 @@
  * active.
  */
 import { soundPause, soundResume } from '../sound/music.ts';
-import { unestablished } from '../../core/provenance.ts';
 import { UiContext, type MenuContext } from '../../generated/classes.gen.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import { registerGlobals } from '../../engine/globals.ts';
@@ -16,6 +15,7 @@ import { mechs } from '../mech/mechGlobals.ts';
 import { inputGlobals } from '../controls/inputGlobals.ts';
 import { inputSub048ca0 } from '../controls/input.ts';
 import { commandExecute } from './commands.ts';
+import { cheatHandleCommand } from './cheats.ts';
 
 export const ui = registerGlobals(
   'ui',
@@ -171,8 +171,7 @@ export function menuPollKey(): void {
  * through GAMEKEY.MAP, to command_execute.
  *
  * @mw2 key_command_update 0x00045d80
- * @fidelity partial
- * @divergence cheat_handle_command (the cheat-code decoder) is not ported
+ * @fidelity exact
  */
 export function keyCommandUpdate(): void {
   const key = inputGlobals.controlKey & 0xffff;
@@ -182,6 +181,6 @@ export function keyCommandUpdate(): void {
     ui.quitCountdown = (ui.quitCountdown + 2) | 0;
     return;
   }
-  if (mechs.netGameEnabled === 0) unestablished('cheat codes (cheat_handle_command) are not ported', 'key_command_update');
+  if (mechs.netGameEnabled === 0) cheatHandleCommand(key);
   commandExecute(inputSub048ca0(key) & 0xffff);
 }

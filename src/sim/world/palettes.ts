@@ -114,7 +114,7 @@ export const palettes = registerGlobals('palettes', bootPalettes(), () => {
 });
 
 /** paletteDacWrite: entry i of the DAC. @portOnly the VFX driver's DAC poke */
-function dacWrite(i: number, r: number, g: number, b: number): void {
+export function dacWrite(i: number, r: number, g: number, b: number): void {
   const d = palettes.dac;
   d[i * 3] = r & 0xff;
   d[i * 3 + 1] = g & 0xff;

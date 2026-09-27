@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Game } from './Game.ts';
 import type { GameData } from './gameData.ts';
 import { ShellView } from './shell/ShellView.tsx';
+import { LaunchView } from './shell/LaunchView.tsx';
 import { mountCd } from './shell/cdDrive.ts';
 import { attachShellAudio } from './shell/shellAudio.ts';
 import { Viewport } from '../editor/panels/Viewport.tsx';
@@ -24,7 +25,7 @@ import { hardware } from '../shell/host/hardware.ts';
 // Debug handle for the browser console: the front end's PC.
 (window as unknown as { mw2shell: unknown }).mw2shell = { hardware };
 
-type Showing = { kind: 'start' } | { kind: 'shell'; pump: ShellPump; done: (status: number) => void } | { kind: 'sim' } | { kind: 'quit' };
+type Showing = { kind: 'start' } | { kind: 'launch'; done: () => void } | { kind: 'shell'; pump: ShellPump; done: (status: number) => void } | { kind: 'sim' } | { kind: 'quit' };
 
 export function GameShell({ data, game }: { data: GameData; game: Game }) {
   const [showing, setShowing] = useState<Showing>({ kind: 'start' });
@@ -54,11 +55,23 @@ export function GameShell({ data, game }: { data: GameData; game: Game }) {
               game.onMissionEnd = null;
               done(r.exitStatus);
             };
-            setShowing({ kind: 'sim' });
-            if (!game.launch(argv)) {
-              game.onMissionEnd = null;
-              done(0);
-            }
+            void game.launchStart(argv).then((finish) => {
+              if (!finish) {
+                game.onMissionEnd = null;
+                done(0);
+                return;
+              }
+              setShowing({
+                kind: 'launch',
+                done: () => {
+                  setShowing({ kind: 'sim' });
+                  if (!game.launchFinish(finish) && game.loadError) {
+                    game.onMissionEnd = null;
+                    done(0);
+                  }
+                },
+              });
+            });
           }),
       },
       splitCommandTail,
@@ -93,6 +106,7 @@ export function GameShell({ data, game }: { data: GameData; game: Game }) {
       </div>
     );
   if (showing.kind === 'shell') return <div className="shell-frame"><ShellView pump={showing.pump} onExit={onShellExit} /></div>;
+  if (showing.kind === 'launch') return <div className="shell-frame"><LaunchView onDone={showing.done} /></div>;
   if (showing.kind === 'sim') return <div className="play-frame"><Viewport game={game} /></div>;
   return (
     <div className="shell-start">

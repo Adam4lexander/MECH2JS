@@ -35,10 +35,12 @@ import { thingNodes } from '../sim/mech/spawn.ts';
 import { layoutRescaleAll } from '../sim/display/rescale.ts';
 import { defaultCanvas, videoInit } from '../sim/display/video.ts';
 import { vfxVideoSub010320 } from '../sim/display/mainView.ts';
+import { bootLoadLaunchAnims, gameBootSub0155a0 } from '../sim/display/launchScreen.ts';
 import { setMekSource } from '../sim/mech/looseFiles.ts';
 import { DEFAULT_RULES, rulesToBytes, simOptionsLoad, type SimRules } from '../sim/mech/simOptions.ts';
 import { destructiblesReset } from '../sim/things/destructibles.ts';
 import { gamethingTableReset } from '../sim/things/gameThings.ts';
+import { simCountMechsByStatus } from '../sim/things/allegianceTally.ts';
 import { dayCycleInit } from '../sim/world/dayCycle.ts';
 import { projectMapsAlloc, projectMapsFree, projectSetMangle } from '../sim/world/projectMaps.ts';
 import { worldRecordsAllDefined, worldRecordsBuildAll, worldRecordsTick } from '../sim/world/worldRecords.ts';
@@ -106,11 +108,14 @@ export interface MissionBootOptions {
 }
 
 /**
- * main()'s start-up from project_open to the frame loop.
+ * main()'s start-up up to and including the launch screen
+ * (boot_load_launch_anims): returns the rest of it to run, or false when
+ * check_launched_by_shell says stop. The host shows the launch screen
+ * (sim/display/launchScreen.ts) between the two.
  *
  * @portOnly the sequence is main's (0x15a30); every call in it is a ported function or a stated gap
  */
-export function bootMission(opts: MissionBootOptions): boolean {
+export function bootMissionStart(opts: MissionBootOptions): (() => boolean) | false {
   setBootImage(opts.exe);
   resetAllGlobals();
   resetProvenanceSeen();
@@ -140,6 +145,22 @@ export function bootMission(opts: MissionBootOptions): boolean {
   simOptionsLoad(opts.rules === undefined ? (dif ?? rulesToBytes(DEFAULT_RULES)) : opts.rules ? rulesToBytes(opts.rules) : null);
   audioTimerInit();
   videoInit();
+  bootLoadLaunchAnims();
+  return () => bootMissionFinish(opts, mission);
+}
+
+/**
+ * main()'s start-up from project_open to the frame loop, all at once.
+ *
+ * @portOnly the sequence is main's (0x15a30): bootMissionStart then bootMissionFinish
+ */
+export function bootMission(opts: MissionBootOptions): boolean {
+  const finish = bootMissionStart(opts);
+  return finish ? finish() : false;
+}
+
+/** The rest of main's start-up, after the launch screen is up (its animation running meanwhile). */
+function bootMissionFinish(opts: MissionBootOptions, mission: string): boolean {
   // static_arena_init: the DTBL pre-pass sizes arenas; the port allocates on demand
   divergence('static_arena_init: no arena pre-pass; tables are allocated on demand', 'main');
   randomTablesInit(opts.randomSeed);
@@ -155,9 +176,7 @@ export function bootMission(opts: MissionBootOptions): boolean {
   dayCycleInit();
   worldRecordsBuildAll();
   simPreloadData();
-  // sim_count_mechs_by_status, terrain_table_reset, camera_init, input_init: Phase 2
-  // sim_count_mechs_by_status: the allegiance tallies (0xa5668..) feed the results screen, Phase 6
-  divergence('sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)', 'main');
+  simCountMechsByStatus();
   terrainTableReset();
   cameraInit();
   // game_boot_sub_015670 re-hooks the keyboard interrupt: the host's
@@ -172,7 +191,8 @@ export function bootMission(opts: MissionBootOptions): boolean {
   worldRecordsTick();
   vfxVideoSub0103c0();
   detailOptionsApplyThunk();
-  // hangAround's debug title (input_sub_048e80, hud_draw_title): not ported; game_boot_sub_0155a0 stops the launch animation, which the port has none of
+  // hangAround's debug title (input_sub_048e80, hud_draw_title): not ported
+  gameBootSub0155a0();
   screenFadeIn(0, defaultCanvas);
   return ok;
 }

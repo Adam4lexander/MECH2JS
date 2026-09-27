@@ -192,3 +192,24 @@ export function checkLaunchedByShell(argv: readonly string[], flags: [number, nu
   // hud_debug_sub_049900(args) shows them on the mono display
   return { ok, args };
 }
+
+/**
+ * The two launch files' names MW2.EXE will open (-B= and -G=, as
+ * check_launched_by_shell reads them, with its defaults), for the host to
+ * fetch off the CD before the synchronous start-up.
+ *
+ * @portOnly a read-only pass over the same options
+ */
+export function launchNamesFromArgv(argv: readonly string[]): [string, string] {
+  let b = 'supanm';
+  let g = 'launch';
+  for (const a of argv.slice(1)) {
+    if (a[0] !== '-' && a[0] !== '/') continue;
+    const c = (a[1] ?? '').toUpperCase();
+    const eq = a.indexOf('=');
+    if (eq < 0) continue;
+    if (c === 'B') b = a.slice(eq + 1);
+    else if (c === 'G') g = a.slice(eq + 1);
+  }
+  return [b, g];
+}
