@@ -11,10 +11,10 @@ installConsoleSinks();
 // Debug handle for the browser console: every registered global group by name.
 (window as unknown as { mw2: unknown }).mw2 = {
   get viewer() {
-    return Object.fromEntries(globalGroups().map((g) => [g.name, g.state])).camera;
+    return Object.fromEntries(globalGroups('mw2').map((g) => [g.name, g.state])).camera;
   },
   get globals() {
-    return Object.fromEntries(globalGroups().map((g) => [g.name, g.state]));
+    return Object.fromEntries(globalGroups('mw2').map((g) => [g.name, g.state]));
   },
 };
 

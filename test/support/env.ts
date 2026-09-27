@@ -62,6 +62,45 @@ export function buildPath(name: string): string {
   return path.join(MW2_DECOMPILED, 'mw2', 'build', name);
 }
 
+// ---- the front end (MW2SHELL.EXE) ----
+
+/** The shell's executable and its main asset archive. */
+export const hasShellData = fs.existsSync(path.join(MW2_ROOT, 'MW2SHELL.EXE')) && fs.existsSync(path.join(MW2_ROOT, 'DATABASE.MW2'));
+export const hasShellDecompiled = fs.existsSync(path.join(MW2_DECOMPILED, 'mw2shell', 'listing'));
+/** The CD image the movies and most screen animations live on. */
+export const hasCdImage = fs.existsSync(path.join(MW2_ROOT, 'MECH2_16B.BIN')) && fs.existsSync(path.join(MW2_ROOT, 'MECH2_16B.CUE'));
+
+export function shellListingPath(name: string): string {
+  return path.join(MW2_DECOMPILED, 'mw2shell', 'listing', name);
+}
+
+export function readShellListing(name: string): string {
+  return fs.readFileSync(shellListingPath(name), 'utf8').replace(/\r\n/g, '\n');
+}
+
+export function shellBuildPath(name: string): string {
+  return path.join(MW2_DECOMPILED, 'mw2shell', 'build', name);
+}
+
+/**
+ * Files the shell wrote into the install (MW2PRM.CFG, MW2REG.CFG, the star
+ * BWDs, INSTMAP1.BWD, MEK\*USR.MEK, INPUT.MAP...), read as the EXPECTED
+ * output of the ported writers. Tests only: at run time the port never reads
+ * the install's config or player files - it keeps its own. Keys are
+ * upper-case with '/' separators; a name that is absent is left out.
+ */
+export function installShellFixtures(names: readonly string[]): Map<string, Uint8Array> {
+  const m = new Map<string, Uint8Array>();
+  for (const n of names) {
+    const [dir, file] = n.includes('/') ? [n.slice(0, n.lastIndexOf('/')), n.slice(n.lastIndexOf('/') + 1)] : ['', n];
+    const d = path.join(MW2_ROOT, dir);
+    if (!fs.existsSync(d)) continue;
+    const re = new RegExp('^' + file.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$', 'i');
+    for (const f of fs.readdirSync(d)) if (re.test(f)) m.set((dir ? dir.toUpperCase() + '/' : '') + f.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(d, f))));
+  }
+  return m;
+}
+
 export function skipReason(): string {
   const miss: string[] = [];
   if (!hasGameData) miss.push(`game data (MW2.PRJ + MW2.EXE) under MW2_ROOT=${MW2_ROOT}`);
@@ -69,6 +108,16 @@ export function skipReason(): string {
   return miss.join('; ');
 }
 
+export function shellSkipReason(): string {
+  const miss: string[] = [];
+  if (!hasShellData) miss.push(`the front end (MW2SHELL.EXE + DATABASE.MW2) under MW2_ROOT=${MW2_ROOT}`);
+  if (!hasShellDecompiled) miss.push(`the shell's decompilation listings under MW2_DECOMPILED=${MW2_DECOMPILED}`);
+  return miss.join('; ');
+}
+
 if (!hasGameData || !hasDecompiled) {
   console.warn(`[golden] SKIPPING suites that need: ${skipReason()}`);
+}
+if (!hasShellData || !hasShellDecompiled) {
+  console.warn(`[golden] SKIPPING shell suites that need: ${shellSkipReason()}`);
 }

@@ -49,6 +49,38 @@ export function worldRecordDefine(...) { ... }
   for an original oddity reproduced on purpose, `divergence('...')` for a
   runtime difference. All three appear in PORTING.md.
 
+## Two executables: MW2.EXE and MW2SHELL.EXE
+
+The port reproduces the sim (MW2.EXE) and the front end (MW2SHELL.EXE,
+`decompiled/mw2shell/`). In the original they are separate processes that
+MECH2.EXE runs in turn, so they are separate address spaces. Everything keyed
+by an address or reset at start-up is therefore keyed by executable
+(`engine/exeTarget.ts`, `'mw2' | 'mw2shell'`, MW2 by default):
+
+| | MW2.EXE | MW2SHELL.EXE |
+|---|---|---|
+| function tag | `@mw2 <name> <addr>` | `@mw2shell <name> <addr>` |
+| static data tag | `@mw2data` | `@mw2shelldata` |
+| checked against | `decompiled/mw2/listing/functions.csv` | `decompiled/mw2shell/listing/functions.csv` |
+| structs | `src/generated/classes.gen.ts` | `src/generated/shell/classes.gen.ts` |
+| labels | `LABEL` (`generated/labels.gen.ts`) | `SHELL_LABEL` (`generated/shell/labels.gen.ts`) |
+| boot image | `imageI32`, ... | `imageReader('mw2shell')` |
+| globals | `registerGlobals(name, state, reset)` | `registerGlobals(name, state, reset, 'mw2shell')` |
+| code pointers | `registerCode(name, addr, fn)` | `registerCode(name, addr, fn, 'mw2shell')` |
+
+- Look shell addresses up in the shell's `functions.csv`; the two images
+  overlap, so an MW2 address means nothing in the shell and the reverse.
+- A shell struct with MW2's name *and* layout (SimOptions, the Project* file
+  structs) is MW2's class, re-exported from the shell module, so one value
+  passes between them. The shell's `MenuItem`, `MechSection` and
+  `MissionObjectiveRecord` share only a name and are their own classes.
+- Code the two share byte for byte (the VFX drawing and runtime routines,
+  `decompiled/mw2shell/build/matched.csv`) is ported once and carries a tag
+  for each executable.
+- `resetAllGlobals(target)` resets one executable's globals, as starting that
+  process would. Library groups (clib, Miles, Smacker) and the shell's dead
+  WASM compiler are left out of PORTING.md's totals.
+
 ## Numbers
 
 - The sim is exact fixed-point. Positions are cm, angles 16.16 degrees
