@@ -8,6 +8,12 @@ import { mw2Decompiled, mw2Root } from '../../tools/paths.ts';
 import { NodeFsSource } from '../../tools/nodeSource.ts';
 import type { MechChoice } from '../../src/data/catalog/mechs.ts';
 import { buildEmptyStar, buildUserStar, type StarSetup } from '../../src/data/config/userStar.ts';
+import { ExeImage } from '../../src/data/exe/ExeImage.ts';
+import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
+import { dosFiles, setDosFiles, setOverlayFiles, setOwnFiles } from '../../src/engine/dosFiles.ts';
+import { startShellProcess } from '../../src/shell/boot.ts';
+import { seedControlFiles } from '../../src/shell/controls/seed.ts';
+import { instmapWrite } from '../../src/shell/handoff/starFiles.ts';
 
 // An unset path (no MW2_ROOT / MW2_DECOMPILED in .env.local) becomes a
 // placeholder that exists nowhere, so every has* below is false and the
@@ -32,27 +38,60 @@ export const TEST_STAR: StarSetup = (() => {
 })();
 
 /**
- * The loose files a mission reads (upper-case keys, '/' separators): the
- * GIDDI drivers (what app/gameData.ts fetches), the install's INPUT.MAP,
- * GAMEKEY.MAP and MW2SND.CFG - which the app no longer reads: it writes its
- * own (shell/controls/seed.ts; test/sim/controlsSeed.test.ts plays on those)
- * - plus the player's star built from `star` (as Game.loadMission does).
- * For tests of every mission, the opponent stars the shell would write are
- * supplied empty (as the install's are) and INSTMAP1.BWD read from the
- * install; the app offers neither.
+ * The loose files a mission reads (upper-case keys, '/' separators), as the
+ * app has them on a first run - nothing a player saved, so every install
+ * gives the same disk: the GIDDI drivers (content, what app/gameData.ts
+ * fetches), the files the port writes for itself (firstRunFiles), and the
+ * player's star built from `star` (as Game.loadMission does). No
+ * MW2SND.CFG: the shell writes one only when the options screen is saved,
+ * and without it MW2.EXE keeps its defaults. For tests of every mission,
+ * the opponent stars the shell would write are supplied empty.
  */
 export function installFiles(star: StarSetup = TEST_STAR): Map<string, Uint8Array> {
-  const m = new Map<string, Uint8Array>();
-  const add = (dir: string, re: RegExp) => {
-    const d = path.join(MW2_ROOT, dir);
-    if (!fs.existsSync(d)) return;
-    for (const f of fs.readdirSync(d)) if (re.test(f)) m.set((dir ? dir + '/' : '') + f.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(d, f))));
-  };
-  add('', /\.MAP$|^MW2SND\.CFG$|^INSTMAP1\.BWD$/i);
-  add('GIDDI', /\.(DLL|STD|CAL)$/i);
+  const m = giddiDrivers();
+  for (const [k, v] of firstRunFiles(m)) m.set(k, v);
   m.set('USERSTAR.BWD', buildUserStar(star));
   for (let i = 1; i <= 5; i++) m.set(`EN0${i}STAR.BWD`, buildEmptyStar());
   return m;
+}
+
+/** The install's GIDDI input drivers (.DLL, .STD, .CAL), keyed 'GIDDI/<NAME>'. */
+function giddiDrivers(): Map<string, Uint8Array> {
+  const m = new Map<string, Uint8Array>();
+  const d = path.join(MW2_ROOT, 'GIDDI');
+  if (!fs.existsSync(d)) return m;
+  for (const f of fs.readdirSync(d)) if (/\.(DLL|STD|CAL)$/i.test(f)) m.set(`GIDDI/${f.toUpperCase()}`, new Uint8Array(fs.readFileSync(path.join(d, f))));
+  return m;
+}
+
+let firstRun: Map<string, Uint8Array> | null = null;
+
+/**
+ * What the port writes for itself before a first mission, made once on a
+ * scratch disk (the disk's layers are put back after): the controls files
+ * (shell/controls/seed.ts - INPUT.MAP, GAMEKEY.MAP, giddi\*.cpc) and
+ * INSTMAP1.BWD as the grievance screen's default pair writes it
+ * (instmap_write(Wolf, Jade Falcon), as the dev launch does).
+ */
+function firstRunFiles(giddi: Map<string, Uint8Array>): Map<string, Uint8Array> {
+  if (firstRun) return firstRun;
+  const saved = { files: dosFiles.files, own: dosFiles.own, overlay: dosFiles.overlay };
+  try {
+    setDosFiles(giddi);
+    setOwnFiles(new Map());
+    setOverlayFiles(null);
+    const shellExe = ExeImage.fromExe(new Uint8Array(fs.readFileSync(path.join(MW2_ROOT, 'MW2SHELL.EXE'))));
+    seedControlFiles(shellExe);
+    // instmap_write names its bitmaps from MW2.PRJ: the shell process, started as the dev launch starts it
+    startShellProcess(shellExe, new ProjectFile(new Uint8Array(fs.readFileSync(path.join(MW2_ROOT, 'MW2.PRJ')))));
+    instmapWrite(0, 1);
+    firstRun = new Map(dosFiles.own);
+  } finally {
+    dosFiles.files = saved.files;
+    dosFiles.own = saved.own;
+    dosFiles.overlay = saved.overlay;
+  }
+  return firstRun;
 }
 
 export function listingPath(name: string): string {

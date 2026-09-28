@@ -22,9 +22,9 @@ describe.runIf(hasGameData && hasShellData)('a mission on the port-seeded INPUT.
     const exe = ExeImage.fromExe(await src.read('MW2.EXE'));
     const shellExe = ExeImage.fromExe(await src.read('MW2SHELL.EXE'));
     const prj = new ProjectFile(await src.read('MW2.PRJ'));
-    // the install's files less every *.MAP: what the app now serves
+    // the disk before the port's first run: the test disk less the controls files, which the seed is to write
     const assets = installFiles();
-    for (const k of [...assets.keys()]) if (/\.MAP$/.test(k)) assets.delete(k);
+    for (const k of [...assets.keys()]) if (/\.(MAP|CPC)$/.test(k)) assets.delete(k);
     setDosFiles(assets);
     setOwnFiles(new Map());
     setOverlayFiles(null);

@@ -1,5 +1,5 @@
-// The input layer against the shipped INPUT.MAP, GAMEKEY.MAP and GIDDI
-// drivers: keys pressed as scancodes through the keyboard driver's own
+// The input layer against the port's first-run INPUT.MAP and GAMEKEY.MAP
+// (test/support/env.ts installFiles) and the GIDDI drivers: keys pressed as scancodes through the keyboard driver's own
 // interrupt handler, read back as playerControls.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
@@ -45,18 +45,18 @@ describe.runIf(hasGameData)('input', () => {
     expect(pc.weapon_fire).toBe(0);
   });
 
-  it('grey arrows arrive through the E0 table and respect the Alt chord', () => {
+  it('grey arrows arrive through the E0 table and respect the Ctrl chord (the default profile\'s modifier)', () => {
     const pc = mechs.playerControls;
     kb.isr(0xe0);
-    kb.isr(0x4b); // grey left: legs_pan_minus without Alt
+    kb.isr(0x4b); // grey left: legs_pan_minus without Ctrl
     inputPollControls();
     expect(pc.legs_pan_minus).toBe(1);
     expect(pc.pilot_pan_minus).toBe(0);
-    kb.isr(0x38); // left Alt down: now pilot_pan_minus, not legs
+    kb.isr(0x1d); // left Ctrl down: now pilot_pan_minus, not legs
     inputPollControls();
     expect(pc.legs_pan_minus).toBe(0);
     expect(pc.pilot_pan_minus).toBe(1);
-    kb.isr(0xb8);
+    kb.isr(0x9d);
     kb.isr(0xe0);
     kb.isr(0xcb);
     inputPollControls();
