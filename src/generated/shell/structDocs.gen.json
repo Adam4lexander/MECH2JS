@@ -2,11 +2,11 @@
  "SimOptions": {
   "doc": "",
   "fields": {
-   "unlimitedAmmo": "MW2's consumers. SHELL: mission_result_sub_023890 does not advance missionIndex when it is 1",
+   "unlimitedAmmo": "MW2's consumers. SHELL: screen_debriefing does not advance missionIndex when it is 1",
    "invulnerability": "MW2's consumers. SHELL: blocks mission advancement when 1, like unlimitedAmmo",
    "splashDamage": "MW2's consumers",
    "collisionDamage": "MW2's consumers. SHELL: blocks mission advancement when 0. So a result of 2 only counts toward the campaign with unlimited ammo off, invulnerability off and collision damage on",
-   "heatTracking": "MW2's consumers. SHELL: mission_result_sub_023890 awards rank points on a Trial only when it is 1, besides the three advancement conditions",
+   "heatTracking": "MW2's consumers. SHELL: screen_debriefing awards rank points on a Trial only when it is 1, besides the three advancement conditions, and with it 0 the mission's honor is 0 ('The Keshik deems it Dishonorable to Alter Heat Tracking') and the Mission Honor / Difficulty Multiplier lines are not printed. Advancement (missionIndex + 1) does not test it",
    "difficulty": "0..2, MW2's mech_config armour scaling. SHELL: star_files_write reads it from its own copy of the file. 0 moves the enemy AI skill rows one easier and 2 one harder"
   }
  },
@@ -35,7 +35,7 @@
   "doc": "",
   "fields": {
    "scenario": "the mission's *SCN1 stream name (yellSCN1 ...); main's state 0xb loads it for pilots_sub_0291b0. NULL in the closing 'Retired' row",
-   "isTrial": "1 on exactly the rows titled 'Trial 1'..'Trial 4' (missions 4, 8, 11, 15 of both careers); trials_sub_037a50 and mission_result_sub_023890 test it == 1",
+   "isTrial": "1 on exactly the rows titled 'Trial 1'..'Trial 4' (missions 4, 8, 11, 15 of both careers); trials_sub_037a50 and screen_debriefing test it == 1",
    "title": "the mission's display name (Pyre Light, ..., Trial 4, Retired)"
   }
  },
@@ -202,10 +202,10 @@
  "MissionObjectiveRecord": {
   "doc": "",
   "fields": {
-   "succeeded": "MW2: the objective reached state 5. SHELL: the promotion count in mission_result_sub_023890 tests it == 1",
-   "category": "MW2: 1 Primary, 2 Secondary, 8 Return, else Tertiary. SHELL: the promotion count tests it == 1, so only primaries count",
+   "succeeded": "MW2: the objective reached state 5. SHELL: the promotion count in screen_debriefing tests it == 1, and the objective list prints 0 'Failed', 1 'Successful', anything else 'Unknown'",
+   "category": "MW2: 1 Primary, 2 Secondary, 8 Return, else Tertiary. SHELL: the promotion count tests it == 1, so only primaries count. The debriefing's list labels 0 Default, 1 Primary, 2 Secondary, 4 Tertiary, 8 Return and anything else 'Unknown'; the honor lines score 1 (5000 unless one failed), 2 (1500 each) and 4 (500 each)",
    "startedAt": "MW2's writer; no shell consumer read yet",
-   "changedAt": "MW2's writer; no shell consumer read yet",
+   "changedAt": "MW2's writer. SHELL: screen_debriefing sorts the objective list by it, ascending (debriefing_objective_compare, 0x21e90), and prints it as '%02d:%02d' ((value / 60) % 60, value % 60); a negative value prints 'DNF' and sorts after every other. CORRECTION (S6 port): this said no shell consumer had been read",
    "required": "MW2: Objective.isPrerequisite (the 'M' flag). No shell consumer read yet",
    "text": "MW2 strcpys the objective text here, and a longer one runs on into the next record"
   }
@@ -215,14 +215,14 @@
   "fields": {
    "inUse": "1 for a registered pilot, 0 for an empty slot: screen_register opens a name entry on 0 and sets 1 for a new pilot; DELETE MECHWARRIOR sets 0",
    "selected": "the pilot last chosen: screen_register sets it on the clicked slot and clears it on the other nine, and on entry takes the in-use record with it set as currentPilot. It is saved in MW2REG.CFG, so the choice persists",
-   "career": "which campaign: indexes careerMissionTables (trials_sub_037a50, mission_result_sub_023890, which also tests it == 2 and never promotes that case; what a third value means is not established). 0 is Clan Wolf and 1 Jade Falcon: main's state 0xf plays mwoland for index 0 of the same table and mjfland otherwise. career_registry_load's reset gives slots 10..19 career 1 and slots 0..9 career 0",
-   "missionIndex": "the pilot's place in the campaign: careerMissionTables[career][missionIndex]. mission_result_sub_023890 adds 1 when the result is 2 and none of the three flags at 0x7d40c blocks it, and tests it against 0x10. 16 is past the last mission ('Retired')",
-   "rank": "rankTitles[rank] (the function at 0x1caa0): 0 Mechwarrior ... 8 Khan. mission_result_sub_023890 adds promotions to it and clamps it to 8",
+   "career": "which campaign: indexes careerMissionTables (trials_sub_037a50, screen_debriefing, which also tests it == 2 and never promotes that case; what a third value means is not established). 0 is Clan Wolf and 1 Jade Falcon: main's state 0xf plays mwoland for index 0 of the same table and mjfland otherwise. career_registry_load's reset gives slots 10..19 career 1 and slots 0..9 career 0",
+   "missionIndex": "the pilot's place in the campaign: careerMissionTables[career][missionIndex]. screen_debriefing adds 1 when the result is 2 and none of the three flags at 0x7d40c blocks it, and tests it against 0x10. 16 is past the last mission ('Retired')",
+   "rank": "rankTitles[rank] (the function at 0x1caa0): 0 Mechwarrior ... 8 Khan. screen_debriefing adds promotions to it and clamps it to 8",
    "careerHonor": "screen_debriefing adds the mission's honor to it after a win (result 2) and prints it as 'Career Honor:'; orders_text_build substitutes it for \\H. screen_register starts a new pilot at 1000 * (1 + rand() / 32767), 1000..2000. (Was unnamed: 'a per-mission amount, which total not established')",
    "killTally": "screen_debriefing adds MissionTallies.enemyMechsDestroyed (the TOTAL column, whoever made the kill) and playerKillsEnemyOther (the player's DIRECT non-mech kills) - two different columns, as the code has it. Read by hall_of_honor_screen (Kills / Hit %); this said 'no reader yet' before",
    "enemyMechHits": "screen_debriefing adds MissionTallies.enemyMechHits. Read by hall_of_honor_screen (Kills / Hit %); this said 'no reader yet' before",
    "shotsFired": "screen_debriefing adds MissionTallies.shotsFired. Read by hall_of_honor_screen (Kills / Hit %); this said 'no reader yet' before",
-   "pilotName": "main passes it as the player's pilot name to star_select_sub_03a8a0. It is also compared against cheat words: FREEBIRTHTOAD (trials_sub_037a50), FERRARI (0x1c080), NOHERCSALLOWED (mission_result_sub_023890). 16 bytes because +0x38 is a separate field; how long the entry screen allows is not established"
+   "pilotName": "main passes it as the player's pilot name to star_select_sub_03a8a0. It is also compared against cheat words: FREEBIRTHTOAD (trials_sub_037a50), FERRARI (0x1c080), NOHERCSALLOWED (screen_debriefing). 16 bytes because +0x38 is a separate field; how long the entry screen allows is not established"
   }
  },
  "SoundConfig": {

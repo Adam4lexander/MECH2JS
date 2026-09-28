@@ -1382,7 +1382,7 @@
  "mechlabForMember": {
   "address": "0xa6374",
   "kind": "int",
-  "doc": "1 when the mech lab was entered from the star screen for one member (CHANGE MECH or a double click), 0 for its MECH LAB button. screen_mechlab tests it with the previous state 0xd and clears it: when set, ACCEPT MECH assigns the variant to the selected member (star_set_member(-1, ...)) and its button 6 stays disabled; when clear it starts at member 0."
+  "doc": "1 when the mech lab was entered from the star screen for one member (CHANGE MECH or a double click), 0 for its MECH LAB button. screen_mechlab tests it with the previous state 0xd and clears it. When set, buttons 0 EXIT LAB, 6 CUSTOMIZE, 7 ACCEPT MECH and 10 DELETE are disabled, and STAR CONFIG (button 1) assigns the variant to the selected member (star_set_member(-1, ...), refused with the KDMT message) and returns 0xd. When clear the lab selects member 0 (star_set_member(0, 0, 0)) and ACCEPT MECH assigns the variant to it and returns the state the lab was entered from. CORRECTION (S7 port): this said that when set ACCEPT MECH assigned the variant and only button 6 stayed disabled; ACCEPT MECH is one of the disabled buttons (0x33b60..0x33b88)."
  },
  "musicSetChosen": {
   "address": "0xa6378",

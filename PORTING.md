@@ -9,7 +9,7 @@ than drifting. Library code (Watcom clib, Miles, Smacker) is excluded from the t
 
 ## MW2.EXE
 
-**Game functions:** 1161  |  **ported exact:** 903  |  **partial:** 65  |  **stub:** 3  |  library functions ported: 38
+**Game functions:** 1161  |  **ported exact:** 905  |  **partial:** 63  |  **stub:** 3  |  library functions ported: 38
 
 Library groups left out of the totals: `clib`, `miles`.
 
@@ -36,7 +36,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | project_file | project | 34 | 14 | 4 | 0 | 16 |
 | project_tables | project | 39 | 34 | 0 | 1 | 4 |
 | stream_seen | project | 3 | 3 | 0 | 0 | 0 |
-| render_asm | render | 74 | 42 | 9 | 0 | 23 |
+| render_asm | render | 74 | 44 | 7 | 0 | 23 |
 | res_cache | resource | 25 | 0 | 1 | 2 | 22 |
 | res_loaders | resource | 9 | 5 | 1 | 0 | 3 |
 | cockpit | sim | 12 | 12 | 0 | 0 | 0 |
@@ -285,15 +285,15 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0001d610 | quadtree_raycast_children | terrain | exact | `quadtreeRaycastChildren` src/sim/world/groundQuadtree.ts:245 |
 | 0x0001d6b0 | quadtree_ground_height | terrain | exact | `quadtreeGroundHeight` src/sim/world/groundQuadtree.ts:161 |
 | 0x0001d840 | ray_set_points | terrain | exact | `raySetPoints` src/engine/collision/ray.ts:42 |
-| 0x0001d8a0 | ray_set_from_direction | terrain | exact | `raySetFromDirection` src/engine/collision/ray.ts:192 |
+| 0x0001d8a0 | ray_set_from_direction | terrain | exact | `raySetFromDirection` src/engine/collision/ray.ts:194 |
 | 0x0001d940 | ray_length | terrain | exact | `rayLength` src/engine/collision/ray.ts:61 |
 | 0x0001d960 | ray_normalise | terrain | exact | `rayNormalise` src/engine/collision/ray.ts:73 |
 | 0x0001d9f0 | ray_normalise_exact | terrain | exact | `rayNormaliseExact` src/engine/collision/ray.ts:94 |
-| 0x0001daa0 | ray_set_length | terrain | exact | `raySetLength` src/engine/collision/ray.ts:122 |
-| 0x0001dbd0 | ray_set_end | terrain | exact | `raySetEnd` src/engine/collision/ray.ts:141 |
-| 0x0001dc40 | ray_set_end_at_height | terrain | exact | `raySetEndAtHeight` src/engine/collision/ray.ts:216 |
-| 0x0001dc70 | ray_copy | terrain | exact | `rayCopy` src/engine/collision/ray.ts:168 |
-| 0x0001dca0 | ray_slab_intersect | terrain | exact | `raySlabIntersect` src/engine/collision/ray.ts:242 |
+| 0x0001daa0 | ray_set_length | terrain | exact | `raySetLength` src/engine/collision/ray.ts:124 |
+| 0x0001dbd0 | ray_set_end | terrain | exact | `raySetEnd` src/engine/collision/ray.ts:143 |
+| 0x0001dc40 | ray_set_end_at_height | terrain | exact | `raySetEndAtHeight` src/engine/collision/ray.ts:218 |
+| 0x0001dc70 | ray_copy | terrain | exact | `rayCopy` src/engine/collision/ray.ts:170 |
+| 0x0001dca0 | ray_slab_intersect | terrain | exact | `raySlabIntersect` src/engine/collision/ray.ts:244 |
 | 0x0001dd60 | scene_node_create | terrain | exact | `sceneNodeCreate` src/engine/scene/sceneGraph.ts:43 |
 | 0x0001de60 | scene_node_init_in_place | terrain | exact | `sceneNodeInitInPlace` src/engine/scene/sceneGraph.ts:83 |
 | 0x0001def0 | scene_node_set_userdata | terrain | exact | `sceneNodeSetUserdata` src/engine/scene/sceneGraph.ts:105 |
@@ -731,15 +731,15 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0003a3d8 | object_sphere_distance | geom_luma | exact | `objectSphereDistance` src/sim/world/collision.ts:430 |
 | 0x0003a4b9 | triangle_normal | geom_luma | exact | `triangleNormal` src/engine/scene/worldObject.ts:168 |
 | 0x0003a745 | ray_bound_sphere_distance | geom_luma | exact | `rayBoundSphereDistance` src/sim/world/collision.ts:530 |
-| 0x0003a838 | fixed_sin | render_asm | exact | `fixedSin` src/core/angle/trig.ts:56 |
-| 0x0003a8a8 | fixed_cos | render_asm | exact | `fixedCos` src/core/angle/trig.ts:80 |
-| 0x0003a8b7 | fixed_asin | render_asm | exact | `fixedAsin` src/core/angle/trig.ts:96 |
-| 0x0003a9cc | fixed_acos | render_asm | exact | `fixedAcos` src/core/angle/trig.ts:136 |
-| 0x0003a9e5 | fixed_atan2 | render_asm | exact | `fixedAtan2` src/core/angle/trig.ts:148 |
-| 0x0003aa90 | math_build_trig_tables | render_asm | exact | `mathBuildTrigTables` src/core/angle/trig.ts:36 |
+| 0x0003a838 | fixed_sin | render_asm | exact | `fixedSin` src/core/angle/trig.ts:55 |
+| 0x0003a8a8 | fixed_cos | render_asm | exact | `fixedCos` src/core/angle/trig.ts:79 |
+| 0x0003a8b7 | fixed_asin | render_asm | exact | `fixedAsin` src/core/angle/trig.ts:95 |
+| 0x0003a9cc | fixed_acos | render_asm | exact | `fixedAcos` src/core/angle/trig.ts:135 |
+| 0x0003a9e5 | fixed_atan2 | render_asm | exact | `fixedAtan2` src/core/angle/trig.ts:147 |
+| 0x0003aa90 | math_build_trig_tables | render_asm | exact | `mathBuildTrigTables` src/core/angle/trig.ts:35 |
 | 0x0003aba0 | sqrt_table_build | render_asm | exact | `sqrtTableBuild` src/engine/scene/worldObject.ts:35 |
-| 0x0003ac00 | int_hypot | render_asm | partial | `intHypot` src/core/math/matrix.ts:304 |
-| 0x0003ad00 | matrix_renormalise | render_asm | partial | `matrixRenormalise` src/core/math/matrix.ts:275 |
+| 0x0003ac00 | int_hypot | render_asm | exact | `intHypot` src/core/math/matrix.ts:310 |
+| 0x0003ad00 | matrix_renormalise | render_asm | exact | `matrixRenormalise` src/core/math/matrix.ts:281 |
 | 0x0003aefc | transform_point | render_asm | exact | `transformPoint` src/core/math/matrix.ts:67 |
 | 0x0003afba | matrix_rotate_vector | render_asm | exact | `matrixRotateVector` src/core/math/matrix.ts:82 |
 | 0x0003b078 | matrix_cross_column | render_asm | exact | `matrixCrossColumn` src/core/math/matrix.ts:98 |
@@ -751,7 +751,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0003b4f0 | transform_copy | render_asm | exact | `transformCopy` src/core/math/matrix.ts:35 |
 | 0x0003b522 | matrix_from_euler | render_asm | exact | `matrixFromEuler` src/core/math/matrix.ts:180 |
 | 0x0003b88b | matrix_from_euler_order0 | render_asm | exact | `matrixFromEulerOrder0` src/core/math/matrix.ts:259 |
-| 0x0003b8af | matrix_to_euler | render_asm | exact | `matrixToEuler` src/core/math/matrix.ts:317 |
+| 0x0003b8af | matrix_to_euler | render_asm | exact | `matrixToEuler` src/core/math/matrix.ts:322 |
 | 0x0003b990 | render_asm_sub_03b990 | render_asm | partial | `spriteVertices` src/render/pipeline/drawPipeline.ts:360 |
 | 0x0003ccf0 | poly_fill_dispatch | render_asm | partial | `polyFillDispatch` src/render/pipeline/fillDispatch.ts:87 |
 | 0x0003cda0 | object_draw_lod_mesh | render_asm | partial | `objectSelectLodMesh` src/render/pipeline/drawPipeline.ts:160 |
@@ -775,7 +775,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0003f500 | object_cull_main_view | code label, no Ghidra function | partial | `objectCullMainView` src/render/pipeline/drawPipeline.ts:42 |
 | 0x0003f990 | lod_quality_is_high | render_asm | exact | `lodQualityIsHigh` src/sim/camera/projection.ts:158 |
 | 0x0003f9b0 | lod_quality_set | render_asm | exact | `lodQualitySet` src/sim/camera/projection.ts:150 |
-| 0x0003fa50 | vec3_normalise | render_asm | exact | `vec3Normalise` src/engine/collision/ray.ts:227 |
+| 0x0003fa50 | vec3_normalise | render_asm | exact | `vec3Normalise` src/engine/collision/ray.ts:229 |
 | 0x0003fbc0 | camera_keys_init | render_asm | exact | `cameraKeysInit` src/sim/camera/cameraUpdate.ts:158 |
 | 0x0003fc00 | camera_keys_update | render_asm | exact | `cameraKeysUpdate` src/sim/camera/cameraUpdate.ts:272 |
 | 0x0003fd50 | camera_keys_start | render_asm | exact | `cameraKeysStart` src/sim/camera/cameraUpdate.ts:256 |
@@ -1115,7 +1115,7 @@ Library groups left out of the totals: `clib`, `miles`.
 
 ## MW2SHELL.EXE
 
-**Game functions:** 431  |  **ported exact:** 313  |  **partial:** 19  |  **stub:** 0  |  library functions ported: 5
+**Game functions:** 431  |  **ported exact:** 314  |  **partial:** 18  |  **stub:** 0  |  library functions ported: 5
 
 Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code left out: `wasm`.
 
@@ -1153,7 +1153,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | mouse | ui | 8 | 8 | 0 | 0 | 0 |
 | picture | ui | 4 | 4 | 0 | 0 | 0 |
 | collection | util | 20 | 4 | 1 | 0 | 15 |
-| vfx_lib | vfx | 30 | 12 | 2 | 0 | 16 |
+| vfx_lib | vfx | 30 | 13 | 1 | 0 | 16 |
 | video_driver | vfx | 24 | 22 | 0 | 0 | 2 |
 
 ### Ported functions
@@ -1303,9 +1303,9 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x0002ac90 | widget_panel_layout | shell_2a5e0 | exact | `widgetPanelLayout` src/shell/ui/widgets.ts:144 |
 | 0x0002ad30 | widget_panel_redraw | shell_2a5e0 | exact | `widgetPanelRedraw` src/shell/ui/widgets.ts:173 |
 | 0x0002ada0 | widget_panel_free_labels | shell_2a5e0 | exact | `widgetPanelFreeLabels` src/shell/ui/widgets.ts:189 |
-| 0x0002ae40 | mechlab_place_item | shell_2a5e0 | exact | `mechlabPlaceItem` src/shell/mechlab/design.ts:356 |
-| 0x0002b0d0 | mechlab_remove_item_slots | shell_2a5e0 | exact | `mechlabRemoveItemSlots` src/shell/mechlab/design.ts:381 |
-| 0x0002bbd0 | mechlab_trim_armour_to_tonnage | shell_2a5e0 | exact | `mechlabTrimArmourToTonnage` src/shell/mechlab/design.ts:423 |
+| 0x0002ae40 | mechlab_place_item | shell_2a5e0 | exact | `mechlabPlaceItem` src/shell/mechlab/design.ts:322 |
+| 0x0002b0d0 | mechlab_remove_item_slots | shell_2a5e0 | exact | `mechlabRemoveItemSlots` src/shell/mechlab/design.ts:347 |
+| 0x0002bbd0 | mechlab_trim_armour_to_tonnage | shell_2a5e0 | exact | `mechlabTrimArmourToTonnage` src/shell/mechlab/design.ts:389 |
 | 0x0002bd20 | mechlab_show_location_marker | shell_2a5e0 | exact | `mechlabShowLocationMarker` src/shell/mechlab/panels.ts:130 |
 | 0x0002bd70 | mechlab_draw_mass | shell_2a5e0 | exact | `mechlabDrawMass` src/shell/mechlab/panels.ts:144 |
 | 0x0002bde0 | mechlab_draw_used_mass | shell_2a5e0 | exact | `mechlabDrawUsedMass` src/shell/mechlab/panels.ts:155 |
@@ -1338,22 +1338,22 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x0002d060 | mechlab_open_armour_panel | shell_2a5e0 | exact | `mechlabOpenArmourPanel` src/shell/mechlab/panels.ts:630 |
 | 0x0002d090 | mechlab_open_criticals_panel | shell_2a5e0 | exact | `mechlabOpenCriticalsPanel` src/shell/mechlab/panels.ts:647 |
 | 0x0002d0d0 | mechlab_edit_variant_title | shell_2a5e0 | exact | `mechlabEditVariantTitle` src/shell/mechlab/panels.ts:666 |
-| 0x0002d130 | mechlab_engine_faster | shell_2a5e0 | exact | `mechlabEngineFaster` src/shell/mechlab/design.ts:493 |
-| 0x0002d490 | mechlab_engine_slower | shell_2a5e0 | exact | `mechlabEngineSlower` src/shell/mechlab/design.ts:503 |
-| 0x0002d7f0 | mechlab_toggle_xl_engine | shell_2a5e0 | exact | `mechlabToggleXlEngine` src/shell/mechlab/design.ts:517 |
-| 0x0002dc90 | mechlab_add_jump_jet | shell_2a5e0 | exact | `mechlabAddJumpJet` src/shell/mechlab/design.ts:555 |
-| 0x0002deb0 | mechlab_delete_jump_jet | shell_2a5e0 | exact | `mechlabDeleteJumpJet` src/shell/mechlab/design.ts:579 |
-| 0x0002e0a0 | mechlab_add_heat_sink | shell_2a5e0 | exact | `mechlabAddHeatSink` src/shell/mechlab/design.ts:593 |
-| 0x0002e270 | mechlab_delete_heat_sink | shell_2a5e0 | exact | `mechlabDeleteHeatSink` src/shell/mechlab/design.ts:607 |
-| 0x0002e450 | mechlab_toggle_heat_sink_type | shell_2a5e0 | exact | `mechlabToggleHeatSinkType` src/shell/mechlab/design.ts:622 |
-| 0x0002e6b0 | mechlab_add_armour | shell_2a5e0 | exact | `mechlabAddArmour` src/shell/mechlab/design.ts:640 |
-| 0x0002e7d0 | mechlab_delete_armour | shell_2a5e0 | exact | `mechlabDeleteArmour` src/shell/mechlab/design.ts:652 |
-| 0x0002e900 | mechlab_toggle_ferro_fibrous | shell_2a5e0 | exact | `mechlabToggleFerroFibrous` src/shell/mechlab/design.ts:673 |
-| 0x0002ebe0 | mechlab_toggle_endo_steel | shell_2a5e0 | partial | `mechlabToggleEndoSteel` src/shell/mechlab/design.ts:688 |
-| 0x0002eee0 | mechlab_add_item_and_recompute | shell_2a5e0 | exact | `mechlabAddItemAndRecompute` src/shell/mechlab/design.ts:708 |
-| 0x0002f230 | mechlab_remove_item_and_recompute | shell_2a5e0 | exact | `mechlabRemoveItemAndRecompute` src/shell/mechlab/design.ts:741 |
-| 0x0002f590 | mechlab_add_ammo | shell_2a5e0 | exact | `mechlabAddAmmo` src/shell/mechlab/design.ts:785 |
-| 0x0002f820 | mechlab_delete_ammo | shell_2a5e0 | exact | `mechlabDeleteAmmo` src/shell/mechlab/design.ts:801 |
+| 0x0002d130 | mechlab_engine_faster | shell_2a5e0 | exact | `mechlabEngineFaster` src/shell/mechlab/design.ts:459 |
+| 0x0002d490 | mechlab_engine_slower | shell_2a5e0 | exact | `mechlabEngineSlower` src/shell/mechlab/design.ts:469 |
+| 0x0002d7f0 | mechlab_toggle_xl_engine | shell_2a5e0 | exact | `mechlabToggleXlEngine` src/shell/mechlab/design.ts:483 |
+| 0x0002dc90 | mechlab_add_jump_jet | shell_2a5e0 | exact | `mechlabAddJumpJet` src/shell/mechlab/design.ts:521 |
+| 0x0002deb0 | mechlab_delete_jump_jet | shell_2a5e0 | exact | `mechlabDeleteJumpJet` src/shell/mechlab/design.ts:545 |
+| 0x0002e0a0 | mechlab_add_heat_sink | shell_2a5e0 | exact | `mechlabAddHeatSink` src/shell/mechlab/design.ts:559 |
+| 0x0002e270 | mechlab_delete_heat_sink | shell_2a5e0 | exact | `mechlabDeleteHeatSink` src/shell/mechlab/design.ts:573 |
+| 0x0002e450 | mechlab_toggle_heat_sink_type | shell_2a5e0 | exact | `mechlabToggleHeatSinkType` src/shell/mechlab/design.ts:588 |
+| 0x0002e6b0 | mechlab_add_armour | shell_2a5e0 | exact | `mechlabAddArmour` src/shell/mechlab/design.ts:606 |
+| 0x0002e7d0 | mechlab_delete_armour | shell_2a5e0 | exact | `mechlabDeleteArmour` src/shell/mechlab/design.ts:618 |
+| 0x0002e900 | mechlab_toggle_ferro_fibrous | shell_2a5e0 | exact | `mechlabToggleFerroFibrous` src/shell/mechlab/design.ts:639 |
+| 0x0002ebe0 | mechlab_toggle_endo_steel | shell_2a5e0 | partial | `mechlabToggleEndoSteel` src/shell/mechlab/design.ts:654 |
+| 0x0002eee0 | mechlab_add_item_and_recompute | shell_2a5e0 | exact | `mechlabAddItemAndRecompute` src/shell/mechlab/design.ts:674 |
+| 0x0002f230 | mechlab_remove_item_and_recompute | shell_2a5e0 | exact | `mechlabRemoveItemAndRecompute` src/shell/mechlab/design.ts:707 |
+| 0x0002f590 | mechlab_add_ammo | shell_2a5e0 | exact | `mechlabAddAmmo` src/shell/mechlab/design.ts:751 |
+| 0x0002f820 | mechlab_delete_ammo | shell_2a5e0 | exact | `mechlabDeleteAmmo` src/shell/mechlab/design.ts:767 |
 | 0x0002fab0 | mechlab_click_weapon_slot | shell_2a5e0 | exact | `mechlabClickWeaponSlot` src/shell/mechlab/panels.ts:714 |
 | 0x0002faf0 | mechlab_click_weapon_row | shell_2a5e0 | exact | `mechlabClickWeaponRow` src/shell/mechlab/panels.ts:732 |
 | 0x0002fb20 | mechlab_next_location | shell_2a5e0 | exact | `mechlabNextLocation` src/shell/mechlab/panels.ts:752 |
@@ -1361,13 +1361,13 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x0002fb70 | mechlab_click_unplaced | shell_2a5e0 | exact | `mechlabClickUnplaced` src/shell/mechlab/panels.ts:786 |
 | 0x0002fc80 | mechlab_click_more | shell_2a5e0 | exact | `mechlabClickMore` src/shell/mechlab/panels.ts:797 |
 | 0x0002fc90 | mechlab_click_slot | shell_2a5e0 | exact | `mechlabClickSlot` src/shell/mechlab/panels.ts:806 |
-| 0x0002fd90 | mechlab_armour_front_up | shell_2a5e0 | exact | `mechlabArmourFrontUp` src/shell/mechlab/design.ts:889 |
-| 0x0002fe20 | mechlab_armour_front_down | shell_2a5e0 | exact | `mechlabArmourFrontDown` src/shell/mechlab/design.ts:919 |
-| 0x0002fe50 | mechlab_armour_rear_up | shell_2a5e0 | exact | `mechlabArmourRearUp` src/shell/mechlab/design.ts:934 |
-| 0x0002fed0 | mechlab_armour_rear_down | shell_2a5e0 | exact | `mechlabArmourRearDown` src/shell/mechlab/design.ts:959 |
-| 0x0002ff00 | mechlab_toggle_equipment | shell_2a5e0 | exact | `mechlabToggleEquipment` src/shell/mechlab/design.ts:978 |
+| 0x0002fd90 | mechlab_armour_front_up | shell_2a5e0 | exact | `mechlabArmourFrontUp` src/shell/mechlab/design.ts:855 |
+| 0x0002fe20 | mechlab_armour_front_down | shell_2a5e0 | exact | `mechlabArmourFrontDown` src/shell/mechlab/design.ts:885 |
+| 0x0002fe50 | mechlab_armour_rear_up | shell_2a5e0 | exact | `mechlabArmourRearUp` src/shell/mechlab/design.ts:900 |
+| 0x0002fed0 | mechlab_armour_rear_down | shell_2a5e0 | exact | `mechlabArmourRearDown` src/shell/mechlab/design.ts:925 |
+| 0x0002ff00 | mechlab_toggle_equipment | shell_2a5e0 | exact | `mechlabToggleEquipment` src/shell/mechlab/design.ts:944 |
 | 0x000305a0 | widget_panel_hit | shell_2a5e0 | exact | `widgetPanelHit` src/shell/ui/widgets.ts:202 |
-| 0x00030db0 | mechlab_load_mek | shell_2a5e0 | exact | `mechlabLoadMek` src/shell/mechlab/design.ts:1037 |
+| 0x00030db0 | mechlab_load_mek | shell_2a5e0 | exact | `mechlabLoadMek` src/shell/mechlab/design.ts:1003 |
 | 0x000339e0 | screen_mechlab | mechlab | exact | `screenMechlab` src/shell/screens/mechlab.ts:243 |
 | 0x00036700 | main | shell_main | partial | `shellMain` src/shell/main.ts:105 |
 | 0x000374c0 | prm_load | prm | exact | `prmLoad` src/shell/handoff/prm.ts:40 |
@@ -1381,14 +1381,14 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x00037880 | mouse_inject_click | mouse | exact | `mouseInjectClick` src/shell/ui/mouse.ts:135 |
 | 0x000378a0 | mouse_update | mouse | exact | `mouseUpdate` src/shell/ui/mouse.ts:157 |
 | 0x00037a50 | screen_ready_room | ready_room | exact | `screenReadyRoom` src/shell/screens/readyRoom.ts:47 |
-| 0x00038130 | register_draw_heading | register | exact | `registerDrawHeading` src/shell/screens/register.ts:62 |
-| 0x00038150 | register_draw_mission_row | register | exact | `registerDrawMissionRow` src/shell/screens/register.ts:74 |
-| 0x000381d0 | register_draw_pilot_name | register | exact | `registerDrawPilotName` src/shell/screens/register.ts:89 |
-| 0x00038210 | register_draw_rank | register | exact | `registerDrawRank` src/shell/screens/register.ts:100 |
-| 0x00038260 | register_draw_honor | register | exact | `registerDrawHonor` src/shell/screens/register.ts:111 |
-| 0x000382a0 | register_draw_mission | register | exact | `registerDrawMission` src/shell/screens/register.ts:124 |
-| 0x00038300 | register_click_nothing | register | exact | `registerClickNothing` src/shell/screens/register.ts:136 |
-| 0x00038310 | screen_register | register | partial | `screenRegister` src/shell/screens/register.ts:201 |
+| 0x00038130 | register_draw_heading | register | exact | `registerDrawHeading` src/shell/screens/register.ts:63 |
+| 0x00038150 | register_draw_mission_row | register | exact | `registerDrawMissionRow` src/shell/screens/register.ts:75 |
+| 0x000381d0 | register_draw_pilot_name | register | exact | `registerDrawPilotName` src/shell/screens/register.ts:90 |
+| 0x00038210 | register_draw_rank | register | exact | `registerDrawRank` src/shell/screens/register.ts:101 |
+| 0x00038260 | register_draw_honor | register | exact | `registerDrawHonor` src/shell/screens/register.ts:112 |
+| 0x000382a0 | register_draw_mission | register | exact | `registerDrawMission` src/shell/screens/register.ts:125 |
+| 0x00038300 | register_click_nothing | register | exact | `registerClickNothing` src/shell/screens/register.ts:137 |
+| 0x00038310 | screen_register | register | partial | `screenRegister` src/shell/screens/register.ts:199 |
 | 0x00038c70 | movie_play | movies | exact | `moviePlay` src/shell/anim/movies.ts:43 |
 | 0x00038e80 | movie_play_inline | movies | exact | `moviePlayInline` src/shell/anim/movies.ts:99 |
 | 0x00039000 | movie_open_background | movies | exact | `movieOpenBackground` src/shell/anim/movies.ts:149 |
@@ -1463,15 +1463,15 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x0003e310 | video_driver_sub_03e310 | video_driver | exact | `videoDriverPaletteSave` src/shell/video/driver.ts:220 |
 | 0x0003e340 | video_driver_sub_03e340 | video_driver | exact | `videoDriverPaletteRestore` src/shell/video/driver.ts:230 |
 | 0x0003e500 | screen_load_background | video_driver | exact | `screenLoadBackground` src/shell/video/background.ts:38 |
-| 0x0003e690 | video_driver_sub_03e690 | video_driver | exact | `videoDriverLine` src/shell/video/driver.ts:287 |
-| 0x0003e710 | video_driver_sub_03e710 | video_driver | exact | `videoDriverPut` src/shell/video/driver.ts:299 |
-| 0x0003e7c0 | video_driver_sub_03e7c0 | video_driver | exact | `videoDriverPutIfDirty` src/shell/video/driver.ts:316 |
-| 0x0003e9c0 | video_driver_sub_03e9c0 | video_driver | exact | `videoDriverErase` src/shell/video/driver.ts:327 |
+| 0x0003e690 | video_driver_sub_03e690 | video_driver | exact | `videoDriverLine` src/shell/video/driver.ts:316 |
+| 0x0003e710 | video_driver_sub_03e710 | video_driver | exact | `videoDriverPut` src/shell/video/driver.ts:328 |
+| 0x0003e7c0 | video_driver_sub_03e7c0 | video_driver | exact | `videoDriverPutIfDirty` src/shell/video/driver.ts:345 |
+| 0x0003e9c0 | video_driver_sub_03e9c0 | video_driver | exact | `videoDriverErase` src/shell/video/driver.ts:356 |
 | 0x0003ea60 | video_driver_sub_03ea60 | video_driver | exact | `screenPaintPicture` src/shell/video/background.ts:65 |
-| 0x0003eac0 | video_driver_sub_03eac0 | video_driver | exact | `videoDriverShape` src/shell/video/driver.ts:339 |
-| 0x0003eb30 | video_driver_sub_03eb30 | video_driver | exact | `videoDriverShapeIfDirty` src/shell/video/driver.ts:350 |
-| 0x0003ebe0 | screen_draw_text | video_driver | exact | `screenDrawText` src/shell/video/driver.ts:367 |
-| 0x0003ed10 | video_driver_sub_03ed10 | video_driver | exact | `screenDrawChar` src/shell/video/driver.ts:387 |
+| 0x0003eac0 | video_driver_sub_03eac0 | video_driver | exact | `videoDriverShape` src/shell/video/driver.ts:368 |
+| 0x0003eb30 | video_driver_sub_03eb30 | video_driver | exact | `videoDriverShapeIfDirty` src/shell/video/driver.ts:379 |
+| 0x0003ebe0 | screen_draw_text | video_driver | exact | `screenDrawText` src/shell/video/driver.ts:396 |
+| 0x0003ed10 | video_driver_sub_03ed10 | video_driver | exact | `screenDrawChar` src/shell/video/driver.ts:416 |
 | 0x0003ee10 | labels_add | video_driver | exact | `labelsAdd` src/shell/ui/labels.ts:314 |
 | 0x0003ee30 | labels_remove | video_driver | exact | `labelsRemove` src/shell/ui/labels.ts:322 |
 | 0x0003ee50 | labels_redraw | video_driver | exact | `labelsRedraw` src/shell/ui/labels.ts:333 |
@@ -1482,7 +1482,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x00043e2c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:156 |
 | 0x00044316 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:198 |
 | 0x00045cc0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:271 |
-| 0x00045d9f | vfx_lib_sub_045d9f | vfx_lib | partial | `vfxPaneCopy` src/shell/video/driver.ts:243 |
+| 0x00045d9f | vfx_lib_sub_045d9f | vfx_lib | exact | `vfxPaneCopy` src/shell/video/driver.ts:252 |
 | 0x00047930 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:377 |
 | 0x00047943 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:388 |
 | 0x00047963 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:402 |
@@ -1502,8 +1502,6 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 ## Divergences (deliberate differences)
 
 - src/app/shell/LaunchView.tsx:24 - the launch screen is held up for ${LAUNCH_MIN_MS} ms: the port's start-up is near instant
-- src/core/math/matrix.ts:277 - double instead of x87 extended precision; a²+b²+c² can exceed
-- src/core/math/matrix.ts:306 - computed in double rather than 80-bit extended precision
 - src/core/provenance.ts:8 - <why>                  a deliberate difference, and its reason
 - src/core/random.ts:56 - the seed is a parameter; the original's is the argv pointer
 - src/data/config/ini.ts:95 - reads the INI from memory instead of opening mw2.ini
@@ -1516,7 +1514,6 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/data/prj/ProjectFile.ts:47 - reads from an in-memory buffer; only mode 0 (the one project_open uses)
 - src/data/prj/ProjectFile.ts:124 - returns a view instead of copying into a caller's buffer
 - src/engine/clock.ts:78 - the AIL calls are not made; the host drives timerInterrupt instead of a Miles timer
-- src/engine/collision/ray.ts:96 - the x87 works in 80-bit extended precision and the port in doubles; a value within an extended ulp of an integer could truncate differently
 - src/engine/logWrite.ts:26 - logStream (0x9e8f0, the FILE* log_open fills) is not modelled: the line goes to the log sink whenever logEnabled is set
 - src/engine/miles/ail.ts:170 - no driver file is read: the port's mixer is the driver, and it is always there
 - src/engine/miles/ail.ts:179 - no driver file is read: the channel messages go to the host's synth
@@ -1596,13 +1593,13 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/shell/host/pump.ts:30 - the shell's loops run at ${passRate} passes a second (the original: as fast as the PC allowed)
 - src/shell/host/timer.ts:14 - the host's clock is the timer; AIL's start-up is the host's audio
 - src/shell/main.ts:107 - the mouse, CD (MSCDEX), interrupt hooks and Miles are the port's host; unported screens show a placeholder
-- src/shell/mechlab/design.ts:690 - the two widget_panel_redraw calls at its end are made by the registered click handler (shell/mechlab/panels.ts), which owns the widget engine
-- src/shell/mechlab/design.ts:1039 - the loose file comes off the port's virtual disk (engine/dosFiles.ts) and the stock record from the port's MW2.PRJ reader
-- src/shell/mechlab/design.ts:1310 - the virtual disk has no directories, so the first open never fails and the mkdir('mek') retry is not reached
+- src/shell/mechlab/design.ts:656 - the two widget_panel_redraw calls at its end are made by the registered click handler (shell/mechlab/panels.ts), which owns the widget engine
+- src/shell/mechlab/design.ts:1005 - the loose file comes off the port's virtual disk (engine/dosFiles.ts) and the stock record from the port's MW2.PRJ reader
+- src/shell/mechlab/design.ts:1276 - the virtual disk has no directories, so the first open never fails and the mkdir('mek') retry is not reached
 - src/shell/mechlab/panels.ts:205 - the product is taken in doubles (the original rounds the x87 product to a double for printf) and printed with toFixed
 - src/shell/screens/debriefing.ts:218 - the per-line scratch buffers (0x8e290 ... 0x8f190) and the sorted pointers (debriefingObjectives) are JS values; debriefingText is written to its address once complete
 - src/shell/screens/options.ts:215 - the name is stored and shown faithfully, but nothing in the port acts on it: MW2.EXE's driver DLLs (mcga, vesa480, vesa768) are not loaded and the renderer draws at the browser's resolution whatever the row says
-- src/shell/screens/register.ts:203 - the slots' name labels are kept beside the records, so MW2REG.CFG carries 0 at +0x38 where the original saved a heap pointer (cleared again by every load)
+- src/shell/screens/register.ts:201 - the slots' name labels are kept beside the records, so MW2REG.CFG carries 0 at +0x38 where the original saved a heap pointer (cleared again by every load)
 - src/shell/sound/music.ts:57 - the drivers are the host's synth and card (hardware.midi, hardware.digital), not MDI.INI / DIG.INI
 - src/shell/text/page.ts:70 - with a negative height the original leaves [6] as malloc left it; the port's is 0 (no limit)
 - src/shell/ui/mouse.ts:159 - yields to the host between presenting the frame and reading the mouse
@@ -1617,7 +1614,6 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/shell/video/cursor.ts:88 - the host's pointer is the mouse; it is always present, and the range is the canvas
 - src/shell/video/driver.ts:96 - the VFX driver (DATABASE item 0x21) is the port's hardware layer, a fixed 640x480 mode
 - src/shell/video/driver.ts:99 - the VFX display driver (DATABASE.MW2 item 0x21) is the port’s own 640x480 screen
-- src/shell/video/driver.ts:245 - the fill behaviour outside the source window is inferred from the VFX API, not read (924 bytes of assembly); every shell call copies within bounds
 - src/sim/ai/behaviours.ts:344 - a gamething with a node leaves the caller's y uninitialised in the C; the port gives 0. A handle that is neither a mech nor a gamething transforms by an uninitialised node pointer; the port reports it and answers [0, 0, 0]
 - src/sim/camera/cameraUpdate.ts:670 - the video-state-4 case (radar_map_up: a fixed yaw of 180 and pitch of -45) is not reproduced; the port is never in that state
 - src/sim/camera/projection.ts:49 - the fields +0xa8 and +0xac (secant terms from the atan tables) are not computed
@@ -1743,8 +1739,8 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 
 ## Quirks (original oddities reproduced on purpose)
 
-- src/core/math/matrix.ts:330 - matrix_to_euler degenerate pole: quarter turn written to yaw, pitch 0
-- src/core/math/matrix.ts:336 - matrix_to_euler near-pole branch mirrors the pitch sign
+- src/core/math/matrix.ts:335 - matrix_to_euler degenerate pole: quarter turn written to yaw, pitch 0
+- src/core/math/matrix.ts:341 - matrix_to_euler near-pole branch mirrors the pitch sign
 - src/data/config/ini.ts:110 - ini_find_section dereferences strtok NULL on a blank line; read as "not a section"
 - src/data/config/ini.ts:155 - ini_get_value drops the last character of a value with no line end
 - src/engine/clock.ts:163 - time compression/expansion advances simTick by the adjusted delta on top of the real one
@@ -1758,11 +1754,11 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/shell/controls/config.ts:289 - controls_save_config: fclose is called a second time on the closed file
 - src/shell/controls/inputMap.ts:80 - controls_write_map_entry: a NULL input name prints as (null)
 - src/shell/controls/panel.ts:115 - controls_cycle_modifier: a reversed axis with no modifier cannot be given one (only flags == 0 steps to Ctrl)
-- src/shell/mechlab/design.ts:1211 - mechlab_load_mek: the second search for a 6001 slot reads the MEK record again, not the grid it just cleared, so any slotted heat sink makes the type double
+- src/shell/mechlab/design.ts:1177 - mechlab_load_mek: the second search for a 6001 slot reads the MEK record again, not the grid it just cleared, so any slotted heat sink makes the type double
 - src/shell/screens/debriefing.ts:422 - screen_debriefing: a member with no chassis reads chassisTable[-1]
 - src/shell/screens/mechlab.ts:283 - screen_mechlab: CUSTOMIZE and DELETE are disabled at entry by the chassis and variant of the previous visit (mechlabChassis / mechlabVariant are set only after)
 - src/shell/screens/options.ts:284 - the slider preview sets soundConfig.sfxVolume around sound_sample_play, which never reads it: sound102 plays at its own volume whichever slider moves
-- src/shell/screens/register.ts:340 - DELETE MECHWARRIOR with no pilot writes through a NULL currentPilot (the button is disabled then)
+- src/shell/screens/register.ts:338 - DELETE MECHWARRIOR with no pilot writes through a NULL currentPilot (the button is disabled then)
 - src/shell/text/page.ts:209 - text_layout_page: a space with no word before it (text starting with a space) never advances
 - src/sim/ai/aiGeometry.ts:94 - mech_probe_ray: the flank point is transformed with the probe end\
 - src/sim/ai/behaviours.ts:259 - ai_enter_behaviour: sprint reads aiDirection after zeroing it, so it always fires the left jet
@@ -1837,7 +1833,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/shell/controls/panel.ts:227 - controls_click_binding: controlsDevice is not a loaded device (the original reads through a NULL record)
 - src/shell/controls/panel.ts:305 - controls_click_second_button: controlsDevice is not a loaded device (the original reads through a NULL record)
 - src/shell/main.ts:254 - main: state ${current} has no screen
-- src/shell/mechlab/design.ts:1054 - mechlab_load_mek: a read past the MEK resource
+- src/shell/mechlab/design.ts:1020 - mechlab_load_mek: a read past the MEK resource
 - src/shell/screens/briefing.ts:37 - screen_briefing: no current pilot (the original reads missionIndex and rank through NULL)
 - src/shell/screens/briefing.ts:47 - screen_briefing: mission 15, rank 6+, career 2 - the stream name buffer is left as the stack held it
 - src/shell/screens/controls.ts:95 - ${what}: an input past the device's name table (the original reads whatever follows it)
