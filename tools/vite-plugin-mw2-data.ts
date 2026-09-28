@@ -1,6 +1,6 @@
 /**
  * Serves the original game files to the browser without copying them into
- * port/. The game reads its data at runtime exactly as MW2.EXE did - from
+ * this repo. The game reads its data at runtime exactly as MW2.EXE did - from
  * MW2.PRJ, MW2.EXE and the loose files beside them - so the dev server only
  * has to hand those files over.
  *
@@ -13,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Connect, Plugin } from 'vite';
-import { mw2Decompiled, mw2Root } from './paths.ts';
+import { mw2Decompiled, mw2Root, unsetMessage } from './paths.ts';
 
 // The game's content only. The install's config and player files (the star
 // BWDs, MW2*.CFG, MEK\ variants) and its controls files (INPUT.MAP,
@@ -108,14 +108,22 @@ function serveFrom(root: string, whitelist: RegExp[]): Connect.NextHandleFunctio
 export function mw2Data(env: Record<string, string | undefined> = process.env): Plugin {
   const root = mw2Root(env);
   const ref = mw2Decompiled(env);
+  const unset = (name: 'MW2_ROOT' | 'MW2_DECOMPILED'): Connect.NextHandleFunction => (_req, res) => {
+    res.statusCode = 404;
+    res.end(unsetMessage(name));
+  };
   const install = (mw: Connect.Server, withRef: boolean) => {
-    mw.use('/mw2', serveFrom(root, GAME_WHITELIST));
-    if (withRef) mw.use('/mw2-ref', serveFrom(ref, REF_WHITELIST));
+    mw.use('/mw2', root ? serveFrom(root, GAME_WHITELIST) : unset('MW2_ROOT'));
+    if (withRef) mw.use('/mw2-ref', ref ? serveFrom(ref, REF_WHITELIST) : unset('MW2_DECOMPILED'));
   };
   return {
     name: 'mw2-data',
     configureServer(server) {
-      server.config.logger.info(`  mw2 data: ${root}`);
+      const log = server.config.logger;
+      if (root) log.info(`  mw2 data: ${root}`);
+      else log.warn(`  mw2 data: ${unsetMessage('MW2_ROOT')}`);
+      if (ref) log.info(`  mw2 decompilation: ${ref}`);
+      else log.warn(`  mw2 decompilation: ${unsetMessage('MW2_DECOMPILED')} (the editor's source view needs it)`);
       install(server.middlewares, true);
     },
     configurePreviewServer(server) {

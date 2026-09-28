@@ -9,8 +9,11 @@ import { NodeFsSource } from '../../tools/nodeSource.ts';
 import type { MechChoice } from '../../src/data/catalog/mechs.ts';
 import { buildEmptyStar, buildUserStar, type StarSetup } from '../../src/data/config/userStar.ts';
 
-export const MW2_ROOT = mw2Root();
-export const MW2_DECOMPILED = mw2Decompiled();
+// An unset path (no MW2_ROOT / MW2_DECOMPILED in .env.local) becomes a
+// placeholder that exists nowhere, so every has* below is false and the
+// suites' skip messages name the variable to set.
+export const MW2_ROOT = mw2Root() ?? '<MW2_ROOT unset: see .env.example>';
+export const MW2_DECOMPILED = mw2Decompiled() ?? '<MW2_DECOMPILED unset: see .env.example>';
 
 export const hasGameData = fs.existsSync(path.join(MW2_ROOT, 'MW2.PRJ')) && fs.existsSync(path.join(MW2_ROOT, 'MW2.EXE'));
 export const hasDecompiled = fs.existsSync(path.join(MW2_DECOMPILED, 'mw2', 'listing'));

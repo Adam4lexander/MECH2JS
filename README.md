@@ -1,7 +1,8 @@
 # MechWarrior 2 - TypeScript port
 
 A faithful port of MechWarrior 2 (1995, DOS) to TypeScript, three.js and
-React, built from the decompilation in `../decompiled`. The data structures,
+React, built from the decompilation in the `mw2-decompiled` repo (its
+`decompiled/` directory). The data structures,
 arithmetic and frame loop are the original's; the code is organised by
 subject rather than by the address ranges the decompilation inherits.
 
@@ -17,16 +18,27 @@ The dev server refuses to serve the install's copies.
 
 ## Running
 
+First say where the game and the decompilation are: copy `.env.example` to
+`.env.local` (git ignores it) and set
+
+- `MW2_ROOT` - the MechWarrior 2 install (`MW2.PRJ`, `MW2.EXE`, ...);
+- `MW2_DECOMPILED` - the decompilation, `decompiled/` in the `mw2-decompiled`
+  repo. Only `npm run gen`, the golden tests and the editor's source view
+  need it; the game builds and plays without it.
+
+The dev server, the tests and the gen scripts all read that file
+(`tools/paths.ts`); a variable set in the environment wins over it. Unset,
+the dev server says what to set, `npm run gen` stops, and the golden tests
+skip.
+
 ```sh
 npm install
 npm run fetch-soundfont   # optional: a local copy of the General MIDI SoundFont (see below)
-npm run dev               # http://localhost:5173 - serves the install from MW2_ROOT (default ..)
-npm test                  # unit + golden tests (golden needs the install and ../decompiled)
+npm run dev               # http://localhost:5173 - serves the install from MW2_ROOT
+npm test                  # unit + golden tests (golden needs MW2_ROOT and MW2_DECOMPILED)
 npm run gen               # regenerate struct schemas and PORTING.md after the decompilation changes
 npm run typecheck
 ```
-
-Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
 
 The game CD's image (e.g. `MECH2_16B.BIN` / `.CUE`) belongs in the install
 directory beside `MW2.PRJ`. It is the CD drive: the intro and in-screen

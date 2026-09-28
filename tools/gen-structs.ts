@@ -30,7 +30,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { PORT_DIR, mw2Decompiled } from './paths.ts';
+import { PORT_DIR, requireDecompiled } from './paths.ts';
 import * as MW2_OVERRIDES from './struct-overrides.ts';
 import * as SHELL_OVERRIDES from './struct-overrides.shell.ts';
 
@@ -428,7 +428,7 @@ function sameLayout(a: GenStruct, b: GenStruct): boolean {
 }
 
 function readTarget(t: Target): { structs: GenStruct[]; globals: GenGlobal[] } {
-  return parseHeader(fs.readFileSync(path.join(mw2Decompiled(), t.header), 'utf8'));
+  return parseHeader(fs.readFileSync(path.join(requireDecompiled(), t.header), 'utf8'));
 }
 
 function write(t: Target, structs: GenStruct[], globals: GenGlobal[]): void {

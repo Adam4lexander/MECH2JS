@@ -67,7 +67,7 @@ export function App() {
     return (
       <div className="boot error">
         Could not load the game data: {failed}
-        <div className="hint">The dev server serves MW2.PRJ and MW2.EXE from MW2_ROOT (default: the directory above port/).</div>
+        <div className="hint">The dev server serves the game from MW2_ROOT: copy .env.example to .env.local, set it to your install, and restart the dev server.</div>
       </div>
     );
   if (!data || !game) return <div className="boot">{status}…</div>;

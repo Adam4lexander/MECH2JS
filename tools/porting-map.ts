@@ -23,10 +23,11 @@
  *
  * Usage: tsx tools/porting-map.ts [--check]
  */
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { PORT_DIR, mw2Decompiled } from './paths.ts';
+import { PORT_DIR, requireDecompiled } from './paths.ts';
 import { LABEL, LABEL_KIND } from '../src/generated/labels.gen.ts';
 import { SHELL_LABEL, SHELL_LABEL_KIND } from '../src/generated/shell/labels.gen.ts';
 
@@ -113,8 +114,26 @@ function parseCsv(text: string): string[][] {
   return rows;
 }
 
+/**
+ * The mw2-decompiled commit the listings came from ('a1b2c3d'), marked when
+ * what the gen scripts read (the listings, the headers, the type sources) has
+ * uncommitted changes - so PORTING.md records which decompilation the
+ * port's tags and generated files were checked against.
+ */
+function decompiledRevision(): string {
+  const dir = requireDecompiled();
+  const git = (...args: string[]) => execFileSync('git', ['-C', dir, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  try {
+    const rev = git('rev-parse', '--short', 'HEAD');
+    const dirty = git('status', '--porcelain', '--', 'mw2/listing', 'mw2/include', 'mw2shell/listing', 'mw2shell/include', 'tools');
+    return `mw2-decompiled \`${rev}\`${dirty ? ' (with uncommitted changes)' : ''}`;
+  } catch {
+    return 'an unknown revision (MW2_DECOMPILED is not in a git repository)';
+  }
+}
+
 function loadFunctions(key: TargetKey): Map<number, Fn> {
-  const rows = parseCsv(fs.readFileSync(path.join(mw2Decompiled(), key, 'listing', 'functions.csv'), 'utf8'));
+  const rows = parseCsv(fs.readFileSync(path.join(requireDecompiled(), key, 'listing', 'functions.csv'), 'utf8'));
   const head = rows[0]!;
   const col = (n: string) => head.indexOf(n);
   const m = new Map<number, Fn>();
@@ -302,6 +321,8 @@ export function run(write: boolean): number {
   L.push('(MW2SHELL.EXE, the front end); this file is built from those tags and checked against');
   L.push('`decompiled/<target>/listing/functions.csv`, so a function renamed upstream fails the build rather');
   L.push('than drifting. Library code (Watcom clib, Miles, Smacker) is excluded from the totals.');
+  L.push('');
+  L.push(`Checked against the decompilation at ${decompiledRevision()}.`);
   L.push('');
   const totals = TARGETS.map((t, i) => section(t, checked[i]!, tags, L, '##'));
 

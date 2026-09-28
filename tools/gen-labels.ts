@@ -19,7 +19,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { PORT_DIR, mw2Decompiled } from './paths.ts';
+import { PORT_DIR, requireDecompiled } from './paths.ts';
 
 interface Label {
   name: string;
@@ -172,7 +172,7 @@ function write(uniq: Label[], source: string, dir: string, prefix: string, typeN
 }
 
 function main(): void {
-  const tools = path.join(mw2Decompiled(), 'tools');
+  const tools = path.join(requireDecompiled(), 'tools');
   const gen = path.join(PORT_DIR, 'src', 'generated');
   const mw2 = uniqueLabels(parseLabels(fs.readFileSync(path.join(tools, 'MW2Types.java'), 'utf8')));
   write(mw2, 'MW2Types.java', gen, '', 'LabelName');

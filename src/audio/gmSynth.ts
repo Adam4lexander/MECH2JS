@@ -14,7 +14,7 @@
  * compressed, 8.4 MB) the SpessaSynth project ships. It is looked for:
  *
  *   1. at <base>/soundfont/GeneralUserGS.sf3 - `npm run fetch-soundfont`
- *      puts it there (port/public/soundfont/, gitignored);
+ *      puts it there (public/soundfont/, gitignored);
  *   2. on jsDelivr, pinned to a SpessaSynth commit, so the bytes cannot
  *      change under the port.
  *

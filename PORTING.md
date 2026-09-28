@@ -7,6 +7,8 @@ Every ported function carries `@mw2 <name> <address>` (MW2.EXE, the sim) or `@mw
 `decompiled/<target>/listing/functions.csv`, so a function renamed upstream fails the build rather
 than drifting. Library code (Watcom clib, Miles, Smacker) is excluded from the totals.
 
+Checked against the decompilation at mw2-decompiled `4552c18`.
+
 ## MW2.EXE
 
 **Game functions:** 1161  |  **ported exact:** 908  |  **partial:** 62  |  **stub:** 3  |  library functions ported: 38
@@ -146,7 +148,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00014ae0 | pane_lerp | vfx_font | exact | `paneLerp` src/sim/cockpit/hud.ts:261 |
 | 0x00014b80 | pane_transition_step | vfx_font | exact | `paneTransitionStep` src/sim/cockpit/hud.ts:289 |
 | 0x00014c50 | pane_transition_step_split | vfx_font | exact | `paneTransitionStepSplit` src/sim/cockpit/hud.ts:323 |
-| 0x00014d90 | brightness_tables_build | vfx_font | exact | `brightnessTablesBuild` src/sim/world/brightness.ts:22 |
+| 0x00014d90 | brightness_tables_build | vfx_font | exact | `brightnessTablesBuild` src/sim/world/brightness.ts:23 |
 | 0x00014e70 | palette_apply_brightness | vfx_font | exact | `paletteApplyBrightness` src/sim/world/palettes.ts:168 |
 | 0x00014ee0 | day_cycle_init | vfx_font | exact | `dayCycleInit` src/sim/world/dayCycle.ts:57 |
 | 0x00014f80 | day_cycle_tick | vfx_font | exact | `dayCycleTick` src/sim/world/dayCycle.ts:78 |
@@ -212,10 +214,10 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00018ef0 | menu_item_text_box | project_tables | exact | `menuItemTextBox` src/sim/ui/menus.ts:567 |
 | 0x000191a0 | menu_calibration_onload | project_tables | exact | `menuCalibrationOnload` src/sim/ui/menuCallbacks.ts:502 |
 | 0x000192d0 | menu_item_calibrate | project_tables | stub | `menuItemCalibrate` src/sim/ui/menuCallbacks.ts:545 |
-| 0x00019560 | brightness_get | project_tables | exact | `brightnessGet` src/sim/world/brightness.ts:43 |
-| 0x000195a0 | brightness_preview | project_tables | exact | `brightnessPreview` src/sim/world/brightness.ts:57 |
-| 0x000195d0 | brightness_commit | project_tables | exact | `brightnessCommit` src/sim/world/brightness.ts:69 |
-| 0x00019600 | brightness_revert | project_tables | exact | `brightnessRevert` src/sim/world/brightness.ts:81 |
+| 0x00019560 | brightness_get | project_tables | exact | `brightnessGet` src/sim/world/brightness.ts:44 |
+| 0x000195a0 | brightness_preview | project_tables | exact | `brightnessPreview` src/sim/world/brightness.ts:58 |
+| 0x000195d0 | brightness_commit | project_tables | exact | `brightnessCommit` src/sim/world/brightness.ts:70 |
+| 0x00019600 | brightness_revert | project_tables | exact | `brightnessRevert` src/sim/world/brightness.ts:82 |
 | 0x000196b0 | lance_menu_onload | ui_callbacks | exact | `lanceMenuOnload` src/sim/ui/menuCallbacks.ts:96 |
 | 0x00019790 | lance_point_menu_onload | ui_callbacks | exact | `lancePointMenuOnload` src/sim/ui/menuCallbacks.ts:128 |
 | 0x00019830 | lance_order_selected | ui_callbacks | exact | `lanceOrderSelected` src/sim/ui/menuCallbacks.ts:150 |

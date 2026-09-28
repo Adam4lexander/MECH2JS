@@ -1,8 +1,23 @@
 # Porting notes
 
 Conventions for the TypeScript port and the decisions behind them. Read this
-before adding code. `decompiled/CLAUDE.md` and `decompiled/README.md` explain
-the decompilation this is ported from; the method rules there apply here too.
+before adding code. The decompilation this is ported from is a separate repo,
+`mw2-decompiled`: its `CLAUDE.md` and `decompiled/README.md` explain it, and
+the method rules there apply here too. Paths below written `decompiled/...`
+are in that repo - locally, under `MW2_DECOMPILED` (`.env.local`).
+
+## Two repos
+
+The port and the decompilation are developed together but committed
+separately. Porting keeps finding things the decompilation got wrong or
+left unnamed; those are fixed **upstream, in `mw2-decompiled`**, through its
+inputs (`tools/name_functions.py`, `tools/*Types.java`, `annotations.json`,
+`tools/mw2shell/*`) and `deepen.ps1` - never by editing its generated
+`src/`, `include/` or `listing/`. The order:
+
+1. fix and commit in `mw2-decompiled` (`deepen.ps1` must print `verify_export: OK`);
+2. here, `npm run gen` - `PORTING.md` records the decompilation commit it
+   was checked against - then commit the port's side, naming that commit.
 
 ## Where things go
 
