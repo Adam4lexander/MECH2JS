@@ -19,7 +19,7 @@
  */
 import { SHELL_LABEL as L } from '../../generated/shell/labels.gen.ts';
 import { cdiv, cmod } from '../../core/int/cint.ts';
-import { x87MulTrunc } from '../../core/int/x87.ts';
+import { x87MulTrunc, x87TruncStore } from '../../core/int/x87.ts';
 import { quirk, unestablished } from '../../core/provenance.ts';
 import { dosFileLoad, dosFileWrite } from '../../engine/dosFiles.ts';
 import { fieldOffset, mem, structSize } from '../memory.ts';
@@ -144,49 +144,15 @@ function imageDouble(a: number): number {
 
 // ------------------------------------------------------------------- x87
 
-const F64 = new DataView(new ArrayBuffer(8));
-function decompose(d: number): { sig: bigint; exp: number } {
-  F64.setFloat64(0, d, true);
-  const hi = F64.getUint32(4, true);
-  const lo = F64.getUint32(0, true);
-  const bexp = (hi >>> 20) & 0x7ff;
-  let frac = (BigInt(hi & 0xfffff) << 32n) | BigInt(lo);
-  let exp = -1074;
-  if (bexp !== 0) {
-    frac |= 1n << 52n;
-    exp = bexp - 1075;
-  }
-  return { sig: hi >>> 31 ? -frac : frac, exp };
-}
-function round64(sig: bigint, exp: number): { sig: bigint; exp: number } {
-  const neg = sig < 0n;
-  let m = neg ? -sig : sig;
-  const bits = m.toString(2).length;
-  if (bits > 64) {
-    const shift = BigInt(bits - 64);
-    const half = 1n << (shift - 1n);
-    const rest = m & ((1n << shift) - 1n);
-    m >>= shift;
-    if (rest > half || (rest === half && (m & 1n) === 1n)) m += 1n;
-    exp += bits - 64;
-  }
-  return { sig: neg ? -m : m, exp };
-}
-
 /**
  * `fild i; fmul qword d1; fmul qword d2; call clib_fp_trunc; fistp`: each
- * product rounded to the x87's 64-bit significand, then truncated.
+ * product rounded to a double (the FPU runs at 53-bit precision, see
+ * core/int/x87.ts), then truncated.
  *
  * @portOnly x87 arithmetic the mech lab's gyro and armour masses use
  */
 export function x87MulMulTrunc(i: number, d1: number, d2: number): number {
-  const a = decompose(d1);
-  const b = decompose(d2);
-  const r1 = round64(BigInt(i | 0) * a.sig, a.exp);
-  const r2 = round64(r1.sig * b.sig, r1.exp + b.exp);
-  let t = r2.exp >= 0 ? r2.sig << BigInt(r2.exp) : r2.sig / (1n << BigInt(-r2.exp));
-  if (t > 0x7fffffffn || t < -0x80000000n) t = -0x80000000n;
-  return Number(t);
+  return x87TruncStore((i | 0) * d1 * d2);
 }
 
 // ------------------------------------------------------------- shared steps

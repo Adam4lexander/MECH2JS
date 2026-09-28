@@ -49,12 +49,12 @@ function ait(states: [number, [number, number][]][]): Uint8Array {
 }
 
 describe('x87 truncation', () => {
-  it('keeps the extended product a double rounds up: |legsPan| 3 * 2/3 truncates to 1', () => {
-    // the double 2/3 is a hair under 2/3, so 3 * it lies just below 2
-    expect(Math.trunc(3 * (2 / 3))).toBe(2);
-    expect(x87MulTrunc(3, 2 / 3)).toBe(1);
-    // 0x3333333 is a multiple of 3 too: 35791394 exactly in a double, one less on the x87
-    expect(x87MulTrunc(0x3333333, 2 / 3)).toBe(35791393);
+  it('rounds the product to a double, as the FPU at 53-bit precision does: |legsPan| 3 * 2/3 truncates to 2', () => {
+    // the double 2/3 is a hair under 2/3, but 3 * it rounds to 2 at 53 bits
+    // (control word 0x127f, core/int/x87.ts); a 64-bit significand would keep
+    // it below 2 and give 1, which this test asserted until 2026-09-28
+    expect(x87MulTrunc(3, 2 / 3)).toBe(2);
+    expect(x87MulTrunc(0x3333333, 2 / 3)).toBe(35791394);
     expect(x87MulTrunc(-7, 0.5)).toBe(-3);
     // out of int32: the integer indefinite
     expect(x87MulTrunc(0x7fffffff, 4.0)).toBe(-0x80000000);

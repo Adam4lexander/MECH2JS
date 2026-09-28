@@ -187,8 +187,8 @@ export function aiHandleBlocked(mech: MechEntity): number {
 /**
  * `fild word sign; fmul qword a; fmul qword b; fild dword acc; faddp; trunc;
  * fistp` - acc + sign * a * b. With sign +/-1 and these constants every
- * product and sum is far from an integer, so double arithmetic gives the
- * x87's answer; the truncation is x87MulTrunc's.
+ * product and sum rounds to a double as the x87 does at 53-bit precision
+ * (core/int/x87.ts); the truncation is clib_fp_trunc's.
  *
  * @portOnly the x87 sequence at 0x2dd19 and 0x2de29
  */

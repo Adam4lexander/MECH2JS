@@ -8,6 +8,7 @@
 import { SHELL_LABEL } from '../../generated/shell/labels.gen.ts';
 import { mpackDbGetItem, type MPackDb } from '../../data/formats/mpack.ts';
 import { quirk } from '../../core/provenance.ts';
+import { x87TruncStore } from '../../core/int/x87.ts';
 import { registerGlobals } from '../../engine/globals.ts';
 import { mem } from '../memory.ts';
 import { driver, mouse, shell } from '../state.ts';
@@ -168,17 +169,14 @@ function imageDouble(addr: number): number {
 
 /**
  * A new pilot's honor: `fild rand; fmul [0x77cb7] (1/32767); fmul [0x77cbf]
- * (1000); fadd 1000; trunc`, in the x87's 64-bit precision. The product is
- * taken exactly and truncated: doubles would round 32767 * (1/32767) up to
- * 1 and give 2000 where the x87 keeps it a hair below and gives 1999.
+ * (1000); fadd 1000; trunc`. The FPU runs at 53-bit precision (core/int/
+ * x87.ts), so doubles in this order are exact: rand() = 32767 gives 2000.
+ * CORRECTION (2026-09-28): this was computed in a 64-bit significand, on
+ * the assumption the FPU kept FNINIT's precision, and gave 1999 there.
  */
 function newPilotHonor(r: number): number {
   const scale = imageDouble(0x77cbf);
-  const bits = new DataView(mem().view(0x77cb7, 8).slice().buffer).getBigUint64(0, true);
-  const exp = Number((bits >> 52n) & 0x7ffn) - 1075;
-  const mantissa = (bits & ((1n << 52n) - 1n)) | (1n << 52n);
-  const product = BigInt(r) * mantissa * BigInt(scale);
-  return (scale + Number(exp < 0 ? product >> BigInt(-exp) : product << BigInt(exp))) | 0;
+  return x87TruncStore(r * imageDouble(0x77cb7) * scale + scale);
 }
 
 /**

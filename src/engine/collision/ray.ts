@@ -93,7 +93,9 @@ export function rayNormalise(ray: Ray): void {
  *
  * @mw2 ray_normalise_exact 0x0001d9f0
  * @fidelity exact
- * @divergence the x87 works in 80-bit extended precision and the port in doubles; a value within an extended ulp of an integer could truncate differently
+ * The x87 works in this order at 53-bit precision (core/int/x87.ts), which
+ * doubles reproduce exactly (a divergence note here said otherwise until
+ * 2026-09-28).
  */
 export function rayNormaliseExact(ray: Ray): void {
   if (ray.normalised === 2) return;

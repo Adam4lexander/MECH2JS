@@ -87,7 +87,7 @@ export function aiChooseThrottle(mech: MechEntity, standoff: number): number {
   else t = 0x333;
   const pan = iabs(mech.control!.legsPan);
   if (t !== 0 && 0x2d < pan >> 16) {
-    // fild |legsPan|; fmul qword [0x909cd] (2/3); clib_fp_trunc; fistp - in extended precision
+    // fild |legsPan|; fmul qword [0x909cd] (2/3); clib_fp_trunc; fistp - the product rounded to a double (53-bit precision)
     const scaled = x87MulTrunc(pan, imageF64(0x909cd, 2 / 3));
     t = ((0x4000000 - scaled) | 0) >> 16;
     if (t < 0x66) t = 0x66;

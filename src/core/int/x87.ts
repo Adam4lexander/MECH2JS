@@ -1,70 +1,37 @@
 /**
- * The x87 steps that a double cannot reproduce.
+ * The x87 steps both executables use to turn floating point back into an
+ * integer: `call clib_fp_trunc; fistp` - toward zero, and the integer
+ * indefinite (0x80000000) when the value does not fit.
  *
- * MW2.EXE converts with `fild`, multiplies by a double constant with `fmul`,
- * then truncates through clib_fp_trunc and stores with `fistp`. The x87
- * holds the product in its 64-bit significand, where a JS double keeps 53, so
- * a product that lies just below an integer can round up to it in a double
- * and truncate one higher. ai_choose_throttle's |legsPan| * (double)2/3 does
- * this for every multiple of 3: the double constant is a hair under 2/3, the
- * exact product sits a few nanounits below the integer, the x87 keeps that
- * and truncates down, and a double rounds up to the integer.
+ * ESTABLISHED: the FPU runs at 53-bit (double) precision, round to nearest.
+ * Watcom's start-up runs __init_8087 from its init table at priority 2
+ * (MW2.EXE: the entry at 0xa465c -> 0x783db; MW2SHELL.EXE: 0x8755e ->
+ * 0x59f93). It detects the FPU and loads control word 0x127f (MW2.EXE from
+ * 0xa4520, the shell from 0x87478) - precision control 10, double. The only
+ * other fldcw in MW2.EXE is clib_fp_trunc's, which sets 64-bit precision
+ * with round-toward-zero for its frndint and restores the word after it.
+ * Every fadd/fmul/fdiv/fsqrt therefore rounds its result to a double's
+ * 53-bit significand, as JS arithmetic does, and a double computation in
+ * the original's order gives the original's answer.
  *
- * ASSUMED, not established: the FPU runs at 64-bit precision, the control
- * word FNINIT leaves. Nothing read so far lowers it. clib_fp_trunc itself
- * writes 0x1f over the control word's high byte, which is 64-bit precision
- * with round-toward-zero, for the frndint only.
+ * CORRECTION (2026-09-28): this file used to ASSUME the 64-bit precision
+ * FNINIT leaves, and computed products in an extended significand; that
+ * made ai_choose_throttle, the new pilot's honor and the mech lab's gyro
+ * and armour masses truncate one lower than the original wherever a double
+ * product rounds up onto an integer (|legsPan| * 2/3 for multiples of 3;
+ * 32767 * (1/32767)).
  *
  * @portOnly language support for x87 arithmetic, no counterpart in MW2.EXE
  */
 
-const F64 = new DataView(new ArrayBuffer(8));
-
-/** A finite double as sig * 2^exp exactly (sig a signed BigInt). */
-function decompose(d: number): { sig: bigint; exp: number } {
-  F64.setFloat64(0, d, true);
-  const hi = F64.getUint32(4, true);
-  const lo = F64.getUint32(0, true);
-  const neg = (hi >>> 31) !== 0;
-  const bexp = (hi >>> 20) & 0x7ff;
-  let frac = (BigInt(hi & 0xfffff) << 32n) | BigInt(lo);
-  let exp: number;
-  if (bexp === 0) exp = -1074;
-  else {
-    frac |= 1n << 52n;
-    exp = bexp - 1075;
-  }
-  return { sig: neg ? -frac : frac, exp };
+/** `call clib_fp_trunc; fistp dword`: toward zero; outside int32 (or NaN) the integer indefinite 0x80000000. */
+export function x87TruncStore(v: number): number {
+  const t = Math.trunc(v);
+  if (!(t <= 0x7fffffff && t >= -0x80000000)) return -0x80000000;
+  return t | 0;
 }
 
-/** Rounds sig * 2^exp to a 64-bit significand, to nearest, ties to even. */
-function roundExtended(sig: bigint, exp: number): { sig: bigint; exp: number } {
-  const neg = sig < 0n;
-  let m = neg ? -sig : sig;
-  const bits = m.toString(2).length;
-  if (bits > 64) {
-    const shift = BigInt(bits - 64);
-    const half = 1n << (shift - 1n);
-    const rest = m & ((1n << shift) - 1n);
-    m >>= shift;
-    if (rest > half || (rest === half && (m & 1n) === 1n)) m += 1n;
-    exp += bits - 64;
-  }
-  return { sig: neg ? -m : m, exp };
-}
-
-/** clib_fp_trunc then fistp of sig * 2^exp: toward zero; outside int32 the integer indefinite 0x80000000. */
-function truncStore(sig: bigint, exp: number): number {
-  let t: bigint;
-  if (exp >= 0) t = sig << BigInt(exp);
-  else t = sig / (1n << BigInt(-exp)); // BigInt division truncates toward zero
-  if (t > 0x7fffffffn || t < -0x80000000n) return -0x80000000;
-  return Number(t);
-}
-
-/** `fild i; fmul qword d; call clib_fp_trunc; fistp` - (int)(i * d) in extended precision. */
+/** `fild i; fmul qword d; call clib_fp_trunc; fistp` - (int)(i * d), the product rounded to a double. */
 export function x87MulTrunc(i: number, d: number): number {
-  const { sig, exp } = decompose(d);
-  const r = roundExtended(BigInt(i | 0) * sig, exp);
-  return truncStore(r.sig, r.exp);
+  return x87TruncStore((i | 0) * d);
 }
