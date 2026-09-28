@@ -8,7 +8,9 @@ adding code**. `PORTING.md` (generated) says what is ported.
 ## Setup
 
 `.env.local` (copied from `.env.example`, git-ignored) sets `MW2_ROOT` (the
-game install) and `MW2_DECOMPILED` (the decompilation). `tools/paths.ts`
+game install) and `MW2_DECOMPILED` (the decompilation). `.env.example` has
+only `MW2_ROOT`: the decompilation is not public, so `MW2_DECOMPILED` is the
+maintainer's, added to `.env.local` by hand. `tools/paths.ts`
 loads it for the dev server, the tests and `npm run gen` alike. With it
 unset the golden tests *skip* rather than fail - a test run showing skips
 means the setup is missing, not that the port is fine.

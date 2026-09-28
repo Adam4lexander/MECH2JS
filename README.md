@@ -19,27 +19,24 @@ The dev server refuses to serve the install's copies.
 
 ## Running
 
-First say where the game and the decompilation are: copy `.env.example` to
-`.env.local` (git ignores it) and set
-
-- `MW2_ROOT` - the MechWarrior 2 install (`MW2.PRJ`, `MW2.EXE`, ...);
-- `MW2_DECOMPILED` - the decompilation, `decompiled/` in the `mw2-decompiled`
-  repo. Only `npm run gen`, the golden tests and the editor's source view
-  need it; the game builds and plays without it.
-
-The dev server, the tests and the gen scripts all read that file
+First say where the game is: copy `.env.example` to `.env.local` (git
+ignores it) and set `MW2_ROOT` to the MechWarrior 2 install (`MW2.PRJ`,
+`MW2.EXE`, ...). The dev server and the tests read that file
 (`tools/paths.ts`); a variable set in the environment wins over it. Unset,
-the dev server says what to set, `npm run gen` stops, and the golden tests
-skip.
+the dev server says what to set.
 
 ```sh
 npm install
 npm run fetch-soundfont   # optional: a local copy of the General MIDI SoundFont (see below)
 npm run dev               # http://localhost:5173 - serves the install from MW2_ROOT
-npm test                  # unit + golden tests (golden needs MW2_ROOT and MW2_DECOMPILED)
-npm run gen               # regenerate struct schemas and PORTING.md after the decompilation changes
+npm test                  # unit + golden tests
 npm run typecheck
 ```
+
+Most golden suites also check the port against the decompilation's
+listings, and `npm run gen` regenerates from them. The decompilation is not
+public: without it those suites skip and `npm run gen` stops. Neither is
+needed to build or play.
 
 The game CD's image (e.g. `MECH2_16B.BIN` / `.CUE`) belongs in the install
 directory beside `MW2.PRJ`. It is the CD drive: the intro and in-screen

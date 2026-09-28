@@ -17,9 +17,10 @@ import { instmapWrite } from '../../src/shell/handoff/starFiles.ts';
 
 // An unset path (no MW2_ROOT / MW2_DECOMPILED in .env.local) becomes a
 // placeholder that exists nowhere, so every has* below is false and the
-// suites' skip messages name the variable to set.
+// suites' skip messages name the variable to set. MW2_DECOMPILED is the
+// maintainer's: the decompilation is not public, and .env.example leaves it out.
 export const MW2_ROOT = mw2Root() ?? '<MW2_ROOT unset: see .env.example>';
-export const MW2_DECOMPILED = mw2Decompiled() ?? '<MW2_DECOMPILED unset: see .env.example>';
+export const MW2_DECOMPILED = mw2Decompiled() ?? '<MW2_DECOMPILED unset>';
 
 export const hasGameData = fs.existsSync(path.join(MW2_ROOT, 'MW2.PRJ')) && fs.existsSync(path.join(MW2_ROOT, 'MW2.EXE'));
 export const hasDecompiled = fs.existsSync(path.join(MW2_DECOMPILED, 'mw2', 'listing'));

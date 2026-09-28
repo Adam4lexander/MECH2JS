@@ -1,8 +1,10 @@
 /**
  * Where the game install and the decompilation live, for tools, tests and the
  * dev server: MW2_ROOT and MW2_DECOMPILED, from the environment or from this
- * repo's .env.local / .env (see .env.example). There are no defaults - the
- * port is its own repo, and neither lives beside it.
+ * repo's .env.local / .env. There are no defaults - the port is its own repo,
+ * and neither lives beside it. .env.example has MW2_ROOT alone: the
+ * decompilation is not public, and only the maintainer sets MW2_DECOMPILED
+ * (docs/porting-notes.md).
  *
  * The files are loaded here, on import, so every entry point - vite, vitest,
  * the gen scripts - sees the same values. A variable already in the
@@ -40,6 +42,7 @@ export function mw2Decompiled(env: Env = process.env): string | null {
 
 /** The message for an unset path, naming the variable and the file to set it in. */
 export function unsetMessage(name: 'MW2_ROOT' | 'MW2_DECOMPILED'): string {
+  if (name === 'MW2_DECOMPILED') return `MW2_DECOMPILED is not set: the decompilation's decompiled/ directory, in .env.local in ${PORT_DIR}`;
   return `${name} is not set: copy .env.example to .env.local in ${PORT_DIR} and set it`;
 }
 

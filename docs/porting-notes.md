@@ -4,7 +4,11 @@ Conventions for the TypeScript port and the decisions behind them. Read this
 before adding code. The decompilation this is ported from is a separate repo,
 `mw2-decompiled`: its `CLAUDE.md` and `decompiled/README.md` explain it, and
 the method rules there apply here too. Paths below written `decompiled/...`
-are in that repo - locally, under `MW2_DECOMPILED` (`.env.local`).
+are in that repo - locally, under `MW2_DECOMPILED` (`.env.local`). The
+decompilation is not public, so `.env.example` leaves `MW2_DECOMPILED` out
+and the README does not mention it: add it to `.env.local` by hand. Without
+it the game builds and plays, most golden suites skip and `npm run gen`
+stops.
 
 ## Two repos
 

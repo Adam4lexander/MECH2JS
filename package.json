@@ -2,7 +2,7 @@
   "name": "mw2-port",
   "private": true,
   "version": "0.1.0",
-  "description": "Faithful TypeScript port of MechWarrior 2 (1995), built from the decompilation in ../decompiled",
+  "description": "Faithful TypeScript port of MechWarrior 2 (1995)",
   "type": "module",
   "scripts": {
     "dev": "vite",

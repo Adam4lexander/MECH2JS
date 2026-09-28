@@ -126,8 +126,8 @@ export function mw2Data(env: Record<string, string | undefined> = process.env): 
       const log = server.config.logger;
       if (root) log.info(`  mw2 data: ${root}`);
       else log.warn(`  mw2 data: ${unsetMessage('MW2_ROOT')}`);
+      // the decompilation is the maintainer's alone: without it the editor's source view is empty, and nothing else
       if (ref) log.info(`  mw2 decompilation: ${ref}`);
-      else log.warn(`  mw2 decompilation: ${unsetMessage('MW2_DECOMPILED')} (the editor's source view needs it)`);
       install(server.middlewares, true);
     },
     configurePreviewServer(server) {
