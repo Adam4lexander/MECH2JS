@@ -8,7 +8,7 @@ import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
 import { readCheatCodes } from '../../src/data/exe/tables/cheats.ts';
 import { ailTimerService } from '../../src/engine/miles/ail.ts';
-import { vfxWindowClear } from '../../src/engine/vfx/vfx.ts';
+import { vfxWindowClear, type VfxWindow } from '../../src/engine/vfx/vfx.ts';
 import { bootMission } from '../../src/mission/load.ts';
 import { mainLoop, mainLoopFrame } from '../../src/mission/mainLoop.ts';
 import { hud } from '../../src/sim/cockpit/hud.ts';
@@ -143,9 +143,20 @@ describe.runIf(hasGameData)('cheat 4: the pictures and the credits', () => {
     for (const c of gpal) for (let k = 0; k < 3; k++) expect(palettes.dac[c * 3 + k]).toBe(jk[13 + c * 3 + k]! >> 2);
 
     // state 5 -> 6: vfxhd in the same pane, from its top row
+    palettes.dacPlayback.length = 0;
     for (let f = 0; f < 200 && cheatCredits.cheatCreditsState !== 6; f++) frame();
     expect(cheatCredits.cheatCreditsState).toBe(6);
     const hd = files.get('VFX/VFXHD.BIN')!;
+    // the fades the host plays back carry the window as each ran: the fade
+    // out over vfxjk, the fade in over vfxhd (not the later picture throughout)
+    const fades = palettes.dacPlayback;
+    expect(fades.length).toBeGreaterThan(2);
+    const at = (w: VfxWindow, x: number, y: number) => w.buffer[(pane.top + y) * W + pane.left + x];
+    const differs = ref.px.findIndex((v, i) => v !== referenceDecode(hd).px[i]);
+    const dx = differs % ref.w;
+    const dy = Math.floor(differs / ref.w);
+    expect(at(fades[0]!.window, dx, dy)).toBe(ref.px[differs]);
+    expect(at(fades[fades.length - 1]!.window, dx, dy)).toBe(referenceDecode(hd).px[differs]);
     expect(cheatCredits.cheatCreditsPicture).toBe(hd);
     frame();
     const ref2 = referenceDecode(hd);

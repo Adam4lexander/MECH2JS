@@ -282,7 +282,7 @@ export function Viewport({ game }: { game: Game }) {
         }
       }
       // the game's 2D (HUD, radar, cockpit text) over it all, through the game's camera
-      if (!scene && hudOverlay.update(defaultCanvas, drawSize.x, drawSize.y)) renderer.render(hudOverlay.scene, hudOverlay.camera);
+      if (!scene && hudOverlay.update(game.windowShown(), drawSize.x, drawSize.y)) renderer.render(hudOverlay.scene, hudOverlay.camera);
       if (now - lastInfo > 250) {
         lastInfo = now;
         setInfo(`${sr.stats.objects} objects · ${sr.stats.polygons} polygons · eye ${eye.map((c) => (c * CM_TO_UNITS).toFixed(0)).join(', ')} m`);

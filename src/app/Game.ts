@@ -14,6 +14,8 @@ import { netplayShutdown } from '../sim/net/netSession.ts';
 import { setNetTransport, type NetTransport } from '../sim/net/transport.ts';
 import { dosFilePrefetch } from '../engine/dosFiles.ts';
 import { launchAnimPath } from '../sim/display/launchScreen.ts';
+import { defaultCanvas } from '../sim/display/video.ts';
+import type { VfxWindow } from '../engine/vfx/vfx.ts';
 import { launchNamesFromArgv } from '../mission/commandLine.ts';
 import { engineStore } from '../editor/store/store.ts';
 import { missionCatalog, type GameData, type MissionEntry } from './gameData.ts';
@@ -226,7 +228,7 @@ export class Game {
   }
 
   /** the blocking fade's in-between DAC being shown, and how many frames it has left */
-  private playbackShown: { dac: Uint8Array; left: number; n: number } | null = null;
+  private playbackShown: { dac: Uint8Array; window: VfxWindow; left: number; n: number } | null = null;
   private playbackCount = 0;
   /** the results of a mission whose end fade is still being shown */
   private pendingResults: MissionResults | null = null;
@@ -256,6 +258,11 @@ export class Game {
       }
     }
     return this.throughBrightness(paletteSlotRgb(slot) ?? paletteSlotRgb(p.paletteCurrentSlot));
+  }
+
+  /** The game's 2D window to show: while a blocking fade plays back, the window as it stood when the fade ran. */
+  windowShown(): VfxWindow {
+    return this.playbackShown?.window ?? defaultCanvas;
   }
 
   /** Changes whenever paletteRgb's answer does. */
@@ -291,7 +298,7 @@ export class Game {
       this.playbackShown = null;
       return false;
     }
-    this.playbackShown = { dac: next.dac, left: next.waits, n: ++this.playbackCount };
+    this.playbackShown = { dac: next.dac, window: next.window, left: next.waits, n: ++this.playbackCount };
     return true;
   }
 

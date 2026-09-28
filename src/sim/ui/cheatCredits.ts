@@ -165,7 +165,7 @@ function windowRefresh(): void {
  *
  * @mw2 cheat_credits_render_hook 0x00019f40
  * @fidelity exact
- * @divergence vfxWindowRefresh, the driver's immediate copy of the window to the screen, is the host's frame; the blocking fades are played by the host after the frame (palettes.dacPlayback), so the fade out of the first picture shows the second one's pixels
+ * @divergence vfxWindowRefresh, the driver's immediate copy of the window to the screen, is the host's frame; the blocking fades are played by the host after the frame (palettes.dacPlayback), each with a copy of the window as it stood when the fade ran
  */
 export const cheatCreditsRenderHook = registerCode('cheat_credits_render_hook', 0x19f40, (): void => {
   const s = cheatCredits;
