@@ -27,6 +27,7 @@ import { simOptionsRead } from './options/simOptions.ts';
 import { prmLoad, prmSave } from './handoff/prm.ts';
 import { starConfigure, starSetMember } from './handoff/stars.ts';
 import { missionBrf2Load } from './career/brf2.ts';
+import { projectClose, projectOpen } from './career/orders.ts';
 import { screenTitle } from './screens/title.ts';
 import { shellScreens, type MainLocals } from './screens/registry.ts';
 import './screens/index.ts';
@@ -151,6 +152,8 @@ export function* shellMain(argv: readonly string[]): Blocking<number> {
   shell.cursorShapes = mpackDbGetItem(shell.database, 0x19);
   shell.shellMouse = mouseInit(new Mouse(), d, shell.uiFont, shell.cursorShapes);
   shell.keyInput = inputInit(new KeyInput());
+  // 0x77b60 'MW2.PRJ'
+  projectOpen('MW2.PRJ');
   careerRegistryLoad();
   simOptionsRead();
   const saved = prmLoad();
@@ -207,6 +210,7 @@ export function* shellMain(argv: readonly string[]): Blocking<number> {
         state = previous === 0 ? 3 : previous;
         if (m.i32(SHELL_LABEL.simLaunchEnabled) !== 0) {
           prmSave(state, locals.career.value, locals.accepted.value, locals.commandLine.value);
+          projectClose();
           return 3;
         }
         break;
@@ -252,6 +256,7 @@ export function* shellMain(argv: readonly string[]): Blocking<number> {
     }
     if (state === -3) {
       prmSave(-3, locals.career.value, locals.accepted.value, 'exittos');
+      projectClose();
       return 0xff;
     }
   }

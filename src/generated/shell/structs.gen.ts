@@ -27,20 +27,20 @@ export interface RawProjectTypeSlot {
   field_0x4: number;
 }
 
-/** ProjectDirEntry - 8 (0x8) bytes, as read raw from memory (pointers are addresses). */
-export interface RawProjectDirEntry {
-  /** +0x000 int */
-  offset: number;
-  /** +0x004 int */
-  length: number;
-}
-
 /** UnplacedItem - 8 (0x8) bytes, as read raw from memory (pointers are addresses). */
 export interface RawUnplacedItem {
   /** +0x000 int */
   item: number;
   /** +0x004 int */
   criticals: number;
+}
+
+/** ProjectDirEntry - 8 (0x8) bytes, as read raw from memory (pointers are addresses). */
+export interface RawProjectDirEntry {
+  /** +0x000 int */
+  offset: number;
+  /** +0x004 int */
+  length: number;
 }
 
 /** CareerMission - 9 (0x9) bytes, as read raw from memory (pointers are addresses). */
@@ -63,6 +63,30 @@ export interface RawEngineRow {
   maker: number;
 }
 
+/** DesignLocation - 16 (0x10) bytes, as read raw from memory (pointers are addresses). */
+export interface RawDesignLocation {
+  /** +0x000 int */
+  internal: number;
+  /** +0x004 int */
+  maxArmour: number;
+  /** +0x008 int */
+  armourFront: number;
+  /** +0x00c int */
+  armourRear: number;
+}
+
+/** ScreenRow - 16 (0x10) bytes, as read raw from memory (pointers are addresses). */
+export interface RawScreenRow {
+  /** +0x000 ButtonDef * */
+  buttons: number;
+  /** +0x004 int */
+  buttonCount: number;
+  /** +0x008 int */
+  background: number;
+  /** +0x00c int */
+  music: number;
+}
+
 /** DeviceRecord - 16 (0x10) bytes, as read raw from memory (pointers are addresses). */
 export interface RawDeviceRecord {
   /** +0x000 int */
@@ -81,18 +105,6 @@ export interface RawStarSlot {
   spriteY: number;
   /** +0x00c int */
   panel: number;
-}
-
-/** DesignLocation - 16 (0x10) bytes, as read raw from memory (pointers are addresses). */
-export interface RawDesignLocation {
-  /** +0x000 int */
-  internal: number;
-  /** +0x004 int */
-  maxArmour: number;
-  /** +0x008 int */
-  armourFront: number;
-  /** +0x00c int */
-  armourRear: number;
 }
 
 /** ProjectTypeEntry - 24 (0x18) bytes, as read raw from memory (pointers are addresses). */
@@ -193,6 +205,20 @@ export interface RawProjectHeader {
   types: RawProjectTypeEntry;
 }
 
+/** MechSection - 40 (0x28) bytes, as read raw from memory (pointers are addresses). */
+export interface RawMechSection {
+  /** +0x000 int */
+  armorFront: number;
+  /** +0x004 int */
+  armorRear: number;
+  /** +0x008 int */
+  internal: number;
+  /** +0x00c ushort[12] */
+  slots: number[];
+  /** +0x024 short */
+  numSlots: number;
+}
+
 /** ItemType - 40 (0x28) bytes, as read raw from memory (pointers are addresses). */
 export interface RawItemType {
   /** +0x000 int */
@@ -209,20 +235,6 @@ export interface RawItemType {
   ammoPerTon: number;
   /** +0x024 char * */
   name: number;
-}
-
-/** MechSection - 40 (0x28) bytes, as read raw from memory (pointers are addresses). */
-export interface RawMechSection {
-  /** +0x000 int */
-  armorFront: number;
-  /** +0x004 int */
-  armorRear: number;
-  /** +0x008 int */
-  internal: number;
-  /** +0x00c ushort[12] */
-  slots: number[];
-  /** +0x024 short */
-  numSlots: number;
 }
 
 /** MechlabWidget - 44 (0x2c) bytes, as read raw from memory (pointers are addresses). */
@@ -615,20 +627,20 @@ export const STRUCTS = {
       { name: 'field_0x4', offset: 0x4, size: 4, count: 1, ctype: "void *", kind: 'ptr', unestablished: true },
     ],
   },
-  ProjectDirEntry: {
-    name: 'ProjectDirEntry',
-    size: 0x8,
-    fields: [
-      { name: 'offset', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
-      { name: 'length', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
-    ],
-  },
   UnplacedItem: {
     name: 'UnplacedItem',
     size: 0x8,
     fields: [
       { name: 'item', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'criticals', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
+    ],
+  },
+  ProjectDirEntry: {
+    name: 'ProjectDirEntry',
+    size: 0x8,
+    fields: [
+      { name: 'offset', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'length', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
     ],
   },
   CareerMission: {
@@ -649,6 +661,26 @@ export const STRUCTS = {
       { name: 'maker', offset: 0x8, size: 4, count: 1, ctype: "char *", kind: 'ptr' },
     ],
   },
+  DesignLocation: {
+    name: 'DesignLocation',
+    size: 0x10,
+    fields: [
+      { name: 'internal', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'maxArmour', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'armourFront', offset: 0x8, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'armourRear', offset: 0xc, size: 4, count: 1, ctype: "int", kind: 'int' },
+    ],
+  },
+  ScreenRow: {
+    name: 'ScreenRow',
+    size: 0x10,
+    fields: [
+      { name: 'buttons', offset: 0x0, size: 4, count: 1, ctype: "ButtonDef *", kind: 'ptr', target: 'ButtonDef' },
+      { name: 'buttonCount', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'background', offset: 0x8, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'music', offset: 0xc, size: 4, count: 1, ctype: "int", kind: 'int' },
+    ],
+  },
   DeviceRecord: {
     name: 'DeviceRecord',
     size: 0x10,
@@ -665,16 +697,6 @@ export const STRUCTS = {
       { name: 'spriteX', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'spriteY', offset: 0x8, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'panel', offset: 0xc, size: 4, count: 1, ctype: "int", kind: 'int' },
-    ],
-  },
-  DesignLocation: {
-    name: 'DesignLocation',
-    size: 0x10,
-    fields: [
-      { name: 'internal', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
-      { name: 'maxArmour', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
-      { name: 'armourFront', offset: 0x8, size: 4, count: 1, ctype: "int", kind: 'int' },
-      { name: 'armourRear', offset: 0xc, size: 4, count: 1, ctype: "int", kind: 'int' },
     ],
   },
   ProjectTypeEntry: {
@@ -754,6 +776,18 @@ export const STRUCTS = {
       { name: 'types', offset: 0xe, size: 24, count: 1, ctype: "ProjectTypeEntry", kind: 'struct', target: 'ProjectTypeEntry' },
     ],
   },
+  MechSection: {
+    name: 'MechSection',
+    size: 0x28,
+    fields: [
+      { name: 'armorFront', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'armorRear', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'internal', offset: 0x8, size: 4, count: 1, ctype: "int", kind: 'int' },
+      { name: 'slots', offset: 0xc, size: 2, count: 12, ctype: "ushort", kind: 'ushort' },
+      { name: 'numSlots', offset: 0x24, size: 2, count: 1, ctype: "short", kind: 'short' },
+      { name: 'pad_026', offset: 0x26, size: 1, count: 2, ctype: "uint8_t", kind: 'pad' },
+    ],
+  },
   ItemType: {
     name: 'ItemType',
     size: 0x28,
@@ -766,18 +800,6 @@ export const STRUCTS = {
       { name: 'criticals', offset: 0x1c, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'ammoPerTon', offset: 0x20, size: 4, count: 1, ctype: "int", kind: 'int' },
       { name: 'name', offset: 0x24, size: 4, count: 1, ctype: "char *", kind: 'ptr' },
-    ],
-  },
-  MechSection: {
-    name: 'MechSection',
-    size: 0x28,
-    fields: [
-      { name: 'armorFront', offset: 0x0, size: 4, count: 1, ctype: "int", kind: 'int' },
-      { name: 'armorRear', offset: 0x4, size: 4, count: 1, ctype: "int", kind: 'int' },
-      { name: 'internal', offset: 0x8, size: 4, count: 1, ctype: "int", kind: 'int' },
-      { name: 'slots', offset: 0xc, size: 2, count: 12, ctype: "ushort", kind: 'ushort' },
-      { name: 'numSlots', offset: 0x24, size: 2, count: 1, ctype: "short", kind: 'short' },
-      { name: 'pad_026', offset: 0x26, size: 1, count: 2, ctype: "uint8_t", kind: 'pad' },
     ],
   },
   MechlabWidget: {

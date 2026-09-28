@@ -40,6 +40,32 @@ export class EngineRow {
   maker: string | null = null;
 }
 
+/** DesignLocation - 16 (0x10) bytes. */
+export class DesignLocation {
+  static readonly schema = STRUCTS.DesignLocation;
+  /** +0x000 int */
+  internal: number = 0;
+  /** +0x004 int */
+  maxArmour: number = 0;
+  /** +0x008 int */
+  armourFront: number = 0;
+  /** +0x00c int */
+  armourRear: number = 0;
+}
+
+/** ScreenRow - 16 (0x10) bytes. */
+export class ScreenRow {
+  static readonly schema = STRUCTS.ScreenRow;
+  /** +0x000 ButtonDef * */
+  buttons: ButtonDef | null = null;
+  /** +0x004 int */
+  buttonCount: number = 0;
+  /** +0x008 int */
+  background: number = 0;
+  /** +0x00c int */
+  music: number = 0;
+}
+
 /** DeviceRecord - 16 (0x10) bytes. */
 export class DeviceRecord {
   static readonly schema = STRUCTS.DeviceRecord;
@@ -60,19 +86,6 @@ export class StarSlot {
   spriteY: number = 0;
   /** +0x00c int */
   panel: number = 0;
-}
-
-/** DesignLocation - 16 (0x10) bytes. */
-export class DesignLocation {
-  static readonly schema = STRUCTS.DesignLocation;
-  /** +0x000 int */
-  internal: number = 0;
-  /** +0x004 int */
-  maxArmour: number = 0;
-  /** +0x008 int */
-  armourFront: number = 0;
-  /** +0x00c int */
-  armourRear: number = 0;
 }
 
 /** ControlBinding - 24 (0x18) bytes. */
@@ -139,6 +152,21 @@ export class StarMember {
   pilotName: string = '';
 }
 
+/** MechSection - 40 (0x28) bytes. */
+export class MechSection {
+  static readonly schema = STRUCTS.MechSection;
+  /** +0x000 int */
+  armorFront: number = 0;
+  /** +0x004 int */
+  armorRear: number = 0;
+  /** +0x008 int */
+  internal: number = 0;
+  /** +0x00c ushort[12] */
+  slots: Uint16Array = new Uint16Array(12);
+  /** +0x024 short */
+  numSlots: number = 0;
+}
+
 /** ItemType - 40 (0x28) bytes. */
 export class ItemType {
   static readonly schema = STRUCTS.ItemType;
@@ -156,21 +184,6 @@ export class ItemType {
   ammoPerTon: number = 0;
   /** +0x024 char * */
   name: string | null = null;
-}
-
-/** MechSection - 40 (0x28) bytes. */
-export class MechSection {
-  static readonly schema = STRUCTS.MechSection;
-  /** +0x000 int */
-  armorFront: number = 0;
-  /** +0x004 int */
-  armorRear: number = 0;
-  /** +0x008 int */
-  internal: number = 0;
-  /** +0x00c ushort[12] */
-  slots: Uint16Array = new Uint16Array(12);
-  /** +0x024 short */
-  numSlots: number = 0;
 }
 
 /** MechlabWidget - 44 (0x2c) bytes. */

@@ -17,18 +17,18 @@
    "field_0x4": "only project_file_close touches it (frees it when non-null)"
   }
  },
- "ProjectDirEntry": {
-  "doc": "",
-  "fields": {
-   "offset": "file offset of the record; project_read_resource seeks to offset + the type's recordPrefix",
-   "length": "the record's length including that prefix: project_resource_size returns length - recordPrefix"
-  }
- },
  "UnplacedItem": {
   "doc": "",
   "fields": {
    "item": "an item code (weapon id, 6001 + n heat sink, 7001 + n jump jet, ammo ...); -1 empty",
    "criticals": "slots it still needs: the item type's criticals, designHeatSinkType for a heat sink, 1 for a jump jet or ammo"
+  }
+ },
+ "ProjectDirEntry": {
+  "doc": "",
+  "fields": {
+   "offset": "file offset of the record; project_read_resource seeks to offset + the type's recordPrefix",
+   "length": "the record's length including that prefix: project_resource_size returns length - recordPrefix"
   }
  },
  "CareerMission": {
@@ -47,6 +47,24 @@
    "maker": "the ENGINE panel's Manufacturer ('Omni', 'GM', 'Pitban' ...)"
   }
  },
+ "DesignLocation": {
+  "doc": "",
+  "fields": {
+   "internal": "structureTable's value for the location (head 3); the save writes it to MechSection.internal",
+   "maxArmour": "front + rear may not exceed it: the ARMOR panel's +1 buttons test it, and the location rows print it as 'Head (9)'. The loader sets 2 x internal (head 9). (Was left unnamed: 'no reader has been found' until the ARMOR handlers were recovered.)",
+   "armourFront": "points on the front; saved to MechSection.armorFront, stripped by mechlab_trim_armour_to_tonnage",
+   "armourRear": "points on the rear, -1 for a location without rear armour (all but the torsos 1..3); the trim and the allocated sum skip -1"
+  }
+ },
+ "ScreenRow": {
+  "doc": "",
+  "fields": {
+   "buttons": "button_bar_create's defs",
+   "buttonCount": "button_bar_create's count (screen_ready_room uses it only for FREEBIRTHTOAD; screen_training adds buttons 1 .. count-1 after its intro)",
+   "background": "the DATABASE.MW2 item screen_load_background puts up",
+   "music": "-1 or an XMIDI item (36..41); no reader found"
+  }
+ },
  "DeviceRecord": {
   "doc": "",
   "fields": {
@@ -61,15 +79,6 @@
    "spriteX": "where star_slot_draw plays the member's chassis sprite; the double-click box is x +-50",
    "spriteY": "the box is the 100 px above",
    "panel": "which of the three panels (label position, CHANGE MECH button 6 + panel) shows this member"
-  }
- },
- "DesignLocation": {
-  "doc": "",
-  "fields": {
-   "internal": "structureTable's value for the location (head 3); the save writes it to MechSection.internal",
-   "maxArmour": "front + rear may not exceed it: the ARMOR panel's +1 buttons test it, and the location rows print it as 'Head (9)'. The loader sets 2 x internal (head 9). (Was left unnamed: 'no reader has been found' until the ARMOR handlers were recovered.)",
-   "armourFront": "points on the front; saved to MechSection.armorFront, stripped by mechlab_trim_armour_to_tonnage",
-   "armourRear": "points on the rear, -1 for a location without rear armour (all but the torsos 1..3); the trim and the allocated sum skip -1"
   }
  },
  "ProjectTypeEntry": {
@@ -142,6 +151,16 @@
    "types": "typeCount entries (declared [1])"
   }
  },
+ "MechSection": {
+  "doc": "",
+  "fields": {
+   "armorFront": "mechlab_load_mek sums it into designArmourPoints and copies it to designLocations[].armourFront; the save writes it back",
+   "armorRear": "the same, into armourRear for the three torsos (1..3)",
+   "internal": "not read by the shell: the save WRITES designLocations[].internal here, from structureTable",
+   "slots": "item codes; the loader copies them into designCriticals",
+   "numSlots": "how many of slots are used; the loader stops at it"
+  }
+ },
  "ItemType": {
   "doc": "",
   "fields": {
@@ -152,16 +171,6 @@
    "criticals": "slots the item takes; WEAPON INFO 'Crit'",
    "ammoPerTon": "non-zero for an ammo weapon (the adds test it); the value is the shots per ton (6 for LRM 20, 24 for LRM 5); WEAPON INFO 'Ammo'",
    "name": "'LRM 20' ...; WEAPON INFO 'Type' and the WEAPONS TABLE rows"
-  }
- },
- "MechSection": {
-  "doc": "",
-  "fields": {
-   "armorFront": "mechlab_load_mek sums it into designArmourPoints and copies it to designLocations[].armourFront; the save writes it back",
-   "armorRear": "the same, into armourRear for the three torsos (1..3)",
-   "internal": "not read by the shell: the save WRITES designLocations[].internal here, from structureTable",
-   "slots": "item codes; the loader copies them into designCriticals",
-   "numSlots": "how many of slots are used; the loader stops at it"
   }
  },
  "MechlabWidget": {

@@ -12,6 +12,11 @@ import { resourceIdByName } from '../../data/prj/ProjectFile.ts';
 import { mem } from '../memory.ts';
 import { project } from '../project.ts';
 import { starConfigure, starSetMember } from '../handoff/stars.ts';
+import { registerGlobals } from '../../engine/globals.ts';
+import type { Blocking } from '../host/blocking.ts';
+import { animStart } from '../anim/anims.ts';
+import { labelCreateUnder, labelDestroy, remapAt, type TextLabel } from '../ui/labels.ts';
+import { shell } from '../state.ts';
 
 /**
  * A stream by name through TABL `table`, as its resource bytes; null for a
@@ -84,12 +89,13 @@ export interface Brf2Planet {
  * with loadStars, the first SDSC configures the player's star and the second
  * the opponent's (and sets opponentStarSkill); then the player's star is
  * current with member 0 selected. With showPlanet, PDSC's planet and text
- * are returned for the caller's screen (the original starts the aplanNN
- * animation and three labels here).
+ * are returned for the caller's screen, which puts them up with
+ * brf2PlanetShow (the original starts the aplanNN animation and three
+ * labels here).
  *
  * @mw2shell mission_brf2_load 0x000291b0
  * @fidelity partial
- * @divergence the planet branch's animation and labels are drawn by the calling screen from the returned Brf2Planet
+ * @divergence the planet branch's anim_start blocks (a file read), so its animation and labels are put up by the caller through brf2PlanetShow, right after this returns
  */
 export function missionBrf2Load(name: string, loadStars: boolean, showPlanet: boolean): Brf2Planet | null {
   const m = mem();
@@ -138,4 +144,42 @@ export function missionBrf2Load(name: string, loadStars: boolean, showPlanet: bo
     lines.push(s);
   }
   return { planet, lines };
+}
+
+/**
+ * The planet branch's three labels (TextLabel * at 0xa2130, which
+ * Mw2shellTypes.java calls planetLabels): each is destroyed and
+ * replaced when the next planet is shown. screen_grievance zeroes the
+ * three dwords on entry - dropping the labels without destroying them -
+ * which in the port is `planetLabels.labels.fill(null)`.
+ */
+export const planetLabels = registerGlobals(
+  'planetLabels',
+  {
+    labels: [null, null, null] as Array<TextLabel | null>,
+  },
+  () => {
+    planetLabels.labels = [null, null, null];
+  },
+  'mw2shell',
+);
+
+/**
+ * What mission_brf2_load's PDSC branch puts up, after it has set
+ * briefingPlanet: slot 0 plays planetAnims[planet * 2] (aplan01..12) at
+ * (414, 10), flags 0x42, and each of the three lines replaces its label
+ * (planetLabels) with label_create_under in font32 at (239, 0x45 + 12 i)
+ * through grievanceTextRemap (0xa1ff8, which screen_grievance fills).
+ *
+ * @portOnly the tail of mission_brf2_load (0x291b0)'s PDSC branch, split off because anim_start blocks
+ */
+export function* brf2PlanetShow(p: Brf2Planet): Blocking<void> {
+  const m = mem();
+  yield* animStart(0, m.ptrStr(SHELL_LABEL.planetAnims + p.planet * 2 * 4) ?? '', 0x19e, 10, 0x42, 0);
+  for (let i = 0; i < 3; i++) {
+    // the line is copied to 0xa1ef8 first
+    const old = planetLabels.labels[i];
+    if (old) labelDestroy(old);
+    planetLabels.labels[i] = labelCreateUnder(shell.font32!, 0xef, 0x45 + 0xc * i, p.lines[i] ?? '', remapAt(SHELL_LABEL.grievanceTextRemap));
+  }
 }

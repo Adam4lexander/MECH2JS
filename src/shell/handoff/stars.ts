@@ -124,6 +124,60 @@ export function starSetMember(index: number, mekName: string | null, pilotName: 
   return -1;
 }
 
+/**
+ * (index): the current star's member's MEK name (index < 0: the selected
+ * member); the empty string past maxMechs or memberCount.
+ *
+ * @mw2shell star_member_mek_name 0x0003aa80
+ * @fidelity exact
+ */
+export function starMemberMekName(index: number): string {
+  const m = mem();
+  const s = currentStar();
+  if (index < 0) index = m.i32(s + F.selected);
+  if (index < m.i32(s + F.maxMechs) && index < m.i32(s + F.memberCount)) return m.cstr(starMember(s, index) + F.mekName, 16);
+  // 0x77df6: the empty string
+  return '';
+}
+
+/**
+ * (index): the current star's member's chassis (a chassisTable row; index
+ * < 0: the selected member); -1 past maxMechs or memberCount.
+ *
+ * @mw2shell star_member_chassis 0x0003aad0
+ * @fidelity exact
+ */
+export function starMemberChassis(index: number): number {
+  const m = mem();
+  const s = currentStar();
+  if (index < 0) index = m.i32(s + F.selected);
+  if (index < m.i32(s + F.maxMechs) && index < m.i32(s + F.memberCount)) return m.i32(starMember(s, index));
+  return -1;
+}
+
+/**
+ * (star): the formation of the current star (star < 0), the player's (0)
+ * or the opponent's (anything else).
+ *
+ * @mw2shell star_formation 0x0003ab10
+ * @fidelity exact
+ */
+export function starFormation(star: number): number {
+  return mem().i32(starRecord(star) + F.formation);
+}
+
+/**
+ * (star): the address of the current star record (star < 0), the
+ * player's (0) or the opponent's.
+ *
+ * @mw2shell star_record 0x0003ab30
+ * @fidelity exact
+ */
+export function starRecord(star: number): number {
+  if (star < 0) return currentStar();
+  return star !== 0 ? OPPONENT : PLAYER;
+}
+
 const PRM = SHELL_LABEL.prmBlock;
 
 /**

@@ -209,10 +209,75 @@
   "kind": "raw",
   "doc": "text_label_type_char's \\T: the pen moves to the first of these past its offset from the label's x - 0, 36, 72 ... 612, then 640 (19 ints; the loop stops at 0x4c bytes)."
  },
+ "archiveNames": {
+  "address": "0x7d464",
+  "kind": "raw",
+  "doc": "screen_archive: (&archiveNames)[career], the archive archive_page_load opens - ARCHWO.MW2 (Wolf), ARCHJF.MW2 (Jade Falcon)."
+ },
+ "formationTitles": {
+  "address": "0x7d470",
+  "kind": "raw",
+  "doc": "grievance_draw_formations reads entry formation * 2: the display names 'Echelon Left' ... 'Wedge'. The odd entries (0x7d4b4, 0x7d4cc ... then 0x11d) are not read by it; what they are is not established."
+ },
+ "careerButtonsWolf": {
+  "address": "0x7d52c",
+  "kind": "raw",
+  "doc": "The button tables those rows point at (listing/screen_buttons.txt, per career)."
+ },
+ "registerButtonsWolf": {
+  "address": "0x7d5b8",
+  "kind": "raw",
+  "doc": ""
+ },
+ "trainingButtonsWolf": {
+  "address": "0x7d7cc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "readyRoomButtonsWolf": {
+  "address": "0x7d890",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSelectButtonsWolf": {
+  "address": "0x7dc64",
+  "kind": "raw",
+  "doc": ""
+ },
+ "careerButtonsJadeFalcon": {
+  "address": "0x7de94",
+  "kind": "raw",
+  "doc": ""
+ },
+ "registerButtonsJadeFalcon": {
+  "address": "0x7df20",
+  "kind": "raw",
+  "doc": ""
+ },
+ "trainingButtonsJadeFalcon": {
+  "address": "0x7e134",
+  "kind": "raw",
+  "doc": ""
+ },
+ "readyRoomButtonsJadeFalcon": {
+  "address": "0x7e1f8",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSelectButtonsJadeFalcon": {
+  "address": "0x7e5cc",
+  "kind": "raw",
+  "doc": ""
+ },
  "titleButtons": {
   "address": "0x7e7fc",
   "kind": "raw",
   "doc": ""
+ },
+ "grievanceButtons": {
+  "address": "0x7e8a4",
+  "kind": "raw",
+  "doc": "screen_grievance's button_bar_create(..., 0x7e8a4, 0x19): 0 LAUNCH, 1 EXIT, 2 the next scenario, then two mirrored panels (3..13 the player's star, 14..24 the opponent's): member + (3..5 / 14..16), formation +, member - (7..9 / 18..20), formation -, insignia, MECH LAB, STAR CONFIG. Buttons 3..5 and 14..16 also give the member labels' positions (their labelX / labelY)."
  },
  "shellMenuItems": {
   "address": "0x7eefc",
@@ -249,10 +314,65 @@
   "kind": "raw",
   "doc": ""
  },
+ "careerScreenRows": {
+  "address": "0x7f08c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "registerScreenRows": {
+  "address": "0x7f0bc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "archiveScreenRows": {
+  "address": "0x7f0ec",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSelectScreenRows": {
+  "address": "0x7f11c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "readyRoomScreenRows": {
+  "address": "0x7f14c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "briefingScreenRows": {
+  "address": "0x7f1dc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "briefingSituationRows": {
+  "address": "0x7f20c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "trainingScreenRows": {
+  "address": "0x7f23c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "planetAnims": {
+  "address": "0x7f29c",
+  "kind": "raw",
+  "doc": "mission_brf2_load's PDSC branch: anim_start(0, planetAnims[briefingPlanet * 2], 414, 10, 0x42, 0) - aplan01 .. aplan12. The odd entries, aplan01c .. aplan12c, are what screen_grievance starts in slot 0 (flags 0x4a) whenever that slot is not running."
+ },
  "grievanceScenarios": {
   "address": "0x7f2fc",
   "kind": "raw",
   "doc": "Trial of Grievance scenarios: 10 names and a NULL (jackscn1 ... swisscn1). screen_grievance steps prmBlock.grievanceScenario through it, wrapping at the NULL, and loads the chosen one through pilots_sub_0291b0."
+ },
+ "insigniaAnims": {
+  "address": "0x7f328",
+  "kind": "raw",
+  "doc": "screen_grievance's insignia animations, indexed like insigniaNames (wiawolf, wiajf, wiaghost, wiasmoke, wianova, wiasteel): slot 1 at (13, 205) and slot 2 at (483, 329)."
+ },
+ "grievanceChassisLimit": {
+  "address": "0x7f340",
+  "kind": "int",
+  "doc": "screen_grievance: the mech-lab chassis count the member steppers wrap at, set on entry from star_record(0)->members[0].pilotName: Enzo 18, Hobbes 17, Calvin 16, else 15 (grievance_chassis_count computes the same for screen_mechlab)."
  },
  "equipmentNames": {
   "address": "0x7f4c4",
@@ -379,6 +499,11 @@
   "kind": "raw",
   "doc": "mission_brf2_load copies the BRF2 stream's SUPS string here (the launch animation stem); prm_save appends it to MW2's command line after \" -b=\". 13 bytes: the image holds the 8.3 template \"xxxxxxxx.xxx\"."
  },
+ "registerNextState": {
+  "address": "0x8396c",
+  "kind": "int",
+  "doc": "screen_register: the result it returns, -1 until a button or shell_menu decides. A static at 0x8396c, not a local: set to 10 by a LAUNCH OLD MISSION row, 8 / 1 by the buttons, then tested once per pass."
+ },
  "registerPilotInfoPanel": {
   "address": "0x83970",
   "kind": "raw",
@@ -401,6 +526,21 @@
  },
  "starSlotsJadeFalcon": {
   "address": "0x83fa4",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSpriteFormatWolf": {
+  "address": "0x840c4",
+  "kind": "raw",
+  "doc": "screen_star_select points starSpriteFormat at one of these by career (0, 1, 2): star_slot_draw sprintfs the chassis's animCode into it for the member's sprite."
+ },
+ "starSpriteFormatJadeFalcon": {
+  "address": "0x840cc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSpriteFormatGrievance": {
+  "address": "0x840d4",
   "kind": "raw",
   "doc": ""
  },
@@ -459,10 +599,20 @@
   "kind": "raw",
   "doc": ""
  },
+ "randSeed": {
+  "address": "0x863d8",
+  "kind": "int",
+  "doc": "rand / srand (0x4bc39 / 0x4bc5d): the LCG state rand_state (0x4bc33) returns the address of; x = x * 0x41c64e6d + 0x3039, rand = bits 16..30. 1 in the image."
+ },
  "projectFiles": {
   "address": "0x875b0",
   "kind": "raw",
   "doc": "project_set_alloc_hooks' two pointers (MW2's projectAllocHook / projectFreeHook): project_file_open and project_load_directories allocate through the first, project_file_close frees through the second The open-project records (seventy-fourth /shell-next): MW2's ProjectFile layout, matched field by field against the shell's project_file_open / _close / project_load_directories / project_resource_size / project_read_resource. Capacity 1: project_file_open only ever checks record 0's inUse, as MW2's does."
+ },
+ "ordersTextRemap": {
+  "address": "0x8a6e4",
+  "kind": "raw",
+  "doc": "orders_text_build fills it on every call - [0] 0xff, [1] 1, [2..255] 0xff - and hands it to page_init as every briefing / debriefing line's colour table: only ink 1 draws."
  },
  "bwdBuffer": {
   "address": "0x8a7e4",
@@ -664,10 +814,50 @@
   "kind": "int",
   "doc": ""
  },
+ "grievanceTextRemap": {
+  "address": "0xa1ff8",
+  "kind": "raw",
+  "doc": "screen_grievance's text colour table, filled on entry: the identity, 0 -> 0xff (transparent), ink 1 -> 0x22. Every member and formation label is drawn through it."
+ },
+ "grievancePlayerFormation": {
+  "address": "0xa20f8",
+  "kind": "int",
+  "doc": "grievance_draw_formations: star_formation(0) / (1), stepped by buttons 6 / 10 and 17 / 21 and passed to star_configure."
+ },
+ "grievanceOpponentFormation": {
+  "address": "0xa20fc",
+  "kind": "int",
+  "doc": ""
+ },
+ "grievancePlayerMembers": {
+  "address": "0xa2100",
+  "kind": "raw",
+  "doc": "screen_grievance: per member {TextLabel *, chassis index}, 3 per star. The chassis is what the steppers step (-1 none) and star_member_chassis refreshes."
+ },
+ "grievanceOpponentMembers": {
+  "address": "0xa2118",
+  "kind": "raw",
+  "doc": ""
+ },
+ "planetLabels": {
+  "address": "0xa2130",
+  "kind": "raw",
+  "doc": "mission_brf2_load's PDSC branch keeps its three planet-description labels here (TextLabel *; label_destroy'd and replaced for each planet, through [ebp + 0xa2130]). screen_grievance zeroes them on entry, dropping the labels without destroying them. (The first note here said no reader had been found: a grep for the address missed the indexed access.)"
+ },
  "briefingPlanet": {
   "address": "0xa213c",
   "kind": "int",
   "doc": "mission_brf2_load: PDSC's planet - 1 (0..11), which picks the aplanNN animation; screen_grievance clears it."
+ },
+ "grievanceOpponentFormationLabel": {
+  "address": "0xa2140",
+  "kind": "int",
+  "doc": "grievance_draw_formations: the two formation labels (TextLabel *) it replaces."
+ },
+ "grievancePlayerFormationLabel": {
+  "address": "0xa2144",
+  "kind": "int",
+  "doc": ""
  },
  "mekTons": {
   "address": "0xa22bc",
@@ -949,6 +1139,11 @@
   "kind": "raw",
   "doc": ""
  },
+ "registerSlots": {
+  "address": "0xa662c",
+  "kind": "raw",
+  "doc": "screen_register: the career's ten registry records (slots 0..9 Wolf, 10..19 Jade Falcon), pointers the slot buttons 1..10 index as 0xa6628 + button * 4."
+ },
  "registerCareer": {
   "address": "0xa6754",
   "kind": "int",
@@ -987,6 +1182,26 @@
  "starPanelY": {
   "address": "0xa7158",
   "kind": "ptr",
+  "doc": ""
+ },
+ "starLimitLabels": {
+  "address": "0xa715c",
+  "kind": "raw",
+  "doc": "star_limits_show: its five labels (formation, mission, maximum 'Mechs, KDMT, total mass), each replaced on a redraw; screen_star_select zeroes them on entry."
+ },
+ "layoutRegionFlag": {
+  "address": "0xa7170",
+  "kind": "raw",
+  "doc": "---- text/briefing/archive (S5) ---- text_layout_page's pending-code flags, static bytes that outlive a call. \\Bnnn sets layoutBackPending and \\Gnnn layoutColumnPending; the next token read tests them first, clears the flag and re-emits the code as the word \"\\b%03d\" / \"\\g%03d\". \\Axx sets layoutRegionFlag; no reader of it has been found (text_layout_page never reads it, and no other function refers to 0xa7170)."
+ },
+ "layoutBackPending": {
+  "address": "0xa7171",
+  "kind": "raw",
+  "doc": ""
+ },
+ "layoutColumnPending": {
+  "address": "0xa7172",
+  "kind": "raw",
   "doc": ""
  }
 }

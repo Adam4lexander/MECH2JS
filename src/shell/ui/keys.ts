@@ -40,6 +40,17 @@ export function inputInit(k: KeyInput): KeyInput {
 }
 
 /**
+ * Drains the keyboard (getch while kbhit) and clears the key slot.
+ *
+ * @mw2shell input_flush 0x0002a650
+ * @fidelity exact
+ */
+export function inputFlush(k: KeyInput): void {
+  while (kbhit()) getch();
+  k.key = 0;
+}
+
+/**
  * Reads one key: 0 when none is waiting; else ASCII, or 0x8000 | the scan
  * code after a 0. Returns 3 for Esc, 1 for any other key, 0 for none.
  *
