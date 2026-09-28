@@ -9,7 +9,7 @@ than drifting. Library code (Watcom clib, Miles, Smacker) is excluded from the t
 
 ## MW2.EXE
 
-**Game functions:** 1159  |  **ported exact:** 860  |  **partial:** 61  |  **stub:** 3  |  library functions ported: 36
+**Game functions:** 1161  |  **ported exact:** 889  |  **partial:** 65  |  **stub:** 3  |  library functions ported: 38
 
 Library groups left out of the totals: `clib`, `miles`.
 
@@ -19,9 +19,9 @@ Library groups left out of the totals: `clib`, `miles`.
 |---|---|---:|---:|---:|---:|---:|
 | ai_combat | ai | 31 | 31 | 0 | 0 | 0 |
 | ai_debug | ai | 2 | 0 | 0 | 0 | 2 |
-| ai_group | ai | 98 | 96 | 1 | 0 | 1 |
+| ai_group | ai | 98 | 97 | 1 | 0 | 0 |
 | ai_state | ai | 17 | 17 | 0 | 0 | 0 |
-| game_boot | boot | 18 | 8 | 2 | 0 | 8 |
+| game_boot | boot | 19 | 12 | 3 | 0 | 4 |
 | main | boot | 15 | 10 | 2 | 0 | 3 |
 | geom_luma | geometry | 67 | 57 | 1 | 0 | 9 |
 | geom_poly | geometry | 20 | 18 | 1 | 0 | 1 |
@@ -31,33 +31,33 @@ Library groups left out of the totals: `clib`, `miles`.
 | mission_log | mission | 28 | 24 | 2 | 0 | 2 |
 | mission_result | mission | 7 | 7 | 0 | 0 | 0 |
 | objectives | mission | 8 | 8 | 0 | 0 | 0 |
-| netplay | netplay | 13 | 1 | 2 | 0 | 10 |
+| netplay | netplay | 13 | 12 | 1 | 0 | 0 |
 | project_entry | project | 31 | 27 | 2 | 0 | 2 |
 | project_file | project | 34 | 14 | 4 | 0 | 16 |
-| project_tables | project | 39 | 32 | 0 | 1 | 6 |
+| project_tables | project | 39 | 33 | 0 | 1 | 5 |
 | stream_seen | project | 3 | 3 | 0 | 0 | 0 |
 | render_asm | render | 74 | 42 | 9 | 0 | 23 |
 | res_cache | resource | 25 | 0 | 1 | 2 | 22 |
 | res_loaders | resource | 9 | 5 | 1 | 0 | 3 |
-| cockpit | sim | 12 | 11 | 1 | 0 | 0 |
+| cockpit | sim | 12 | 12 | 0 | 0 | 0 |
 | damage | sim | 54 | 53 | 1 | 0 | 0 |
 | mech_config | sim | 20 | 17 | 1 | 0 | 2 |
-| sim_objects | sim | 29 | 27 | 1 | 0 | 1 |
-| weapons | sim | 15 | 14 | 0 | 0 | 1 |
+| sim_objects | sim | 29 | 28 | 1 | 0 | 0 |
+| weapons | sim | 15 | 15 | 0 | 0 | 0 |
 | sound_config | sound | 11 | 7 | 3 | 0 | 1 |
 | sound_res | sound | 14 | 13 | 1 | 0 | 0 |
 | sound_seq | sound | 59 | 30 | 9 | 0 | 20 |
 | sound_sfx | sound | 15 | 15 | 0 | 0 | 0 |
 | terrain | terrain | 103 | 96 | 0 | 0 | 7 |
-| cheats | ui | 14 | 0 | 3 | 0 | 11 |
+| cheats | ui | 14 | 7 | 7 | 0 | 0 |
 | hud_debug | ui | 15 | 0 | 0 | 0 | 15 |
 | target_ui | ui | 2 | 1 | 0 | 0 | 1 |
-| ui_callbacks | ui | 33 | 29 | 0 | 0 | 4 |
+| ui_callbacks | ui | 34 | 29 | 0 | 0 | 5 |
 | screenshot | util | 3 | 1 | 0 | 0 | 2 |
 | time_format | util | 3 | 3 | 0 | 0 | 0 |
-| vfx_font | vfx | 47 | 41 | 1 | 0 | 5 |
-| vfx_lib | vfx | 42 | 15 | 2 | 0 | 25 |
-| vfx_video | vfx | 51 | 41 | 5 | 0 | 5 |
+| vfx_font | vfx | 47 | 42 | 1 | 0 | 4 |
+| vfx_lib | vfx | 42 | 16 | 2 | 0 | 24 |
+| vfx_video | vfx | 51 | 41 | 6 | 0 | 4 |
 
 ### Ported functions
 
@@ -80,6 +80,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00010f00 | message_bar_layout | vfx_video | exact | `messageBarLayout` src/sim/cockpit/messages.ts:111 |
 | 0x00011020 | message_post | vfx_video | exact | `messagePost` src/sim/cockpit/messages.ts:59 |
 | 0x00011130 | message_bar_draw | vfx_video | exact | `messageBarDraw` src/sim/cockpit/messages.ts:141 |
+| 0x00011340 | vfx_video_text_handler | vfx_video | partial | `vfxVideoTextHandler` src/sim/display/videoText.ts:35 |
 | 0x000113a0 | radar_module_load | vfx_video | exact | `vfxVideoDispHandler` src/sim/cockpit/radar.ts:375 |
 | 0x00011440 | radar_mode_install | vfx_video | exact | `vfxVideoSub011440` src/sim/cockpit/radar.ts:421 |
 | 0x000115e0 | radar_init | vfx_video | exact | `radarDisplayInit` src/sim/cockpit/radar.ts:463 |
@@ -125,7 +126,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x000137a0 | layout_pane_scale_about_centre | vfx_font | exact | `layoutPaneScaleAboutCentre` src/sim/display/layout.ts:155 |
 | 0x00013860 | layout_pane_fit_shape | vfx_font | exact | `layoutPaneFitShape` src/sim/display/layout.ts:177 |
 | 0x00013960 | vfx_pane_frame | vfx_font | exact | `vfxPaneFrame` src/sim/display/layout.ts:192 |
-| 0x000139f0 | pane_rule_under_text | vfx_font | exact | `paneRuleUnderTextDraw` src/sim/ui/menus.ts:231 |
+| 0x000139f0 | pane_rule_under_text | vfx_font | exact | `paneRuleUnderTextDraw` src/sim/ui/menus.ts:232 |
 | 0x00013a40 | hud_text_underline | vfx_font | exact | `vfxFontSub013a40` src/sim/cockpit/objectivesHud.ts:96 |
 | 0x00013ad0 | vfx_text_box_draw | vfx_font | exact | `vfxFontSub013ad0` src/sim/cockpit/targetDisplay.ts:265 |
 | 0x00014020 | vfx_font_sub_014020 | vfx_font | exact | `vfxFontSub014020` src/sim/display/layout.ts:211 |
@@ -151,9 +152,15 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00015070 | day_cycle_set_phase | vfx_font | exact | `dayCycleSetPhase` src/sim/world/dayCycle.ts:111 |
 | 0x000150e0 | vfx_font_sub_0150e0 | vfx_font | exact | `vfxFontSub0150e0` src/sim/world/dayCycle.ts:135 |
 | 0x000150f0 | vfx_font_sub_0150f0 | vfx_font | exact | `vfxFontSub0150f0` src/sim/world/dayCycle.ts:149 |
+| 0x00015210 | vfx_font_sub_015210 | vfx_font | exact | `vfxFontSub015210` src/sim/display/launchScreen.ts:56 |
+| 0x00015230 | boot_load_launch_anims | game_boot | partial | `bootLoadLaunchAnims` src/sim/display/launchScreen.ts:107 |
+| 0x000154d0 | launch_anim_tick | game_boot | exact | `launchAnimTick` src/sim/display/launchScreen.ts:150 |
+| 0x000155a0 | game_boot_sub_0155a0 | game_boot | exact | `gameBootSub0155a0` src/sim/display/launchScreen.ts:165 |
 | 0x00015690 | audio_timer_init | game_boot | partial | `audioTimerInit` src/engine/clock.ts:76 |
 | 0x00015760 | sim_clock_step | game_boot | exact | `simClockStep` src/engine/clock.ts:132 |
 | 0x00015980 | sim_stopwatch_elapsed | game_boot | exact | `simStopwatchElapsed` src/engine/clock.ts:101 |
+| 0x000159a0 | net_stopwatch_elapsed | game_boot | exact | `netStopwatchElapsed` src/sim/net/netSession.ts:106 |
+| 0x000159c0 | net_stopwatch_reset | game_boot | exact | `netStopwatchReset` src/sim/net/netSession.ts:114 |
 | 0x000159e0 | sim_clock_reset | game_boot | exact | `simClockReset` src/engine/clock.ts:111 |
 | 0x00015e90 | game_update_pause | game_boot | exact | `gameUpdatePause` src/sim/ui/uiContext.ts:91 |
 | 0x00015f00 | game_boot_sub_015f00 | game_boot | exact | `gameBootSub015f00` src/mission/results.ts:128 |
@@ -168,7 +175,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00016720 | objective_evaluate | mission_result | exact | `objectiveEvaluate` src/mission/results.ts:282 |
 | 0x00016e80 | mission_results_update | mission_result | exact | `missionResultsUpdate` src/mission/results.ts:388 |
 | 0x000170c0 | mission_clock_update | mission_result | exact | `missionClockUpdate` src/mission/missionClock.ts:25 |
-| 0x000170e0 | mission_save_results | mission_config | exact | `missionSaveResults` src/mission/end.ts:100 |
+| 0x000170e0 | mission_save_results | mission_config | exact | `missionSaveResults` src/mission/end.ts:101 |
 | 0x00017280 | mission_event_nop | mission_config | exact | `missionEventNop` src/sim/things/gameThingDamage.ts:135 |
 | 0x00017290 | mission_stub_true | mission_config | exact | `missionStubTrue` src/mission/tables/missionTables.ts:182 |
 | 0x000172a0 | group_identify_target | mission_config | exact | `groupIdentifyTarget` src/mission/objectives.ts:218 |
@@ -180,26 +187,27 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00017490 | task_data | project_tables | exact | `taskData` src/engine/tasks/taskList.ts:144 |
 | 0x000174a0 | task_list_run | project_tables | exact | `taskListRun` src/engine/tasks/taskList.ts:112 |
 | 0x00017570 | ui_context_register | project_tables | exact | `uiContextRegister` src/sim/ui/uiContext.ts:62 |
-| 0x000175d0 | ui_context_request_open | project_tables | exact | `uiContextRequestOpen` src/sim/ui/menus.ts:36 |
-| 0x00017610 | ui_context_toggle | project_tables | exact | `uiContextToggle` src/sim/ui/menus.ts:52 |
-| 0x000176e0 | ui_context_clear_all | project_tables | exact | `uiContextClearAll` src/sim/ui/menus.ts:164 |
+| 0x000175d0 | ui_context_request_open | project_tables | exact | `uiContextRequestOpen` src/sim/ui/menus.ts:37 |
+| 0x00017610 | ui_context_toggle | project_tables | exact | `uiContextToggle` src/sim/ui/menus.ts:53 |
+| 0x000176e0 | ui_context_clear_all | project_tables | exact | `uiContextClearAll` src/sim/ui/menus.ts:165 |
 | 0x00017710 | menu_resolve_callbacks | project_tables | exact | `menuResolveCallbacks` src/sim/ui/menuLoad.ts:207 |
 | 0x00017810 | menu_load | project_tables | exact | `menuLoad` src/sim/ui/menuLoad.ts:296 |
 | 0x000178b0 | menu_layout | project_tables | exact | `menuLayout` src/sim/ui/menuLoad.ts:245 |
-| 0x00017aa0 | menu_load_art | project_tables | exact | `menuLoadArt` src/sim/ui/menus.ts:174 |
-| 0x00017b40 | menu_open | project_tables | exact | `menuOpen` src/sim/ui/menus.ts:116 |
-| 0x00017be0 | menu_close | project_tables | exact | `menuClose` src/sim/ui/menus.ts:135 |
+| 0x00017aa0 | menu_load_art | project_tables | exact | `menuLoadArt` src/sim/ui/menus.ts:175 |
+| 0x00017b40 | menu_open | project_tables | exact | `menuOpen` src/sim/ui/menus.ts:117 |
+| 0x00017be0 | menu_close | project_tables | exact | `menuClose` src/sim/ui/menus.ts:136 |
 | 0x00017ca0 | ui_context_clear_request | project_tables | exact | `uiContextClearRequest` src/sim/ui/menuCallbacks.ts:82 |
 | 0x00017cd0 | menu_poll_key | project_tables | exact | `menuPollKey` src/sim/ui/uiContext.ts:112 |
-| 0x00017ea0 | ui_context_dispatch | project_tables | exact | `uiContextDispatch` src/sim/ui/menus.ts:89 |
-| 0x00017f30 | menu_frame | project_tables | exact | `menuFrame` src/sim/ui/menus.ts:186 |
-| 0x00017fd0 | menu_key_action | project_tables | exact | `menuKeyAction` src/sim/ui/menus.ts:207 |
-| 0x00018040 | menu_draw | project_tables | exact | `menuDraw` src/sim/ui/menus.ts:248 |
-| 0x00018560 | ui_context_find | project_tables | exact | `uiContextFindNode` src/sim/ui/menus.ts:73 |
+| 0x00017ea0 | ui_context_dispatch | project_tables | exact | `uiContextDispatch` src/sim/ui/menus.ts:90 |
+| 0x00017f30 | menu_frame | project_tables | exact | `menuFrame` src/sim/ui/menus.ts:187 |
+| 0x00017fd0 | menu_key_action | project_tables | exact | `menuKeyAction` src/sim/ui/menus.ts:208 |
+| 0x00018040 | menu_draw | project_tables | exact | `menuDraw` src/sim/ui/menus.ts:249 |
+| 0x00018560 | ui_context_find | project_tables | exact | `uiContextFindNode` src/sim/ui/menus.ts:74 |
 | 0x00018690 | ui_context_active | project_tables | exact | `uiContextActive` src/sim/ui/uiContext.ts:78 |
-| 0x000186e0 | menu_item_slider | project_tables | exact | `menuItemSlider` src/sim/ui/menus.ts:483 |
-| 0x00018ac0 | menu_item_choice | project_tables | exact | `menuItemChoice` src/sim/ui/menus.ts:379 |
-| 0x00018d00 | menu_item_toggle | project_tables | exact | `menuItemToggle` src/sim/ui/menus.ts:429 |
+| 0x000186e0 | menu_item_slider | project_tables | exact | `menuItemSlider` src/sim/ui/menus.ts:484 |
+| 0x00018ac0 | menu_item_choice | project_tables | exact | `menuItemChoice` src/sim/ui/menus.ts:380 |
+| 0x00018d00 | menu_item_toggle | project_tables | exact | `menuItemToggle` src/sim/ui/menus.ts:430 |
+| 0x00018ef0 | menu_item_text_box | project_tables | exact | `menuItemTextBox` src/sim/ui/menus.ts:555 |
 | 0x000191a0 | menu_calibration_onload | project_tables | exact | `menuCalibrationOnload` src/sim/ui/menuCallbacks.ts:502 |
 | 0x000192d0 | menu_item_calibrate | project_tables | stub | `menuItemCalibrate` src/sim/ui/menuCallbacks.ts:545 |
 | 0x00019560 | brightness_get | project_tables | exact | `brightnessGet` src/sim/world/brightness.ts:43 |
@@ -359,8 +367,8 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00020890 | mech_collision_damage | terrain | exact | `mechCollisionDamage` src/sim/mech/damage.ts:545 |
 | 0x00020930 | collision_damage_apply | terrain | exact | `collisionDamageApply` src/sim/mech/damage.ts:562 |
 | 0x00020a50 | obstacle_collision_damage | terrain | exact | `obstacleCollisionDamage` src/sim/mech/damage.ts:604 |
-| 0x00020b10 | mech_crash_to_ground | terrain | exact | `mechCrashToGround` src/sim/mech/mechTickAi.ts:98 |
-| 0x00021510 | mech_ai_think | mission_log | partial | `mechAiThink` src/sim/mech/mechTickAi.ts:304 |
+| 0x00020b10 | mech_crash_to_ground | terrain | exact | `mechCrashToGround` src/sim/mech/mechTickAi.ts:99 |
+| 0x00021510 | mech_ai_think | mission_log | partial | `mechAiThink` src/sim/mech/mechTickAi.ts:306 |
 | 0x000215f0 | ai_rules_run | mission_log | exact | `aiRulesRun` src/sim/ai/rules.ts:216 |
 | 0x00021770 | ai_rules_rebuild | mission_log | exact | `aiRulesRebuild` src/sim/ai/rules.ts:151 |
 | 0x000218d0 | groups_start_mission | mission_log | partial | `groupsStartMission` src/sim/groups/orders.ts:183 |
@@ -403,7 +411,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00023420 | ai_ring_target_with_navpoints | ai_state | exact | `aiRingTargetWithNavpoints` src/sim/ai/states.ts:178 |
 | 0x00023590 | ai_select_navpoint | ai_state | exact | `aiSelectNavpoint` src/sim/ai/states.ts:163 |
 | 0x000235e0 | ai_follow_formation_slot | ai_state | exact | `aiFollowFormationSlot` src/sim/ai/states.ts:213 |
-| 0x00023650 | ai_log_attack | ai_combat | exact | `aiLogAttack` src/sim/mech/mechTickAi.ts:277 |
+| 0x00023650 | ai_log_attack | ai_combat | exact | `aiLogAttack` src/sim/mech/mechTickAi.ts:279 |
 | 0x000236e0 | ai_rule_tables_load | ai_combat | exact | `aiRuleTablesLoad` src/sim/ai/rules.ts:63 |
 | 0x00023720 | ai_rule_post_to_leader | ai_combat | exact | `aiRulePostToLeader` src/sim/ai/rules.ts:466 |
 | 0x00023760 | lance_mech_for_slot | ai_combat | exact | `lanceMechForSlot` src/sim/groups/orders.ts:332 |
@@ -430,10 +438,10 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x000249f0 | mech_spawn | ai_combat | exact | `mechSpawn` src/sim/mech/spawn.ts:145 |
 | 0x00024a80 | mech_entity_alloc | ai_combat | exact | `mechEntityAlloc` src/sim/mech/spawn.ts:69 |
 | 0x00024ac0 | mech_entity_reset | ai_combat | exact | `mechEntityReset` src/sim/mech/spawn.ts:84 |
-| 0x00024ca0 | autopilot_drive | ai_combat | exact | `autopilotDrive` src/sim/mech/mechTickAi.ts:333 |
+| 0x00024ca0 | autopilot_drive | ai_combat | exact | `autopilotDrive` src/sim/mech/mechTickAi.ts:335 |
 | 0x00024e80 | mech_punch_in_auto_heading | ai_combat | exact | `mechPunchInAutoHeading` src/sim/cockpit/hud.ts:657 |
-| 0x00024ec0 | mech_heat_meltdown | ai_combat | exact | `mechHeatMeltdown` src/sim/mech/mechTickAi.ts:183 |
-| 0x00024f90 | mech_heat_update | ai_combat | exact | `mechHeatUpdate` src/sim/mech/mechTickAi.ts:210 |
+| 0x00024ec0 | mech_heat_meltdown | ai_combat | exact | `mechHeatMeltdown` src/sim/mech/mechTickAi.ts:185 |
+| 0x00024f90 | mech_heat_update | ai_combat | exact | `mechHeatUpdate` src/sim/mech/mechTickAi.ts:212 |
 | 0x00025340 | mech_on_destroyed | ai_group | exact | `mechOnDestroyed` src/sim/mech/damage.ts:631 |
 | 0x00025740 | mech_destroy_section | ai_group | exact | `mechDestroySection` src/sim/mech/damage.ts:446 |
 | 0x00025960 | mech_damage_slot | ai_group | exact | `mechDamageSlot` src/sim/mech/damage.ts:224 |
@@ -441,19 +449,19 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x000265f0 | mech_eject | ai_group | exact | `mechEject` src/sim/mech/damage.ts:715 |
 | 0x000266e0 | mech_std_create | ai_group | partial | `mechStdCreate` src/sim/mech/create.ts:61 |
 | 0x00026990 | mech_std_tick_terrain | ai_group | exact | `mechStdTickTerrain` src/sim/mech/mechTickTerrain.ts:98 |
-| 0x00027780 | mech_std_tick_ai | ai_group | exact | `mechStdTickAi` src/sim/mech/mechTickAi.ts:393 |
-| 0x00028320 | mech_std_tick_player | ai_group | exact | `mechStdTickPlayer` src/sim/mech/mechTickAi.ts:700 |
+| 0x00027780 | mech_std_tick_ai | ai_group | exact | `mechStdTickAi` src/sim/mech/mechTickAi.ts:395 |
+| 0x00028320 | mech_std_tick_player | ai_group | exact | `mechStdTickPlayer` src/sim/mech/mechTickAi.ts:702 |
 | 0x00028660 | mech_std_cockpit | ai_group | exact | `mechStdCockpit` src/sim/mech/tickHooks.ts:36 |
 | 0x00028670 | mech_std_cockpit_release | ai_group | exact | `mechStdCockpitRelease` src/sim/mech/tickHooks.ts:47 |
 | 0x00028690 | mech_std_create_loadout | ai_group | exact | `mechStdCreateLoadout` src/sim/mech/loadout.ts:91 |
 | 0x000287b0 | mech_loadout_size | ai_group | exact | `mechLoadoutSize` src/sim/mech/loadout.ts:79 |
 | 0x000287f0 | weapon_fire_sound_play | ai_group | exact | `weaponFireSoundPlay` src/sim/weapons/weapons.ts:628 |
 | 0x00028810 | render_view_from_pose | ai_group | exact | `renderViewFromPose` src/sim/display/insetView.ts:68 |
-| 0x00028910 | death_flash | ai_group | exact | `deathFlash` src/sim/mech/mechTickAi.ts:87 |
+| 0x00028910 | death_flash | ai_group | exact | `deathFlash` src/sim/mech/mechTickAi.ts:88 |
 | 0x00028930 | damage_flash | ai_group | exact | `damageFlash` src/sim/cockpit/hud.ts:600 |
-| 0x00028980 | palette_fade_screen_to_preset | ai_group | exact | `paletteFadeScreenToPreset` src/mission/end.ts:64 |
-| 0x000289f0 | mech_death_update | ai_group | exact | `mechDeathUpdate` src/sim/mech/mechTickAi.ts:157 |
-| 0x00028ae0 | mech_jump_jet_effects | ai_group | exact | `mechJumpJetEffects` src/sim/mech/mechTickAi.ts:128 |
+| 0x00028980 | palette_fade_screen_to_preset | ai_group | exact | `paletteFadeScreenToPreset` src/mission/end.ts:65 |
+| 0x000289f0 | mech_death_update | ai_group | exact | `mechDeathUpdate` src/sim/mech/mechTickAi.ts:159 |
+| 0x00028ae0 | mech_jump_jet_effects | ai_group | exact | `mechJumpJetEffects` src/sim/mech/mechTickAi.ts:130 |
 | 0x00028be0 | mech_play_landing | ai_group | exact | `mechPlayLanding` src/sim/mech/mechTickTerrain.ts:50 |
 | 0x00028c70 | view_shake_impulse | ai_group | exact | `viewShakeImpulse` src/sim/camera/cameraUpdate.ts:301 |
 | 0x00028e30 | hud_overlay_draw | ai_group | exact | `hudOverlayDraw` src/sim/cockpit/overlay.ts:434 |
@@ -476,6 +484,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0002a210 | ai_validate_target | ai_group | exact | `aiValidateTarget` src/sim/ai/targeting.ts:109 |
 | 0x0002a460 | ai_validate_gamething | ai_group | exact | `aiValidateGamething` src/sim/ai/targeting.ts:151 |
 | 0x0002a670 | ai_validate_current_target | ai_group | exact | `aiValidateCurrentTarget` src/sim/ai/targeting.ts:261 |
+| 0x0002a930 | player_target_mech_index | ai_group | exact | `playerTargetMechIndex` src/sim/ui/cheats.ts:51 |
 | 0x0002a9d0 | player_target_node | ai_group | exact | `playerTargetNode` src/sim/ai/targeting.ts:340 |
 | 0x0002aa40 | player_target_reticle | ai_group | exact | `playerTargetReticle` src/sim/ai/targeting.ts:359 |
 | 0x0002ab60 | vec_to_range_bearing | ai_group | exact | `vecToRangeBearing` src/core/math/vec.ts:23 |
@@ -696,7 +705,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00038fd0 | texture_perspective_set | geom_luma | exact | `texturePerspectiveSet` src/sim/display/renderState.ts:238 |
 | 0x00038ff0 | camera_init | geom_luma | exact | `cameraInit` src/sim/camera/cameraUpdate.ts:689 |
 | 0x00039190 | camera_update | geom_luma | exact | `cameraUpdate` src/sim/camera/cameraUpdate.ts:731 |
-| 0x00039400 | camera_set_mode | geom_luma | exact | `cameraSetMode` src/sim/mech/mechTickAi.ts:69 |
+| 0x00039400 | camera_set_mode | geom_luma | exact | `cameraSetMode` src/sim/mech/mechTickAi.ts:70 |
 | 0x00039430 | camera_get_mode | geom_luma | exact | `cameraGetMode` src/sim/camera/viewer.ts:55 |
 | 0x00039440 | camera_apply_zoom | geom_luma | exact | `cameraApplyZoom` src/sim/camera/cameraUpdate.ts:323 |
 | 0x000394c0 | viewer_pose_save | geom_luma | exact | `viewerPoseSave` src/sim/display/insetView.ts:25 |
@@ -834,10 +843,31 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00044030 | sound_install_mdi_driver | sound_config | partial | `soundInstallMdiDriver` src/sim/sound/engineNote.ts:46 |
 | 0x000441b0 | sound_settings_init | sound_config | exact | `soundSettingsInit` src/sim/sound/mixer.ts:128 |
 | 0x00044290 | check_launched_by_shell | netplay | partial | `checkLaunchedByShell` src/mission/commandLine.ts:87 |
-| 0x00044720 | netplay_frame_exchange | netplay | partial | `netplayFrameExchange` src/sim/net/netplay.ts:28 |
+| 0x000445e0 | netplay_init | netplay | exact | `netplayInit` src/sim/net/netSession.ts:136 |
+| 0x000446d0 | netplay_start | netplay | exact | `netplayStart` src/sim/net/netSession.ts:164 |
+| 0x00044720 | netplay_frame_exchange | netplay | exact | `netplayFrameExchange` src/sim/net/netSession.ts:280 |
+| 0x00044a90 | netplay_shutdown | netplay | exact | `netplayShutdown` src/sim/net/netSession.ts:393 |
+| 0x00044b70 | netplay_build_state | netplay | exact | `netplayBuildState` src/sim/net/netSession.ts:416 |
+| 0x00044d40 | netplay_apply_state | netplay | exact | `netplayApplyState` src/sim/net/netSession.ts:472 |
+| 0x00045090 | netplay_build_thing_bitmap | netplay | exact | `netplayBuildThingBitmap` src/sim/net/netSession.ts:555 |
+| 0x00045120 | netplay_apply_thing_bitmap | netplay | exact | `netplayApplyThingBitmap` src/sim/net/netSession.ts:583 |
+| 0x000451b0 | netplay_join | netplay | exact | `netplayJoin` src/sim/net/netSession.ts:185 |
+| 0x00045470 | netplay_sign_off | netplay | exact | `netplaySignOff` src/sim/net/netSession.ts:613 |
+| 0x00045670 | netplay_elect_master | netplay | exact | `netplayElectMaster` src/sim/net/netSession.ts:670 |
 | 0x00045720 | cheat_match | netplay | exact | `cheatMatch` src/data/exe/tables/cheats.ts:47 |
-| 0x00045d80 | key_command_update | cheats | partial | `keyCommandUpdate` src/sim/ui/uiContext.ts:173 |
+| 0x00045780 | cheat_handle_command | cheats | partial | `cheatHandleCommand` src/sim/ui/cheats.ts:69 |
+| 0x00045d80 | key_command_update | cheats | exact | `keyCommandUpdate` src/sim/ui/uiContext.ts:173 |
 | 0x00046060 | command_execute | cheats | partial | `commandExecute` src/sim/ui/commands.ts:127 |
+| 0x00046874 | net_dos_alloc_send | cheats | partial | `netDosAllocSend` src/sim/net/transport.ts:112 |
+| 0x0004689c | net_dos_alloc_recv | cheats | partial | `netDosAllocRecv` src/sim/net/transport.ts:125 |
+| 0x000468c4 | net_dos_free_send | cheats | partial | `netDosFreeSend` src/sim/net/transport.ts:138 |
+| 0x000468e1 | net_dos_free_recv | cheats | partial | `netDosFreeRecv` src/sim/net/transport.ts:149 |
+| 0x000468fe | net_send | cheats | exact | `netSend` src/sim/net/transport.ts:186 |
+| 0x00046930 | net_receive | cheats | exact | `netReceive` src/sim/net/transport.ts:205 |
+| 0x0004695f | net_poll | cheats | exact | `netPoll` src/sim/net/transport.ts:174 |
+| 0x00046966 | net_station_info | cheats | exact | `netStationInfo` src/sim/net/transport.ts:160 |
+| 0x00046980 | net_queue_message | cheats | exact | `netQueueMessage` src/sim/net/transport.ts:230 |
+| 0x00046a10 | net_next_message | cheats | exact | `netNextMessage` src/sim/net/transport.ts:255 |
 | 0x00046ac0 | cheats_sub_046ac0 | cheats | partial | `cheatsSub046ac0` src/sim/ui/commands.ts:89 |
 | 0x00047650 | input_torso_tilt | target_ui | exact | `inputTorsoTilt` src/data/exe/tables/controlChannels.ts:94 |
 | 0x000476a0 | input_open_device | input | exact | `inputOpenDevice` src/sim/controls/input.ts:263 |
@@ -920,7 +950,8 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0004e540 | thing_node_queue_pop | sim_objects | exact | `thingNodeQueuePop` src/sim/mech/spawn.ts:45 |
 | 0x0004e570 | gamething_alloc | sim_objects | exact | `gamethingAlloc` src/sim/things/gameThings.ts:52 |
 | 0x0004e5d0 | project_chunk_exec | sim_objects | exact | `projectChunkExec` src/mission/vm/chunkExec.ts:110 |
-| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:58 |
+| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:62 |
+| 0x0004fd00 | sim_count_mechs_by_status | sim_objects | exact | `simCountMechsByStatus` src/sim/things/allegianceTally.ts:18 |
 | 0x0004fde0 | poly_resolve_code | sim_objects | exact | `polyResolveCode` src/engine/scene/wtboLoader.ts:80 |
 | 0x0004fe80 | poly_set_vertex_offset | sim_objects | exact | `polySetVertexOffset` src/engine/scene/wtboLoader.ts:99 |
 | 0x0004fea0 | poly_set_vertex_scale | sim_objects | exact | `polySetVertexScale` src/engine/scene/wtboLoader.ts:109 |
@@ -944,11 +975,11 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00051aa0 | gamething_destroy | sim_objects | exact | `gamethingDestroy` src/sim/things/gameThingDamage.ts:61 |
 | 0x00051b70 | gamething_apply_damage | sim_objects | exact | `gamethingApplyDamage` src/sim/things/gameThingDamage.ts:30 |
 | 0x00051c50 | effect_spawn_fragments | sim_objects | exact | `effectSpawnFragments` src/sim/effects/effects.ts:249 |
-| 0x00051d20 | cockpit_save_config | cockpit | exact | `cockpitSaveConfig` src/mission/end.ts:82 |
+| 0x00051d20 | cockpit_save_config | cockpit | exact | `cockpitSaveConfig` src/mission/end.ts:83 |
 | 0x00051d40 | environment_heat_update | cockpit | exact | `environmentHeatUpdate` src/sim/effects/effects.ts:469 |
 | 0x00051e90 | nuke_detonate | cockpit | exact | `nukeDetonate` src/sim/effects/effects.ts:439 |
 | 0x00051f50 | nuke_blast_update | cockpit | exact | `nukeBlastUpdate` src/sim/effects/effects.ts:419 |
-| 0x00052020 | mech_weapons_cancel_bursts | cockpit | partial | `mechWeaponsCancelBursts` src/sim/mech/mechTickAi.ts:113 |
+| 0x00052020 | mech_weapons_cancel_bursts | cockpit | exact | `mechWeaponsCancelBursts` src/sim/mech/mechTickAi.ts:114 |
 | 0x00052080 | mech_weapons_tick | cockpit | exact | `mechWeaponsTick` src/sim/weapons/weapons.ts:129 |
 | 0x00052620 | mech_weapon_fire | cockpit | exact | `mechWeaponFire` src/sim/weapons/weapons.ts:292 |
 | 0x000528b0 | weapon_select_next_in_group | cockpit | exact | `weaponSelectNextInGroup` src/sim/weapons/weapons.ts:483 |
@@ -961,6 +992,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00052c40 | weapon_set_fire_group | weapons | exact | `weaponSetFireGroup` src/sim/weapons/weapons.ts:536 |
 | 0x00052c60 | player_weapon_set_fire_group | weapons | exact | `playerWeaponSetFireGroup` src/sim/weapons/weapons.ts:554 |
 | 0x00052c90 | weapon_cycle_group | weapons | exact | `weaponCycleGroup` src/sim/weapons/weapons.ts:595 |
+| 0x00052cb0 | netplay_weapons_start_burst | weapons | exact | `netplayWeaponsStartBurst` src/sim/net/netWeapons.ts:39 |
 | 0x00052d60 | player_fire_group | weapons | exact | `playerFireGroup` src/sim/weapons/weapons.ts:427 |
 | 0x00052ea0 | mech_update_missile_lock | weapons | exact | `mechUpdateMissileLock` src/sim/weapons/weapons.ts:661 |
 | 0x00053190 | mech_update_aim_range | weapons | exact | `mechUpdateAimRange` src/sim/weapons/aim.ts:69 |
@@ -985,6 +1017,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x000588c3 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:259 |
 | 0x000588e5 | vfx_shape_origin | vfx_lib | exact | `vfxShapeOrigin` src/engine/vfx/vfx.ts:249 |
 | 0x00058908 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:235 |
+| 0x00058966 | vfx_lib_sub_058966 | vfx_lib | exact | `vfxLibSub058966` src/sim/display/launchScreen.ts:69 |
 | 0x00058a43 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:224 |
 | 0x00058e0d | palette_fade_used_colours | vfx_lib | partial | `paletteFadeUsedColours` src/sim/world/palettes.ts:387 |
 | 0x0005dc10 | AIL_install_DIG_driver_file | miles_ail | stub | `ailInstallDigDriverFile` src/engine/miles/ail.ts:168 |
@@ -1018,6 +1051,8 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00061f33 | stopwatch_set | clib_start | exact | `stopwatchSet` src/engine/timer.ts:106 |
 | 0x00061f76 | stopwatch_free | clib_start | exact | `stopwatchFree` src/engine/timer.ts:115 |
 | 0x00061fb0 | timer_set_paused | clib_start | exact | `timerSetPaused` src/engine/timer.ts:128 |
+| 0x00062cc3 | qsort_median3 | clib | exact | `median3` src/engine/qsort.ts:23 |
+| 0x00062d1b | qsort | clib | exact | `watcomQsort` src/engine/qsort.ts:54 |
 | 0x00063860 | palette_set_entries | clib | exact | `paletteSetEntries` src/sim/world/palettes.ts:129 |
 | 0x00063a70 | palette_fade_state_build | clib | exact | `paletteFadeStateBuild` src/sim/world/palettes.ts:205 |
 | 0x00063b50 | palette_fade_state_step | clib | exact | `paletteFadeStateStep` src/sim/world/palettes.ts:235 |
@@ -1066,7 +1101,7 @@ Library groups left out of the totals: `clib`, `miles`.
 
 ## MW2SHELL.EXE
 
-**Game functions:** 430  |  **ported exact:** 124  |  **partial:** 12  |  **stub:** 0  |  library functions ported: 0
+**Game functions:** 430  |  **ported exact:** 201  |  **partial:** 18  |  **stub:** 0  |  library functions ported: 5
 
 Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code left out: `wasm`.
 
@@ -1074,36 +1109,36 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 
 | module | group | functions | exact | partial | stub | not started |
 |---|---|---:|---:|---:|---:|---:|
-| archive_db | archive | 2 | 0 | 0 | 0 | 2 |
+| archive_db | archive | 2 | 2 | 0 | 0 | 0 |
 | mpack_db | archive | 7 | 6 | 0 | 0 | 1 |
 | shell_main | boot | 3 | 0 | 1 | 0 | 2 |
-| career | career | 3 | 2 | 0 | 0 | 1 |
-| pilots | career | 5 | 1 | 1 | 0 | 3 |
-| ready_room | career | 1 | 0 | 0 | 0 | 1 |
-| register | career | 10 | 0 | 0 | 0 | 10 |
-| controls | controls | 42 | 0 | 0 | 0 | 42 |
-| mission_prep | handoff | 10 | 2 | 0 | 0 | 8 |
+| career | career | 3 | 3 | 0 | 0 | 0 |
+| pilots | career | 5 | 4 | 1 | 0 | 0 |
+| ready_room | career | 1 | 1 | 0 | 0 | 0 |
+| register | career | 10 | 7 | 1 | 0 | 2 |
+| controls | controls | 42 | 11 | 0 | 0 | 31 |
+| mission_prep | handoff | 10 | 7 | 3 | 0 | 0 |
 | mission_result | handoff | 1 | 0 | 0 | 0 | 1 |
 | prm | handoff | 2 | 2 | 0 | 0 | 0 |
 | star_files | handoff | 4 | 4 | 0 | 0 | 0 |
-| shell_input | input | 36 | 2 | 6 | 0 | 28 |
+| shell_input | input | 36 | 5 | 7 | 0 | 24 |
 | mechlab | mechlab | 1 | 0 | 0 | 0 | 1 |
-| star_select | mechlab | 10 | 3 | 0 | 0 | 7 |
-| movies | movies | 25 | 18 | 0 | 0 | 7 |
+| star_select | mechlab | 10 | 10 | 0 | 0 | 0 |
+| movies | movies | 25 | 23 | 0 | 0 | 2 |
 | res_cache | resource | 15 | 0 | 0 | 0 | 15 |
-| credits | screens | 1 | 0 | 0 | 0 | 1 |
+| credits | screens | 1 | 1 | 0 | 0 | 0 |
 | options | screens | 19 | 1 | 1 | 0 | 17 |
-| shell_263d0 | screens | 12 | 7 | 0 | 0 | 5 |
-| shell_2a5e0 | screens | 73 | 2 | 0 | 0 | 71 |
-| shell_3d980 | screens | 1 | 0 | 0 | 0 | 1 |
-| stats | screens | 2 | 0 | 0 | 0 | 2 |
-| text_markup | screens | 21 | 11 | 0 | 0 | 10 |
-| shell_sound | sound | 14 | 11 | 0 | 0 | 3 |
+| shell_263d0 | screens | 12 | 12 | 0 | 0 | 0 |
+| shell_2a5e0 | screens | 73 | 8 | 0 | 0 | 65 |
+| shell_3d980 | screens | 1 | 1 | 0 | 0 | 0 |
+| stats | screens | 2 | 2 | 0 | 0 | 0 |
+| text_markup | screens | 21 | 19 | 0 | 0 | 2 |
+| shell_sound | sound | 14 | 12 | 0 | 0 | 2 |
 | sound_detect | sound | 15 | 1 | 1 | 0 | 13 |
 | button_bar | ui | 9 | 9 | 0 | 0 | 0 |
 | mouse | ui | 8 | 8 | 0 | 0 | 0 |
-| picture | ui | 4 | 0 | 0 | 0 | 4 |
-| collection | util | 20 | 0 | 0 | 0 | 20 |
+| picture | ui | 4 | 4 | 0 | 0 | 0 |
+| collection | util | 20 | 4 | 1 | 0 | 15 |
 | vfx_lib | vfx | 30 | 12 | 2 | 0 | 16 |
 | video_driver | vfx | 24 | 22 | 0 | 0 | 2 |
 
@@ -1111,6 +1146,15 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 
 | address | original | module | fidelity | port |
 |---|---|---|---|---|
+| 0x00010010 | str_dup_nonempty | collection | exact | `strDupNonempty` src/shell/util/collection.ts:17 |
+| 0x00010090 | strupr | collection | exact | `strupr` src/shell/clib.ts:37 |
+| 0x00010200 | collection_append | collection | exact | `collectionAppend` src/shell/util/collection.ts:48 |
+| 0x000102c0 | collection_remove | collection | exact | `collectionRemove` src/shell/util/collection.ts:61 |
+| 0x00010470 | collection_get | collection | partial | `collectionGet` src/shell/util/collection.ts:74 |
+| 0x0001a530 | input_devices_load | shell_input | partial | `inputDevicesLoad` src/shell/controls/devices.ts:100 |
+| 0x0001a690 | input_device_get | shell_input | exact | `inputDeviceGet` src/shell/controls/devices.ts:67 |
+| 0x0001a6c0 | input_devices_free | shell_input | exact | `inputDevicesFree` src/shell/controls/devices.ts:146 |
+| 0x0001a8e0 | input_devices_grow | shell_input | exact | `inputDevicesGrow` src/shell/controls/devices.ts:80 |
 | 0x0001af70 | shell_input_sub_01af70 | shell_input | partial | `cursorShow` src/shell/video/cursor.ts:62 |
 | 0x0001b010 | shell_input_sub_01b010 | shell_input | partial | `cursorSetShape` src/shell/video/cursor.ts:50 |
 | 0x0001b0e0 | mouse_read_state | shell_input | exact | `mouseReadState` src/shell/video/cursor.ts:111 |
@@ -1119,14 +1163,35 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x0001b850 | shell_input_sub_01b850 | shell_input | partial | `screenBlit` src/shell/video/cursor.ts:21 |
 | 0x0001be20 | shell_input_sub_01be20 | shell_input | partial | `mouseDriverStart` src/shell/video/cursor.ts:86 |
 | 0x0001c000 | shell_input_sub_01c000 | shell_input | partial | `cursorShutdown` src/shell/video/cursor.ts:73 |
-| 0x0001cf40 | project_stream_load | mission_prep | exact | `projectStreamLoad` src/shell/career/brf2.ts:20 |
-| 0x0001cfd0 | brf2_find_chunk | mission_prep | exact | `brf2FindChunk` src/shell/career/brf2.ts:37 |
+| 0x0001c080 | screen_briefing | mission_prep | exact | `screenBriefing` src/shell/screens/briefing.ts:77 |
+| 0x0001caa0 | orders_text_build | mission_prep | exact | `ordersTextBuild` src/shell/career/orders.ts:157 |
+| 0x0001ceb0 | project_open | mission_prep | partial | `projectOpen` src/shell/career/orders.ts:49 |
+| 0x0001cf00 | project_tabl_lookup | mission_prep | exact | `projectTablLookup` src/shell/career/orders.ts:64 |
+| 0x0001cf40 | project_stream_load | mission_prep | exact | `projectStreamLoad` src/shell/career/brf2.ts:25 |
+| 0x0001cfa0 | project_stream_release | mission_prep | partial | `projectStreamRelease` src/shell/career/orders.ts:76 |
+| 0x0001cfd0 | brf2_find_chunk | mission_prep | exact | `brf2FindChunk` src/shell/career/brf2.ts:42 |
+| 0x0001d020 | bwd_stream_open | mission_prep | exact | `bwdStreamOpen` src/shell/career/orders.ts:88 |
+| 0x0001d080 | bwd_find_chunk | mission_prep | exact | `bwdFindChunk` src/shell/career/orders.ts:114 |
+| 0x0001d0c0 | project_close | mission_prep | partial | `projectClose` src/shell/career/orders.ts:136 |
 | 0x0001d140 | bwd_build_begin | star_files | exact | `bwdBuildBegin` src/shell/handoff/starFiles.ts:59 |
 | 0x0001d310 | star_bwd_add_mech | star_files | exact | `starBwdAddMech` src/shell/handoff/starFiles.ts:115 |
 | 0x0001d540 | star_files_write | star_files | exact | `starFilesWrite` src/shell/handoff/starFiles.ts:177 |
 | 0x0001d6c0 | instmap_write | star_files | exact | `instmapWrite` src/shell/handoff/starFiles.ts:225 |
 | 0x0001da70 | career_registry_load | career | exact | `careerRegistryLoad` src/shell/career/registry.ts:23 |
 | 0x0001db50 | career_registry_save | career | exact | `careerRegistrySave` src/shell/career/registry.ts:48 |
+| 0x0001dbe0 | screen_career | career | exact | `screenCareer` src/shell/screens/career.ts:36 |
+| 0x0001f830 | controls_write_modifier_lines | controls | exact | `controlsWriteModifierLines` src/shell/controls/inputMap.ts:93 |
+| 0x0001f930 | controls_write_jumpjet_enable | controls | exact | `controlsWriteJumpjetEnable` src/shell/controls/inputMap.ts:129 |
+| 0x0001fc40 | controls_write_map_entry | controls | exact | `controlsWriteMapEntry` src/shell/controls/inputMap.ts:165 |
+| 0x000201a0 | controls_write_temp_map | controls | exact | `controlsWriteTempMap` src/shell/controls/inputMap.ts:251 |
+| 0x00020540 | controls_choose_bound_devices | controls | exact | `controlsChooseBoundDevices` src/shell/controls/config.ts:208 |
+| 0x00020620 | controls_renumber_devices | controls | exact | `controlsRenumberDevices` src/shell/controls/config.ts:169 |
+| 0x00020730 | controls_clear_bindings | controls | exact | `controlsClearBindings` src/shell/controls/config.ts:137 |
+| 0x00020a40 | controls_load_config | controls | exact | `controlsLoadConfig` src/shell/controls/config.ts:253 |
+| 0x00020b00 | controls_save_config | controls | exact | `controlsSaveConfig` src/shell/controls/config.ts:304 |
+| 0x00020c10 | controls_reset_defaults | controls | exact | `controlsResetDefaults` src/shell/controls/config.ts:323 |
+| 0x00020e60 | controls_accept_config | controls | exact | `controlsAcceptConfig` src/shell/controls/inputMap.ts:354 |
+| 0x00021400 | credits_screen | credits | exact | `creditsScreen` src/shell/screens/credits.ts:51 |
 | 0x00021810 | mpack_db_open | mpack_db | exact | `mpackDbOpen` src/data/formats/mpack.ts:35 |
 | 0x00021a30 | mpack_db_get_item | mpack_db | exact | `mpackDbGetItem` src/data/formats/mpack.ts:64 |
 | 0x00021ad0 | mpack_db_get_item_unpacked | mpack_db | exact | `mpackDbGetItemUnpacked` src/data/formats/mpack.ts:82 |
@@ -1138,10 +1203,19 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x000263d0 | message_box | shell_263d0 | exact | `messageBox` src/shell/ui/messageBox.ts:57 |
 | 0x000267f0 | font_holder_init | shell_263d0 | exact | `fontHolderInit` src/shell/ui/labels.ts:28 |
 | 0x00026830 | text_width | shell_263d0 | exact | `textWidth` src/shell/ui/labels.ts:42 |
+| 0x00026870 | font_char_width | shell_263d0 | exact | `fontCharWidth` src/shell/ui/textInput.ts:20 |
 | 0x00026890 | label_create_under | shell_263d0 | exact | `labelCreateUnder` src/shell/ui/labels.ts:263 |
 | 0x000268e0 | label_create | shell_263d0 | exact | `labelCreate` src/shell/ui/labels.ts:276 |
 | 0x00026980 | font_holder_draw_text | shell_263d0 | exact | `fontHolderDrawText` src/shell/ui/labels.ts:55 |
 | 0x000269a0 | font_holder_draw_char | shell_263d0 | exact | `fontHolderDrawChar` src/shell/ui/labels.ts:65 |
+| 0x00026b50 | screen_archive | shell_263d0 | exact | `screenArchive` src/shell/screens/archive.ts:23 |
+| 0x00026ca0 | archive_prev_page | shell_263d0 | exact | `archivePrevPage` src/shell/archive/viewer.ts:303 |
+| 0x00027050 | archive_follow_link | shell_263d0 | exact | `archiveFollowLink` src/shell/archive/viewer.ts:338 |
+| 0x00027160 | archive_viewer_frame | shell_263d0 | exact | `archiveViewerFrame` src/shell/archive/viewer.ts:378 |
+| 0x00027a20 | archive_page_load | archive_db | exact | `archivePageLoad` src/shell/archive/viewer.ts:156 |
+| 0x00028150 | archive_viewer_destroy | archive_db | exact | `archiveViewerDestroy` src/shell/archive/viewer.ts:277 |
+| 0x000281e0 | hall_of_honor_compare | stats | exact | `hallOfHonorCompare` src/shell/screens/hallOfHonor.ts:25 |
+| 0x00028250 | hall_of_honor_screen | stats | exact | `hallOfHonorScreen` src/shell/screens/hallOfHonor.ts:54 |
 | 0x00028680 | button_bar_create | button_bar | exact | `buttonBarCreate` src/shell/ui/buttonBar.ts:133 |
 | 0x000287a0 | button_bar_destroy | button_bar | exact | `buttonBarDestroy` src/shell/ui/buttonBar.ts:167 |
 | 0x00028820 | button_bar_truncate | button_bar | exact | `buttonBarTruncate` src/shell/ui/buttonBar.ts:179 |
@@ -1151,11 +1225,24 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x00028b60 | button_enable | button_bar | exact | `buttonEnable` src/shell/ui/buttonBar.ts:253 |
 | 0x00028bc0 | button_disable | button_bar | exact | `buttonDisable` src/shell/ui/buttonBar.ts:271 |
 | 0x00028c30 | button_init | button_bar | exact | `buttonInit` src/shell/ui/buttonBar.ts:87 |
-| 0x000291b0 | mission_brf2_load | pilots | partial | `missionBrf2Load` src/shell/career/brf2.ts:90 |
+| 0x00028ef0 | picture_init | picture | exact | `pictureInit` src/shell/ui/picture.ts:43 |
+| 0x00029020 | picture_destroy | picture | exact | `pictureDestroy` src/shell/ui/picture.ts:88 |
+| 0x00029080 | picture_show | picture | exact | `pictureShow` src/shell/ui/picture.ts:102 |
+| 0x000290f0 | picture_hide | picture | exact | `pictureHide` src/shell/ui/picture.ts:116 |
+| 0x000291b0 | mission_brf2_load | pilots | partial | `missionBrf2Load` src/shell/career/brf2.ts:96 |
+| 0x00029510 | grievance_draw_formations | pilots | exact | `grievanceDrawFormations` src/shell/screens/grievance.ts:91 |
+| 0x000295c0 | grievance_chassis_count | pilots | exact | `grievanceChassisCount` src/shell/screens/grievance.ts:77 |
+| 0x00029680 | screen_grievance | pilots | exact | `screenGrievance` src/shell/screens/grievance.ts:130 |
 | 0x0002a410 | screen_title | pilots | exact | `screenTitle` src/shell/screens/title.ts:26 |
 | 0x0002a5e0 | input_init | shell_2a5e0 | exact | `inputInit` src/shell/ui/keys.ts:29 |
-| 0x0002a6f0 | input_poll_key | shell_2a5e0 | exact | `inputPollKey` src/shell/ui/keys.ts:46 |
-| 0x00036700 | main | shell_main | partial | `shellMain` src/shell/main.ts:103 |
+| 0x0002a650 | input_flush | shell_2a5e0 | exact | `inputFlush` src/shell/ui/keys.ts:45 |
+| 0x0002a6f0 | input_poll_key | shell_2a5e0 | exact | `inputPollKey` src/shell/ui/keys.ts:57 |
+| 0x0002a910 | text_input | shell_2a5e0 | exact | `textInput` src/shell/ui/textInput.ts:50 |
+| 0x0002ac90 | widget_panel_layout | shell_2a5e0 | exact | `widgetPanelLayout` src/shell/ui/widgets.ts:144 |
+| 0x0002ad30 | widget_panel_redraw | shell_2a5e0 | exact | `widgetPanelRedraw` src/shell/ui/widgets.ts:173 |
+| 0x0002ada0 | widget_panel_free_labels | shell_2a5e0 | exact | `widgetPanelFreeLabels` src/shell/ui/widgets.ts:189 |
+| 0x000305a0 | widget_panel_hit | shell_2a5e0 | exact | `widgetPanelHit` src/shell/ui/widgets.ts:202 |
+| 0x00036700 | main | shell_main | partial | `shellMain` src/shell/main.ts:105 |
 | 0x000374c0 | prm_load | prm | exact | `prmLoad` src/shell/handoff/prm.ts:40 |
 | 0x000375a0 | prm_save | prm | exact | `prmSave` src/shell/handoff/prm.ts:70 |
 | 0x000376a0 | mouse_init | mouse | exact | `mouseInit` src/shell/ui/mouse.ts:57 |
@@ -1166,38 +1253,60 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x000377b0 | mouse_right_clicked | mouse | exact | `mouseRightClicked` src/shell/ui/mouse.ts:125 |
 | 0x00037880 | mouse_inject_click | mouse | exact | `mouseInjectClick` src/shell/ui/mouse.ts:135 |
 | 0x000378a0 | mouse_update | mouse | exact | `mouseUpdate` src/shell/ui/mouse.ts:157 |
+| 0x00037a50 | screen_ready_room | ready_room | exact | `screenReadyRoom` src/shell/screens/readyRoom.ts:47 |
+| 0x00038130 | register_draw_heading | register | exact | `registerDrawHeading` src/shell/screens/register.ts:62 |
+| 0x00038150 | register_draw_mission_row | register | exact | `registerDrawMissionRow` src/shell/screens/register.ts:74 |
+| 0x000381d0 | register_draw_pilot_name | register | exact | `registerDrawPilotName` src/shell/screens/register.ts:89 |
+| 0x00038210 | register_draw_rank | register | exact | `registerDrawRank` src/shell/screens/register.ts:100 |
+| 0x00038260 | register_draw_honor | register | exact | `registerDrawHonor` src/shell/screens/register.ts:111 |
+| 0x000382a0 | register_draw_mission | register | exact | `registerDrawMission` src/shell/screens/register.ts:124 |
+| 0x00038300 | register_click_nothing | register | exact | `registerClickNothing` src/shell/screens/register.ts:136 |
+| 0x00038310 | screen_register | register | partial | `screenRegister` src/shell/screens/register.ts:201 |
 | 0x00038c70 | movie_play | movies | exact | `moviePlay` src/shell/anim/movies.ts:43 |
-| 0x00039270 | anim_update_all | movies | exact | `animUpdateAll` src/shell/anim/anims.ts:323 |
-| 0x00039590 | anim_is_running | movies | exact | `animIsRunning` src/shell/anim/anims.ts:247 |
-| 0x000395d0 | anim_set_flags | movies | exact | `animSetFlags` src/shell/anim/anims.ts:259 |
-| 0x00039610 | anim_unhide | movies | exact | `animUnhide` src/shell/anim/anims.ts:271 |
-| 0x00039650 | anim_free | movies | exact | `animFree` src/shell/anim/anims.ts:223 |
-| 0x000396f0 | anim_free_all | movies | exact | `animFreeAll` src/shell/anim/anims.ts:237 |
-| 0x00039710 | anim_move | movies | exact | `animMove` src/shell/anim/anims.ts:283 |
-| 0x00039780 | anim_open_smk | movies | exact | `animOpenSmk` src/shell/anim/anims.ts:84 |
-| 0x000398d0 | anim_open_shp | movies | exact | `animOpenShp` src/shell/anim/anims.ts:125 |
-| 0x000399b0 | anim_start | movies | exact | `animStart` src/shell/anim/anims.ts:172 |
-| 0x00039ad0 | anim_start_free | movies | exact | `animStartFree` src/shell/anim/anims.ts:197 |
-| 0x00039fb0 | anim_set_frame | movies | exact | `animSetFrame` src/shell/anim/anims.ts:301 |
+| 0x00038e80 | movie_play_inline | movies | exact | `moviePlayInline` src/shell/anim/movies.ts:99 |
+| 0x00039000 | movie_open_background | movies | exact | `movieOpenBackground` src/shell/anim/movies.ts:149 |
+| 0x00039140 | movie_background_close | movies | exact | `movieBackgroundClose` src/shell/anim/movies.ts:187 |
+| 0x000391e0 | movie_background_step | movies | exact | `movieBackgroundStep` src/shell/anim/movies.ts:171 |
+| 0x00039270 | anim_update_all | movies | exact | `animUpdateAll` src/shell/anim/anims.ts:324 |
+| 0x00039590 | anim_is_running | movies | exact | `animIsRunning` src/shell/anim/anims.ts:248 |
+| 0x000395d0 | anim_set_flags | movies | exact | `animSetFlags` src/shell/anim/anims.ts:260 |
+| 0x00039610 | anim_unhide | movies | exact | `animUnhide` src/shell/anim/anims.ts:272 |
+| 0x00039650 | anim_free | movies | exact | `animFree` src/shell/anim/anims.ts:224 |
+| 0x000396f0 | anim_free_all | movies | exact | `animFreeAll` src/shell/anim/anims.ts:238 |
+| 0x00039710 | anim_move | movies | exact | `animMove` src/shell/anim/anims.ts:284 |
+| 0x00039780 | anim_open_smk | movies | exact | `animOpenSmk` src/shell/anim/anims.ts:85 |
+| 0x000398d0 | anim_open_shp | movies | exact | `animOpenShp` src/shell/anim/anims.ts:126 |
+| 0x000399b0 | anim_start | movies | exact | `animStart` src/shell/anim/anims.ts:173 |
+| 0x00039ad0 | anim_start_free | movies | exact | `animStartFree` src/shell/anim/anims.ts:198 |
+| 0x00039c20 | anim_play_to_end | movies | exact | `animPlayToEnd` src/shell/anim/anims.ts:422 |
+| 0x00039fb0 | anim_set_frame | movies | exact | `animSetFrame` src/shell/anim/anims.ts:302 |
 | 0x00039ff0 | music_create | movies | exact | `musicCreate` src/shell/sound/music.ts:73 |
 | 0x0003a0d0 | music_destroy | movies | exact | `musicDestroy` src/shell/sound/music.ts:97 |
 | 0x0003a110 | music_start | movies | exact | `musicStart` src/shell/sound/music.ts:115 |
 | 0x0003a1a0 | music_is_playing | movies | exact | `musicIsPlaying` src/shell/sound/music.ts:128 |
 | 0x0003a200 | sound_system_init | movies | exact | `soundSystemInit` src/shell/sound/music.ts:55 |
-| 0x0003a340 | sound_sample_create | shell_sound | exact | `soundSampleCreate` src/shell/sound/samples.ts:41 |
-| 0x0003a400 | sound_sample_destroy | shell_sound | exact | `soundSampleDestroy` src/shell/sound/samples.ts:63 |
-| 0x0003a440 | sound_sample_ramp | shell_sound | exact | `soundSampleRamp` src/shell/sound/samples.ts:128 |
-| 0x0003a4a0 | sound_sample_ramp_step | shell_sound | exact | `soundSampleRampStep` src/shell/sound/samples.ts:147 |
-| 0x0003a530 | sound_sample_set_looping | shell_sound | exact | `soundSampleSetLooping` src/shell/sound/samples.ts:78 |
-| 0x0003a560 | sound_sample_play | shell_sound | exact | `soundSamplePlay` src/shell/sound/samples.ts:91 |
-| 0x0003a690 | sound_sample_stop | shell_sound | exact | `soundSampleStop` src/shell/sound/samples.ts:105 |
-| 0x0003a6e0 | sound_sample_set_volume | shell_sound | exact | `soundSampleSetVolume` src/shell/sound/samples.ts:115 |
+| 0x0003a340 | sound_sample_create | shell_sound | exact | `soundSampleCreate` src/shell/sound/samples.ts:42 |
+| 0x0003a400 | sound_sample_destroy | shell_sound | exact | `soundSampleDestroy` src/shell/sound/samples.ts:64 |
+| 0x0003a440 | sound_sample_ramp | shell_sound | exact | `soundSampleRamp` src/shell/sound/samples.ts:129 |
+| 0x0003a4a0 | sound_sample_ramp_step | shell_sound | exact | `soundSampleRampStep` src/shell/sound/samples.ts:148 |
+| 0x0003a530 | sound_sample_set_looping | shell_sound | exact | `soundSampleSetLooping` src/shell/sound/samples.ts:79 |
+| 0x0003a560 | sound_sample_play | shell_sound | exact | `soundSamplePlay` src/shell/sound/samples.ts:92 |
+| 0x0003a5e0 | sound_sample_play_wait | shell_sound | exact | `soundSamplePlayWait` src/shell/sound/samples.ts:169 |
+| 0x0003a690 | sound_sample_stop | shell_sound | exact | `soundSampleStop` src/shell/sound/samples.ts:106 |
+| 0x0003a6e0 | sound_sample_set_volume | shell_sound | exact | `soundSampleSetVolume` src/shell/sound/samples.ts:116 |
 | 0x0003a7b0 | music_apply_volume | shell_sound | exact | `musicApplyVolume` src/shell/sound/music.ts:139 |
-| 0x0003a810 | stars_save_to_prm | shell_sound | exact | `starsSaveToPrm` src/shell/handoff/stars.ts:133 |
-| 0x0003a850 | stars_restore_from_prm | shell_sound | exact | `starsRestoreFromPrm` src/shell/handoff/stars.ts:146 |
+| 0x0003a810 | stars_save_to_prm | shell_sound | exact | `starsSaveToPrm` src/shell/handoff/stars.ts:187 |
+| 0x0003a850 | stars_restore_from_prm | shell_sound | exact | `starsRestoreFromPrm` src/shell/handoff/stars.ts:200 |
 | 0x0003a8a0 | star_set_member | star_select | exact | `starSetMember` src/shell/handoff/stars.ts:92 |
+| 0x0003aa80 | star_member_mek_name | star_select | exact | `starMemberMekName` src/shell/handoff/stars.ts:131 |
+| 0x0003aad0 | star_member_chassis | star_select | exact | `starMemberChassis` src/shell/handoff/stars.ts:147 |
+| 0x0003ab10 | star_formation | star_select | exact | `starFormation` src/shell/handoff/stars.ts:162 |
+| 0x0003ab30 | star_record | star_select | exact | `starRecord` src/shell/handoff/stars.ts:173 |
 | 0x0003ab50 | star_configure | star_select | exact | `starConfigure` src/shell/handoff/stars.ts:70 |
-| 0x0003abb0 | star_launch_prepare | star_select | exact | `starLaunchPrepare` src/shell/handoff/stars.ts:167 |
+| 0x0003abb0 | star_launch_prepare | star_select | exact | `starLaunchPrepare` src/shell/handoff/stars.ts:221 |
+| 0x0003aeb0 | star_slot_draw | star_select | exact | `starSlotDraw` src/shell/screens/starSelect.ts:89 |
+| 0x0003b1f0 | star_limits_show | star_select | exact | `starLimitsShow` src/shell/screens/starSelect.ts:142 |
+| 0x0003b420 | screen_star_select | star_select | exact | `screenStarSelect` src/shell/screens/starSelect.ts:225 |
 | 0x0003bea0 | label_list_add | text_markup | exact | `labelListAdd` src/shell/ui/labels.ts:354 |
 | 0x0003beb0 | label_list_remove | text_markup | exact | `labelListRemove` src/shell/ui/labels.ts:362 |
 | 0x0003bed0 | label_list_clear | text_markup | exact | `labelListClear` src/shell/ui/labels.ts:381 |
@@ -1206,9 +1315,18 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x0003bfa0 | label_set_typewriter | text_markup | exact | `labelSetTypewriter` src/shell/ui/labels.ts:253 |
 | 0x0003bfb0 | text_label_redraw | text_markup | exact | `textLabelRedraw` src/shell/ui/labels.ts:237 |
 | 0x0003c040 | text_label_type_char | text_markup | exact | `textLabelTypeChar` src/shell/ui/labels.ts:181 |
+| 0x0003c280 | text_label_type_step | text_markup | exact | `textLabelTypeStep` src/shell/text/page.ts:357 |
 | 0x0003c2c0 | text_label_init | text_markup | exact | `textLabelInit` src/shell/ui/labels.ts:142 |
 | 0x0003c370 | label_hide | text_markup | exact | `labelHide` src/shell/ui/labels.ts:289 |
 | 0x0003c3c0 | label_destroy | text_markup | exact | `labelDestroy` src/shell/ui/labels.ts:304 |
+| 0x0003c410 | page_init | text_markup | exact | `pageInit` src/shell/text/page.ts:68 |
+| 0x0003ca70 | text_layout_page | text_markup | exact | `textLayoutPage` src/shell/text/page.ts:131 |
+| 0x0003d7f0 | page_restart | text_markup | exact | `pageRestart` src/shell/text/page.ts:370 |
+| 0x0003d850 | page_type_step | text_markup | exact | `pageTypeStep` src/shell/text/page.ts:389 |
+| 0x0003d890 | page_hide | text_markup | exact | `pageHide` src/shell/text/page.ts:406 |
+| 0x0003d8d0 | page_set_picture | text_markup | exact | `pageSetPicture` src/shell/text/page.ts:418 |
+| 0x0003d900 | page_destroy | text_markup | exact | `pageDestroy` src/shell/text/page.ts:428 |
+| 0x0003d980 | screen_training | shell_3d980 | exact | `screenTraining` src/shell/screens/training.ts:34 |
 | 0x0003dd90 | video_driver_sub_03dd90 | video_driver | exact | `videoDriverInit` src/shell/video/driver.ts:94 |
 | 0x0003dfe0 | video_driver_sub_03dfe0 | video_driver | exact | `videoDriverSuspend` src/shell/video/driver.ts:137 |
 | 0x0003e020 | video_driver_sub_03e020 | video_driver | exact | `videoDriverResume` src/shell/video/driver.ts:149 |
@@ -1247,10 +1365,16 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x00048393 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:260 |
 | 0x000483d8 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:236 |
 | 0x00048513 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:225 |
+| 0x00048d69 | qsort_median3 | clib | exact | `median3` src/engine/qsort.ts:24 |
+| 0x00048dc1 | qsort | clib | exact | `watcomQsort` src/engine/qsort.ts:55 |
+| 0x0004bc39 | rand | miles_driver | exact | `rand` src/shell/clib.ts:15 |
+| 0x0004bc5d | srand | miles_driver | exact | `srand` src/shell/clib.ts:26 |
+| 0x0005a7a4 | clock_impl | clib_2 | partial | `clock` src/shell/clib.ts:53 |
 
 
 ## Divergences (deliberate differences)
 
+- src/app/shell/LaunchView.tsx:24 - the launch screen is held up for ${LAUNCH_MIN_MS} ms: the port's start-up is near instant
 - src/core/math/matrix.ts:277 - double instead of x87 extended precision; a²+b²+c² can exceed
 - src/core/math/matrix.ts:306 - computed in double rather than 80-bit extended precision
 - src/core/provenance.ts:8 - <why>                  a deliberate difference, and its reason
@@ -1295,9 +1419,8 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/vfx/vfx.ts:316 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
 - src/mission/commandLine.ts:89 - -M / -X's mono display, -Q's quadtree switch-off, -E's mw2debug.txt and the version text are not ported; their flags are still set
 - src/mission/commandLine.ts:93 - This program must be launched from MECH2.EXE
-- src/mission/load.ts:139 - no mw2dif.cfg on the disk: the port's DEFAULT_RULES, not the original's all-off record
-- src/mission/load.ts:144 - static_arena_init: no arena pre-pass; tables are allocated on demand
-- src/mission/load.ts:160 - sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)
+- src/mission/load.ts:158 - no mw2dif.cfg on the disk: the port's DEFAULT_RULES, not the original's all-off record
+- src/mission/load.ts:186 - static_arena_init: no arena pre-pass; tables are allocated on demand
 - src/mission/mainLoop.ts:87 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
 - src/mission/mainLoop.ts:91 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
 - src/mission/objectives.ts:62 - ${what} longer than its ${destSize}-byte field; the original overruns into the next field
@@ -1322,15 +1445,36 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/render/pipeline/fillDispatch.ts:89 - 1- and 2-vertex polygons (points while 0x97038 is set, vfx_line_draw lines while 0x97034 is set, else the filler) are not drawn: SceneRenderer builds no geometry for them
 - src/render/pipeline/viewLatch.ts:62 - only the fields the object cull, clipper and shading read are latched: the projection (rows 0-1 premultiplied by projScale, centre, viewport bounds) is done by the GPU from the same viewer; viewerPosition itself is left to the caller, so the editor can draw from its own viewer without handing it to the simulation
 - src/shell/anim/movies.ts:45 - Smacker's full-screen output is the host's movie surface (hardware.movie), scaled to the display
-- src/shell/career/brf2.ts:22 - the resource comes from the port's MW2.PRJ reader, not the shell's cache (project_stream_release has nothing to free)
-- src/shell/career/brf2.ts:92 - the planet branch's animation and labels are drawn by the calling screen from the returned Brf2Planet
+- src/shell/archive/viewer.ts:158 - the fatal exits print nothing (the message is logged as unestablished) and throw ShellExit(1)
+- src/shell/archive/viewer.ts:279 - the archive's bytes are the host's: closing it frees nothing
+- src/shell/career/brf2.ts:27 - the resource comes from the port's MW2.PRJ reader, not the shell's cache (project_stream_release has nothing to free)
+- src/shell/career/brf2.ts:98 - the planet branch's anim_start blocks (a file read), so its animation and labels are put up by the caller through brf2PlanetShow, right after this returns
+- src/shell/career/orders.ts:51 - MW2.PRJ is the host's (shellProject.prj, set by startShellProcess); the port's resource cache needs no hooks, hash or directory load
+- src/shell/career/orders.ts:54 - MW2.PRJ is opened by the host (shellProject.prj), not by project_open
+- src/shell/career/orders.ts:78 - the port's resources are copies with nothing to release
+- src/shell/career/orders.ts:90 - the port's MW2.PRJ reader stands in for the shell's resource cache
+- src/shell/career/orders.ts:138 - the host owns MW2.PRJ; only the handle is closed
+- src/shell/career/orders.ts:159 - the NUL is forced into the port's copy of the stream, not the cached resource (the same byte each time, so nothing reads the difference)
+- src/shell/clib.ts:55 - counts the host's timer (hardware.timeMs, which runs from the machine's start, not the program's) rather than the DOS time of day; only rand's seed depends on it
+- src/shell/controls/config.ts:306 - returns nothing: the original returns the message box's answer or the second fclose's result, and every caller discards it
+- src/shell/controls/devices.ts:102 - the directory is listed in name order (dosFindFiles), where DOS's readdir gives the FAT directory's order; the install's giddi\ lists alphabetically (its .cpc device records say so), so the two agree there
+- src/shell/controls/devices.ts:103 - the loaded module's methods are the port's implementations of the shipped drivers (sim/controls/giddi.ts, giddiDriverFor); a driver the port has none for - the joysticks, FLTSTCK, MSJSTICK, TMASTER, VIO1/2 - is dropped the way the original drops a DLL that fails to load, so the port lists only KEYBOARD and MOUSE
+- src/shell/controls/devices.ts:128 - input_devices_load: no port driver for giddi\\${lower}; dropped as a DLL that will not load
+- src/shell/controls/inputMap.ts:253 - the port's disk cannot fail to open a file, so 'Error: Could not write map file.' (0x738b4) is never shown
+- src/shell/controls/profiles.ts:160 - giddi\\${p.device}.cpc: the port's own default profile, not the install's file
+- src/shell/controls/seed.ts:51 - GAMEKEY.MAP: the port writes its own table; the install\
+- src/shell/controls/seed.ts:78 - first run: the controls configuration is the device panel\
 - src/shell/handoff/starFiles.ts:227 - the bytes after each BMPJ name's NUL are uninitialised stack in the original; the port writes zeros (the shipped instmap1.bwd has zeros there)
 - src/shell/host/pump.ts:30 - the shell's loops run at ${passRate} passes a second (the original: as fast as the PC allowed)
 - src/shell/host/timer.ts:14 - the host's clock is the timer; AIL's start-up is the host's audio
-- src/shell/main.ts:105 - the mouse, CD (MSCDEX), interrupt hooks and Miles are the port's host; unported screens show a placeholder
+- src/shell/main.ts:107 - the mouse, CD (MSCDEX), interrupt hooks and Miles are the port's host; unported screens show a placeholder
+- src/shell/screens/register.ts:203 - the slots' name labels are kept beside the records, so MW2REG.CFG carries 0 at +0x38 where the original saved a heap pointer (cleared again by every load)
 - src/shell/sound/music.ts:57 - the drivers are the host's synth and card (hardware.midi, hardware.digital), not MDI.INI / DIG.INI
+- src/shell/text/page.ts:70 - with a negative height the original leaves [6] as malloc left it; the port's is 0 (no limit)
 - src/shell/ui/mouse.ts:159 - yields to the host between presenting the frame and reading the mouse
 - src/shell/ui/shellMenu.ts:119 - COMBAT VARIABLES, COCKPIT CONTROLS, HALL OF HONOR and THE KESHIK run through menuScreens, filled in as those screens are ported
+- src/shell/util/collection.ts:19 - a failed malloc (the original prints its message and exits) cannot happen
+- src/shell/util/collection.ts:76 - index `count` (past the end) gives null; the original reads whatever the array holds there
 - src/shell/video/cursor.ts:23 - the pointer is composited by the host over the displayed screen, not blitted into it
 - src/shell/video/cursor.ts:40 - the host redraws its pointer overlay every frame
 - src/shell/video/cursor.ts:52 - the shape is handed to the host, which draws it at the mouse position less the origin
@@ -1366,12 +1510,15 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/controls/input.ts:612 - a driver asking for calibration (install returns 4) would open the calibration screen (calibration_menu_run), which is not ported
 - src/sim/controls/input.ts:751 - no keyboard device is open, so no keystroke is read
 - src/sim/display/insetView.ts:70 - viewer_latch_globals (before and after the draw) is the render layer's, which latches the viewer itself when it draws; empty_stub_37e70 is empty
+- src/sim/display/launchScreen.ts:109 - the timer that runs launch_anim_tick is the host's (MW2.EXE's start-up is synchronous in the port)
 - src/sim/display/mainView.ts:46 - the drawing - sky and ground, backdrop, world, cockpit - is the host's, beneath the 2D window (renderPort.mainView): the viewport's window pixels are handed back to it (vfxWindowClearPane) where the original paints them, and a wipe instead of sky and ground becomes the host view's background rather than window pixels. viewer_latch_globals and the draw counter at 0x95510 are the render layer's. mainViewWindow's memset of the buffer at 0xa46fc (a window the shipped game never selects) and vfx_video_sub_010a50 (the cheat at 0x954e0) are not ported
 - src/sim/display/mainView.ts:86 - render_buffers_init(0x80, 0x5dc) and polysDrawnLimit = 0x578 size the software renderer's arenas and draw budget, which the port's renderer does not have
 - src/sim/display/mainView.ts:89 - vfx_video_sub_010320: no render arenas or polygon budget (render_buffers_init, polysDrawnLimit)
 - src/sim/display/rescale.ts:58 - hud_debug_sub_049a90 (the debug text's layout) is not ported yet
 - src/sim/display/rescale.ts:89 - hud_debug_sub_049a90 (the debug text layout) is not ported
 - src/sim/display/video.ts:135 - vfx_load_drivers and the driver's set-up call (DAT_0009fd4c) are the host's; the mode is display.screenMode rather than the driver's record; the VGA/data selectors and the copy of the pane at 0xa4694 are not kept
+- src/sim/display/videoText.ts:37 - the text is decoded into a copy (the port's MW2.PRJ outlives the process, and the original negates the cached copy in place, so a second call in one run would re-encode it); vfx_video_font_handler's drawing is the host's: the text is left in videoText.shown
+- src/sim/display/videoText.ts:44 - vfx_video_font_handler is not ported: the host shows the text
 - src/sim/effects/simTables.ts:151 - the dword at +0x28 (pad_028, zeroed here) has no field in the live Projectile class
 - src/sim/groups/orders.ts:185 - no monochrome debug display to clear (monoDebugPresent / project_file_sub_04afff)
 - src/sim/mech/anim.ts:117 - the 'Couldn't load ID %s Type %s' line appended to symlog.txt is not written; the static-arena copies (ANFL, ANTK) are JS objects
@@ -1394,12 +1541,25 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/mech/loadout.ts:162 - MechEntity +0x24 (no port field) is written 0x10e; nothing reads it
 - src/sim/mech/loadout.ts:173 - MechEntity +0x24 (no port field) is written 0x10e; nothing reads it
 - src/sim/mech/looseFiles.ts:77 - no file handle is returned or closed, and no arena: the caller gets the bytes; the failure line goes to the log channel 'symlog' rather than symlog.txt
-- src/sim/mech/mechTickAi.ts:115 - the two netplay weapon-fired arrays it zeroes are not kept by the port
-- src/sim/mech/mechTickAi.ts:306 - the monochrome-screen AI debug display (mission_log_sub_0214a0, run for the player's mech while monoDebugPresent) is not ported
+- src/sim/mech/mechTickAi.ts:308 - the monochrome-screen AI debug display (mission_log_sub_0214a0, run for the player's mech while monoDebugPresent) is not ported
 - src/sim/mech/resourceRef.ts:30 - no static-arena copy (arenaTag): the port's buffers need no arena, so the arenaTag path returns the bytes it loaded
 - src/sim/mech/spawn.ts:71 - cannot fail (the original returns 0 when static_malloc does)
 - src/sim/mech/spawn.ts:86 - the dwords at +0x24, +0xe0 and +0xe4 (padding in the header, no port fields) are zeroed in the original
-- src/sim/net/netplay.ts:30 - netplay is out of scope: only the single-player early return is ported
+- src/sim/net/netSession.ts:166 - a generator: the join waits on the network across host frames
+- src/sim/net/netSession.ts:187 - a generator: each pass of either loop yields to the host before its input_poll_controls; dataSelector2 = dataSelector (DOS selectors) has no counterpart
+- src/sim/net/netSession.ts:282 - a failed send, or a round with no live station left to send to, spends a tick through netSpin, which is how the original's 9-tick bound passes when the driver is not delivering; the SS/DE reply loop ("until delivered") gives up after 0xb6 failed sends instead of hanging the tab
+- src/sim/net/netSession.ts:347 - a send the driver did not deliver: the port spends a tick on it, as the original spent real time retrying
+- src/sim/net/netSession.ts:352 - a send round with no station left to deliver to: the port spends a tick on it
+- src/sim/net/netSession.ts:371 - the SS reply was never delivered: the original retries forever; the port gives up
+- src/sim/net/netSession.ts:615 - each pass spends a tick through netSpin: the original's second passes in real time while it spins, the port's loop would not otherwise end
+- src/sim/net/netSession.ts:658 - netplay_sign_off: each pass spends one timer tick (the original waits out its second in real time)
+- src/sim/net/transport.ts:114 - there is no real-mode memory: the buffer is a byte array and the "segment" is a token, never 0xffff
+- src/sim/net/transport.ts:127 - as net_dos_alloc_send
+- src/sim/net/transport.ts:140 - nothing to free; always succeeds
+- src/sim/net/transport.ts:151 - nothing to free; always succeeds
+- src/sim/net/transport.ts:217 - a packet longer than the receive buffer is cut to it
+- src/sim/net/transport.ts:232 - the high half of the return is the caller's ESI in the original; every caller truncates it to a short
+- src/sim/net/transport.ts:257 - returns an offset into the receive buffer where the original returns a linear address (0 for none)
 - src/sim/sound/engineNote.ts:48 - no mdi.ini is read: the port's Miles layer has its one driver
 - src/sim/sound/engineNote.ts:60 - sound_seq_sub_0414e0 (the sequences' volume, none of which exist yet) is not ported
 - src/sim/sound/engineNote.ts:76 - sound_release_sequences has nothing to release (no sequence is ever loaded in a mission)
@@ -1413,6 +1573,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/sound/music.ts:227 - one stop request to the drive interface
 - src/sim/sound/music.ts:313 - sound_release_sequences has no sequence to release (no XMIDI is loaded in a mission)
 - src/sim/things/gameThingDamage.ts:93 - the original sets 0x200 on worldRecords[geomIndex] before testing geomIndex for -1, and reads gameThings[-1] for a replacement with no gamething; the port skips both out-of-table accesses (the first cannot happen - a thing with geomIndex -1 already has flags 4)
+- src/sim/ui/cheats.ts:71 - code 4's hook swap (ui_callbacks_sub_01a820) is not established and not done; free eye's message font is a register the export lost (1 is used)
 - src/sim/ui/commands.ts:91 - the wait is split across host frames (keyPauseActive) instead of a blocking loop
 - src/sim/ui/commands.ts:129 - the screenshot (0x52) command is reported, not run; debug commands (hangAround) are not ported
 - src/sim/ui/commands.ts:136 - command 0x${cmd.toString(16)} (${what}) is not ported yet
@@ -1420,9 +1581,8 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/ui/menuCallbacks.ts:547 - the calibration loop (input_sub_048cd0 / _048ce0 / _048d90) is not ported
 - src/sim/ui/menuLoad.ts:209 - the indices are held beside the records (MenuModule.indices) rather than in the callback fields they are replaced in
 - src/sim/ui/menuLoad.ts:298 - the module is read into objects (readModule); a failed load leaves node.record and node.module set, as the original does
-- src/sim/ui/menus.ts:137 - the loaded block is dropped rather than freed
+- src/sim/ui/menus.ts:138 - the loaded block is dropped rather than freed
 - src/sim/ui/uiContext.ts:64 - the node is a JS object rather than malloc(0x12)
-- src/sim/ui/uiContext.ts:175 - cheat_handle_command (the cheat-code decoder) is not ported
 - src/sim/weapons/projectiles.ts:227 - the original faults (idiv by zero) when the round is exactly on the target's origin; the port stops after the proximity bit instead
 - src/sim/weapons/projectiles.ts:266 - projectile_home: the round is on its target; the original divides by zero here and faults
 - src/sim/weapons/weapons.ts:748 - returns nothing: the C's return is whatever EAX last held, and both callers discard it
@@ -1456,6 +1616,11 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/mission/vm/chunkExec.ts:346 - GP with no object: the original clears the PREVIOUS gamepiece node
 - src/mission/vm/streams.ts:197 - '.BWD' is appended in the caller's own reference buffer
 - src/render/SceneRenderer.ts:406 - the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled
+- src/shell/controls/config.ts:196 - controls_renumber_devices: strncpy of 16 bytes into record 15\
+- src/shell/controls/config.ts:295 - controls_save_config: fclose is called a second time on the closed file
+- src/shell/controls/inputMap.ts:80 - controls_write_map_entry: a NULL input name prints as (null)
+- src/shell/screens/register.ts:340 - DELETE MECHWARRIOR with no pilot writes through a NULL currentPilot (the button is disabled then)
+- src/shell/text/page.ts:209 - text_layout_page: a space with no word before it (text starting with a space) never advances
 - src/sim/ai/aiGeometry.ts:94 - mech_probe_ray: the flank point is transformed with the probe end\
 - src/sim/ai/behaviours.ts:259 - ai_enter_behaviour: sprint reads aiDirection after zeroing it, so it always fires the left jet
 - src/sim/ai/pilot.ts:402 - ai_behind_pick_sector: the front case tests the chooser\
@@ -1472,15 +1637,19 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/mech/damage.ts:298 - mech_damage_slot: an LRM20 ammo bin (code / 100 == 100) takes the equipment path and is only removed
 - src/sim/mech/damage.ts:460 - mech_destroy_section: a side torso clears its own destroyed bit (0x2000) again
 - src/sim/mech/damage.ts:614 - obstacle_collision_damage: no object was recorded for the hit; the original reads its type through a null pointer (taken as no gamething)
-- src/sim/mech/mechTickAi.ts:435 - reset_target clears previous_target, not itself
-- src/sim/mech/mechTickAi.ts:529 - the turn-rate cosine takes the forward speed in km/h as an angle in degrees
+- src/sim/mech/mechTickAi.ts:437 - reset_target clears previous_target, not itself
+- src/sim/mech/mechTickAi.ts:531 - the turn-rate cosine takes the forward speed in km/h as an angle in degrees
 - src/sim/mech/tickHooks.ts:252 - door_tick_ai: within a step of the nav point the ramps aim at a step-long offset from the world origin
+- src/sim/net/netSession.ts:484 - a client adopts simTick from every DA packet, including another client\
+- src/sim/net/netSession.ts:539 - the rear damage level carries over from the side torsos to the sections after them
+- src/sim/net/netSession.ts:574 - SN: a byte is stored only after every eighth gamething, so 248..253 are never sent
+- src/sim/net/netSession.ts:604 - SN is read one byte behind: gamething i >= 8 takes the bit sent for i - 8
 - src/sim/sound/mixer.ts:333 - sound_sample_eos: a caller-buffer sound (id -1) decrements the high half of enemyLockWarnTick
 - src/sim/sound/voice.ts:75 - voice: static record 0x${addr.toString(16)} has a buffer word; the port reads it as none
 - src/sim/sound/voice.ts:154 - sound_seq_queue_message: a dropped duplicate keeps its VoiceLine marked in use
 - src/sim/sound/voice.ts:165 - sound_seq_queue_message: a dropped duplicate keeps its VoiceLine marked in use
 - src/sim/sound/voice.ts:246 - voice_queue_advance: a posted text line is dropped while its endTick is still ahead
-- src/sim/ui/menus.ts:308 - menu_draw: a digit on a menu\
+- src/sim/ui/menus.ts:309 - menu_draw: a digit on a menu\
 - src/sim/weapons/weapons.ts:78 - weapons[-1].fireGroup: reads the loadout dword at +0xb2 (throttleScale >> 16 | weaponCycleLock << 16)
 - src/sim/weapons/weapons.ts:565 - player_weapon_set_fire_group with no weapon selected writes loadout +0xb2 (throttleScale high word, weaponCycleLock low word)
 - src/sim/world/objectTasks.ts:336 - task_object_sound: INIT never sets the gate, so a chunk without it leaves the heap\
@@ -1499,12 +1668,22 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/resources/preload.ts:112 - sim_preload_data: ai_rule_tables_load is not installed
 - src/engine/vfx/vfx.ts:322 - vfx_line_draw: a callback mode (above 1) is not ported
 - src/mission/commandLine.ts:118 - -E: mw2debug.txt is not opened; the trace goes to the port log
-- src/mission/end.ts:133 - mission_save_results: an objective text runs past the end of the record, onto the stack
+- src/mission/end.ts:134 - mission_save_results: an objective text runs past the end of the record, onto the stack
 - src/mission/vm/objExec.ts:45 - OBJ with no POLY id loads a loose .wtb file; not ported
 - src/render/pipeline/fillDispatch.ts:76 - polygonFillHook 0x${h.toString(16)} is not ported; render_asm_sub_03bb80 used
 - src/render/pipeline/hooks.ts:43 - objectCullHook 0x${a.toString(16)} is not ported; object_cull_main_view used
 - src/render/pipeline/hooks.ts:52 - polygonDrawHook 0x${a.toString(16)} is not ported; polygon_resolve_colour used
-- src/shell/main.ts:249 - main: state ${current} has no screen
+- src/shell/archive/viewer.ts:90 - archive_page_load: ${message.trim()} - exit(1)
+- src/shell/archive/viewer.ts:254 - archive_page_load: a picture item outside the archive (the original hands picture_init what its locals held)
+- src/shell/archive/viewer.ts:423 - archive_viewer_frame: NEXT PAGE with no pages (the original reads through NULL)
+- src/shell/career/orders.ts:102 - bwd_stream_open: the cache returned no data (the original reads its +4 anyway)
+- src/shell/career/orders.ts:181 - orders_text_build: \\H or \\R with no current pilot (the original reads through NULL)
+- src/shell/career/orders.ts:225 - orders_text_build: an empty text after the codes - text_layout_page is handed NULL
+- src/shell/controls/inputMap.ts:74 - controls_write_map_entry: a binding on a device that is not loaded (the original reads through a NULL record)
+- src/shell/controls/inputMap.ts:293 - controls_write_temp_map: a bound record of an unused control slot (controlMapNames is NULL there)
+- src/shell/main.ts:254 - main: state ${current} has no screen
+- src/shell/screens/briefing.ts:37 - screen_briefing: no current pilot (the original reads missionIndex and rank through NULL)
+- src/shell/screens/briefing.ts:47 - screen_briefing: mission 15, rank 6+, career 2 - the stream name buffer is left as the stack held it
 - src/sim/ai/behaviours.ts:144 - ai_choose_behaviour: no behaviour set for gamepieceClass ${mech.gamepieceClass}
 - src/sim/ai/behaviours.ts:365 - point_around_target: a gamething with a node leaves y uninitialised (0 here)
 - src/sim/ai/behaviours.ts:368 - point_around_target: handle 0x${targetHandle.toString(16)} is neither a mech nor a gamething, and the C uses an uninitialised node
@@ -1540,24 +1719,32 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/mech/config.ts:355 - ammo bin ${i}: past the end of the MEK record
 - src/sim/mech/config.ts:378 - MGEO record of ${r.data.length} bytes: the loader reads ${MGEO_RECORD_SIZE} regardless
 - src/sim/mech/damage.ts:203 - scene_subtree_raise_damage_level: a node without an object reads flags through a null pointer; taken as 0
-- src/sim/mech/mechTickAi.ts:316 - aiStateHandlers[${e.aiState}] is null
+- src/sim/mech/mechTickAi.ts:318 - aiStateHandlers[${e.aiState}] is null
 - src/sim/mech/resourceRef.ts:51 - resource_load_ref: loose-file fallback for a reference given by id uses an uninitialised name
 - src/sim/mech/tickHooks.ts:207 - door_tick_ai: the group has no current objective and the C reads objectives[-1]
-- src/sim/net/netplay.ts:34 - a network session is running, and netplay is not ported
+- src/sim/net/netSession.ts:82 - station ${s} is outside netStationFlags: the original writes past the table
+- src/sim/net/netSession.ts:382 - station ${station} has no mech: the original writes through a null pointer
+- src/sim/net/netSession.ts:490 - DA from station ${station}, which has no mech: the original writes through a null pointer
+- src/sim/net/netSession.ts:517 - a remote mech with no ControlState: reverseDirection is written through a null pointer
+- src/sim/net/netSession.ts:537 - netplay_apply_state: the front damage level is read before any section set it (an uninitialised local); taken as the rear level
+- src/sim/net/netWeapons.ts:56 - netplay_weapons_start_burst: slot ${i} has no weapon type (${w.type}); shots and guidance taken as 0
+- src/sim/net/transport.ts:165 - INT 0x65 with no network driver loaded: taken as a lone station 0 of 1
+- src/sim/net/transport.ts:195 - net_send of a length past the transfer buffer (a full queue\
+- src/sim/net/transport.ts:212 - net_receive with nothing waiting: the driver\
 - src/sim/sound/music.ts:255 - music_start_mission_track: MUS resource not "%d %d"; sscanf would leave the fields as they were
 - src/sim/sound/options.ts:26 - ${what}: an XMIDI sequence is loaded, and the port has no sequencer
 - src/sim/things/gameThingDamage.ts:38 - gamething_apply_damage: object index ${i} is past the 254 gamethings
 - src/sim/things/gameThingDamage.ts:46 - gamething_apply_damage: the destroyed thing has no world object (the original reads its type through a null pointer)
 - src/sim/things/gameThingDamage.ts:104 - gamething_destroy_world_record: replacement record ${record} has no gamething; the original tests the word before gameThings (0xf4a80)
 - src/sim/things/gameThingDamage.ts:125 - gamething_allegiance: affiliation ${a} is past the 8-entry table
+- src/sim/ui/cheats.ts:107 - cheat 4: ui_callbacks_sub_01a820 swaps the main-view hook (0x959b8) for LAB_00019f40 - not read
 - src/sim/ui/menuCallbacks.ts:141 - lance_point_menu_onload: no item record after the list
 - src/sim/ui/menuCallbacks.ts:155 - lance_order_selected: a negative slot reads before the table
 - src/sim/ui/menuCallbacks.ts:187 - lance_slot_ai_state: an empty mechTable slot, read through a null pointer
 - src/sim/ui/menuCallbacks.ts:550 - menu_item_calibrate: a device calibration was started, and it is not ported
 - src/sim/ui/menuLoad.ts:122 - menu control data: a list with a suffix callback in the module
 - src/sim/ui/menuLoad.ts:197 - ${MENU_TABLES[kind].label}[${index}] (0x${address.toString(16)}) is not ported
-- src/sim/ui/menus.ts:324 - menu_draw: a menu without a title underlines at uninitialised coordinates
-- src/sim/ui/uiContext.ts:185 - cheat codes (cheat_handle_command) are not ported
+- src/sim/ui/menus.ts:325 - menu_draw: a menu without a title underlines at uninitialised coordinates
 - src/sim/weapons/weapons.ts:181 - mech_weapons_tick: weapons[${next}] is past the ten slots (the C reads the sections that follow)
 - src/sim/weapons/weapons.ts:307 - mech_weapon_fire: a weapon with ammo has no bin (the C would dereference null)
 - src/sim/weapons/weapons.ts:315 - mech_weapon_fire: the next ammo bin is past the loadout\

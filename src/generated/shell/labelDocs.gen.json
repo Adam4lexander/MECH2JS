@@ -54,6 +54,11 @@
   "kind": "int",
   "doc": ""
  },
+ "inputDeviceCapacity": {
+  "address": "0x7a168",
+  "kind": "int",
+  "doc": "S8 port: how many InputDevice records inputDevices has room for - input_devices_grow adds 50 (0xcb2 bytes) and returns it, input_devices_load grows when inputDeviceCount passes it, input_devices_free zeroes it."
+ },
  "inputDevices": {
   "address": "0x7a16c",
   "kind": "ptr",
@@ -113,6 +118,11 @@
   "address": "0x7a954",
   "kind": "int",
   "doc": ""
+ },
+ "controlsKeyboardDevice": {
+  "address": "0x7a958",
+  "kind": "int",
+  "doc": "S8 port: the keyboard's device number. controls_screen sets it to -1 (the image's value), then to the index of the device named 'keyboard' ('Error: keyboard.dll not found' while still < 0); controls_write_temp_map's fixed legs_pan_minus / legs_pan_plus lines (GreyDelete, GreyPageDown) are bound to that device."
  },
  "configPageNames": {
   "address": "0x7a95c",
