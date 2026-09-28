@@ -87,13 +87,14 @@ function animPath(name: string, ext: string): string {
  */
 export function* animOpenSmk(slot: AnimSlot, name: string): Blocking<number> {
   const path = animPath(name, 'smk');
-  const smk = smackOpen(yield* awaitHost(dosFileLoadAsync(path)));
+  // flag 0x40 asks for Smacker flag 0x20 besides main's smackerOpenFlags (the sound tracks)
+  const smk = smackOpen(yield* awaitHost(dosFileLoadAsync(path)), ((slot.flags & 0x40) !== 0 ? 0x20 : 0) | mem().i32(SHELL_LABEL.smackerOpenFlags));
   slot.smk = smk;
   if (!smk) return 0;
   const d = driver();
   if ((slot.flags & 0x10000000) !== 0) {
-    // SmackColorRemap into the driver's palette: the first frame's, once decoded
-    smackDoFrame(smk);
+    // SmackColorRemap into the driver's palette: the first frame's, once decoded (silently: it is decoded again to show)
+    smackDoFrame(smk, false);
     d.palette.set(smk.palette);
     smk.frameNum = 0;
   }

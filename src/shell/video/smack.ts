@@ -18,7 +18,11 @@
  */
 import { SmackerDecoder, parseSmacker, type SmackerFrame } from '../../data/formats/smacker.ts';
 import type { VfxWindow } from '../../engine/vfx/vfx.ts';
+import { hardware } from '../host/hardware.ts';
 import { timerRead } from '../host/timer.ts';
+
+/** SmackOpen's sound-track bits: SMACKTRACK1..7, 0x200 << track (main's smackerOpenFlags is all seven, 0xfe00) */
+export const SMACK_TRACKS = 0xfe00;
 
 /** @portOnly an open Smacker movie, as the shell uses one */
 export class Smack {
@@ -39,8 +43,11 @@ export class Smack {
   /** when the current frame went up (timer_read) */
   shownAt = 0;
   readonly frameMs: number;
+  /** the sound tracks SmackOpen was asked for (bit i: track i), which SmackDoFrame plays */
+  readonly tracks: number;
 
-  constructor(bytes: Uint8Array) {
+  constructor(bytes: Uint8Array, flags: number) {
+    this.tracks = (flags & SMACK_TRACKS) >>> 9;
     const h = parseSmacker(bytes);
     this.decoder = new SmackerDecoder(bytes, h);
     this.width = h.width;
@@ -51,14 +58,16 @@ export class Smack {
 }
 
 /**
- * SmackOpen over a file's bytes; null when it is not a Smacker file.
+ * SmackOpen over a file's bytes with its open flags - the sound tracks
+ * among them (SMACK_TRACKS) are played as frames are decoded; null when it
+ * is not a Smacker file.
  *
  * @portOnly RAD's SmackOpen (0x4cb08), over the port's decoder
  */
-export function smackOpen(bytes: Uint8Array | null): Smack | null {
+export function smackOpen(bytes: Uint8Array | null, flags: number): Smack | null {
   if (!bytes) return null;
   try {
-    return new Smack(bytes);
+    return new Smack(bytes, flags);
   } catch {
     return null;
   }
@@ -69,8 +78,13 @@ export function smackToBuffer(s: Smack, win: VfxWindow, x: number, y: number): v
   s.target = { win, x, y };
 }
 
-/** @portOnly SmackDoFrame (0x4d7ac): decodes the current frame into the buffer */
-export function smackDoFrame(s: Smack): void {
+/**
+ * @portOnly SmackDoFrame (0x4d7ac): decodes the current frame into the
+ * buffer, and - as the library does through Miles for a movie opened with
+ * sound tracks - sends the frame's sound on those tracks to the host
+ * (`sound` false decodes silently: a frame decoded only for its palette).
+ */
+export function smackDoFrame(s: Smack, sound = true): void {
   if (s.decoder.nextFrame !== s.frameNum) {
     s.decoder.reset();
     while (s.decoder.nextFrame < s.frameNum) s.decoder.decodeNextFrame();
@@ -78,6 +92,7 @@ export function smackDoFrame(s: Smack): void {
   const f = s.decoder.decodeNextFrame();
   if (!f) return;
   s.lastFrame = f;
+  if (sound) smackFrameSound(s, f);
   s.newPalette = f.paletteChanged || s.frameNum === 0 ? 1 : 0;
   // the decoder's palette is 8-bit ((v << 2) | (v >> 4)): back to the DAC's 6
   for (let i = 0; i < 768; i++) s.palette[i] = f.palette[i]! >> 2;
@@ -94,6 +109,18 @@ export function smackDoFrame(s: Smack): void {
     }
   }
   s.shownAt = timerRead();
+}
+
+/** A decoded frame's sound on the tracks the movie was opened with, to the host's PCM output. @portOnly */
+function smackFrameSound(s: Smack, f: SmackerFrame): void {
+  const out = hardware.pcmOut;
+  if (!out || s.tracks === 0) return;
+  for (let i = 0; i < 7; i++) {
+    if ((s.tracks & (1 << i)) === 0) continue;
+    const t = s.decoder.header.audio[i];
+    const pcm = f.audio[i];
+    if (t && pcm && pcm.length > 0) out(pcm, t.sampleRate, t.channels);
+  }
 }
 
 /** @portOnly SmackNextFrame (0x4da48) */

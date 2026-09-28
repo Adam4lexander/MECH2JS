@@ -20,6 +20,7 @@ import { Mouse, mouseInit } from './ui/mouse.ts';
 import { KeyInput, inputInit } from './ui/keys.ts';
 import { messageBox } from './ui/messageBox.ts';
 import { moviePlay } from './anim/movies.ts';
+import { SMACK_TRACKS } from './video/smack.ts';
 import { Sample, soundSampleCreate, soundSampleSetLooping, soundSampleSetVolume } from './sound/samples.ts';
 import { Song, musicCreate, musicDestroy, musicIsPlaying, musicStart, soundSystemInit } from './sound/music.ts';
 import { careerRegistryLoad } from './career/registry.ts';
@@ -126,6 +127,8 @@ export function* shellMain(argv: readonly string[]): Blocking<number> {
   if (!dbBytes) throw new ShellExit(1);
   shell.database = mpackDbOpen('DATABASE.MW2', dbBytes);
   shell.soundSystem = soundSystemInit();
+  // every movie and animation is opened with these: all seven sound tracks when movie sound is on
+  m.setI32(SHELL_LABEL.smackerOpenFlags, m.i32(SHELL_LABEL.movieSoundEnabled) === 0 ? 0 : SMACK_TRACKS);
   timerStart();
   if (!sim) yield* moviePlay('mintro');
   const d = videoDriverInit(new VideoDriver());

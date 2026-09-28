@@ -23,13 +23,9 @@ function moviePath(name: string, cd: boolean): string {
 }
 
 /** Plays a decoded frame's sound on the host's card. */
-function frameSound(s: Smack): void {
-  const f = s.lastFrame;
-  const out = hardware.pcmOut;
-  if (!f || !out) return;
-  const t = s.decoder.header.audio[0];
-  const pcm = f.audio[0];
-  if (t && pcm && pcm.length > 0) out(pcm, t.sampleRate, t.channels);
+/** main's smackerOpenFlags (0x91194): every movie is opened with them - the sound tracks when movie sound is on */
+function openFlags(): number {
+  return mem().i32(SHELL_LABEL.smackerOpenFlags);
 }
 
 /**
@@ -46,10 +42,10 @@ function frameSound(s: Smack): void {
  */
 export function* moviePlay(name: string): Blocking<number> {
   if (mem().i32(SHELL_LABEL.moviesEnabled) === 0) return 1;
-  let s = smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, anims.tryCd !== 0))));
+  let s = smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, anims.tryCd !== 0))), openFlags());
   anims.tryCd = 0;
   if (!s) {
-    s = smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, true))));
+    s = smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, true))), openFlags());
     if (!s) return 0;
   }
   const d = shell.videoDriver;
@@ -70,7 +66,6 @@ export function* moviePlay(name: string): Blocking<number> {
       hardware.dacVersion++;
     }
     hardware.movie.version++;
-    frameSound(s);
     if (frame === s.frames) break;
     smackNextFrame(s);
     while (smackWait(s) !== 0) yield WAIT;
@@ -101,10 +96,10 @@ export function* moviePlay(name: string): Blocking<number> {
  */
 export function* moviePlayInline(name: string): Blocking<void> {
   if (mem().i32(SHELL_LABEL.moviesEnabled) === 0) return;
-  let s = smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, anims.tryCd !== 0))));
+  let s = smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, anims.tryCd !== 0))), openFlags());
   anims.tryCd = 0;
   if (!s) {
-    s = smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, true))));
+    s = smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, true))), openFlags());
     if (!s) return;
   }
   // shell_input_sub_01afa0 / _01af70 hide and show the pointer around it
@@ -121,7 +116,6 @@ export function* moviePlayInline(name: string): Blocking<void> {
       hardware.dacVersion++;
     }
     hardware.screenVersion++;
-    frameSound(s);
     if (frame === s.frames) break;
     smackNextFrame(s);
     while (smackWait(s) !== 0) yield WAIT;
@@ -150,7 +144,7 @@ export class BackgroundMovie {
  * @fidelity exact
  */
 export function* movieOpenBackground(m: BackgroundMovie, name: string, x: number, y: number): Blocking<BackgroundMovie> {
-  const s = smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, false)))) ?? smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, true))));
+  const s = smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, false))), openFlags()) ?? smackOpen(yield* awaitHost(dosFileLoadAsync(moviePath(name, true))), openFlags());
   m.smk = s;
   m.x = x;
   m.y = y;
