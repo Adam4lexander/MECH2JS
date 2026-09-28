@@ -7,10 +7,20 @@
  * @portOnly
  */
 import { SystemErrorFatal } from '../core/systemError.ts';
-import { error as logError, log } from '../core/log.ts';
-import { bootMission } from '../mission/load.ts';
+import { error as logError, log, warn } from '../core/log.ts';
+import { bootMission, bootMissionStart, bootMissionStartSteps } from '../mission/load.ts';
+import { net, type NetBlocking } from '../sim/net/netplay.ts';
+import { netplayShutdown } from '../sim/net/netSession.ts';
+import { setNetTransport, type NetTransport } from '../sim/net/transport.ts';
+import { cdDriveLetter, dosFilePrefetch, dosFilePrefetchDir } from '../engine/dosFiles.ts';
+import { launchAnimPath } from '../sim/display/launchScreen.ts';
+import { defaultCanvas } from '../sim/display/video.ts';
+import type { VfxWindow } from '../engine/vfx/vfx.ts';
+import { launchNamesFromArgv } from '../mission/commandLine.ts';
 import { engineStore } from '../editor/store/store.ts';
-import type { GameData } from './gameData.ts';
+import { missionCatalog, type GameData, type MissionEntry } from './gameData.ts';
+import { setDosFiles } from '../engine/dosFiles.ts';
+import { prepareDevMission } from '../shell/devLaunch.ts';
 import { parseLuma } from '../data/formats/image.ts';
 import { cacheLoadResource } from '../engine/resources/cache.ts';
 import { palettes, paletteSlotRgb } from '../sim/world/palettes.ts';
@@ -54,7 +64,66 @@ export class Game {
   private audioChosen = false;
 
   constructor(readonly data: GameData) {
-    this.audio = new AudioHost(data.cue);
+    this.audio = new AudioHost(data.cd);
+    setDosFiles(data.loose);
+  }
+
+  private catalog: MissionEntry[] | null = null;
+
+  /** MECH2's loop waits on this: called once when a mission's results are in (main has ended) */
+  onMissionEnd: ((r: MissionResults) => void) | null = null;
+
+  /**
+   * MW2.EXE run the way MECH2 runs it, first half: the launch pictures
+   * fetched off the CD (MW2.EXE reads them synchronously), then main's
+   * start-up up to its launch screen. Returns the rest of the start-up, or
+   * null when it stopped. The host shows the launch screen meanwhile.
+   */
+  async launchStart(argv: string[]): Promise<(() => boolean) | null> {
+    this.audio.pause();
+    this.mission = argv[1] ?? null;
+    this.setup = null;
+    this.loadError = null;
+    this.results = null;
+    this.pendingResults = null;
+    this.playbackShown = null;
+    const names = launchNamesFromArgv(argv);
+    try {
+      // both art variants: which one MW2.EXE opens depends on the screen mode its start-up picks
+      for (const n of names) for (const variant of ['', '6']) await dosFilePrefetch(launchAnimPath(n, variant));
+      // the CD's keating directory, which project_scan_dev_dir lists (read once, from the CD's mounting)
+      const letter = cdDriveLetter();
+      if (letter) await dosFilePrefetchDir(`${letter}:keating`);
+    } catch (e) {
+      // a CD read that failed: MW2.EXE finds those files missing, as with an unreadable disc
+      warn('cd', `reading the CD ahead of the mission failed: ${String(e)}`);
+    }
+    try {
+      const finish = bootMissionStart({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, argv });
+      return finish || null;
+    } catch (e) {
+      this.failed(e);
+      return null;
+    }
+  }
+
+  /** Second half: the rest of main's start-up, then Play. */
+  launchFinish(finish: () => boolean): boolean {
+    let ok = false;
+    try {
+      ok = finish();
+    } catch (e) {
+      this.failed(e);
+    }
+    this.mode = 'edit';
+    if (this.loadError === null) this.setMode('play');
+    engineStore.bump();
+    return ok;
+  }
+
+  private failed(e: unknown): void {
+    this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
+    logError('mission', this.loadError);
   }
 
   /** the player's star the last mission was set up with (Replay reuses it), or null for a mission that takes none */
@@ -70,8 +139,6 @@ export class Game {
     this.audio.pause();
     this.mission = stream;
     this.setup = setup;
-    const loose = new Map(this.data.loose);
-    if (setup) loose.set('USERSTAR.BWD', buildUserStar(setup));
     this.loadError = null;
     this.results = null;
     this.pendingResults = null;
@@ -79,7 +146,16 @@ export class Game {
     const t0 = performance.now();
     let ok = false;
     try {
-      ok = bootMission({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, looseFiles: loose, mission: stream });
+      // the shell's part, done by the ported shell code into a scratch overlay: the stars, the launch animation, the command line
+      const entry = (this.catalog ??= missionCatalog(this.data.prj)).find((m) => m.stream === stream);
+      const argv = prepareDevMission({
+        shellExe: this.data.shellExe,
+        prj: this.data.prj,
+        stream,
+        insignia: entry?.loose.includes('INSTMAP1.BWD') ?? false,
+        userStar: setup ? buildUserStar(setup) : null,
+      });
+      ok = bootMission({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, argv });
     } catch (e) {
       this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
       logError('mission', this.loadError);
@@ -91,6 +167,66 @@ export class Game {
     return ok;
   }
 
+  /** NetMech: main's start-up waiting in netplay_start's join, resumed once a display frame by playFrame; null otherwise */
+  netBoot: NetBlocking<boolean> | null = null;
+
+  /**
+   * NetMech from the dev route (app/net/NetLobby.tsx): the mission's files
+   * as the shell's code writes them (the star from `setup`), then MW2.EXE
+   * with NETDEMO's command line - `MW2 -n -g=NETWAIT <mission>`, what
+   * NETDEMO.EXE spawns (0x14260) - on `transport` as the network driver.
+   * Main's start-up runs to netplay_start's join, which then waits on the
+   * other stations a pass per display frame; the frame loop follows.
+   */
+  loadNetMission(stream: string, setup: StarSetup | null, transport: NetTransport): boolean {
+    this.audio.pause();
+    this.mission = stream;
+    this.setup = setup;
+    this.loadError = null;
+    this.results = null;
+    this.pendingResults = null;
+    this.playbackShown = null;
+    this.netBoot = null;
+    let ok = false;
+    try {
+      const entry = (this.catalog ??= missionCatalog(this.data.prj)).find((m) => m.stream === stream);
+      prepareDevMission({
+        shellExe: this.data.shellExe,
+        prj: this.data.prj,
+        stream,
+        insignia: entry?.loose.includes('INSTMAP1.BWD') ?? false,
+        userStar: setup ? buildUserStar(setup) : null,
+      });
+      setNetTransport(transport);
+      const steps = bootMissionStartSteps({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, argv: ['MW2', '-n', '-g=NETWAIT', stream] });
+      // the start-up through the mission load, to the join's first pass - so the view binds the loaded mission
+      if (steps && !steps.next().done) this.netBoot = steps;
+      ok = steps !== false;
+    } catch (e) {
+      this.failed(e);
+    }
+    this.mode = 'edit';
+    if (ok && this.loadError === null) this.setMode('play');
+    engineStore.bump();
+    return ok;
+  }
+
+  /** One pass of the join main's start-up is waiting in; at its end the loop takes over. */
+  private stepNetBoot(): void {
+    const boot = this.netBoot!;
+    try {
+      const r = boot.next();
+      if (!r.done) return;
+      this.netBoot = null;
+      log('mission', `${this.mission ?? ''}: the network join ${net.netSessionState === 1 ? 'is complete' : 'failed'}`);
+    } catch (e) {
+      this.netBoot = null;
+      this.failed(e);
+      this.mode = 'edit';
+    }
+    engineStore.bump();
+  }
+
   /** Editor override: a day phase (0 dawn, 1 day, 2 dusk, 3 night) whose palette to show, or null for the game's. */
   palettePhase: number | null = null;
 
@@ -100,7 +236,7 @@ export class Game {
   }
 
   /** the blocking fade's in-between DAC being shown, and how many frames it has left */
-  private playbackShown: { dac: Uint8Array; left: number; n: number } | null = null;
+  private playbackShown: { dac: Uint8Array; window: VfxWindow; left: number; n: number } | null = null;
   private playbackCount = 0;
   /** the results of a mission whose end fade is still being shown */
   private pendingResults: MissionResults | null = null;
@@ -130,6 +266,11 @@ export class Game {
       }
     }
     return this.throughBrightness(paletteSlotRgb(slot) ?? paletteSlotRgb(p.paletteCurrentSlot));
+  }
+
+  /** The game's 2D window to show: while a blocking fade plays back, the window as it stood when the fade ran. */
+  windowShown(): VfxWindow {
+    return this.playbackShown?.window ?? defaultCanvas;
   }
 
   /** Changes whenever paletteRgb's answer does. */
@@ -165,7 +306,7 @@ export class Game {
       this.playbackShown = null;
       return false;
     }
-    this.playbackShown = { dac: next.dac, left: next.waits, n: ++this.playbackCount };
+    this.playbackShown = { dac: next.dac, window: next.window, left: next.waits, n: ++this.playbackCount };
     return true;
   }
 
@@ -260,12 +401,18 @@ export class Game {
       this.pendingResults = null;
       this.mode = 'edit';
       engineStore.bump();
+      this.onMissionEnd?.(this.results);
       return false;
     }
     this.pending = Math.min(this.pending + (ms * 182) / 1000, Game.MAX_TICKS_PER_FRAME);
     while (this.pending >= 1) {
       ailTimerService();
       this.pending -= 1;
+    }
+    if (this.netBoot) {
+      this.stepNetBoot();
+      this.audio.pump();
+      return this.mode === 'play';
     }
     if (this.loopRate !== null) {
       const period = 1000 / this.loopRate;
@@ -313,10 +460,13 @@ export class Game {
         this.results = r;
         this.mode = 'edit';
         engineStore.bump();
+        this.onMissionEnd?.(r);
       }
     } catch (e) {
       this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
       logError('frame', this.loadError);
+      // system_error's teardown signs off a network game (netplay_shutdown) before it exits
+      if (e instanceof SystemErrorFatal && net.netSessionState === 1) netplayShutdown();
       this.mode = 'edit';
       engineStore.bump();
       return false;

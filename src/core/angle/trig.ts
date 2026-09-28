@@ -28,10 +28,9 @@ export const sinTable = new Int32Array(258);
 export const atanTable = new Int32Array(258);
 
 /**
- * Fills sinTable and atanTable. The original runs on the x87 in extended
- * precision; JS doubles agree because no entry lies within 1e-6 of an integer
- * (checked by dump_trig_tables.py and by the golden test against
- * listing/trig_tables.txt).
+ * Fills sinTable and atanTable. The original runs on the x87 at 53-bit
+ * precision (core/int/x87.ts), as JS doubles do; the golden test against
+ * listing/trig_tables.txt (dump_trig_tables.py) checks every entry.
  *
  * @mw2 math_build_trig_tables 0x0003aa90
  * @fidelity exact

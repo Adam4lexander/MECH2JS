@@ -27,7 +27,7 @@ import { clock } from '../../engine/clock.ts';
 import { registerGlobals } from '../../engine/globals.ts';
 import { imageI32, imageI32s } from '../../engine/image.ts';
 import { cacheLoadResource, cacheUnlock } from '../../engine/resources/cache.ts';
-import type { VfxWindow } from '../../engine/vfx/vfx.ts';
+import { VfxWindow } from '../../engine/vfx/vfx.ts';
 
 /** paletteResourceIds' length - the 0x14 the init pass fills (label note). */
 export const PALETTE_SLOT_COUNT = 20;
@@ -50,10 +50,26 @@ export interface PaletteFadeState {
   count: number;
 }
 
-/** A DAC the host shows for `waits` frames of a blocking fade. @portOnly */
+/**
+ * A DAC the host shows for `waits` frames of a blocking fade, with the
+ * window as it stood while the fade ran (the original held the screen for
+ * the fade; the host plays it back after the frame, when later drawing may
+ * have changed the window). @portOnly
+ */
 export interface DacFrame {
   dac: Uint8Array;
   waits: number;
+  window: VfxWindow;
+}
+
+/** A copy of a window's pixels. @portOnly */
+function windowSnapshot(w: VfxWindow): VfxWindow {
+  const s = new VfxWindow();
+  s.xMax = w.xMax;
+  s.yMax = w.yMax;
+  s.buffer = w.buffer.slice();
+  s.drawn = w.drawn.slice();
+  return s;
 }
 
 function bootPalettes() {
@@ -114,7 +130,7 @@ export const palettes = registerGlobals('palettes', bootPalettes(), () => {
 });
 
 /** paletteDacWrite: entry i of the DAC. @portOnly the VFX driver's DAC poke */
-function dacWrite(i: number, r: number, g: number, b: number): void {
+export function dacWrite(i: number, r: number, g: number, b: number): void {
   const d = palettes.dac;
   d[i * 3] = r & 0xff;
   d[i * 3 + 1] = g & 0xff;
@@ -432,6 +448,7 @@ export function paletteFadeUsedColours(canvas: VfxWindow, target: Uint8Array, du
   p.paletteFadeAccum.fill(maxd >> 1, 0, Math.max(0, last));
   if (maxd === 0) return;
   const inc = Math.floor((duration >>> 0) * 0x10000 / maxd) >>> 0;
+  const shown = windowSnapshot(canvas);
   let pace = 0x8000;
   for (let pass = maxd; pass !== 0; pass--) {
     for (let u = last; u >= 0; u--) {
@@ -450,7 +467,7 @@ export function paletteFadeUsedColours(canvas: VfxWindow, target: Uint8Array, du
     pace = (pace + inc) >>> 0;
     const waits = (pace >>> 16) << 16 >> 16;
     if (waits >= 1) {
-      p.dacPlayback.push({ dac: p.dac.slice(), waits });
+      p.dacPlayback.push({ dac: p.dac.slice(), waits, window: shown });
       pace = pace & 0xffff;
     }
   }

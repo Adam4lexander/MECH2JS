@@ -2,7 +2,7 @@
  * The browser end of the sound: WebAudio playing what the port's Miles layer
  * mixed (11025 Hz stereo, engine/miles/ail.ts), a stand-in synth for the
  * engine note's MIDI messages, and a CD drive backed by the install's CD
- * image.
+ * image (a ripped CD's files have no audio tracks: no drive, no music).
  *
  * Nothing here decides anything the game can see. The mixer runs on the
  * game's timer whether or not this plays it; this only schedules each
@@ -13,6 +13,7 @@
 import { ail, ailMidiListen, DIG_OUTPUT_RATE, digTakeOutput } from '../engine/miles/ail.ts';
 import { setCdDrive } from '../engine/miles/cdDrive.ts';
 import { BinCdDrive, parseCue, type CueSheet } from './binCdDrive.ts';
+import type { GameCd } from '../app/gameData.ts';
 import { EngineSynth } from './engineSynth.ts';
 
 /** how far ahead of the audio clock a frame's PCM is queued */
@@ -29,9 +30,9 @@ export class AudioHost {
   readonly cd: BinCdDrive | null;
   enabled = false;
 
-  constructor(cue: { name: string; text: string } | null) {
+  constructor(cd: GameCd | null) {
     let sheet: CueSheet | null = null;
-    if (cue) sheet = parseCue(cue.text);
+    if (cd?.kind === 'image') sheet = parseCue(cd.cue.text);
     this.cd = sheet ? new BinCdDrive(sheet, () => this.context()) : null;
     // the drive is plugged in from the start, as a CD in the drive would be; it only sounds once audio is on
     setCdDrive(this.cd);
@@ -39,6 +40,12 @@ export class AudioHost {
 
   private context(): { ctx: AudioContext; out: AudioNode } | null {
     return this.ctx && this.master && this.enabled ? { ctx: this.ctx, out: this.master } : null;
+  }
+
+  /** The audio output other hosts (the front end's sound card) play into; enables sound (call inside a user gesture). */
+  output(): { ctx: AudioContext; out: AudioNode } {
+    this.enable();
+    return { ctx: this.ctx!, out: this.master! };
   }
 
   /** Must run inside a user gesture the first time (the browser's autoplay rule). */

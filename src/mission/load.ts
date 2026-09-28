@@ -10,8 +10,11 @@
 import { musicStartMissionTrack, soundConfigLoad, soundInitAll } from '../sim/sound/music.ts';
 import { randomTablesInit } from '../core/random.ts';
 import { audioTimerInit, simClockReset } from '../engine/clock.ts';
-import { uiContextRegister } from '../sim/ui/uiContext.ts';
-import { setDosFiles } from '../engine/dosFiles.ts';
+import { ui, uiContextRegister } from '../sim/ui/uiContext.ts';
+import { dosDiskSnapshot, setDosFiles, setOverlayFiles, setOwnFiles } from '../engine/dosFiles.ts';
+import { checkLaunchedByShell } from './commandLine.ts';
+import type { NetBlocking } from '../sim/net/netplay.ts';
+import { netplayInit, netplayStart } from '../sim/net/netSession.ts';
 import { inputInit } from '../sim/controls/input.ts';
 import { cameraInit } from '../sim/camera/cameraUpdate.ts';
 import { terrainTableReset } from '../sim/mech/animTask.ts';
@@ -34,10 +37,13 @@ import { thingNodes } from '../sim/mech/spawn.ts';
 import { layoutRescaleAll } from '../sim/display/rescale.ts';
 import { defaultCanvas, videoInit } from '../sim/display/video.ts';
 import { vfxVideoSub010320 } from '../sim/display/mainView.ts';
+import { bootLoadLaunchAnims, gameBootSub0155a0 } from '../sim/display/launchScreen.ts';
+import { projectScanDevDir } from './devDir.ts';
 import { setMekSource } from '../sim/mech/looseFiles.ts';
-import { DEFAULT_RULES, simOptionsLoad, type SimRules } from '../sim/mech/simOptions.ts';
+import { rulesToBytes, simOptionsFileEnsure, simOptionsLoad, type SimRules } from '../sim/mech/simOptions.ts';
 import { destructiblesReset } from '../sim/things/destructibles.ts';
 import { gamethingTableReset } from '../sim/things/gameThings.ts';
+import { simCountMechsByStatus } from '../sim/things/allegianceTally.ts';
 import { dayCycleInit } from '../sim/world/dayCycle.ts';
 import { projectMapsAlloc, projectMapsFree, projectSetMangle } from '../sim/world/projectMaps.ts';
 import { worldRecordsAllDefined, worldRecordsBuildAll, worldRecordsTick } from '../sim/world/worldRecords.ts';
@@ -84,57 +90,116 @@ export interface MissionBootOptions {
   prj: ProjectFile;
   ini?: IniFile | null;
   /**
-   * the install's loose files (USERSTAR.BWD, EN0?STAR.BWD, MEK/*.MEK,
-   * INPUT.MAP, GAMEKEY.MAP, GIDDI/*.DLL ...), upper-case keys with '/'
+   * The whole disk for this run (USERSTAR.BWD, EN0?STAR.BWD, MEK/*.MEK,
+   * INPUT.MAP, GAMEKEY.MAP, GIDDI/*.DLL ...), upper-case keys with '/' -
+   * tests' way of supplying files. Omitted, the mission reads the disk as
+   * the host has set it up (engine/dosFiles.ts).
    */
   looseFiles?: Map<string, Uint8Array>;
-  /** the rule toggles (mw2dif.cfg's record in the original); DEFAULT_RULES when omitted, null for the original's no-file zeroes */
+  /**
+   * The rule toggles to use instead of the disk's mw2dif.cfg; null for the
+   * original's no-file zeroes. Omitted: mw2dif.cfg from the disk - which
+   * the port's disk always has (simOptionsFileEnsure writes DEFAULT_RULES
+   * into a disk without one).
+   */
   rules?: SimRules | null;
-  /** the mission stream to load, e.g. 'AMY_SCN1' */
-  mission: string;
+  /** MW2.EXE's argv, as MECH2 spawns it (argv[0] 'mw2.exe', then the command line mw2prm.cfg carries) */
+  argv?: readonly string[];
+  /** the mission stream to load, e.g. 'AMY_SCN1', when there is no argv (the dev route and tests) */
+  mission?: string;
   /** the RNG seed (the original's is the argv pointer; see core/random.ts) */
   randomSeed?: number;
 }
 
 /**
- * main()'s start-up from project_open to the frame loop.
+ * main()'s start-up up to and including the launch screen
+ * (boot_load_launch_anims): returns the rest of it to run, or false when
+ * check_launched_by_shell says stop. The host shows the launch screen
+ * (sim/display/launchScreen.ts) between the two.
  *
  * @portOnly the sequence is main's (0x15a30); every call in it is a ported function or a stated gap
  */
-export function bootMission(opts: MissionBootOptions): boolean {
+export function bootMissionStart(opts: MissionBootOptions): (() => boolean) | false {
+  const steps = bootMissionStartSteps(opts);
+  return steps && (() => runBootSteps(steps));
+}
+
+/**
+ * bootMissionStart for a host that can wait: the rest of main's start-up as
+ * a generator, which in a network game yields while netplay_start's join
+ * waits on the other stations (sim/net/netplay.ts).
+ *
+ * @portOnly the sequence is main's (0x15a30)
+ */
+export function bootMissionStartSteps(opts: MissionBootOptions): NetBlocking<boolean> | false {
   setBootImage(opts.exe);
   resetAllGlobals();
   resetProvenanceSeen();
   installSystemErrorHandler(opts.exe, opts.ini ?? null);
   // project_open
   setMainProject(opts.prj);
-  setLooseFiles(opts.looseFiles ?? new Map());
-  setMekSource(opts.looseFiles ?? new Map());
-  setDosFiles(opts.looseFiles ?? new Map());
+  if (opts.looseFiles) {
+    setDosFiles(opts.looseFiles);
+    setOwnFiles(new Map());
+    setOverlayFiles(null);
+  }
+  const disk = dosDiskSnapshot();
+  setLooseFiles(disk);
+  setMekSource(disk);
   // main reads mw2snd.cfg before anything else it brings up
   soundConfigLoad();
   brightnessLoad();
-  simOptionsLoad(opts.rules === undefined ? DEFAULT_RULES : opts.rules);
+  // check_launched_by_shell: the scenario and the shell's options
+  let mission = opts.mission ?? '';
+  if (opts.argv) {
+    const r = checkLaunchedByShell(opts.argv);
+    if (!r.ok) return false;
+    mission = r.args;
+  }
+  // sim_options_load("mw2dif.cfg", &simOptions)
+  simOptionsLoad(opts.rules === undefined ? simOptionsFileEnsure() : opts.rules ? rulesToBytes(opts.rules) : null);
   audioTimerInit();
   videoInit();
+  bootLoadLaunchAnims();
+  return bootMissionFinishSteps(opts, mission);
+}
+
+/** Runs the rest of the start-up to its end; a join that would wait on the network is an error here. @portOnly */
+function runBootSteps(steps: NetBlocking<boolean>): boolean {
+  const r = steps.next();
+  if (!r.done) throw new Error('a network game waits on the other stations to join: boot it with bootMissionStartSteps');
+  return r.value;
+}
+
+/**
+ * main()'s start-up from project_open to the frame loop, all at once.
+ *
+ * @portOnly the sequence is main's (0x15a30): bootMissionStart then bootMissionFinish
+ */
+export function bootMission(opts: MissionBootOptions): boolean {
+  const finish = bootMissionStart(opts);
+  return finish ? finish() : false;
+}
+
+/** The rest of main's start-up, after the launch screen is up (its animation running meanwhile). */
+function* bootMissionFinishSteps(opts: MissionBootOptions, mission: string): NetBlocking<boolean> {
   // static_arena_init: the DTBL pre-pass sizes arenas; the port allocates on demand
   divergence('static_arena_init: no arena pre-pass; tables are allocated on demand', 'main');
   randomTablesInit(opts.randomSeed);
   brightnessTablesBuild();
   soundInitAll();
   vfxVideoSub010320();
+  netplayInit();
   simTablesReset();
   gamethingTableReset();
   destructiblesReset();
-  const ok = simLoadByName(opts.mission);
-  // project_scan_dev_dir: the loose files are the host's overlay
+  const ok = simLoadByName(mission);
+  projectScanDevDir();
   layoutRescaleAll();
   dayCycleInit();
   worldRecordsBuildAll();
   simPreloadData();
-  // sim_count_mechs_by_status, terrain_table_reset, camera_init, input_init: Phase 2
-  // sim_count_mechs_by_status: the allegiance tallies (0xa5668..) feed the results screen, Phase 6
-  divergence('sim_count_mechs_by_status is not ported (Phase 6: its tallies feed the results)', 'main');
+  simCountMechsByStatus();
   terrainTableReset();
   cameraInit();
   // game_boot_sub_015670 re-hooks the keyboard interrupt: the host's
@@ -143,13 +208,18 @@ export function bootMission(opts: MissionBootOptions): boolean {
   for (let i = 0; i < missionTables.missionTableCount; i++) objectiveTableStart(i);
   mechDispatchHook0();
   groupsStartMission();
-  // netplay_start (single player: nothing); ui_callbacks_sub_0196a0 is an empty function
+  if ((yield* netplayStart()) === 0) {
+    ui.quitRequested = 1;
+    ui.quitCountdown = 3;
+  }
+  // ui_callbacks_sub_0196a0 is an empty function
   musicStartMissionTrack();
   simClockReset();
   worldRecordsTick();
   vfxVideoSub0103c0();
   detailOptionsApplyThunk();
-  // hangAround's debug title (input_sub_048e80, hud_draw_title): not ported; game_boot_sub_0155a0 stops the launch animation, which the port has none of
+  // hangAround's debug title (input_sub_048e80, hud_draw_title): not ported
+  gameBootSub0155a0();
   screenFadeIn(0, defaultCanvas);
   return ok;
 }

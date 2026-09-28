@@ -5,7 +5,7 @@ import globals from 'globals';
 
 // Layer boundaries. The simulation must not know about three.js, React or the
 // DOM; render must not know about React. See README "Layout".
-const SIM_LAYERS = ['core', 'data', 'engine', 'sim', 'ai', 'mission', 'generated'];
+const SIM_LAYERS = ['core', 'data', 'engine', 'sim', 'ai', 'mission', 'shell', 'launcher', 'generated'];
 const noUi = [
   { group: ['three', 'three/*'], message: 'Simulation layers must not import three.js - go through a port (engine/ports.ts).' },
   { group: ['react', 'react-dom', 'react/*', 'react-dom/*'], message: 'Simulation layers must not import React.' },

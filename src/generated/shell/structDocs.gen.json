@@ -1,0 +1,405 @@
+{
+ "SimOptions": {
+  "doc": "",
+  "fields": {
+   "unlimitedAmmo": "MW2's consumers. SHELL: screen_debriefing does not advance missionIndex when it is 1",
+   "invulnerability": "MW2's consumers. SHELL: blocks mission advancement when 1, like unlimitedAmmo",
+   "splashDamage": "MW2's consumers",
+   "collisionDamage": "MW2's consumers. SHELL: blocks mission advancement when 0. So a result of 2 only counts toward the campaign with unlimited ammo off, invulnerability off and collision damage on",
+   "heatTracking": "MW2's consumers. SHELL: screen_debriefing awards rank points on a Trial only when it is 1, besides the three advancement conditions, and with it 0 the mission's honor is 0 ('The Keshik deems it Dishonorable to Alter Heat Tracking') and the Mission Honor / Difficulty Multiplier lines are not printed. Advancement (missionIndex + 1) does not test it",
+   "difficulty": "0..2, MW2's mech_config armour scaling. SHELL: star_files_write reads it from its own copy of the file. 0 moves the enemy AI skill rows one easier and 2 one harder"
+  }
+ },
+ "ProjectTypeSlot": {
+  "doc": "",
+  "fields": {
+   "directory": "the type's directory once loaded; project_resource_size and project_read_resource load all of them when it is null",
+   "field_0x4": "only project_file_close touches it (frees it when non-null)"
+  }
+ },
+ "UnplacedItem": {
+  "doc": "",
+  "fields": {
+   "item": "an item code (weapon id, 6001 + n heat sink, 7001 + n jump jet, ammo ...); -1 empty",
+   "criticals": "slots it still needs: the item type's criticals, designHeatSinkType for a heat sink, 1 for a jump jet or ammo"
+  }
+ },
+ "ProjectDirEntry": {
+  "doc": "",
+  "fields": {
+   "offset": "file offset of the record; project_read_resource seeks to offset + the type's recordPrefix",
+   "length": "the record's length including that prefix: project_resource_size returns length - recordPrefix"
+  }
+ },
+ "CareerMission": {
+  "doc": "",
+  "fields": {
+   "scenario": "the mission's *SCN1 stream name (yellSCN1 ...); main's state 0xb loads it for pilots_sub_0291b0. NULL in the closing 'Retired' row",
+   "isTrial": "1 on exactly the rows titled 'Trial 1'..'Trial 4' (missions 4, 8, 11, 15 of both careers); trials_sub_037a50 and screen_debriefing test it == 1",
+   "title": "the mission's display name (Pyre Light, ..., Trial 4, Retired)"
+  }
+ },
+ "EngineRow": {
+  "doc": "",
+  "fields": {
+   "rating": "10, 15 ... 400",
+   "mass": "hundredths of a ton, halved for XL (designEngineMass)",
+   "maker": "the ENGINE panel's Manufacturer ('Omni', 'GM', 'Pitban' ...)"
+  }
+ },
+ "DesignLocation": {
+  "doc": "",
+  "fields": {
+   "internal": "structureTable's value for the location (head 3); the save writes it to MechSection.internal",
+   "maxArmour": "front + rear may not exceed it: the ARMOR panel's +1 buttons test it, and the location rows print it as 'Head (9)'. The loader sets 2 x internal (head 9). (Was left unnamed: 'no reader has been found' until the ARMOR handlers were recovered.)",
+   "armourFront": "points on the front; saved to MechSection.armorFront, stripped by mechlab_trim_armour_to_tonnage",
+   "armourRear": "points on the rear, -1 for a location without rear armour (all but the torsos 1..3); the trim and the allocated sum skip -1"
+  }
+ },
+ "ScreenRow": {
+  "doc": "",
+  "fields": {
+   "buttons": "button_bar_create's defs",
+   "buttonCount": "button_bar_create's count (screen_ready_room uses it only for FREEBIRTHTOAD; screen_training adds buttons 1 .. count-1 after its intro)",
+   "background": "the DATABASE.MW2 item screen_load_background puts up",
+   "music": "-1 or an XMIDI item (36..41); no reader found"
+  }
+ },
+ "DeviceRecord": {
+  "doc": "",
+  "fields": {
+   "number": "the device's position in the giddi list, -1 none",
+   "name": "InputDevice.name; the name temp.map entries print"
+  }
+ },
+ "StarSlot": {
+  "doc": "",
+  "fields": {
+   "member": "which star member stands here (0 the player)",
+   "spriteX": "where star_slot_draw plays the member's chassis sprite; the double-click box is x +-50",
+   "spriteY": "the box is the 100 px above",
+   "panel": "which of the three panels (label position, CHANGE MECH button 6 + panel) shows this member"
+  }
+ },
+ "ProjectTypeEntry": {
+  "doc": "",
+  "fields": {
+   "tag": "the resource type ('TABL', 'MEK\\0' ...); project_find_type compares 4 bytes",
+   "dirOffset": "file offset of the type's directory; project_load_directories skips the type when 0",
+   "dirSize": "the directory's size: project_load_directories allocates and reads this much",
+   "field_0xc": "not read",
+   "recordPrefix": "bytes skipped at the start of each record (62, the DATA record header, in MW2.PRJ): added to the offset and taken off the length",
+   "field_0x16": "not read"
+  }
+ },
+ "ControlBinding": {
+  "doc": "",
+  "fields": {
+   "kind": "0 an axis control on an axis, 2 an axis control on two buttons (input minus, input2 plus in temp.map), 1 a button control; controls_clear_bindings gives controls 0..6 kind 0",
+   "device": "input_device_get index, -1 unbound",
+   "flags": "bits 0..2 the modifier (1 Ctrl, 2 Alt, 4 Shift); bit 31 a reversed axis; bits 4..6 only while controls_write_temp_map runs",
+   "flags2": "input2's flags, built and cleared by controls_write_temp_map",
+   "input": "axis or button number, -1 none",
+   "input2": "kind 2's second button, -1 none"
+  }
+ },
+ "ChassisEntry": {
+  "doc": "",
+  "fields": {
+   "animCode": "2 letters ('ds' Firemoth, 'kf', 'jn' ...): screen_mechlab builds the chassis animation name from it with the career's 'awomp%s' / 'ajfmp%s' / 'aiamp%s' format. Its reader appeared once the table was typed from 0x83678",
+   "prefix": "3 letters matched against a MEK name (star_set_member, star_bwd_add_mech)",
+   "streamName": "the chassis stream star_bwd_add_mech writes at GPS +0x24 (firemoth ...)",
+   "displayName": "drawn on the star screen (Firemoth, Kit Fox ...)",
+   "tonnage": "star_set_member refuses a chassis above the Keshik maximum by it, and the star screen shows it as '%d.00 T'. Resolves the 'no consumer' note from the first star-files increment",
+   "nameSound": "a DATABASE.MW2 WAV item (83..99; -1 for the Tarantula): screen_mechlab loads it as a sample (0xa6370) whenever NEXT / PREV CHASSIS changes the chassis. (Was '+0x10: no consumer read yet' when the table was typed 4 bytes late.)"
+  }
+ },
+ "ButtonDef": {
+  "doc": "",
+  "fields": {
+   "x0": "hotspot left (button_init +0x18 rectangle)",
+   "y0": "hotspot top",
+   "x1": "hotspot right, inclusive (button_bar_hit)",
+   "y1": "hotspot bottom, inclusive",
+   "labelX": "where the label is drawn",
+   "labelY": "likewise",
+   "label": "the label: '<' first = always drawn, else only on hover; NULL for none"
+  }
+ },
+ "ProjectDirectory": {
+  "doc": "",
+  "fields": {
+   "field_0x0": "not read (an INDX chunk header in MW2.PRJ - see MW2's ProjectDirectory)",
+   "entries": "indexed directly by resource id (declared [1]; ids start at 1)"
+  }
+ },
+ "StarMember": {
+  "doc": "",
+  "fields": {
+   "chassis": "index into chassisTable, set by star_set_member; star_files_write skips a member with -1",
+   "mekName": "star_set_member strncpys 8 and NUL-terminates at +0xc; star_bwd_add_mech writes it into the GPS chunk",
+   "pilotName": "star_set_member copies it; star_bwd_add_mech takes 15 characters"
+  }
+ },
+ "ProjectHeader": {
+  "doc": "",
+  "fields": {
+   "field_0x0": "not checked (project_file_open checks 'PROJ' at file offset 0, before this buffer)",
+   "length": "length - 8: project_file_open reads it at file offset 0x10 and allocates length + 8",
+   "field_0x8": "not read",
+   "typeCount": "bounds project_find_type's and project_load_directories' loops",
+   "types": "typeCount entries (declared [1])"
+  }
+ },
+ "MechSection": {
+  "doc": "",
+  "fields": {
+   "armorFront": "mechlab_load_mek sums it into designArmourPoints and copies it to designLocations[].armourFront; the save writes it back",
+   "armorRear": "the same, into armourRear for the three torsos (1..3)",
+   "internal": "not read by the shell: the save WRITES designLocations[].internal here, from structureTable",
+   "slots": "item codes; the loader copies them into designCriticals",
+   "numSlots": "how many of slots are used; the loader stops at it"
+  }
+ },
+ "ItemType": {
+  "doc": "",
+  "fields": {
+   "heat": "WEAPON INFO 'Heat'",
+   "damage": "WEAPON INFO 'Damage': '-' for 0, 'N/missile' when negative (-N)",
+   "range": "WEAPON INFO 'Range': '-' for -1",
+   "mass": "hundredths of a ton; summed into designWeaponMass. (Was described as the table at 0x7faa4 +0.)",
+   "criticals": "slots the item takes; WEAPON INFO 'Crit'",
+   "ammoPerTon": "non-zero for an ammo weapon (the adds test it); the value is the shots per ton (6 for LRM 20, 24 for LRM 5); WEAPON INFO 'Ammo'",
+   "name": "'LRM 20' ...; WEAPON INFO 'Type' and the WEAPONS TABLE rows"
+  }
+ },
+ "MechlabWidget": {
+  "doc": "",
+  "fields": {
+   "x": "-1 ends the table",
+   "y": "bit 31 set = relative (widget_panel_layout): previous y + ((y & 0xff0) >> 4) * previous h + (y & 0xf) - 0x80000022 two rows down plus 2 px. (Was 'how the panel reads that is not established'.)",
+   "w": "-1: taken from the drawn label's width (widget_panel_layout)",
+   "h": "-1: the drawn label's height, else the previous row's",
+   "textStyle": "passed as the label's last argument: 0xa5530 normal; draw functions swap in 0xa5630 for the selected row and 0xa5730 for Used Mass over the maximum",
+   "label": "the label the row's drawFn put up; mechlab_open_panel frees it and clears this",
+   "drawFn": "mechlab_* draw function",
+   "clickFn": "mechlab_* click function or NULL",
+   "value": "a label's char * (mechlab_widget_draw_label), a WEAPON INFO field index or a weapon type index, by drawFn - so an int, not a pointer",
+   "extra": "a second value, by row: the CUSTOMIZING summary's component rows hold the address of the panel they open (mechlab_open_panel reads it); the EQUIPMENT rows hold an item code (5000, 5401 ...). An int for the same reason as value - typed as a pointer, the item codes became references to 0x1388 ... (first draft of this increment)"
+  }
+ },
+ "OptionsWidget": {
+  "doc": "",
+  "fields": {
+   "x": "-1 ends the table",
+   "w": "the draw functions centre their text at x + w / 2",
+   "textStyle": "the mech lab's draw functions pass it as the label's last argument (0xa5530 normally; mechlab_draw_weapon_row swaps in 0xa5630 for the selected type); the options panel leaves it 0",
+   "drawFn": "options_draw_*",
+   "clickFn": "options_click_*; the options panel calls it on a left click inside the row",
+   "value": "the byte or dword it shows and changes: a simOptions or soundConfig field"
+  }
+ },
+ "MissionObjectiveRecord": {
+  "doc": "",
+  "fields": {
+   "succeeded": "MW2: the objective reached state 5. SHELL: the promotion count in screen_debriefing tests it == 1, and the objective list prints 0 'Failed', 1 'Successful', anything else 'Unknown'",
+   "category": "MW2: 1 Primary, 2 Secondary, 8 Return, else Tertiary. SHELL: the promotion count tests it == 1, so only primaries count. The debriefing's list labels 0 Default, 1 Primary, 2 Secondary, 4 Tertiary, 8 Return and anything else 'Unknown'; the honor lines score 1 (5000 unless one failed), 2 (1500 each) and 4 (500 each)",
+   "startedAt": "MW2's writer; no shell consumer read yet",
+   "changedAt": "MW2's writer. SHELL: screen_debriefing sorts the objective list by it, ascending (debriefing_objective_compare, 0x21e90), and prints it as '%02d:%02d' ((value / 60) % 60, value % 60); a negative value prints 'DNF' and sorts after every other. CORRECTION (S6 port): this said no shell consumer had been read",
+   "required": "MW2: Objective.isPrerequisite (the 'M' flag). No shell consumer read yet",
+   "text": "MW2 strcpys the objective text here, and a longer one runs on into the next record"
+  }
+ },
+ "PilotRecord": {
+  "doc": "",
+  "fields": {
+   "inUse": "1 for a registered pilot, 0 for an empty slot: screen_register opens a name entry on 0 and sets 1 for a new pilot; DELETE MECHWARRIOR sets 0",
+   "selected": "the pilot last chosen: screen_register sets it on the clicked slot and clears it on the other nine, and on entry takes the in-use record with it set as currentPilot. It is saved in MW2REG.CFG, so the choice persists",
+   "career": "which campaign: indexes careerMissionTables (trials_sub_037a50, screen_debriefing, which also tests it == 2 and never promotes that case; what a third value means is not established). 0 is Clan Wolf and 1 Jade Falcon: main's state 0xf plays mwoland for index 0 of the same table and mjfland otherwise. career_registry_load's reset gives slots 10..19 career 1 and slots 0..9 career 0",
+   "missionIndex": "the pilot's place in the campaign: careerMissionTables[career][missionIndex]. screen_debriefing adds 1 when the result is 2 and none of the three flags at 0x7d40c blocks it, and tests it against 0x10. 16 is past the last mission ('Retired')",
+   "rank": "rankTitles[rank] (the function at 0x1caa0): 0 Mechwarrior ... 8 Khan. screen_debriefing adds promotions to it and clamps it to 8",
+   "careerHonor": "screen_debriefing adds the mission's honor to it after a win (result 2) and prints it as 'Career Honor:'; orders_text_build substitutes it for \\H. screen_register starts a new pilot at 1000 * (1 + rand() / 32767), 1000..2000. (Was unnamed: 'a per-mission amount, which total not established')",
+   "killTally": "screen_debriefing adds MissionTallies.enemyMechsDestroyed (the TOTAL column, whoever made the kill) and playerKillsEnemyOther (the player's DIRECT non-mech kills) - two different columns, as the code has it. Read by hall_of_honor_screen (Kills / Hit %); this said 'no reader yet' before",
+   "enemyMechHits": "screen_debriefing adds MissionTallies.enemyMechHits. Read by hall_of_honor_screen (Kills / Hit %); this said 'no reader yet' before",
+   "shotsFired": "screen_debriefing adds MissionTallies.shotsFired. Read by hall_of_honor_screen (Kills / Hit %); this said 'no reader yet' before",
+   "pilotName": "main passes it as the player's pilot name to star_select_sub_03a8a0. It is also compared against cheat words: FREEBIRTHTOAD (trials_sub_037a50), FERRARI (0x1c080), NOHERCSALLOWED (screen_debriefing). 16 bytes because +0x38 is a separate field; how long the entry screen allows is not established"
+  }
+ },
+ "SoundConfig": {
+  "doc": "",
+  "fields": {
+   "sfxVolume": "slider 2 (y 152), 0..0x10000; MW2's sfxVolumeScale",
+   "voiceVolume": "slider 3 (y 176), 0..0x10000; MW2's voiceVolumeScale",
+   "musicVolume": "slider 1 (y 128), 0..0x10000; MW2's cdVolumeScale",
+   "objectTextures": "ON / OFF",
+   "terrainTextures": "ON / OFF",
+   "displayDetail": "HIGH / LOW",
+   "objectDensity": "HIGH / LOW",
+   "explosionChunks": "ON / OFF",
+   "videoDriver": "'' (320x200), 'vesa480.dll' (640x480) or 'vesa768.dll' (1024x768); MW2's game_boot copies 12 characters into videoDriverName"
+  }
+ },
+ "AnimSlot": {
+  "doc": "",
+  "fields": {
+   "smk": "the open Smacker movie (anim_open_smk); its header supplies width, height and frames",
+   "shapes": "the loaded VFX shape table (anim_open_shp); one shape per frame",
+   "frameBuffer": "a Smacker slot's decoded frame, which anim_update_all draws; anim_free frees it",
+   "flags": "anim_start's flags | 0x80000100. Read bits: 0x80000000 active (anim_start, anim_start_free); 0x80 anchor at the bottom-centre; 0x40 Smacker open flag 0x20; 0x10 restore the background when stopped; 0x02 no frame buffer; 0x10000000 apply the movie palette. From anim_update_all: 0x40000000 free after this pass; 0x20000000 follow the mouse; 0x100 changed since last drawn (picks one of two draw calls); 0x20 hidden; 0x10 drawn last pass, so its old rectangle is restored when it moves, changes frame or hides (REFINES 'restore the background when stopped'); 8 loop at the end; 4 hold the last frame; 1 stopped (set at the end, or by anim_set_flags)",
+   "x": "anim_start's x, moved left by width / 2 under flag 0x80",
+   "y": "anim_start's y, moved up by the height under flag 0x80",
+   "width": "read back for the 0x80 anchoring",
+   "height": "read back for the 0x80 anchoring",
+   "prevX": "where it was drawn last pass: the rectangle anim_update_all restores",
+   "prevFrame": "the frame drawn last pass; anim_set_frame sets -1 to force a redraw",
+   "frame": "the current frame",
+   "frameCount": "the end test for looping, holding or stopping",
+   "frameInterval": "1000 / rate (anim_start; rate 0 means 10), added to nextFrameTime",
+   "nextFrameTime": "a shape animation advances when timer_read() reaches it"
+  }
+ },
+ "TextLabel": {
+  "doc": "",
+  "fields": {
+   "font": "the font holder: text_width and the character drawer take it",
+   "baseColour": "restored into currentColour at a space or a backslash code",
+   "currentColour": "\\A sets it to 0x84240 (textRemap1, ink -> colour 1) for one word. Which draw call reads it has not been seen - the character drawer is passed only font, x and y",
+   "typewriter": "1: text_label_redraw replays character by character; otherwise it draws the whole string at once",
+   "text": "the label's own copy of its text, codes included",
+   "height": "font +0x40c",
+   "width": "text_width at creation, widened by typing to the pen's reach",
+   "x": "left edge; the origin for \\G columns and tab stops",
+   "y": "baseline passed to the drawer",
+   "done": "set when typing reaches the end; text_label_type_step then returns 1",
+   "penX": "where the next character is drawn; \\G, \\B and \\T move it",
+   "charIndex": "the next character to type; -1 before the first"
+  }
+ },
+ "InputDevice": {
+  "doc": "",
+  "fields": {
+   "name": "the DLL's file name without '.dll' ('keyboard' ...)",
+   "driver": "the loaded DLL; its function at +8 fills +0xd onwards",
+   "displayName": "the device lists' text",
+   "axisTitles": "what the Directional list shows",
+   "axisNames": "what a binding cell shows; empty or '*'-prefixed axes are skipped",
+   "buttonTitles": "what the Buttons list shows",
+   "buttonNames": "what a binding cell shows; '*'-prefixed buttons cannot be bound"
+  }
+ },
+ "Mouse": {
+  "doc": "",
+  "fields": {
+   "cursor": "mouse_init's fourth argument: main passes DATABASE.MW2 item 0x19 (VFX shapes), which shell_input_sub_01b010 puts up as the pointer",
+   "driver": "the video driver object (main's videoDriver): mouse_update presents it (video_driver_sub_03e1f0) and draws the readout through it",
+   "font": "a FontHolder (main passes uiFont); the readout draws with its +0x408 drawFont and restores with its +0x40c height",
+   "readoutWidth": "the width of the last '(%d,%d)' readout, restored from the background before the next is drawn; 0 when none is up",
+   "leftClicked": "mouse_update: 1 on the frame the left button goes down; mouse_left_clicked returns it",
+   "rightClicked": "the same for the right button; mouse_right_clicked returns it",
+   "middleClicked": "the same for the middle button",
+   "doubleClicked": "mouse_update: 1 for a left click within 201 timer_read units of the previous one; mouse_double_clicked returns it",
+   "lastClickTime": "timer_read() at the last left click that was not a double click",
+   "x": "pointer x from mouse_read_state; every screen passes it to button_bar_hit",
+   "y": "pointer y, likewise",
+   "leftDown": "held now (the event handler's bit 0); mouse_update edges it into leftClicked",
+   "rightDown": "held now (bit 1); also shows the developer coordinate readout",
+   "middleDown": "held now (bit 2)",
+   "present": "set by mouse_init when the driver reports a mouse; gates every driver call"
+  }
+ },
+ "MissionTallies": {
+  "doc": "",
+  "fields": {
+   "playerKillsEnemyMech": "MW2 mech_on_destroyed: killCreditMech is the player, a mech, allegiance 1. The debriefing's 'Enemy Mechs Destroyed' DIRECT column",
+   "shotsFired": "MW2 mech_weapon_fire, once per shot by the player's mech with ammo left. Hit Percentage's divisor",
+   "enemyMechHits": "MW2 mech_apply_damage: damage credited to the player on an allegiance-1 mech. Hit Percentage's dividend",
+   "enemyMechsDestroyed": "MW2 mech_on_destroyed: every allegiance-1 mech destroyed, by anyone. The TOTAL column; 250 honor each",
+   "wingmenDestroyed": "MW2 mech_on_destroyed: a mech of the player's group destroyed (not ejected, which is +0x36). 'Wingman Deaths', -4000 honor each after a win",
+   "playerKillsEnemyOther": "MW2 mech_on_destroyed: the player killed an allegiance-1 NON-mech (vehicle, aircraft, target). 'Enemy Vehicles Destroyed' DIRECT column",
+   "enemyOthersDestroyed": "MW2 mech_on_destroyed: every allegiance-1 non-mech destroyed, by anyone. The vehicles TOTAL column; 125 honor each"
+  }
+ },
+ "StarRecord": {
+  "doc": "",
+  "fields": {
+   "formation": "formationNames[formation] in star_limits_show; the star screen steps it +1/-1",
+   "selected": "the member star_set_member edits when given index < 0",
+   "maxMechs": "printed as 'Maximum Mechs in current Star'",
+   "memberCount": "bounds star_files_write's loop and the mass sum; star_set_member drops the last member",
+   "maxTonnage": "the Keshik-defined maximum: star_set_member refuses a heavier chassis; printed too",
+   "members": "3 x 0x24 fills the record exactly"
+  }
+ },
+ "MPackDb": {
+  "doc": "",
+  "fields": {
+   "path": "mpack_db_open copies the path here and fopens it",
+   "file": "the open stream; every reader seeks and reads it",
+   "count": "the archive's leading int32: the number of items",
+   "entries": "collection of 8-byte {offset, size}; every reader takes entry id - 1 and checks id against the collection's count"
+  }
+ },
+ "MenuItem": {
+  "doc": "",
+  "fields": {
+   "x0": "hit box, tested inclusively",
+   "textX": "the centre x minus half the text width",
+   "textY": "the centre y minus half the font height",
+   "pressed": "message_box: 1 while the button is held down under the pointer; picks the button shape drawn"
+  }
+ },
+ "ProjectFile": {
+  "doc": "",
+  "fields": {
+   "handle": "the open file every seek and read goes through",
+   "inUse": "project_file_open refuses while it is set and sets it; project_file_close clears it",
+   "header": "the loaded header, from projectAllocHook",
+   "field_0xa": "no reader or writer found",
+   "types": "one slot per header type, by project_find_type's index",
+   "name": "the path project_file_open opened (strncpy 0x20); project_file_close clears it"
+  }
+ },
+ "PrmBlock": {
+  "doc": "",
+  "fields": {
+   "resumeState": "prm_save's nextState; prm_load hands it to main as the screen state to resume (-3 quit)",
+   "career": "main's career variable: 0 Wolf, 1 Jade Falcon, 2 Trial of Grievance",
+   "pilotAccepted": "main's byte, stored zero-extended: 1 once screen_register's ACCEPT (or a double-click on an occupied slot) picks a pilot; screen_register clears it on entry and main clears it on the title screen and a fresh start. screen_career reads it: 0 plays aworgstr/ajfrgstr and goes straight to the register (0xc)",
+   "currentStarIsPlayer": "stars_save_to_prm: currentStar == &playerStar; stars_restore_from_prm sets currentStar back from it",
+   "savedPlayerStar": "playerStar, copied whole by stars_save_to_prm and back by stars_restore_from_prm",
+   "savedOpponentStar": "opponentStar, likewise",
+   "grievanceScenario": "screen_grievance's index into grievanceScenarios: it starts from this value (0 when entered from the title, state 8), steps it with a button and stores it back on leaving",
+   "pilotSlot": "currentPilot's index in pilotRegistry, -1 for none; prm_load turns it back into currentPilot",
+   "commandLine": "MW2.EXE's command line, which MECH2 spawns it with: prm_save's string + ' -b=' + the name at 0x8395c, then star_launch_prepare appends ' -of=<player formation>' and, with an opponent star, ' -oe=<its formation>'. prm_load cuts it at the first character <= ' '"
+  }
+ },
+ "FontHolder": {
+  "doc": "",
+  "fields": {
+   "font": "the DATABASE.MW2 font item; text_width measures with it",
+   "drawFont": "the same font again; every caller passes it to screen_draw_text",
+   "height": "vfx_font_height(font); shell_menu and message_box centre text on it",
+   "driver": "the video driver it was made for"
+  }
+ },
+ "BwdBuffer": {
+  "doc": "",
+  "fields": {
+   "tag": "'BWD'",
+   "streamLength": "set to bwdLength just before the file is written; MW2's ProjectItem.streamLength, where project_next_chunk stops",
+   "maxChunkSize": "the largest chunk appended (bwdMaxChunk); MW2's project_next_chunk raises system_error(0x2c) for any chunk larger than this, so it must be kept up to date",
+   "chunks": "REV, DTBL, then the file's own chunks (GPS, or instmap's BMPJ / BMID)"
+  }
+ },
+ "MissionRecord": {
+  "doc": "",
+  "fields": {
+   "magic": "'MW2M'",
+   "objectiveCount": "how many of objectives[] are filled: MW2 counts the listed ones. SHELL: bounds every loop over objectives",
+   "startTime": "MW2: the player's objective table's start time. No shell consumer read yet",
+   "decidedAt": "MW2: when the table's result was decided. No shell consumer read yet",
+   "result": "MW2: 2 successful, 3 failed, 4 time exceeded, 0 undecided. SHELL: advancement and promotion require 2; the NOHERCSALLOWED path overwrites it with 2 and another path with 3",
+   "objectives": "48 x 0x34 fills the record exactly: MW2's objective table holds 48"
+  }
+ }
+}

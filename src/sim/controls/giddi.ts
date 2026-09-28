@@ -35,6 +35,10 @@ export interface GiddiRecord {
   analogCount: number;
   /** +0x04 */
   buttonCount: number;
+  /** +0x0c: the device's name for people ('Keyboard'); MW2SHELL.EXE's device lists show it (InputDevice.displayName) */
+  displayName: string | null;
+  /** +0x1c: the analog channels' long names; the shell's Directional list shows them (InputDevice.axisTitles) */
+  analogTitles: (string | null)[] | null;
   /** +0x20: names input_bind_channel matches against */
   analogNames: (string | null)[] | null;
   /** +0x28 */
@@ -44,7 +48,7 @@ export interface GiddiRecord {
 }
 
 export function emptyRecord(): GiddiRecord {
-  return { analogCount: 0, buttonCount: 0, analogNames: null, buttonDescriptions: null, buttonNames: null };
+  return { analogCount: 0, buttonCount: 0, displayName: null, analogTitles: null, analogNames: null, buttonDescriptions: null, buttonNames: null };
 }
 
 export interface GiddiDriver {
@@ -75,6 +79,12 @@ class ModuleReader {
     for (let i = a; i < this.m.block.length && this.m.block[i] !== 0; i++) s += String.fromCharCode(this.m.block[i]!);
     return s;
   }
+  /** the string the relocated dword at `immAt` (an instruction operand) points at */
+  ptrStr(immAt: number): string {
+    const p = this.m.fixups.get(immAt);
+    if (p === undefined) throw new Error(`GIDDI driver: no relocation at 0x${immAt.toString(16)}`);
+    return this.str(p);
+  }
   /** `count` pointers from the table whose address is the relocated dword at `immAt` (an instruction operand) */
   names(immAt: number, count: number): (string | null)[] {
     const table = this.m.fixups.get(immAt);
@@ -94,6 +104,27 @@ class ModuleReader {
  * 128-word ring (0xb77..0xc77) that readKey drains. poll copies the map and
  * adds three synthetic buttons: Shift (0x76), Control (0x77) and Alt (0x78).
  */
+/**
+ * The keyboard's typematic setting (repeat delay and period) as BIOS int
+ * 16h AX=0305h leaves it; the host repeats a held key at this rate. At
+ * boot it is the BIOS default, 500 ms then 10.9 a second (rate 0x0b).
+ *
+ * @portOnly the hardware below the driver
+ */
+export const typematic = { delayMs: 500, periodMs: (8 + 3) * 2 * 4.17 };
+
+/**
+ * int 16h AX=0305h, set typematic rate and delay: BH the delay in 250 ms
+ * steps (0..3), BL the rate (0..0x1f), a period of (8 + (BL & 7)) *
+ * 2^((BL >> 3) & 3) * 4.17 ms - 0 is 30 a second, 0x1f 2 a second.
+ *
+ * @portOnly the BIOS service KEYBOARD.DLL calls
+ */
+export function biosSetTypematic(bh: number, bl: number): void {
+  typematic.delayMs = ((bh & 3) + 1) * 250;
+  typematic.periodMs = (8 + (bl & 7)) * (1 << ((bl >> 3) & 3)) * 4.17;
+}
+
 export class KeyboardDriver implements GiddiDriver {
   readonly kind = 'keyboard';
   private readonly r: ModuleReader;
@@ -221,17 +252,28 @@ export class KeyboardDriver implements GiddiDriver {
     }
   }
 
-  /** +0x00 (0x890 -> 0xfe6): clears the key map and hooks interrupt 9 */
+  /**
+   * +0x00 (0x890 -> 0xfe6): clears the key map, sets the slowest typematic
+   * rate - 250 ms, then 2 a second (0x102e: int 16h AX=0305h, BH 0, BL
+   * 0x1f), so a held key barely feeds the keystroke ring - and hooks
+   * interrupt 9
+   */
   install(): number {
     this.down.fill(0);
+    biosSetTypematic(0, 0x1f);
     return 0;
   }
-  /** +0x04 (0x8b0 -> 0x104e): unhooks it */
-  remove(): void {}
+  /** +0x04 (0x8b0 -> 0x104e): unhooks it and sets the typematic rate back to 500 ms, rate 9 (0x1067) */
+  remove(): void {
+    biosSetTypematic(1, 9);
+  }
   /** +0x08 (0x8d0) */
   init(rec: GiddiRecord): number {
     rec.analogCount = 0;
     rec.buttonCount = 0x79;
+    // 0x8e7: +0xc -> 'Keyboard'; +0x1c = 0 (no analog titles); +0x20 is not written
+    rec.displayName = this.r.ptrStr(0x8ea);
+    rec.analogTitles = null;
     rec.buttonDescriptions = this.r.names(0x914, 0x79);
     rec.buttonNames = this.r.names(0x91b, 0x79);
     return 0;
@@ -330,6 +372,9 @@ export class MouseDriver implements GiddiDriver {
   init(rec: GiddiRecord): number {
     rec.analogCount = 2;
     rec.buttonCount = 3;
+    // 0x2f7: +0xc -> 'Mouse'; 0x313: +0x1c -> the axes' long names
+    rec.displayName = this.r.ptrStr(0x2fa);
+    rec.analogTitles = this.r.names(0x316, 2);
     rec.analogNames = this.r.names(0x324, 2);
     rec.buttonDescriptions = this.r.names(0x32b, 3);
     rec.buttonNames = this.r.names(0x332, 3);

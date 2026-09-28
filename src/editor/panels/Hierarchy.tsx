@@ -88,7 +88,7 @@ function roots(): Item[] {
   items.push({
     key: 'globals',
     label: 'Globals',
-    children: () => globalGroups().map((g) => ({ key: `g:${g.name}`, label: g.name, target: g.state })),
+    children: () => globalGroups().map((g) => ({ key: `g:${g.target}:${g.name}`, label: g.target === 'mw2' ? g.name : `${g.target}: ${g.name}`, target: g.state })),
   });
   return items;
 }

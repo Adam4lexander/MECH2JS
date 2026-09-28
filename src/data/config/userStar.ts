@@ -12,15 +12,21 @@
  *             objective mask 0x0006, flags 0x0400 - the same values as the
  *             player GPS of MW2.PRJ's own star streams (AMY_STAR, KIM_STAR ...)
  *   starmate  group 0, leader 0, side 2 (the group's allegiance), AI
- *             parameters 0, mask 0x0006, flags 0x0400 - as the shell wrote
- *             'Friend 1' in this install's USERSTAR.BWD; MW2.PRJ has no
- *             friendly starmate to compare with, and the shell's rule is not
- *             decompiled
+ *             parameters 0, mask 0x0006, flags 0x0400
+ *
+ * These are the shell's own rules: its writer is ported as
+ * shell/handoff/starFiles.ts (star_bwd_add_mech, star_files_write), which
+ * the game's front end and the dev route use. This builder stays for the dev
+ * picker's own star, which is freer than the shell's in two ways: any 'Mech
+ * the missions field (not only the shell's 18-row chassisTable, with its
+ * Keshik tonnage cap), and names up to 21 characters (the shell cuts them at
+ * 15). test/sim/missionSetup.test.ts checks it against the install's
+ * USERSTAR.BWD.
  *
  * The chunk is 0x5c bytes, so the name the game reads at +0x4c (22 bytes)
  * runs into the next chunk; the shell leaves +0x4c.. zero, so it reads empty.
  *
- * @portOnly
+ * @portOnly the dev picker's star builder (the shell's writer is shell/handoff/starFiles.ts)
  */
 import type { MechChoice } from '../catalog/mechs.ts';
 

@@ -1,0 +1,1477 @@
+{
+ "optionsTextOn": {
+  "address": "0x75b38",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextOff": {
+  "address": "0x75b3c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextOnByte": {
+  "address": "0x75b41",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextOffByte": {
+  "address": "0x75b45",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextDishonorableSet": {
+  "address": "0x75b4a",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextOffSet": {
+  "address": "0x75b5c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextOffClear": {
+  "address": "0x75b61",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextDishonorableClear": {
+  "address": "0x75b66",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextHigh": {
+  "address": "0x75b78",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextLow": {
+  "address": "0x75b7e",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsText320x200": {
+  "address": "0x75b83",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsText640x480": {
+  "address": "0x75b8c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsText1024x768": {
+  "address": "0x75b95",
+  "kind": "raw",
+  "doc": ""
+ },
+ "videoDriverVesa480": {
+  "address": "0x75b9f",
+  "kind": "raw",
+  "doc": ""
+ },
+ "videoDriverVesa768": {
+  "address": "0x75bab",
+  "kind": "raw",
+  "doc": ""
+ },
+ "videoDriverNone": {
+  "address": "0x75bb7",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsMovieName": {
+  "address": "0x75bf0",
+  "kind": "raw",
+  "doc": "shell_menu's COMBAT VARIABLES: movie_open_background(..., 0x75bf0, 120, 4)."
+ },
+ "brf2Suffix": {
+  "address": "0x7688c",
+  "kind": "raw",
+  "doc": "mission_brf2_load: appended to the scenario name's first 4 letters (yellscn1 -> yellbrf2)"
+ },
+ "optionLaunchAnim": {
+  "address": "0x77b76",
+  "kind": "raw",
+  "doc": "String constants the handoff code copies (xrefs in prm_save, star_set_member, star_launch_prepare)."
+ },
+ "stdSuffix": {
+  "address": "0x77df0",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionFormationPlayer": {
+  "address": "0x77df7",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionFormationEnemy": {
+  "address": "0x77dfd",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mainProject": {
+  "address": "0x7988c",
+  "kind": "int",
+  "doc": "project_open: the handle res_cache_proj_handler returns for MW2.PRJ; every cache_load_resource from the project passes it (MW2's mainProject)"
+ },
+ "projectAllocHook": {
+  "address": "0x79894",
+  "kind": "raw",
+  "doc": ""
+ },
+ "projectFreeHook": {
+  "address": "0x79898",
+  "kind": "raw",
+  "doc": ""
+ },
+ "wasmKeywords": {
+  "address": "0x798a0",
+  "kind": "raw",
+  "doc": ""
+ },
+ "wasmTags": {
+  "address": "0x799b4",
+  "kind": "raw",
+  "doc": ""
+ },
+ "inputDeviceCount": {
+  "address": "0x7a164",
+  "kind": "int",
+  "doc": ""
+ },
+ "inputDeviceCapacity": {
+  "address": "0x7a168",
+  "kind": "int",
+  "doc": "S8 port: how many InputDevice records inputDevices has room for - input_devices_grow adds 50 (0xcb2 bytes) and returns it, input_devices_load grows when inputDeviceCount passes it, input_devices_free zeroes it."
+ },
+ "inputDevices": {
+  "address": "0x7a16c",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "chunkTags": {
+  "address": "0x7a688",
+  "kind": "raw",
+  "doc": "The BWD chunk tags packed 4 bytes apart, from 'BWD' up to briefingTags (which continues the same run): BWD, REV, DTBL, PLNT, ... BMPJ (+0x38), BMID (+0x3c), ... GPS (+0xd0). bwd_build_begin copies BWD/REV/DTBL from here, instmap_write BMPJ/BMID, star_bwd_add_mech GPS."
+ },
+ "briefingTags": {
+  "address": "0x7a780",
+  "kind": "raw",
+  "doc": ""
+ },
+ "enemySkillTable": {
+  "address": "0x7a7a8",
+  "kind": "raw",
+  "doc": "Right after briefingTags: 9 rows of 5 shorts, indexed by skill in star_bwd_add_mech and copied to GPS +0x10 (MW2's gpsParams[0..4])."
+ },
+ "opponentStarSkill": {
+  "address": "0x7a804",
+  "kind": "int",
+  "doc": "mission_brf2_load: the second SDSC chunk's +8, the opponent star's skill. star_files_write starts the enemy files' skill rows at this - 2."
+ },
+ "insigniaNames": {
+  "address": "0x7a808",
+  "kind": "raw",
+  "doc": "instmap_write: the six Clans' insignia bitmap names (l1wolfcl, l1jadefn, l1gostbr, l1smojag, l1novact, l1steelv). Indexed by its two arguments; each name is looked up in TABL 8 and written as a BMPJ. The -1 after them (0x7a820) is not a terminator: it is controlsSelectedControl's initial value (a 7-entry array here made controls.c read it as insigniaNames[6])."
+ },
+ "controlsSelectedControl": {
+  "address": "0x7a820",
+  "kind": "int",
+  "doc": "the selected cell: a control (-1 none) and its column (0 input, 1 input2)"
+ },
+ "controlsDevice": {
+  "address": "0x7a824",
+  "kind": "int",
+  "doc": "the device whose axes and buttons the right-hand lists show"
+ },
+ "controlNames": {
+  "address": "0x7a828",
+  "kind": "raw",
+  "doc": "display names ('Throttle ' .. 'Next Nav Point', 6 empty) and the sim's names for temp.map ('throttle', 'legs_pan_delta' .. 'advance_nav')"
+ },
+ "controlMapNames": {
+  "address": "0x7a8bc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "controlsBindings": {
+  "address": "0x7a950",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "controlsConfigSlot": {
+  "address": "0x7a954",
+  "kind": "int",
+  "doc": ""
+ },
+ "controlsKeyboardDevice": {
+  "address": "0x7a958",
+  "kind": "int",
+  "doc": "S8 port: the keyboard's device number. controls_screen sets it to -1 (the image's value), then to the index of the device named 'keyboard' ('Error: keyboard.dll not found' while still < 0); controls_write_temp_map's fixed legs_pan_minus / legs_pan_plus lines (GreyDelete, GreyPageDown) are bound to that device."
+ },
+ "configPageNames": {
+  "address": "0x7a95c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "axisDirectionNames": {
+  "address": "0x7a96c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "modifierNames": {
+  "address": "0x7a98c",
+  "kind": "raw",
+  "doc": "indexed by flags & 7, which only takes 0, 1, 2, 4 (index 3 is '~--' too)"
+ },
+ "configSlotNames": {
+  "address": "0x7a9a0",
+  "kind": "raw",
+  "doc": ""
+ },
+ "controlsBindingPanel": {
+  "address": "0x7a9b4",
+  "kind": "raw",
+  "doc": ""
+ },
+ "controlsDevicePanel": {
+  "address": "0x7c6c0",
+  "kind": "raw",
+  "doc": "controls_screen: the device-selection panel (20 rows) and the GAME CONTROLS binding panel (168 rows), both widget_panel_layout tables."
+ },
+ "creditsLines": {
+  "address": "0x7ca80",
+  "kind": "raw",
+  "doc": "credits_screen's lines: '<' heading, '>' job title, '~' heading (the date check's replacement), else a name; NULL is a blank line."
+ },
+ "difficultyNames": {
+  "address": "0x7d090",
+  "kind": "raw",
+  "doc": "---- options (S8) ---- options_draw_difficulty: label_create_under(font27, ..., [0x7d090 + byte * 4]) - '~EASY', '~MEDIUM', '~HARD' for simOptions.difficulty 0..2. Nothing bounds the byte: 3 would read optionsWidgets' first dword (x = 393) as the pointer."
+ },
+ "optionsWidgets": {
+  "address": "0x7d09c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "midiEnabled": {
+  "address": "0x7d37c",
+  "kind": "int",
+  "doc": "Set by sound_system_init's caller: gates AIL_install_MDI_INI and main's music. main clears it (with 0x7d380/0x7d384) unless argc is 2."
+ },
+ "digitalSoundEnabled": {
+  "address": "0x7d380",
+  "kind": "int",
+  "doc": "The other start-up switches: each 1 in the data, and all cleared by main unless the shell was started with one argument (MECH2's way).   digitalSoundEnabled: sound_system_init keeps the digital driver for effects     only while it is set.   movieSoundEnabled: main sets the Smacker open flags (0x91194) to 0xfe00 - the     shape of Smacker's audio-track bits - when it is set, else 0; and     sound_system_init clears it when the digital driver cannot be installed. So     presumably movie audio; the Smacker flag values are not checked here.   simLaunchEnabled: main's state 10 runs the sim only while it is set."
+ },
+ "movieSoundEnabled": {
+  "address": "0x7d384",
+  "kind": "int",
+  "doc": ""
+ },
+ "simLaunchEnabled": {
+  "address": "0x7d388",
+  "kind": "int",
+  "doc": ""
+ },
+ "moviesEnabled": {
+  "address": "0x7d38c",
+  "kind": "int",
+  "doc": "movie_play does nothing (returns 0) unless it is set; 1 in the image, and no writer found. main also tests it once at start-up (clib_sub_04b794)."
+ },
+ "cdPath": {
+  "address": "0x7d390",
+  "kind": "raw",
+  "doc": "'X:\\' - the CD drive's letter first (MSCDEX), '\\0' without one; movie_play and the anim openers prefix it for 'X:\\smk\\name.smk'."
+ },
+ "rankTitles": {
+  "address": "0x7d394",
+  "kind": "raw",
+  "doc": ""
+ },
+ "clanNames": {
+  "address": "0x7d3b8",
+  "kind": "raw",
+  "doc": "Indexed by PilotRecord.career in hall_of_honor_screen: Wolf, Jade Falcon, Ghost Bear, Smoke Jaguar, Nova Cat, Steel Vipers. Only 0 and 1 occur in the registry."
+ },
+ "soundConfig": {
+  "address": "0x7d3d0",
+  "kind": "raw",
+  "doc": ""
+ },
+ "simOptions": {
+  "address": "0x7d40c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "tabStops": {
+  "address": "0x7d414",
+  "kind": "raw",
+  "doc": "text_label_type_char's \\T: the pen moves to the first of these past its offset from the label's x - 0, 36, 72 ... 612, then 640 (19 ints; the loop stops at 0x4c bytes)."
+ },
+ "archiveNames": {
+  "address": "0x7d464",
+  "kind": "raw",
+  "doc": "screen_archive: (&archiveNames)[career], the archive archive_page_load opens - ARCHWO.MW2 (Wolf), ARCHJF.MW2 (Jade Falcon)."
+ },
+ "formationTitles": {
+  "address": "0x7d470",
+  "kind": "raw",
+  "doc": "grievance_draw_formations reads entry formation * 2: the display names 'Echelon Left' ... 'Wedge'. The odd entries (0x7d4b4, 0x7d4cc ... then 0x11d) are not read by it; what they are is not established."
+ },
+ "careerButtonsWolf": {
+  "address": "0x7d52c",
+  "kind": "raw",
+  "doc": "The button tables those rows point at (listing/screen_buttons.txt, per career)."
+ },
+ "registerButtonsWolf": {
+  "address": "0x7d5b8",
+  "kind": "raw",
+  "doc": ""
+ },
+ "trainingButtonsWolf": {
+  "address": "0x7d7cc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "readyRoomButtonsWolf": {
+  "address": "0x7d890",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSelectButtonsWolf": {
+  "address": "0x7dc64",
+  "kind": "raw",
+  "doc": ""
+ },
+ "careerButtonsJadeFalcon": {
+  "address": "0x7de94",
+  "kind": "raw",
+  "doc": ""
+ },
+ "registerButtonsJadeFalcon": {
+  "address": "0x7df20",
+  "kind": "raw",
+  "doc": ""
+ },
+ "trainingButtonsJadeFalcon": {
+  "address": "0x7e134",
+  "kind": "raw",
+  "doc": ""
+ },
+ "readyRoomButtonsJadeFalcon": {
+  "address": "0x7e1f8",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSelectButtonsJadeFalcon": {
+  "address": "0x7e5cc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "titleButtons": {
+  "address": "0x7e7fc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "grievanceButtons": {
+  "address": "0x7e8a4",
+  "kind": "raw",
+  "doc": "screen_grievance's button_bar_create(..., 0x7e8a4, 0x19): 0 LAUNCH, 1 EXIT, 2 the next scenario, then two mirrored panels (3..13 the player's star, 14..24 the opponent's): member + (3..5 / 14..16), formation +, member - (7..9 / 18..20), formation -, insignia, MECH LAB, STAR CONFIG. Buttons 3..5 and 14..16 also give the member labels' positions (their labelX / labelY)."
+ },
+ "shellMenuItems": {
+  "address": "0x7eefc",
+  "kind": "raw",
+  "doc": "shell_menu's six labels: NEW ALLEGIANCE, COMBAT VARIABLES, COCKPIT CONTROLS, HALL OF HONOR, THE KESHIK, FLEE TO DOS."
+ },
+ "careerMissionsWolf": {
+  "address": "0x7ef14",
+  "kind": "raw",
+  "doc": ""
+ },
+ "careerMissionsJadeFalcon": {
+  "address": "0x7efb0",
+  "kind": "raw",
+  "doc": ""
+ },
+ "careerMissionTables": {
+  "address": "0x7f04c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "trainingMissionsWolf": {
+  "address": "0x7f054",
+  "kind": "raw",
+  "doc": ""
+ },
+ "trainingMissionsJadeFalcon": {
+  "address": "0x7f06c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "trainingMissionTables": {
+  "address": "0x7f084",
+  "kind": "raw",
+  "doc": ""
+ },
+ "careerScreenRows": {
+  "address": "0x7f08c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "registerScreenRows": {
+  "address": "0x7f0bc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "archiveScreenRows": {
+  "address": "0x7f0ec",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSelectScreenRows": {
+  "address": "0x7f11c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "readyRoomScreenRows": {
+  "address": "0x7f14c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "debriefingScreenRows": {
+  "address": "0x7f17c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "debriefingAftermathRows": {
+  "address": "0x7f1ac",
+  "kind": "raw",
+  "doc": "AFTERMATH's viewer: +0 / +4 go to archive_page_load (0x24f08), which pages through the debriefing's remaining pages, as briefingSituationRows does for SITUATION."
+ },
+ "briefingScreenRows": {
+  "address": "0x7f1dc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "briefingSituationRows": {
+  "address": "0x7f20c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "trainingScreenRows": {
+  "address": "0x7f23c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabScreenRows": {
+  "address": "0x7f26c",
+  "kind": "raw",
+  "doc": "screen_mechlab's rows: row[career].background to screen_load_background (0x33b00) and +0 / +4 to button_bar_create (0x33b19, 0x33b20): 11 buttons (EXIT LAB .. DELETE, listing/screen_buttons.txt); career 2 reuses the Wolf buttons with item 10."
+ },
+ "planetAnims": {
+  "address": "0x7f29c",
+  "kind": "raw",
+  "doc": "mission_brf2_load's PDSC branch: anim_start(0, planetAnims[briefingPlanet * 2], 414, 10, 0x42, 0) - aplan01 .. aplan12. The odd entries, aplan01c .. aplan12c, are what screen_grievance starts in slot 0 (flags 0x4a) whenever that slot is not running."
+ },
+ "grievanceScenarios": {
+  "address": "0x7f2fc",
+  "kind": "raw",
+  "doc": "Trial of Grievance scenarios: 10 names and a NULL (jackscn1 ... swisscn1). screen_grievance steps prmBlock.grievanceScenario through it, wrapping at the NULL, and loads the chosen one through pilots_sub_0291b0."
+ },
+ "insigniaAnims": {
+  "address": "0x7f328",
+  "kind": "raw",
+  "doc": "screen_grievance's insignia animations, indexed like insigniaNames (wiawolf, wiajf, wiaghost, wiasmoke, wianova, wiasteel): slot 1 at (13, 205) and slot 2 at (483, 329)."
+ },
+ "grievanceChassisLimit": {
+  "address": "0x7f340",
+  "kind": "int",
+  "doc": "screen_grievance: the mech-lab chassis count the member steppers wrap at, set on entry from star_record(0)->members[0].pilotName: Enzo 18, Hobbes 17, Calvin 16, else 15 (grievance_chassis_count computes the same for screen_mechlab)."
+ },
+ "equipmentNames": {
+  "address": "0x7f4c4",
+  "kind": "raw",
+  "doc": "{code, name} x 23, the equipment names (5000 MASC ... 9000 Ferro-Fibrous); mechlab_draw_slot finds a code by code / 50."
+ },
+ "locationNames": {
+  "address": "0x7f57c",
+  "kind": "raw",
+  "doc": "Head, Right Torso, Center Torso, Left Torso, Right Arm, Left Arm, Right Leg, Left Leg - the mech lab's location names, MW2 section order."
+ },
+ "structureTable": {
+  "address": "0x7f59c",
+  "kind": "raw",
+  "doc": "BattleTech's internal structure table, one row per 5 t from 10 to 100 t (row (tons - 10) / 5): centre torso, side torso, arm, leg. The loader fills designLocations[].internal from it (head fixed at 3)."
+ },
+ "engineTable": {
+  "address": "0x7f6cc",
+  "kind": "raw",
+  "doc": "{rating, mass (hundredths of a ton), maker} per 5 points of rating, 10..400."
+ },
+ "itemTypes": {
+  "address": "0x7fa8c",
+  "kind": "raw",
+  "doc": "The item types (weapons first): 0x28 bytes each, indexed by item id / 100. Typed for the 28 weapon types the WEAPONS TABLE can list (0..27); the equipment ids go further, but where the table ends is not established."
+ },
+ "locationMarkerX": {
+  "address": "0x7ff64",
+  "kind": "raw",
+  "doc": "mechlab_show_location_marker's offsets for animation slot 12, per location."
+ },
+ "locationMarkerY": {
+  "address": "0x7ff84",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabEnginePanel": {
+  "address": "0x7ffa4",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabHeatSinkPanel": {
+  "address": "0x80264",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabJumpJetPanel": {
+  "address": "0x8041c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabStructurePanel": {
+  "address": "0x8057c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabArmorPanel": {
+  "address": "0x80944",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabEquipmentPanel": {
+  "address": "0x81100",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabWeaponsPanel": {
+  "address": "0x81368",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabCriticalsPanel": {
+  "address": "0x81d8c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabCustomizingPanel": {
+  "address": "0x827b0",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabDesignPanel": {
+  "address": "0x82e38",
+  "kind": "raw",
+  "doc": ""
+ },
+ "chassisTable": {
+  "address": "0x83678",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabChassisCount": {
+  "address": "0x83840",
+  "kind": "int",
+  "doc": "How many chassis NEXT / PREV CHASSIS cycle through (0 .. count - 1): screen_mechlab sets 15 (Firemoth .. Dire Wolf), or in career 2 grievance_chassis_count's 16 / 17 / 18 for the pilot names Calvin / Hobbes / Enzo, which add the Elemental, the Tarantula and the Battle Master IIC."
+ },
+ "mechlabAnimFormatWolf": {
+  "address": "0x83844",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabAnimFormatJadeFalcon": {
+  "address": "0x8384c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabAnimFormatGrievance": {
+  "address": "0x83854",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabChassisAnimFormat": {
+  "address": "0x8385c",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "mechlabChassis": {
+  "address": "0x83878",
+  "kind": "int",
+  "doc": "The chassis the mech lab shows (chassisTable index)."
+ },
+ "cdDrive": {
+  "address": "0x8387c",
+  "kind": "int",
+  "doc": ""
+ },
+ "musicByStateGrievance": {
+  "address": "0x83880",
+  "kind": "raw",
+  "doc": "Screen music (main). Per state, by career: 0 = leave the music alone, 0x20000000 = stop, 0x10000000 = restart, else a DATABASE.MW2 XMIDI base item (35..41) to which musicSetOffset is added."
+ },
+ "musicByStateWolf": {
+  "address": "0x838c8",
+  "kind": "raw",
+  "doc": ""
+ },
+ "musicByStateJadeFalcon": {
+  "address": "0x83910",
+  "kind": "raw",
+  "doc": ""
+ },
+ "launchAnimName": {
+  "address": "0x8395c",
+  "kind": "raw",
+  "doc": "mission_brf2_load copies the BRF2 stream's SUPS string here (the launch animation stem); prm_save appends it to MW2's command line after \" -b=\". 13 bytes: the image holds the 8.3 template \"xxxxxxxx.xxx\"."
+ },
+ "registerNextState": {
+  "address": "0x8396c",
+  "kind": "int",
+  "doc": "screen_register: the result it returns, -1 until a button or shell_menu decides. A static at 0x8396c, not a local: set to 10 by a LAUNCH OLD MISSION row, 8 / 1 by the buttons, then tested once per pass."
+ },
+ "registerPilotInfoPanel": {
+  "address": "0x83970",
+  "kind": "raw",
+  "doc": "screen_register's two right-hand panels, drawn by widget_panel_layout."
+ },
+ "registerMissionListPanel": {
+  "address": "0x83ad0",
+  "kind": "raw",
+  "doc": ""
+ },
+ "midiDriverSets": {
+  "address": "0x83e14",
+  "kind": "raw",
+  "doc": "{char *mdiFile, int itemOffset} x 14: ADLIB.MDI 0, ADLIBG/OPL3/PASPLUS/SBPRO1/ SBPRO2/TANDY 8, SBAWE 16, MT32 24, MPU401/SNDSCAPE/ULTRA 32 (PAS, SBLASTER 0)."
+ },
+ "starSlotsWolf": {
+  "address": "0x83e84",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSlotsJadeFalcon": {
+  "address": "0x83fa4",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSpriteFormatWolf": {
+  "address": "0x840c4",
+  "kind": "raw",
+  "doc": "screen_star_select points starSpriteFormat at one of these by career (0, 1, 2): star_slot_draw sprintfs the chassis's animCode into it for the member's sprite."
+ },
+ "starSpriteFormatJadeFalcon": {
+  "address": "0x840cc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSpriteFormatGrievance": {
+  "address": "0x840d4",
+  "kind": "raw",
+  "doc": ""
+ },
+ "playerStar": {
+  "address": "0x840dc",
+  "kind": "raw",
+  "doc": ""
+ },
+ "opponentStar": {
+  "address": "0x8415c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "currentStar": {
+  "address": "0x841dc",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "formationNames": {
+  "address": "0x841e0",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starPanelXWolf": {
+  "address": "0x84210",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starPanelYWolf": {
+  "address": "0x8421c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starPanelXJadeFalcon": {
+  "address": "0x84228",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starPanelYJadeFalcon": {
+  "address": "0x84234",
+  "kind": "raw",
+  "doc": ""
+ },
+ "textRemap1": {
+  "address": "0x84240",
+  "kind": "raw",
+  "doc": ""
+ },
+ "textRemap5": {
+  "address": "0x84340",
+  "kind": "raw",
+  "doc": ""
+ },
+ "textRemap8": {
+  "address": "0x84440",
+  "kind": "raw",
+  "doc": ""
+ },
+ "randSeed": {
+  "address": "0x863d8",
+  "kind": "int",
+  "doc": "rand / srand (0x4bc39 / 0x4bc5d): the LCG state rand_state (0x4bc33) returns the address of; x = x * 0x41c64e6d + 0x3039, rand = bits 16..30. 1 in the image."
+ },
+ "projectFiles": {
+  "address": "0x875b0",
+  "kind": "raw",
+  "doc": "project_set_alloc_hooks' two pointers (MW2's projectAllocHook / projectFreeHook): project_file_open and project_load_directories allocate through the first, project_file_close frees through the second The open-project records (seventy-fourth /shell-next): MW2's ProjectFile layout, matched field by field against the shell's project_file_open / _close / project_load_directories / project_resource_size / project_read_resource. Capacity 1: project_file_open only ever checks record 0's inUse, as MW2's does."
+ },
+ "ordersTextRemap": {
+  "address": "0x8a6e4",
+  "kind": "raw",
+  "doc": "orders_text_build fills it on every call - [0] 0xff, [1] 1, [2..255] 0xff - and hands it to page_init as every briefing / debriefing line's colour table: only ink 1 draws."
+ },
+ "bwdBuffer": {
+  "address": "0x8a7e4",
+  "kind": "raw",
+  "doc": "star_files' BWD build buffer (sixty-eighth /shell-next): bwd_build_begin clears it and appends the BWD, REV and DTBL chunks; every append checks bwdLength against 0x800 and raises bwdMaxChunk (mirrored into the header); the writers set streamLength = bwdLength and fwrite bwdLength bytes."
+ },
+ "bwdLength": {
+  "address": "0x8afe4",
+  "kind": "int",
+  "doc": ""
+ },
+ "bwdMaxChunk": {
+  "address": "0x8afe8",
+  "kind": "int",
+  "doc": ""
+ },
+ "controlsEditText": {
+  "address": "0x8afec",
+  "kind": "raw",
+  "doc": "controls_edit_config_name's working copy of the text: up to 62 characters, the '_' cursor and a NUL. The space up to 0x8b0ec is not used by anything else found."
+ },
+ "controlsSaveText": {
+  "address": "0x8b0ec",
+  "kind": "raw",
+  "doc": "controls_save_config's sprintf buffer: 'giddi\\config%02d.cpc' for its fopen, then 'Configuration %d Saved.#Ok' for its message_box. 0x40 bytes, up to controlsMovie."
+ },
+ "controlsMovie": {
+  "address": "0x8b12c",
+  "kind": "raw",
+  "doc": "---- controls screen (S8) ---- controls_screen's amwlogo1 loop: the 0x18-byte block it mallocs and hands to movie_open_background (0x73a86 'amwlogo1', at 120, 4), NULL when the malloc fails. Its steppers are controls_screen's two panel loops, controls_edit_config_name's key loop and controls_scroll_buttons' held-button loop; controls_screen closes and frees it. No other function reads 0x8b12c."
+ },
+ "controlsRemapSelected": {
+  "address": "0x8b130",
+  "kind": "raw",
+  "doc": "controls_screen's two remaps: ink -> 0x10 for a chosen device, ink -> 7 for the devices that cannot be chosen once four are."
+ },
+ "controlsRemapFull": {
+  "address": "0x8b230",
+  "kind": "raw",
+  "doc": ""
+ },
+ "controlsCellText": {
+  "address": "0x8b330",
+  "kind": "raw",
+  "doc": "The binding cells' text: controls_draw_binding sprintfs '%s %s' (device, input) or strcpys '----' here, controls_draw_second_button sprintfs '/%s'; each hands it to label_create_under, which copies it. 0x100 bytes, up to controlsSelectedColumn."
+ },
+ "controlsSelectedColumn": {
+  "address": "0x8b430",
+  "kind": "int",
+  "doc": ""
+ },
+ "controlsPage": {
+  "address": "0x8b434",
+  "kind": "int",
+  "doc": ""
+ },
+ "controlBindings": {
+  "address": "0x8b438",
+  "kind": "raw",
+  "doc": ""
+ },
+ "controlDefaultsScratch": {
+  "address": "0x8c218",
+  "kind": "raw",
+  "doc": "controls_reset_defaults reads each device's giddi\\<device>.cpc here"
+ },
+ "controlsButtonScroll": {
+  "address": "0x8cff8",
+  "kind": "int",
+  "doc": ""
+ },
+ "controlsDeviceRecords": {
+  "address": "0x8cffc",
+  "kind": "raw",
+  "doc": "the .cpc's 16 device records: which device each saved binding number meant"
+ },
+ "controlsDeviceChosen": {
+  "address": "0x8d0fc",
+  "kind": "raw",
+  "doc": "per device slot 0..15: 1 when chosen (the keyboard always is)"
+ },
+ "controlsConfigName": {
+  "address": "0x8d13c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "controlsExit": {
+  "address": "0x8d17c",
+  "kind": "int",
+  "doc": "1 leaves controls_screen (ACCEPT, ABORT, Esc); anything else after the device panel goes on to the binding panel."
+ },
+ "controlsDirty": {
+  "address": "0x8d180",
+  "kind": "int",
+  "doc": ""
+ },
+ "controlsDeviceCount": {
+  "address": "0x8d184",
+  "kind": "int",
+  "doc": ""
+ },
+ "mapAnalogCount": {
+  "address": "0x8d188",
+  "kind": "int",
+  "doc": "temp.map's '# analog count' / '# discrete count'"
+ },
+ "mapDiscreteCount": {
+  "address": "0x8d18c",
+  "kind": "int",
+  "doc": ""
+ },
+ "debriefingRemap": {
+  "address": "0x8e890",
+  "kind": "raw",
+  "doc": "Filled on every entry: [0] 0xff, [i] i. No reader has been found - nothing in the shell's functions refers to 0x8e890 but this store, and it is not passed anywhere."
+ },
+ "debriefingObjectives": {
+  "address": "0x8f390",
+  "kind": "raw",
+  "doc": "The objective pointers qsort sorts (0x23b39 fills one per objective, 4 bytes each, into the MissionRecord on screen_debriefing's stack; comparator 0x21e90)."
+ },
+ "debriefingText": {
+  "address": "0x8f450",
+  "kind": "raw",
+  "doc": "The debriefing's text: emptied on entry (strcpy from 0x759bc), then strcat'd with the objectives table, the honor lines and the Career Honor line, and passed to orders_text_build as its \\Q text (0x24c1f). Sized by the gap to menuItems (0x90490); the buffer's declared size is not established."
+ },
+ "menuItems": {
+  "address": "0x90490",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsMovie": {
+  "address": "0x91150",
+  "kind": "raw",
+  "doc": "shell_menu's COMBAT VARIABLES: the amwlogo1 movie_open_background it keeps stepping (zeroed before, left stale after its close); options_click_slider steps it too."
+ },
+ "sliderShapes": {
+  "address": "0x91154",
+  "kind": "raw",
+  "doc": "shell_menu's COMBAT VARIABLES: mpack_db_get_item(database, 8, &0x91154, ...); options_draw_slider draws shape 1 (the bar) and shape 0 (the knob) from it."
+ },
+ "soundSystem": {
+  "address": "0x9115c",
+  "kind": "int",
+  "doc": ""
+ },
+ "shellMouse": {
+  "address": "0x91164",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "videoDriver": {
+  "address": "0x91168",
+  "kind": "int",
+  "doc": "main: the 0x3a6-byte video driver object (video_driver_sub_03dd90), which every font holder, page and label list is given. A pointer, kept as an int because every consumer passes it on as one."
+ },
+ "uiFont": {
+  "address": "0x9116c",
+  "kind": "ptr",
+  "doc": "Three more font slots (seventy-fifth /shell-next). main is their only writer (a sweep of every function's disassembly for stores to them), and all three end up holding the item-32 holder - 0x9116c first gets item 26's, like font32 - so at run time they are the same font as font32. Named by what reads them, which is consistent per slot: presumably the original kept one variable per role.   uiFont: label_create labels, button bars, message_box / menu text, text_input.     (message_box's decompile shows it being stored; that is a register reload     written back - the machine code only loads it.)   archiveFont: only ever passed to archive_page_load (the archive viewers and     the briefing's archive entries), which hands it to page_init.   pageFont: orders_text_build, page_init and text_width for the briefing and     debriefing pages and the honour lines."
+ },
+ "font32": {
+  "address": "0x91170",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "font27": {
+  "address": "0x91174",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "font28": {
+  "address": "0x91178",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "font30": {
+  "address": "0x9117c",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "font31": {
+  "address": "0x91180",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "archiveFont": {
+  "address": "0x91184",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "pageFont": {
+  "address": "0x91188",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "database": {
+  "address": "0x9118c",
+  "kind": "ptr",
+  "doc": "main: mpack_db_open(DATABASE.MW2); every mpack_db_get_item(database, item) - fonts, sounds, music, art - reads through it."
+ },
+ "project": {
+  "address": "0x91190",
+  "kind": "int",
+  "doc": ""
+ },
+ "smackerOpenFlags": {
+  "address": "0x91194",
+  "kind": "int",
+  "doc": ""
+ },
+ "pilotRegistry": {
+  "address": "0x91198",
+  "kind": "raw",
+  "doc": ""
+ },
+ "currentPilot": {
+  "address": "0x91648",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "sound77": {
+  "address": "0x91690",
+  "kind": "int",
+  "doc": "main's four shared samples, by DATABASE.MW2 item (what each sound is, is not established beyond where it plays):   sound77  looping; every text page keeps it (text_markup, page +0x28) -            presumably the typing sound   sound101 the star screen's formation / starmate / CHANGE MECH buttons and            two mech-lab buttons   sound102 MECH LAB, the options slider preview, one mech-lab action   sound103 the archive holoprojector and archive pages"
+ },
+ "sound101": {
+  "address": "0x91694",
+  "kind": "int",
+  "doc": ""
+ },
+ "sound102": {
+  "address": "0x91698",
+  "kind": "int",
+  "doc": ""
+ },
+ "sound103": {
+  "address": "0x9169c",
+  "kind": "int",
+  "doc": ""
+ },
+ "grievanceTextRemap": {
+  "address": "0xa1ff8",
+  "kind": "raw",
+  "doc": "screen_grievance's text colour table, filled on entry: the identity, 0 -> 0xff (transparent), ink 1 -> 0x22. Every member and formation label is drawn through it."
+ },
+ "grievancePlayerFormation": {
+  "address": "0xa20f8",
+  "kind": "int",
+  "doc": "grievance_draw_formations: star_formation(0) / (1), stepped by buttons 6 / 10 and 17 / 21 and passed to star_configure."
+ },
+ "grievanceOpponentFormation": {
+  "address": "0xa20fc",
+  "kind": "int",
+  "doc": ""
+ },
+ "grievancePlayerMembers": {
+  "address": "0xa2100",
+  "kind": "raw",
+  "doc": "screen_grievance: per member {TextLabel *, chassis index}, 3 per star. The chassis is what the steppers step (-1 none) and star_member_chassis refreshes."
+ },
+ "grievanceOpponentMembers": {
+  "address": "0xa2118",
+  "kind": "raw",
+  "doc": ""
+ },
+ "planetLabels": {
+  "address": "0xa2130",
+  "kind": "raw",
+  "doc": "mission_brf2_load's PDSC branch keeps its three planet-description labels here (TextLabel *; label_destroy'd and replaced for each planet, through [ebp + 0xa2130]). screen_grievance zeroes them on entry, dropping the labels without destroying them. (The first note here said no reader had been found: a grep for the address missed the indexed access.)"
+ },
+ "briefingPlanet": {
+  "address": "0xa213c",
+  "kind": "int",
+  "doc": "mission_brf2_load: PDSC's planet - 1 (0..11), which picks the aplanNN animation; screen_grievance clears it."
+ },
+ "grievanceOpponentFormationLabel": {
+  "address": "0xa2140",
+  "kind": "int",
+  "doc": "grievance_draw_formations: the two formation labels (TextLabel *) it replaces."
+ },
+ "grievancePlayerFormationLabel": {
+  "address": "0xa2144",
+  "kind": "int",
+  "doc": ""
+ },
+ "mechlabTrimLocation": {
+  "address": "0xa2248",
+  "kind": "int",
+  "doc": "mechlab_trim_armour_to_tonnage's round-robin: the location it starts stripping points from, left where it stopped (outside the loader's cleared block)."
+ },
+ "mechlabSavePath": {
+  "address": "0xa224c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabVariantName": {
+  "address": "0xa226c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabAnimName": {
+  "address": "0xa228c",
+  "kind": "raw",
+  "doc": "screen_mechlab's name buffers: the chassis animation's name (sprintf of mechlabChassisAnimFormat with the chassis's animCode), the '%s%02dstd' name project_tabl_lookup is asked for (and the 'mek\\%s??usr.mek' pattern), SAVE's '%s%02dusr.mek' and the 'mek\\%s' path it fopen's 'wb'."
+ },
+ "mechlabSaveName": {
+  "address": "0xa229c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mekTons": {
+  "address": "0xa22bc",
+  "kind": "int",
+  "doc": "The MEK being edited: its header sits at 0xa22bc, six ints the loader clears together (memset 0x18). They follow MW2's MechChassis (tons, moveSpeed, jump, heatSinks, numWeapons, numAmmo; mw2_types.h), and the mech lab uses them that way: designMaxMass = tons * 100, heat sinks past 10 cost a ton each, jump jets are jump * a per-jet mass, rating = tons * walk."
+ },
+ "mekWalkMP": {
+  "address": "0xa22c0",
+  "kind": "int",
+  "doc": ""
+ },
+ "mekJumpMP": {
+  "address": "0xa22c4",
+  "kind": "int",
+  "doc": ""
+ },
+ "mekHeatSinks": {
+  "address": "0xa22c8",
+  "kind": "int",
+  "doc": ""
+ },
+ "mekNumWeapons": {
+  "address": "0xa22cc",
+  "kind": "int",
+  "doc": "The rest of the MEK record as mechlab_load_mek reads it and screen_mechlab's save writes it back (fwrite 0x18, 0x28 x 8, 8 x numWeapons, 8 x numAmmo, 50)."
+ },
+ "mekNumAmmo": {
+  "address": "0xa22d0",
+  "kind": "int",
+  "doc": ""
+ },
+ "mekSections": {
+  "address": "0xa22d4",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mekWeapons": {
+  "address": "0xa2414",
+  "kind": "raw",
+  "doc": "{slotCode, location} x 10; the loader copies slotCode into the weapon list"
+ },
+ "mekAmmoBins": {
+  "address": "0xa2464",
+  "kind": "raw",
+  "doc": "{binCode, weaponCode} x 25; binCode is what a section slot >= 10000 names, weaponCode seeds the design's ammo item"
+ },
+ "mekTitle": {
+  "address": "0xa252c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mekFileBuffer": {
+  "address": "0xa2560",
+  "kind": "raw",
+  "doc": "mechlab_load_mek freads a loose MEK here (up to 0x800 bytes) and reads it in place."
+ },
+ "mechlabCallsign": {
+  "address": "0xa4560",
+  "kind": "raw",
+  "doc": "screen_mechlab sprintf's '~CALLSIGN: %s (%d.00 T MAX)' here from star_record(-1)'s selected member and maxTonnage; mechlabDesignPanel's first row (draw_title) shows it."
+ },
+ "mechlabChassisTitle": {
+  "address": "0xa45e0",
+  "kind": "raw",
+  "doc": "'~' + chassisTable[mechlabChassis].displayName, rewritten after every mechlab_load_mek (whose memset of the design block, 0xa45e0..0xa4d88, clears it): row 1 of both summary panels."
+ },
+ "designTitle": {
+  "address": "0xa46e0",
+  "kind": "raw",
+  "doc": "The variant's title, the MEK file's last 50 bytes: mechlab_load_mek copies the file's text here, a NEW variant sprintfs 'User Variant #%d' here (slot - 99), and the save copies it back into mekTitle and writes it. Where it is drawn is not traced."
+ },
+ "designMaxMass": {
+  "address": "0xa47e0",
+  "kind": "int",
+  "doc": "The mech lab's design being edited, in HUNDREDTHS OF A TON: the loader (0x30db0) sets designMaxMass = the MEK's tonnage * 100, and the recompute (0x2eee0 and two copies) sets designMass to the sum of its parts and designFreeMass = max - mass. screen_mechlab's SAVE refuses max < mass."
+ },
+ "designMass": {
+  "address": "0xa47e4",
+  "kind": "int",
+  "doc": ""
+ },
+ "designFreeMass": {
+  "address": "0xa47e8",
+  "kind": "int",
+  "doc": ""
+ },
+ "designEngineIndex": {
+  "address": "0xa47ec",
+  "kind": "int",
+  "doc": "(rating - 10) / 5, plus 10000 when section 1 (right torso) holds code 5850 (the engine, MW2 damage callouts): an engine reaching a side torso is XL, and the recompute halves the table mass for it. Indexes the engine table 0x7f6cc."
+ },
+ "designEngineRating": {
+  "address": "0xa47f0",
+  "kind": "int",
+  "doc": "The design's mass terms (hundredths of a ton), each summed into designMass by the recompute (0x2eee0). The name says how each is computed."
+ },
+ "designEngineMass": {
+  "address": "0xa47f4",
+  "kind": "int",
+  "doc": ""
+ },
+ "designGyroMass": {
+  "address": "0xa4800",
+  "kind": "int",
+  "doc": "designEngineRating * 0.01 * 100, rounded up to a whole ton: rating / 100 tons rounded up, the BattleTech gyro (mechlab_remove_item_and_recompute). This was 'a whole-ton term, likely the gyro, unconfirmed' until that copy was read."
+ },
+ "designCockpitMass": {
+  "address": "0xa4804",
+  "kind": "int",
+  "doc": "always 300 (3 t), set by the recompute and added into designMass: the cockpit."
+ },
+ "designHeatSinkType": {
+  "address": "0xa4808",
+  "kind": "int",
+  "doc": "1 single, 2 double: 'Single' / 'Double' in the HEAT SINKS panel, the critical slots each heat sink takes, and the factor the save puts on the MEK's heatSinks. (mechlab_load_mek's note left this as 'meaning not established'.)"
+ },
+ "designHeatSinkMass": {
+  "address": "0xa480c",
+  "kind": "int",
+  "doc": ""
+ },
+ "designSlottedHeatSinks": {
+  "address": "0xa4810",
+  "kind": "int",
+  "doc": "Heat sinks the engine cannot hold: count - rating / 25, at least 0. FASTER and SLOWER add or remove heat-sink items so this many need critical slots."
+ },
+ "designJumpJetUnitMass": {
+  "address": "0xa4814",
+  "kind": "int",
+  "doc": ""
+ },
+ "designJumpJetMass": {
+  "address": "0xa4818",
+  "kind": "int",
+  "doc": ""
+ },
+ "designEndoSteel": {
+  "address": "0xa4820",
+  "kind": "int",
+  "doc": "designEndoSteel was named designStructureHalved (increment 31), for its one effect, before its writer was read: mechlab_load_mek sets it when any MEK section slot is 8001, and MW2SHELL's item table (0x7f4c4) names 8000 ENDO STEEL. The recompute halves the internal structure mass while it is set."
+ },
+ "designStructureMass": {
+  "address": "0xa4824",
+  "kind": "int",
+  "doc": ""
+ },
+ "designFerroFibrous": {
+  "address": "0xa482c",
+  "kind": "int",
+  "doc": "mechlab_load_mek sets it when any slot is 9001 (item table: FERRO-FIBROUS); armour then costs 1/19.2 t a point (0x76e3d) instead of 1/16 (0x76e2d), in the loader and in mechlab_trim_armour_to_tonnage."
+ },
+ "designArmourMass": {
+  "address": "0xa4830",
+  "kind": "int",
+  "doc": ""
+ },
+ "designArmourPoints": {
+  "address": "0xa4838",
+  "kind": "int",
+  "doc": ""
+ },
+ "designArmourAllocated": {
+  "address": "0xa483c",
+  "kind": "int",
+  "doc": "Points actually spread over the locations (designLocations front + rear); mechlab_trim_armour_to_tonnage strips points until it is <= designArmourPoints."
+ },
+ "designWeaponMass": {
+  "address": "0xa4840",
+  "kind": "int",
+  "doc": ""
+ },
+ "designAmmoMass": {
+  "address": "0xa4848",
+  "kind": "int",
+  "doc": ""
+ },
+ "designMascMass": {
+  "address": "0xa4850",
+  "kind": "int",
+  "doc": "MASC: when any slot is 5001 (item table: MASC) the loader sets designMascMass = designMascTons * 100, designMascTons being (designMaxMass / 25 + 50) / 100 - tons / 25 rounded. The recompute adds it."
+ },
+ "designWalkMP": {
+  "address": "0xa4858",
+  "kind": "int",
+  "doc": ""
+ },
+ "designRunMP": {
+  "address": "0xa485c",
+  "kind": "int",
+  "doc": "(walk * 3 + 2) / 2; the ENGINE panel's Running Speed row shows it."
+ },
+ "designJumpMP": {
+  "address": "0xa4860",
+  "kind": "int",
+  "doc": ""
+ },
+ "designAmmo": {
+  "address": "0xa4864",
+  "kind": "raw",
+  "doc": "The selected location, 0..7 in MW2 section order (0 head ... 7 left leg). The design's fitted items (sixty-seventh /shell-next; the functions' notes described them by address). Item codes: a weapon is type * 100 + n, n = 1, 2 ... numbering that type's instances; its ammo is 10000 + weapon * 100 + k, k = 1..10. Both lists are packed, unused entries -1.   designAmmo: 25 entries, one ton each (designAmmoMass = 100 per entry); at most     10 per weapon instance. The .mek save turns each into an ammo bin     {10000 + type * 100 + m, weapon}.   designWeapons: 10 entries; designWeaponMass sums itemTypes[code / 100].mass."
+ },
+ "designWeapons": {
+  "address": "0xa48c8",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabSelectedItem": {
+  "address": "0xa48f0",
+  "kind": "int",
+  "doc": "what the WEAPONS panel has selected: a type from the WEAPONS TABLE (type * 100, n = 0) or a fitted weapon (type * 100 + n), -1 none; ADD WEAPON / ADD AMMO / REMOVE and WEAPON INFO act on it (mechlab_open_weapons_panel clears it)"
+ },
+ "mechlabLocation": {
+  "address": "0xa48f4",
+  "kind": "int",
+  "doc": ""
+ },
+ "designCriticals": {
+  "address": "0xa48f8",
+  "kind": "raw",
+  "doc": "The design's critical slots, [location][12], 0-based in MW2's section order. The loader copies the MEK's slots in (-1 past numSlots), maps ammo-bin codes (>= 10000) to the design's ammo items, and zeroes the fixed actuators (5301, 5302, 5351, 5352, 5401, 5402, 5451, 5452). The save path (screen_mechlab) writes each entry below 10000 back into MechSection.slots, stopping at -1."
+ },
+ "mechlabUnplacedCount": {
+  "address": "0xa4a7c",
+  "kind": "int",
+  "doc": "how many entries mechlabUnplaced holds; mechlab_remove_item_slots lowers it."
+ },
+ "mechlabUnplaced": {
+  "address": "0xa4a80",
+  "kind": "raw",
+  "doc": "First entry of the list of items not yet placed in a location; -1 = none. screen_mechlab's SAVE refuses 'Unassigned criticals detected' otherwise. 78 {item, criticals} pairs; item -1 = empty (mechlab_load_mek's reset writes -1 every 8 bytes up to 0x270). Every 'queue unplaced' in the lab appends {item, slots} at mechlabUnplacedCount, which it keeps below 78 (0x4e). (Was placed as a single int, 'first entry'.)"
+ },
+ "designLocations": {
+  "address": "0xa4cf0",
+  "kind": "raw",
+  "doc": ""
+ },
+ "designEquipMasc": {
+  "address": "0xa4d70",
+  "kind": "int",
+  "doc": "The EQUIPMENT panel's five flags (its draw_yes_no rows' values, flipped by mechlab_toggle_equipment with the item code in the row's extra). mechlab_load_mek sets designEquipMasc when any MEK slot is 5001 and COUNTS the other four codes in the grid (5401, 5451, 5402, 5452 - draw_equipment_name's Right Lower Arm, Right Hand, Left Lower Arm, Left Hand Actuator) before zeroing them."
+ },
+ "designEquipRightLowerArm": {
+  "address": "0xa4d74",
+  "kind": "int",
+  "doc": ""
+ },
+ "designEquipRightHand": {
+  "address": "0xa4d78",
+  "kind": "int",
+  "doc": ""
+ },
+ "designEquipLeftLowerArm": {
+  "address": "0xa4d7c",
+  "kind": "int",
+  "doc": ""
+ },
+ "designEquipLeftHand": {
+  "address": "0xa4d80",
+  "kind": "int",
+  "doc": ""
+ },
+ "designMascTons": {
+  "address": "0xa4d84",
+  "kind": "int",
+  "doc": ""
+ },
+ "designBackup": {
+  "address": "0xa4d88",
+  "kind": "raw",
+  "doc": "mechlab_load_mek copies the whole design block (0xa45e0, 0x7a8 bytes) here before clearing it. No reader has been found."
+ },
+ "mechlabTextNormal": {
+  "address": "0xa5530",
+  "kind": "raw",
+  "doc": "screen_mechlab builds its own three text styles the same way: ink -> 6 normal, 1 selected, and 8 warning - then the warning ink per career (0x17 Wolf / Jade Falcon, 0xca career 2). MechlabWidget.textStyle and the draw functions pass them."
+ },
+ "mechlabTextSelected": {
+  "address": "0xa5630",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabTextWarning": {
+  "address": "0xa5730",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabPanel": {
+  "address": "0xa5830",
+  "kind": "raw",
+  "doc": "---- mech lab (S7) ---- screen_mechlab's two panels. mechlabSummaryPanel is the left column: the screen points it at mechlabDesignPanel (browsing) or mechlabCustomizingPanel (CUSTOMIZE) and widget_panel_layout's it; a click is hit-tested against it first and its row's clickFn called with no redraw. mechlabPanel is the right-hand panel on show (NULL while browsing): mechlab_open_panel frees its labels and points it at the clicked row's extra; a click that missed the left column is hit-tested against it and followed by widget_panel_redraw of both. Neither is cleared on leaving, so the next visit starts with the last panel still hit-testable (its labels freed)."
+ },
+ "mechlabSummaryPanel": {
+  "address": "0xa5834",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabText": {
+  "address": "0xa5838",
+  "kind": "raw",
+  "doc": "The mech lab draw functions' sprintf buffer (label_create copies it); the DELETE button builds 'mek\\%s.mek' in it for remove()."
+ },
+ "mechlabChassisAnimX": {
+  "address": "0xa593c",
+  "kind": "int",
+  "doc": "animation slot 16, the chassis: its place (x 0x146, or 0x136 in career 2; y 0x17f) and name format, set per career by screen_mechlab."
+ },
+ "mechlabChassisAnimY": {
+  "address": "0xa5940",
+  "kind": "int",
+  "doc": ""
+ },
+ "mechlabVariants": {
+  "address": "0xa5944",
+  "kind": "raw",
+  "doc": "screen_mechlab's variant list for the current chassis, 200 names of 13 bytes. 0..99: stock '<prefix>NNstd' names that exist in MW2.PRJ (TABL 6); slot 0 is always '<prefix>00std'. 100..199: the player's files 'mek\\<prefix>NNusr.mek', slot 100 + NN. Save takes the first free slot from 100 ('Too many mechs of this variant' when none); Delete (user slots only) removes the file and moves on to the next filled slot, wrapping to 0."
+ },
+ "mechlabVariant": {
+  "address": "0xa636c",
+  "kind": "int",
+  "doc": "the selected slot of mechlabVariants: mechlab_load_mek loads it, ACCEPT hands it to star_set_member, and the Delete button is disabled below 100"
+ },
+ "mechlabForMember": {
+  "address": "0xa6374",
+  "kind": "int",
+  "doc": "1 when the mech lab was entered from the star screen for one member (CHANGE MECH or a double click), 0 for its MECH LAB button. screen_mechlab tests it with the previous state 0xd and clears it. When set, buttons 0 EXIT LAB, 6 CUSTOMIZE, 7 ACCEPT MECH and 10 DELETE are disabled, and STAR CONFIG (button 1) assigns the variant to the selected member (star_set_member(-1, ...), refused with the KDMT message) and returns 0xd. When clear the lab selects member 0 (star_set_member(0, 0, 0)) and ACCEPT MECH assigns the variant to it and returns the state the lab was entered from. CORRECTION (S7 port): this said that when set ACCEPT MECH assigned the variant and only button 6 stayed disabled; ACCEPT MECH is one of the disabled buttons (0x33b60..0x33b88)."
+ },
+ "musicSetChosen": {
+  "address": "0xa6378",
+  "kind": "raw",
+  "doc": ""
+ },
+ "musicSetOffset": {
+  "address": "0xa637c",
+  "kind": "int",
+  "doc": ""
+ },
+ "currentMusic": {
+  "address": "0xa6380",
+  "kind": "int",
+  "doc": ""
+ },
+ "currentMusicItem": {
+  "address": "0xa6384",
+  "kind": "int",
+  "doc": ""
+ },
+ "prmBlock": {
+  "address": "0xa6394",
+  "kind": "raw",
+  "doc": ""
+ },
+ "registerSlots": {
+  "address": "0xa662c",
+  "kind": "raw",
+  "doc": "screen_register: the career's ten registry records (slots 0..9 Wolf, 10..19 Jade Falcon), pointers the slot buttons 1..10 index as 0xa6628 + button * 4."
+ },
+ "registerCareer": {
+  "address": "0xa6754",
+  "kind": "int",
+  "doc": "The career whose missions the register lists (careerMissionTables index)."
+ },
+ "animSlots": {
+  "address": "0xa679c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starSlotLayout": {
+  "address": "0xa711c",
+  "kind": "ptr",
+  "doc": "screen_star_select points these at the career's tables (career 2: Wolf's)."
+ },
+ "starSpriteFormat": {
+  "address": "0xa7120",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "starPanelLabels": {
+  "address": "0xa7124",
+  "kind": "raw",
+  "doc": "Per panel: the pilot-name, chassis-name and tonnage labels star_slot_draw puts up."
+ },
+ "starMemberTonnage": {
+  "address": "0xa7148",
+  "kind": "raw",
+  "doc": ""
+ },
+ "starPanelX": {
+  "address": "0xa7154",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "starPanelY": {
+  "address": "0xa7158",
+  "kind": "ptr",
+  "doc": ""
+ },
+ "starLimitLabels": {
+  "address": "0xa715c",
+  "kind": "raw",
+  "doc": "star_limits_show: its five labels (formation, mission, maximum 'Mechs, KDMT, total mass), each replaced on a redraw; screen_star_select zeroes them on entry."
+ },
+ "layoutRegionFlag": {
+  "address": "0xa7170",
+  "kind": "raw",
+  "doc": "---- text/briefing/archive (S5) ---- text_layout_page's pending-code flags, static bytes that outlive a call. \\Bnnn sets layoutBackPending and \\Gnnn layoutColumnPending; the next token read tests them first, clears the flag and re-emits the code as the word \"\\b%03d\" / \"\\g%03d\". \\Axx sets layoutRegionFlag; no reader of it has been found (text_layout_page never reads it, and no other function refers to 0xa7170)."
+ },
+ "layoutBackPending": {
+  "address": "0xa7171",
+  "kind": "raw",
+  "doc": ""
+ },
+ "layoutColumnPending": {
+  "address": "0xa7172",
+  "kind": "raw",
+  "doc": ""
+ }
+}

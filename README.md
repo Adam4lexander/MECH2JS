@@ -1,40 +1,87 @@
 # MechWarrior 2 - TypeScript port
 
 A faithful port of MechWarrior 2 (1995, DOS) to TypeScript, three.js and
-React, built from the decompilation in `../decompiled`. The data structures,
+React, built from the decompilation in the `mw2-decompiled` repo (its
+`decompiled/` directory). The data structures,
 arithmetic and frame loop are the original's; the code is organised by
 subject rather than by the address ranges the decompilation inherits.
 
-**Nothing from the game is in this directory.** The port reads the original
-`MW2.PRJ`, `MW2.EXE` and loose files from the install at runtime.
+**Nothing from the game is in this directory.** The port reads the game's
+content from the install at runtime - `MW2.PRJ`, `MW2.EXE`, `MW2SHELL.EXE`,
+`DATABASE.MW2`, `ARCHWO.MW2` / `ARCHJF.MW2`, `MW2.INI`, the `GIDDI\` input
+drivers and the game CD (its image, `*.CUE` / `*.BIN`, or its files) - and
+nothing else. The files the
+two programs write (the pilot registry, `MW2PRM.CFG`, `MW2*.CFG`, the star
+BWDs, the mech lab's `MEK\` variants, the controls files `INPUT.MAP`,
+`GAMEKEY.MAP` and `giddi\*.cpc`) are the port's own: it seeds them itself on a
+first run and keeps them in the browser (IndexedDB, `src/app/diskStore.ts`).
+The dev server refuses to serve the install's copies.
 
 ## Running
 
+First say where the game is: copy `.env.example` to `.env.local` (git
+ignores it) and set `MW2_ROOT` to the MechWarrior 2 install (`MW2.PRJ`,
+`MW2.EXE`, ...). The dev server and the tests read that file
+(`tools/paths.ts`); a variable set in the environment wins over it. Unset,
+the dev server says what to set.
+
 ```sh
 npm install
-npm run dev          # http://localhost:5173 - serves the install from MW2_ROOT (default ..)
-npm test             # unit + golden tests (golden needs the install and ../decompiled)
-npm run gen          # regenerate struct schemas and PORTING.md after the decompilation changes
+npm run fetch-soundfont   # optional: a local copy of the General MIDI SoundFont (see below)
+npm run dev               # http://localhost:5173 - serves the install from MW2_ROOT
+npm test                  # unit + golden tests
 npm run typecheck
 ```
 
-Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
+Most golden suites also check the port against the decompilation's
+listings, and `npm run gen` regenerates from them. The decompilation is not
+public: without it those suites skip and `npm run gen` stops. Neither is
+needed to build or play.
 
-## Missions
+The game CD's image (e.g. `MECH2_16B.BIN` / `.CUE`) belongs in the install
+directory beside `MW2.PRJ`. It is the CD drive: the intro and in-screen
+movies, the launch pictures, the training instructor's voice (`KEATING\`) and
+the CD music tracks all come from it. A ripped CD works too: with no image,
+the CD's `SMK\`, `LAUNCH\` and `KEATING\` directories copied into the install
+directory are the CD drive. A rip has no audio tracks, so there is no CD
+music, and whatever it left out (some leave out the Smacker movies and
+animations) the programs find missing, as on a bad disc. With neither there is
+no CD drive. The image wins when both are there.
 
-The shell (MW2SHELL.EXE - career, trials, mech lab) is not ported. It hands the
-game its players through loose BWD files; the port does not read those from the
-install, and sorts the missions by which of them each includes:
+The front end's music is XMIDI played through a General MIDI SoundFont
+(GeneralUser GS, free to redistribute; `tools/fetch-soundfont.ts`), which is
+not game data and not kept in git. `npm run fetch-soundfont` puts a pinned,
+checksummed copy in `public/soundfont/`; without it the synth fetches the same
+file from jsDelivr, and offline the music is silent.
+
+## The game
+
+`http://localhost:5173` runs the game as MECH2.EXE does: the intro, then the
+front end (MW2SHELL.EXE, ported under `src/shell/`) - register a pilot, the
+Clan hall, training, the Trials, briefings, the mech lab, star configuration,
+COMBAT VARIABLES and COCKPIT CONTROLS, debriefings and the career - handing
+each launch to the combat sim (MW2.EXE) and back (`src/app/mech2Loop.ts`).
+Your pilots, 'Mechs and settings persist across reloads.
+
+## The developer route (`?dev`)
+
+`http://localhost:5173/?dev` opens the mission picker and the editor instead.
+The missions are sorted by which of the shell's hand-off files (loose BWDs)
+each includes; the port builds them in the shell's own layout:
 
 - **Ready** (20) - the mission sets the player's 'Mech itself (training, the
   Trials of Position): it just launches.
 - **Choose pilot and 'Mech** (24) - the mission takes the player's star
   (`USERSTAR.BWD`). You name the pilot and pick a 'Mech - every 'Mech the
-  shipped missions field - and up to four starmates; the port builds the file
-  in the shell's own layout. The last setup is remembered.
-- **Needs opponents** (15) - these also take opponent stars (`EN01STAR`..
-  `EN05STAR`, and for ten of them `INSTMAP1`) that only the shell's opponent
-  setup writes; they are listed but not offered yet.
+  shipped missions field - and up to four starmates. The last setup is
+  remembered.
+- **Opponents** (15) - these also take opponent stars (`EN01STAR`..
+  `EN05STAR`, and for ten of them `INSTMAP1`), written by the shell's own
+  code from the mission's briefing.
+
+**NetMech…** in the picker starts a network game: MW2.EXE's own netplay
+(`src/sim/net`) over a WebRTC data channel between two browser tabs, joined
+by copying an offer and an answer between them (no server).
 
 ## Modes
 
@@ -79,9 +126,9 @@ install, and sorts the missions by which of them each includes:
   objective and wake as the mission's objectives open - in AMY_SCN1 the
   first star powers up and comes for the player straight away. When the
   mission is decided, 'Press any key to exit...' follows after 3 s and the
-  mission ends after 20; the debriefing shows the result record MW2.EXE
-  would have left in mw2msn.cfg (the port never writes the game's cfg
-  files). The objects mission scripts animate - spinning, blinking,
+  mission ends after 20; MW2.EXE's results (mw2msn.cfg, MW2CAR.CFG) go to
+  the port's own disk, and on this route the debriefing shows that record.
+  The objects mission scripts animate - spinning, blinking,
   driving and path-following - run their scheduled tasks.
   Sound is the game's own sound code (src/sim/sound): the eight streaming
   SFLX channels with their priorities and stealing, positional one-shots
@@ -94,9 +141,9 @@ install, and sorts the missions by which of them each includes:
   with the first Play; the toolbar's Sound button toggles it. The engine hum
   is a MIDI note on the player's sound card in the original - its pitch and
   level follow the game here, its timbre is a stand-in.
-  The rule toggles the original reads from mw2dif.cfg (the shell's options
-  screen writes it) are the port's own: splash damage, collision damage
-  and heat tracking on, difficulty 1 (`DEFAULT_RULES`,
+  The rule toggles the original reads from mw2dif.cfg are the port's own
+  file, which the front end's COMBAT VARIABLES screen writes; a first run
+  starts it at the shell's defaults (`DEFAULT_RULES`,
   src/sim/mech/simOptions.ts). With heat tracking off the player's mech
   never heats, as in the original.
 - **Edit** - no frame runs and time stands still; the editor shows the scene
@@ -115,7 +162,10 @@ node in step, which the tick hooks do in play. Mech detail levels come from
 the game's own `mech_lod_update`, evaluated from the editor camera.
 
 The viewport bar's **Faithful** / **Modern** buttons pick how the view is
-drawn, and the choice is remembered. Faithful renders at 640x480, scaled up
+drawn, and the choice is remembered. The bar, and with it Modern, the
+enhancements and VR below, is the developer route's: the game itself
+(without `?dev`) plays Faithful, as the original drew it. Both draw through
+the same screen (`src/app/gameScreen.ts`). Faithful renders at 640x480, scaled up
 with nearest filtering, at the original's draw and detail distances. Modern
 renders at native resolution and draws further out, as a headset always
 does (`src/render/viewSettings.ts`). The original's distances were tuned for

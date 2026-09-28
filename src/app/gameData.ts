@@ -1,12 +1,15 @@
 /**
  * Everything the port reads from the install, fetched once: MW2.PRJ, MW2.EXE,
- * MW2.INI and the loose files beside them that are settings and drivers - the
- * input maps, MW2SND.CFG and the GIDDI input drivers.
+ * MW2SHELL.EXE, MW2.INI and the loose content beside them - the GIDDI input
+ * drivers (their .DLL, .STD and .CAL files) - which become the disk's
+ * read-only layer (engine/dosFiles.ts). And whether the game CD is there,
+ * as an image or as files; the CD drive reads it as it goes.
  *
- * NOT the player's data the shell leaves there - the star BWD files
- * (USERSTAR, EN01..05STAR, INSTMAP1) and the mech lab's MEK\ variants: the
- * port builds the player's star from its own mission setup (userStar.ts), and
- * a mission that wants what only the shell sets up is not offered.
+ * NOT the config and player files the programs write - the star BWD files
+ * (USERSTAR, EN01..05STAR, INSTMAP1), MW2*.CFG, the mech lab's MEK\ variants -
+ * nor the controls files: INPUT.MAP (the shell's output), GAMEKEY.MAP and the
+ * giddi\*.CPC configurations. The port keeps its own (app/diskStore.ts),
+ * writing the controls files on a first run (shell/controls/seed.ts).
  */
 import { ExeImage } from '../data/exe/ExeImage.ts';
 import { IniFile } from '../data/config/ini.ts';
@@ -17,12 +20,25 @@ import { walkStream } from '../data/bwd/stream.ts';
 export interface GameData {
   prj: ProjectFile;
   exe: ExeImage;
+  /** MW2SHELL.EXE, the front end */
+  shellExe: ExeImage;
   ini: IniFile;
-  /** loose files by upper-case name ('INPUT.MAP', 'GIDDI/KEYBOARD.DLL') */
+  /** loose files by upper-case name ('GIDDI/KEYBOARD.DLL', 'DATABASE.MW2') */
   loose: Map<string, Uint8Array>;
-  /** the game CD's cue sheet, when its image is in the install (the music) */
-  cue: { name: string; text: string } | null;
+  /** the game CD, when the install has it; null for none */
+  cd: GameCd | null;
 }
+
+/**
+ * The game CD as the install holds it: its image (a cue sheet and BIN, whose
+ * audio tracks are the music), or its files copied off it into the install
+ * directory (SMK\, LAUNCH\, KEATING\ beside MW2.EXE - a ripped CD, with no
+ * music). The image wins when both are there.
+ */
+export type GameCd = { kind: 'image'; cue: { name: string; text: string } } | { kind: 'files' };
+
+/** The CD's directories the programs read from its drive (the movies and animations, the launch pictures, the instructor's voice). */
+const CD_DIRS = ['SMK', 'LAUNCH', 'KEATING'];
 
 export interface MissionEntry {
   /** the SCN1 stream name, e.g. AMY_SCN1 */
@@ -38,7 +54,8 @@ export interface MissionEntry {
   needs: 'ready' | 'star' | 'opponents';
 }
 
-async function listDir(dir: string): Promise<string[]> {
+/** The served files in one install directory ('' for the root), as 'DIR/NAME' paths. */
+export async function listDir(dir: string): Promise<string[]> {
   const r = await fetch(`/mw2/__list/${dir}`);
   return r.ok ? ((await r.json()) as string[]) : [];
 }
@@ -49,6 +66,8 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
   const prj = new ProjectFile(await src.read('MW2.PRJ'));
   progress('MW2.EXE');
   const exe = ExeImage.fromExe(await src.read('MW2.EXE'));
+  progress('MW2SHELL.EXE');
+  const shellExe = ExeImage.fromExe(await src.read('MW2SHELL.EXE'));
   progress('MW2.INI');
   let ini = new IniFile(null);
   try {
@@ -57,18 +76,32 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
     /* the INI only supplies error texts */
   }
   const loose = new Map<string, Uint8Array>();
-  const names = [
-    ...(await listDir('')).filter((n) => /\.MAP$/i.test(n) || /^MW2SND\.CFG$/i.test(n)),
-    ...(await listDir('GIDDI')),
-  ];
-  for (const n of names) {
+  for (const n of await listDir('GIDDI')) {
     progress(n);
     loose.set(n.toUpperCase(), await src.read(n));
   }
-  let cue: GameData['cue'] = null;
+  // the pictures of MW2.EXE's fifth cheat code (read by name, vfx\<name>.bin)
+  for (const n of ['VFX/VFXJK.BIN', 'VFX/VFXHD.BIN']) {
+    try {
+      loose.set(n, await src.read(n));
+    } catch {
+      /* without them the cheat runs its transitions and the credits, as the original does */
+    }
+  }
+  // the front end's archives: its screens, fonts, music and samples, and the Clan archives
+  for (const n of ['DATABASE.MW2', 'ARCHWO.MW2', 'ARCHJF.MW2']) {
+    progress(n);
+    try {
+      loose.set(n, await src.read(n));
+    } catch {
+      /* the front end reports a missing archive itself */
+    }
+  }
+  let cd: GameCd | null = null;
   const cueName = (await listDir('')).find((n) => /\.CUE$/i.test(n));
-  if (cueName) cue = { name: cueName, text: new TextDecoder().decode(await src.read(cueName)) };
-  return { prj, exe, ini, loose, cue };
+  if (cueName) cd = { kind: 'image', cue: { name: cueName, text: new TextDecoder().decode(await src.read(cueName)) } };
+  else if ((await Promise.all(CD_DIRS.map(listDir))).some((l) => l.length > 0)) cd = { kind: 'files' };
+  return { prj, exe, shellExe, ini, loose, cd };
 }
 
 /**

@@ -94,6 +94,11 @@
   "kind": "raw",
   "doc": "the two message-bar slots (MessageSlot): 0 the top bar, 1 the bottom"
  },
+ "savedHudEnabled": {
+  "address": "0x955ac",
+  "kind": "int",
+  "doc": "hudEnabled as it was before something hid the HUD: radar_mode_step stores it when the map opens (mode 4), cheat_credits_render_hook while its view shrinks (state 2), and vfx_video_sub_0106d0 copies it back into hudEnabled after the page flip when viewportRestorePending is set. cheat_credits_render_hook sets it to 1 at its end, so the HUD comes back ON whatever it was"
+ },
  "mapHeightLow": {
   "address": "0x955b8",
   "kind": "int",
@@ -188,6 +193,11 @@
   "address": "0x957d4",
   "kind": "raw",
   "doc": "per-mission, and the whole of the ejection outcome hangs on it. sim_objects sets it from the mission record as (record[0xe] == 0), in a run of six flags all inverted the same way. When it is set, mech_eject refuses: it plays cue 0x20 and leaves status alone instead of writing 5, and the status-5 tick rewrites 5 (ej) to 4 (dd) and sets missionEndCode to 4 rather than 2. ui_callbacks_sub_019da0 deliberately forces it to 0 around an command_execute (formerly option_toggle)(0x3b) call and puts it back afterwards, which is what establishes the direction - that path wants the ejection to go through. ONE READER was unexplained: ai_group_part1 at the 0x170d threshold gates a mech_on_destroyed (formerly ai_log_new_leader) call on this being non-zero. With that function now known to be the mech-destroyed handler, the reading is: when ejection is disabled, the path that would eject the mech destroys it instead. That is consistent with the rest of this note, but the 0x170d site itself has not been re-read."
+ },
+ "launchGreyRamp": {
+  "address": "0x957e8",
+  "kind": "raw",
+  "doc": "16 RGB triples, a grey ramp (0,0,0 206,210,218 ... 7,7,8), 8-bit: boot_load_launch_anims shifts each byte right by 2 in place and writes them to DAC entries 0..15 once the launch picture has faded in"
  },
  "simTick": {
   "address": "0x9581c",
@@ -344,6 +354,56 @@
   "address": "0x959a4",
   "kind": "raw",
   "doc": "five ints, one per lance slot, holding which of the six command-menu entries is currently showing for that lancemate: 1 attack, 2 target, 3 follow, 4 patrol, 5 godirect, 6 shutdown, 0 none. Each lance_order_* menu entry writes its own number here beside calling lance_order_issue, and lance_order_selected reads it back, answering 7 for a slot out of range. Note the UI numbering is not the order code: the menu shows attack first, but its order code is 3 and target's is 2."
+ },
+ "cheatCreditsSavedHook": {
+  "address": "0x959b8",
+  "kind": "raw",
+  "doc": "main's render hook (0x97074) as cheat_credits_hook_install found it - vfx_video_sub_010490 (0x10490) in the image. cheat_credits_render_hook calls it while the view shrinks and closes (states 0 to 3) and puts it back in 0x97074 at the end"
+ },
+ "cheatCreditsPointPane": {
+  "address": "0x959bc",
+  "kind": "raw",
+  "doc": "a pane of 16.16 screen fractions, all four edges 0x8000 - the screen's centre point. cheat_credits_render_hook lays it out in pixels on first use and makes it the transition's from-pane for the close (pane_transition_step_split back to it)"
+ },
+ "cheatCreditsSmallPane": {
+  "address": "0x959d0",
+  "kind": "raw",
+  "doc": "a pane of 16.16 screen fractions, 0x7d71..0x828f on both axes - a small box round the centre. The transition's from-pane (its to-pane is the full-screen 0x959e4, its out-pane 0x959f8, both in the params record at 0x95a14): cheat_credits_render_hook shrinks the view to it and back"
+ },
+ "cheatCreditsTransition": {
+  "address": "0x95a24",
+  "kind": "raw",
+  "doc": "the pane transition cheat_credits_render_hook steps: {state record 0x95a0c, params record 0x95a14}, the same two-pointer shape as the HUD's transitions (0x96bc0). The params hold {duration 0xb6 in the image - the hook sets 0x27d, then 0x2d8 - from 0x959d0, to 0x959e4, out 0x959f8}"
+ },
+ "cheatCreditsPicture": {
+  "address": "0x95a2c",
+  "kind": "raw",
+  "doc": "the picture file vfx_bin_file_load returned (vfxjk, then vfxhd), or 0; freed when the next is loaded and at the end"
+ },
+ "cheatCreditsPalette": {
+  "address": "0x95a30",
+  "kind": "raw",
+  "doc": "256 x 3 bytes from calloc: gif_palette_read's copy of the picture's palette, and between the pictures 256 copies of the colour at 0xd4080, the targets of palette_fade_used_colours"
+ },
+ "cheatCreditsGifWork": {
+  "address": "0x95a34",
+  "kind": "raw",
+  "doc": "the 0x502e-byte work block gif_decode is given (its layout is in gif_decode's note)"
+ },
+ "cheatCreditsPictureShown": {
+  "address": "0x95a38",
+  "kind": "int",
+  "doc": "1 once the first picture has been drawn and faded in; while it is set cheat_credits_render_hook redraws the picture every frame and leaves the picture's palette up for the credits menu. Cleared when the second picture fails to load"
+ },
+ "cheatCreditsTimer": {
+  "address": "0x95a3c",
+  "kind": "int",
+  "doc": "the simTick at which cheat_credits_render_hook's current state ends: + 0x38e before the transition, + 0x111 for each picture and after the credits"
+ },
+ "cheatCreditsTransitionDir": {
+  "address": "0x95a40",
+  "kind": "raw",
+  "doc": "byte: the direction pane_transition_step is run in - 1 (from the full screen to the small pane 0x959d0) then 0 (back)"
  },
  "devDirEntryCount": {
   "address": "0x95a44",
@@ -1705,6 +1765,11 @@
   "kind": "raw",
   "doc": "a VFX driver hook that paces: palette_fade_used_colours calls it duration times over a fade, and main's display step calls it before the page flip when 0x95514 is set - consistent with a wait for vertical retrace, which is NOT established"
  },
+ "vfxWindowRefresh": {
+  "address": "0x9fd60",
+  "kind": "raw",
+  "doc": "the VFX driver's entry 6 (vfx_lib_sub_053651 copies the 13-entry table the driver module starts with to 0x9fd48): (window, x0, y0, x1, y1), cdecl. In MCGA.DLL (entry 6 at object offset 0x864) it clips the rectangle to 0..0x13f x 0..0xc7 and copies the window's pixels to 0xa0000 + its row table - the window put on the screen at once. cheat_credits_render_hook calls it with (defaultCanvas, 0, 0, xMax, yMax) after drawing a picture"
+ },
  "paletteDacRead": {
   "address": "0x9fd68",
   "kind": "raw",
@@ -1740,6 +1805,26 @@
   "kind": "raw",
   "doc": "per-channel Bresenham accumulator, primed to half the largest delta so each channel takes its first step near the middle of its run"
  },
+ "gifBitMasks": {
+  "address": "0xa15c1",
+  "kind": "raw",
+  "doc": "9 bytes 0, 1, 3, 7, 0xf, 0x1f, 0x3f, 0x7f, 0xff: gif_read_bits masks n bits with entry n"
+ },
+ "gifInterlaceStep": {
+  "address": "0xa15ca",
+  "kind": "raw",
+  "doc": "5 bytes 8, 8, 4, 2, 0: gif_put_pixel's row step for each pass of an interlaced GIF"
+ },
+ "gifInterlaceStart": {
+  "address": "0xa15cf",
+  "kind": "raw",
+  "doc": "5 bytes 0, 4, 2, 1, 0: the first row of each pass of an interlaced GIF - gif_put_pixel reads entry pass + 1 when a pass runs past the height"
+ },
+ "gifPane": {
+  "address": "0xa15d4",
+  "kind": "raw",
+  "doc": "the pane gif_decode was given - gif_put_pixel writes each finished row into it"
+ },
  "currentViewport": {
   "address": "0xa46a8",
   "kind": "raw",
@@ -1749,6 +1834,11 @@
   "address": "0xa46bc",
   "kind": "raw",
   "doc": "a five-int record of the same shape as currentViewport and each viewportModes entry - render_asm_sub_03eb10 copies both with the same five-iteration loop. project_tables, damage and sound_res all store its address into draw-target slots, so it is the record everything points at by default, and palette_fade_used_colours scans its pixels. WHETHER IT IS LITERALLY THE VISIBLE FRAMEBUFFER IS NOT ESTABLISHED - default target is what the call sites show"
+ },
+ "viewportRestorePending": {
+  "address": "0xa46d0",
+  "kind": "int",
+  "doc": "set when currentViewport has been left pointing at a transition's pane: radar_draw_transition (keep), cheat_credits_render_hook (state 2, and at its end). vfx_video_sub_0106d0, after the page flip, then restores hudEnabled from savedHudEnabled and currentViewport from the full-screen copy at 0xa4694, and clears it. ui_context_dispatch does not run the frame of a context with flags bit 1 while it is set"
  },
  "screenModeInfo": {
   "address": "0xa46d4",
@@ -1890,10 +1980,30 @@
   "kind": "int",
   "doc": "the key code menu_poll_key leaves for the menu code to consume - 0x0d from menu_enter, 0x1b from menu_abort, 0x96/0x97 and 0x99/0x20 from the two analog menu axes, or a raw keystroke passed through from playerControls +0x14"
  },
+ "cheatCreditsPicturePane": {
+  "address": "0xd4050",
+  "kind": "raw",
+  "doc": "a ViewWindow: currentViewport as state 4 found it, then shrunk about its centre to the first picture's size by layout_pane_fit_gif - gif_decode draws both pictures in it"
+ },
+ "cheatCreditsSavedViewport": {
+  "address": "0xd4064",
+  "kind": "raw",
+  "doc": "a ViewWindow: currentViewport as cheat_credits_render_hook's state 0 found it; wiped to 0 and restored to currentViewport while the view closes (state 3)"
+ },
  "fleeToDos": {
   "address": "0xd407c",
   "kind": "int",
   "doc": "set by menu_item_flee_to_dos; main then exits with code 0xff instead of 0"
+ },
+ "cheatCreditsFadeColour": {
+  "address": "0xd4080",
+  "kind": "raw",
+  "doc": "three bytes the picture fades go through: written to every DAC entry before the first picture and faded to between the two. In bss and written by nothing, so black"
+ },
+ "cheatCreditsState": {
+  "address": "0xd4083",
+  "kind": "raw",
+  "doc": "byte: cheat_credits_render_hook's state - 0 to 7, then 0xff; cheat_credits_hook_install sets 0"
  },
  "devDirEntries": {
   "address": "0xd4084",

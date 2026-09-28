@@ -1,8 +1,27 @@
 # Porting notes
 
 Conventions for the TypeScript port and the decisions behind them. Read this
-before adding code. `decompiled/CLAUDE.md` and `decompiled/README.md` explain
-the decompilation this is ported from; the method rules there apply here too.
+before adding code. The decompilation this is ported from is a separate repo,
+`mw2-decompiled`: its `CLAUDE.md` and `decompiled/README.md` explain it, and
+the method rules there apply here too. Paths below written `decompiled/...`
+are in that repo - locally, under `MW2_DECOMPILED` (`.env.local`). The
+decompilation is not public, so `.env.example` leaves `MW2_DECOMPILED` out
+and the README does not mention it: add it to `.env.local` by hand. Without
+it the game builds and plays, most golden suites skip and `npm run gen`
+stops.
+
+## Two repos
+
+The port and the decompilation are developed together but committed
+separately. Porting keeps finding things the decompilation got wrong or
+left unnamed; those are fixed **upstream, in `mw2-decompiled`**, through its
+inputs (`tools/name_functions.py`, `tools/*Types.java`, `annotations.json`,
+`tools/mw2shell/*`) and `deepen.ps1` - never by editing its generated
+`src/`, `include/` or `listing/`. The order:
+
+1. fix and commit in `mw2-decompiled` (`deepen.ps1` must print `verify_export: OK`);
+2. here, `npm run gen` - `PORTING.md` records the decompilation commit it
+   was checked against - then commit the port's side, naming that commit.
 
 ## Where things go
 
@@ -48,6 +67,88 @@ export function worldRecordDefine(...) { ... }
   established (return the most neutral value, never a guess), `quirk('...')`
   for an original oddity reproduced on purpose, `divergence('...')` for a
   runtime difference. All three appear in PORTING.md.
+
+## Two executables: MW2.EXE and MW2SHELL.EXE
+
+The port reproduces the sim (MW2.EXE) and the front end (MW2SHELL.EXE,
+`decompiled/mw2shell/`). In the original they are separate processes that
+MECH2.EXE runs in turn, so they are separate address spaces. Everything keyed
+by an address or reset at start-up is therefore keyed by executable
+(`engine/exeTarget.ts`, `'mw2' | 'mw2shell'`, MW2 by default):
+
+| | MW2.EXE | MW2SHELL.EXE |
+|---|---|---|
+| function tag | `@mw2 <name> <addr>` | `@mw2shell <name> <addr>` |
+| static data tag | `@mw2data` | `@mw2shelldata` |
+| checked against | `decompiled/mw2/listing/functions.csv` | `decompiled/mw2shell/listing/functions.csv` |
+| structs | `src/generated/classes.gen.ts` | `src/generated/shell/classes.gen.ts` |
+| labels | `LABEL` (`generated/labels.gen.ts`) | `SHELL_LABEL` (`generated/shell/labels.gen.ts`) |
+| boot image | `imageI32`, ... | `imageReader('mw2shell')` |
+| globals | `registerGlobals(name, state, reset)` | `registerGlobals(name, state, reset, 'mw2shell')` |
+| code pointers | `registerCode(name, addr, fn)` | `registerCode(name, addr, fn, 'mw2shell')` |
+
+- Look shell addresses up in the shell's `functions.csv`; the two images
+  overlap, so an MW2 address means nothing in the shell and the reverse.
+- A shell struct with MW2's name *and* layout (SimOptions, the Project* file
+  structs) is MW2's class, re-exported from the shell module, so one value
+  passes between them. The shell's `MenuItem`, `MechSection` and
+  `MissionObjectiveRecord` share only a name and are their own classes.
+- Code the two share byte for byte (the VFX drawing and runtime routines,
+  `decompiled/mw2shell/build/matched.csv`) is ported once and carries a tag
+  for each executable.
+- `resetAllGlobals(target)` resets one executable's globals, as starting that
+  process would. Library groups (clib, Miles, Smacker) and the shell's dead
+  WASM compiler are left out of PORTING.md's totals.
+
+### The disk: what the two programs share
+
+In the original the shell and the sim are separate processes and the files
+are the whole contract between them (decompiled/mech2/README.md). The port
+keeps that contract: `engine/dosFiles.ts` is a virtual DOS disk both read
+and write through the ported fopen/fread/fwrite sites, in three layers -
+read-only content from the install (the GIDDI drivers), the
+port's own files (everything a program writes: MW2REG.CFG, mw2prm.cfg,
+MW2DIF/MW2SND/MW2CAR/mw2msn.cfg, the star BWDs, user MEKs, INPUT.MAP and
+giddi\config00.cpc; persisted in IndexedDB by `app/diskStore.ts`), and a
+scratch overlay (the dev mission picker's launches, never persisted).
+**The port never reads the install's config or player files at run
+time**; tests read them as the expected output of the ported writers
+(`installShellFixtures`). Files the original ships and a program only
+reads - GAMEKEY.MAP, the per-device giddi\<device>.cpc profiles - are the
+port's own data, written onto the disk on a first run together with the
+controls screen's INPUT.MAP (`shell/controls/seed.ts`).
+
+`src/launcher/mech2.ts` is MECH2.EXE's loop (shell intro -> mw2prm.cfg ->
+mw2.exe -> shell sim, until an exit status of 0xff); MW2.EXE takes its argv
+through `check_launched_by_shell` (`mission/commandLine.ts`).
+
+### The shell's memory
+
+MW2SHELL.EXE is mostly a file editor, and writes its globals to disk with a
+single fwrite of the struct, residue bytes and all. So its static data is a
+byte-for-byte copy of its image (`shell/memory.ts`, reset on each start):
+`prmBlock`, `playerStar`, `pilotRegistry`, `bwdBuffer` live at their own
+addresses, pointers into the image are followed where they point, and field
+offsets come from the generated schemas (`fieldOffset`). Heap objects stay
+JS objects. String constants the code copies get a label in
+Mw2shellTypes.java like any other global - never a literal typed in.
+
+### The shell's blocking loops
+
+Every screen and modal helper of MW2SHELL.EXE is a loop that owns the
+machine until it returns. The port writes each as a generator with the
+original's control flow (`shell/host/blocking.ts`) and composes them with
+`yield*`; a function that can block - anything that reaches
+`mouse_update`, a Smacker wait, or a file read off the CD - is
+`function*` and returns `Blocking<T>`. `mouse_update` yields between its
+present and its read of the mouse, which is the shell's frame boundary.
+`shell/host/pump.ts` resumes the generator from the host's frames at a
+fixed number of passes a second (a `@divergence`: the original ran as fast
+as the PC could, and some timings count passes). The hardware the shell's
+drivers talk to - the screen and DAC, int 33h, the BIOS keyboard buffer, the
+250 Hz timer, the sound card - is `shell/host/hardware.ts`; the browser
+side (`app/shell/`) feeds it input and presents it. `?dev` in the address
+opens the mission picker and editor instead of the game.
 
 ## Numbers
 
@@ -101,3 +202,13 @@ decompilation. Each state object registers itself with
 - **Resource cache.** MW2.PRJ is held in memory; cache_lock / unlock / release
   have no memory to manage. They are ported as no-ops where they are called.
 - **FetchSource** lives in `src/app` because `fetch` is a DOM API.
+- **NetMech.** The INT 0x65 driver is a `NetTransport` the host installs
+  (`sim/net/transport.ts`; `QueueTransport`/`MemoryNetHub` in memory,
+  `app/net/webrtcLink.ts` over a WebRTC data channel signalled by pasted
+  offer/answer text). The join blocks on the other stations, so
+  netplay_start/netplay_join are generators and main's start-up is
+  `bootMissionStartSteps` (the sync `bootMission` throws if the join would
+  wait). Loops the original spun in real time on a silent driver (a failed
+  send, the sign-off's second) spend timer ticks through `setNetSpin`
+  (default: one `timerInterrupt`). Two stations cannot share one process's
+  globals: `test/sim/netplay.test.ts` runs each in a child process.

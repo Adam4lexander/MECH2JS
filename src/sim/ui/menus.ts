@@ -19,12 +19,13 @@ import { stopwatchCreate, stopwatchReset } from '../../engine/timer.ts';
 import { vfxCharacterWidth, vfxFontHeight, vfxLineDraw, vfxPaneWipe, vfxShapeBounds, vfxShapeDraw, vfxStringDraw } from '../../engine/vfx/vfx.ts';
 import type { Menu, MenuContext, MenuControl, MenuItem, UiContext, ViewWindow } from '../../generated/classes.gen.ts';
 import { vfxFontSub013a40 } from '../cockpit/objectivesHud.ts';
+import { vfxFontSub013ad0 } from '../cockpit/targetDisplay.ts';
 import { inputSub048c50, inputSub048c60 } from '../controls/input.ts';
-import { vfxPaneFrame } from '../display/layout.ts';
-import { display } from '../display/video.ts';
+import { layoutPaneInPane, vfxPaneFrame } from '../display/layout.ts';
+import { defaultCanvas, display } from '../display/video.ts';
 import { radar } from '../cockpit/radar.ts';
 import { soundPlayAt } from '../sound/mixer.ts';
-import { menuLoad, type MenuListData, type MenuSliderData } from './menuLoad.ts';
+import { menuLoad, type MenuListData, type MenuPanesData, type MenuSliderData } from './menuLoad.ts';
 import { ui } from './uiContext.ts';
 
 /** the ink byte of the text colour table (0xa4dd2 = 0xa4dc4 + 0xe) */
@@ -77,6 +78,18 @@ export function uiContextFindNode(id: number): UiContext | null {
   let c = ui.uiContextHead;
   while (c && c.id !== id) c = c.next;
   return c;
+}
+
+/**
+ * The MenuContext of the first context whose active byte is 1, or null -
+ * how cheat_credits_render_hook waits for the credits menu to close.
+ *
+ * @mw2 ui_context_active_record 0x00018660
+ * @fidelity exact
+ */
+export function uiContextActiveRecord(): MenuContext | null {
+  for (let c = ui.uiContextHead; c; c = c.next) if ((c.active & 0xff) === 1) return c.record;
+  return null;
 }
 
 /**
@@ -543,4 +556,30 @@ export const menuItemSlider = registerCode('menu_item_slider', 0x186e0, (ctx: Me
   cacheUnlock((av + ids[2]!) | 0, 'SHP');
   cacheUnlock((av + ids[4]!) | 0, 'SHP');
   cacheUnlock((av + ids[6]!) | 0, 'SHP');
+});
+
+/**
+ * menuItemDrawFns[4] (MENU 3's credits pages): the control's pane is laid
+ * out inside the menu's pane on first use (its canvas set to defaultCanvas)
+ * and its text drawn there word-wrapped; the control is previewed unless
+ * the menu is accepting (4) or backing out (5).
+ *
+ * @mw2 menu_item_text_box 0x00018ef0
+ * @fidelity exact
+ */
+export const menuItemTextBox = registerCode('menu_item_text_box', 0x18ef0, (ctx: MenuContext | null, c: MenuControl | null, _index: number, _item: MenuItem, _x: number, _y: number, menu: Menu | null): void => {
+  if (!ctx || !menu) return;
+  const state = menu.state;
+  const pane = ctx.pane;
+  const font = ctx.font;
+  if (!pane || !font || !c || !c.data) return;
+  const d = c.data as MenuPanesData;
+  const box = d.pane0;
+  if (!box || d.text === null) return;
+  if (!box.canvas) {
+    box.canvas = defaultCanvas;
+    layoutPaneInPane(pane, box, box);
+  }
+  vfxFontSub013ad0(box, d.text, font);
+  if (c.preview && state !== 4 && state !== 5) c.preview(c.selector, 0);
 });

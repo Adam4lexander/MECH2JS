@@ -272,10 +272,14 @@ export function matrixFromEulerOrder0(out: Transform, pitch: number, yaw: number
  * then the three COLUMNS (0,3,6), (1,4,7), (2,5,8). There is no
  * orthogonalisation step - only unit length, rows then columns.
  *
+ * The x87 sequence is fild a, b, c; (a*a + b*b) + c*c; fsqrt; fdivr K;
+ * then each times s - this order, at the FPU's 53-bit precision
+ * (core/int/x87.ts), which doubles reproduce exactly.
+ * CORRECTION (2026-09-28): this was partial, on the assumption the x87
+ * kept 64-bit precision.
+ *
  * @mw2 matrix_renormalise 0x0003ad00
- * @fidelity partial
- * @divergence double instead of x87 extended precision; a²+b²+c² can exceed
- *   2^53, so results can differ by one at a truncation boundary
+ * @fidelity exact
  */
 export function matrixRenormalise(m: Mat3): void {
   const K = 536870912.0;
@@ -297,13 +301,14 @@ export function matrixRenormalise(m: Mat3): void {
 }
 
 /**
- * sqrt(a*a + b*b) on the x87, truncated toward zero. Exact for int inputs:
- * the sum of squares is below 2^63 and a double sqrt of it truncates the same
- * way extended precision does except within an ulp of an integer.
+ * sqrt(a*a + b*b) on the x87, truncated toward zero. The FPU runs at
+ * 53-bit precision (core/int/x87.ts), so each product, the sum and the
+ * square root round as doubles do.
+ * CORRECTION (2026-09-28): this was partial, on the assumption the x87
+ * kept 64-bit precision.
  *
  * @mw2 int_hypot 0x0003ac00
- * @fidelity partial
- * @divergence computed in double rather than 80-bit extended precision
+ * @fidelity exact
  */
 export function intHypot(a: number, b: number): number {
   return Math.trunc(Math.sqrt(a * a + b * b)) | 0;

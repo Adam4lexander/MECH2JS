@@ -30,7 +30,7 @@ import { inputPollControls } from '../sim/controls/input.ts';
 import { inputGlobals } from '../sim/controls/inputGlobals.ts';
 import { commandGlobals, keyPauseEnd } from '../sim/ui/commands.ts';
 import { mechDispatchHook1, mechDispatchHook2, mechDispatchHook3, mechDispatchHook4 } from '../sim/mech/hooks.ts';
-import { netplayFrameExchange } from '../sim/net/netplay.ts';
+import { netplayFrameExchange } from '../sim/net/netSession.ts';
 import { gameUpdatePause, keyCommandUpdate, menuPollKey, ui } from '../sim/ui/uiContext.ts';
 import { uiContextDispatch } from '../sim/ui/menus.ts';
 import { bitmap3dAnimate } from '../sim/world/bitmap3d.ts';

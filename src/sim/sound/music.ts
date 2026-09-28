@@ -15,7 +15,7 @@ import { unestablished } from '../../core/provenance.ts';
 import { systemError } from '../../core/systemError.ts';
 import { cdDrive } from '../../engine/miles/cdDrive.ts';
 import { clock } from '../../engine/clock.ts';
-import { dosFileLoad } from '../../engine/dosFiles.ts';
+import { dosFileLoad, dosFileWrite } from '../../engine/dosFiles.ts';
 import { registerGlobals } from '../../engine/globals.ts';
 import { imageI32 } from '../../engine/image.ts';
 import { cacheLoadResource, cacheUnlock } from '../../engine/resources/cache.ts';
@@ -310,12 +310,17 @@ export function soundInitAll(): number {
  *
  * @mw2 sound_save_config 0x00043f20
  * @fidelity partial
- * @divergence the port never writes the game's cfg files: mw2snd.cfg is left as it was; sound_release_sequences has no sequence to release
+ * @divergence sound_release_sequences has no sequence to release (no XMIDI is loaded in a mission)
  */
 export function soundSaveConfig(): void {
   if (music.musicCdTrack !== -1) cdStop();
   midiClose();
   soundShutdown();
+  // sound_config_write("mw2snd.cfg", soundConfigBuffer): 0x3c bytes
+  const out = new Uint8Array(0x3c);
+  const dv = new DataView(out.buffer);
+  for (let i = 0; i < 15; i++) dv.setInt32(i * 4, sound.soundConfigBuffer?.[i] ?? 0, true);
+  dosFileWrite('mw2snd.cfg', out);
 }
 
 /**
