@@ -119,7 +119,7 @@ function smackFrameSound(s: Smack, f: SmackerFrame): void {
     if ((s.tracks & (1 << i)) === 0) continue;
     const t = s.decoder.header.audio[i];
     const pcm = f.audio[i];
-    if (t && pcm && pcm.length > 0) out(pcm, t.sampleRate, t.channels);
+    if (t && pcm && pcm.length > 0) out(pcm, t.sampleRate, t.channels, s, f.index === 0);
   }
 }
 

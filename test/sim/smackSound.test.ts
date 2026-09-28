@@ -5,7 +5,7 @@
 // carries a 22 kHz track.
 import { afterEach, describe, expect, it } from 'vitest';
 import { hardware } from '../../src/shell/host/hardware.ts';
-import { SMACK_TRACKS, smackDoFrame, smackNextFrame, smackOpen } from '../../src/shell/video/smack.ts';
+import { SMACK_TRACKS, smackDoFrame, smackGoto, smackNextFrame, smackOpen } from '../../src/shell/video/smack.ts';
 import { openCdImage } from '../support/cdImage.ts';
 import { hasCdImage } from '../support/env.ts';
 
@@ -14,26 +14,36 @@ describe.runIf(hasCdImage)('Smacker sound on the tracks a movie is opened with',
     hardware.pcmOut = null;
   });
 
-  async function play(flags: number): Promise<{ samples: number; rate: number }> {
+  async function play(flags: number): Promise<{ samples: number; rate: number; restarts: number; streams: Set<object> }> {
     const iso = await openCdImage();
     const s = smackOpen(await iso.read('SMK/AWOBRIEF.SMK'), flags)!;
     let samples = 0;
     let rate = 0;
-    hardware.pcmOut = (pcm, r) => {
+    let restarts = 0;
+    const streams = new Set<object>();
+    hardware.pcmOut = (pcm, r, _c, stream, restart) => {
       samples += pcm.length;
       rate = r;
+      streams.add(stream);
+      if (restart) restarts++;
     };
     for (let i = 0; i < s.frames; i++) {
       smackDoFrame(s);
       smackNextFrame(s);
     }
-    return { samples, rate };
+    // looped back to the first frame, as a looping animation does: a restart of its timeline
+    smackGoto(s, 1);
+    smackDoFrame(s);
+    return { samples, rate, restarts, streams };
   }
 
   it('AWOBRIEF opened with the sound tracks: its audio reaches the host', async () => {
     const r = await play(SMACK_TRACKS);
     expect(r.rate).toBe(22050);
     expect(r.samples).toBeGreaterThan(22050 / 2);
+    // one stream (the movie) for the host to keep its own timeline; frame 0 - first and after the loop - restarts it
+    expect(r.streams.size).toBe(1);
+    expect(r.restarts).toBe(2);
   });
 
   it('opened without them (movie sound off): silent', async () => {

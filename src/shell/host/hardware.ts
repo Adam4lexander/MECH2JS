@@ -45,7 +45,11 @@ export const hardware = {
   // ---- a full-screen movie: Smacker drives the display itself while one plays
   movie: null as { width: number; height: number; pixels: Uint8Array; version: number } | null,
   /** the sound card: a movie's audio as it is decoded (the host plays it) */
-  pcmOut: null as ((samples: Int16Array, rate: number, channels: number) => void) | null,
+  /**
+   * PCM for the host to play: `stream` is the movie it belongs to (each keeps its own timeline, so
+   * two movies' sound mixes), `restart` set when the movie is back at its first frame
+   */
+  pcmOut: null as ((samples: Int16Array, rate: number, channels: number, stream: object, restart: boolean) => void) | null,
   /** the sound card's digital side, as Miles drives it; null for no card (every sample call is then a no-op, as without a driver) */
   digital: null as DigitalCard | null,
   /** the MIDI side: a General MIDI synth (the MDI driver's output); null for none */
