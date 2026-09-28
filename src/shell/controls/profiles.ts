@@ -96,8 +96,8 @@ export const KEYBOARD_PROFILE: DeviceProfile = {
   ],
 };
 
-/** GIDDI\MOUSE.CPC */
-export const MOUSE_PROFILE: DeviceProfile = {
+/** GIDDI\MOUSE.CPC as it shipped: the mouse's up/down tilts the torso inverted (reversed), flight-stick style. */
+export const MOUSE_PROFILE_SHIPPED: DeviceProfile = {
   name: 'name goes here',
   device: 'mouse',
   savedDevices: SHIPPED_DEVICES,
@@ -109,6 +109,17 @@ export const MOUSE_PROFILE: DeviceProfile = {
     { page: 0, control: 'weapon_cycle', kind: 'button', input: 'RightBtn' },
     { page: 0, control: 'target_reticle', kind: 'button', input: 'MiddleBtn' },
   ],
+};
+
+/**
+ * The mouse profile the port supplies: the shipped one with torso_tilt not
+ * reversed, so pushing the mouse forward tilts the torso up.
+ *
+ * @divergence a deliberate change of default, the user's choice (2026-09-28): the shipped MOUSE.CPC inverts the mouse's up/down; COCKPIT CONTROLS can still reverse it
+ */
+export const MOUSE_PROFILE: DeviceProfile = {
+  ...MOUSE_PROFILE_SHIPPED,
+  bindings: MOUSE_PROFILE_SHIPPED.bindings.map((b) => (b.control === 'torso_tilt' ? { ...b, reversed: false } : b)),
 };
 
 /** The profiles the port supplies, by device. */

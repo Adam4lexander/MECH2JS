@@ -31,7 +31,7 @@ import {
 } from '../../src/shell/controls/config.ts';
 import { controlMapName, controlsAcceptConfigFiles, controlsWriteTempMap } from '../../src/shell/controls/inputMap.ts';
 import { controlsDeviceRow, controlsToggleDevice } from '../../src/shell/controls/panel.ts';
-import { KEYBOARD_PROFILE, MOUSE_PROFILE, profileToCpc } from '../../src/shell/controls/profiles.ts';
+import { KEYBOARD_PROFILE, MOUSE_PROFILE, MOUSE_PROFILE_SHIPPED, profileToCpc } from '../../src/shell/controls/profiles.ts';
 import { seedControlFiles } from '../../src/shell/controls/seed.ts';
 import { gamekeyBindings, gamekeyMapBytes } from '../../src/sim/controls/gamekeyMap.ts';
 import { input, inputLoadGamekeys } from '../../src/sim/controls/input.ts';
@@ -196,11 +196,17 @@ describe.runIf(hasShellData && hasGameData)('cockpit controls configuration', ()
     expect(hex(dosFileLoad('giddi\\config00.cpc'))).toBe(hex(once));
   });
 
-  it('the port\'s KEYBOARD and MOUSE profiles are the install\'s GIDDI\\KEYBOARD.CPC and GIDDI\\MOUSE.CPC', () => {
+  it('the port\'s KEYBOARD and shipped MOUSE profiles are the install\'s GIDDI\\KEYBOARD.CPC and GIDDI\\MOUSE.CPC; its default mouse differs only in the reversal', () => {
     controlsScreenSetup();
     const names = Array.from({ length: CONTROLS }, (_, i) => controlMapName(i));
     expect(hex(profileToCpc(KEYBOARD_PROFILE, names, inputDeviceGet(0)!.record))).toBe(hex(want.get('GIDDI/KEYBOARD.CPC')!));
-    expect(hex(profileToCpc(MOUSE_PROFILE, names, inputDeviceGet(1)!.record))).toBe(hex(want.get('GIDDI/MOUSE.CPC')!));
+    const shipped = profileToCpc(MOUSE_PROFILE_SHIPPED, names, inputDeviceGet(1)!.record);
+    expect(hex(shipped)).toBe(hex(want.get('GIDDI/MOUSE.CPC')!));
+    // the port's default differs in one byte: the top of torso_tilt's flags dword, bit 31 (reversed)
+    const port = profileToCpc(MOUSE_PROFILE, names, inputDeviceGet(1)!.record);
+    const differ = [...port].map((v, i) => (v !== shipped[i] ? i : -1)).filter((i) => i >= 0);
+    expect(differ.length).toBe(1);
+    expect(shipped[differ[0]!]! ^ port[differ[0]!]!).toBe(0x80);
   });
 
   it('RESET DEFAULTS with the keyboard and mouse lays the profiles out as the install\'s CONFIG00 was before its edits', () => {
@@ -233,11 +239,13 @@ describe.runIf(hasShellData && hasGameData)('cockpit controls configuration', ()
     const r = seedControlFiles(shellExe);
     expect(r.written.sort()).toEqual(['GAMEKEY.MAP', 'GIDDI/CONFIG00.CPC', 'GIDDI/KEYBOARD.CPC', 'GIDDI/MOUSE.CPC', 'INPUT.MAP'].map((s) => s.replace('/', '\\')).sort());
     expect(hex(dosFileLoad('giddi\\keyboard.cpc'))).toBe(hex(want.get('GIDDI/KEYBOARD.CPC')!));
-    expect(hex(dosFileLoad('giddi\\mouse.cpc'))).toBe(hex(want.get('GIDDI/MOUSE.CPC')!));
+    const names = Array.from({ length: CONTROLS }, (_, i) => controlMapName(i));
+    expect(hex(dosFileLoad('giddi\\mouse.cpc'))).toBe(hex(profileToCpc(MOUSE_PROFILE, names, inputDeviceGet(1)!.record)));
     const map = text(dosFileLoad('input.map'));
     expect(map.startsWith('# mw2shell CockPit Config generated map file\r\nthrottle_plus {\r\n\t+ keyboard\tEqual\r\n}\r\n')).toBe(true);
     expect(map).toContain('torso_pan {\r\n\t+ mouse\tLeft/Right\r\n}');
-    expect(map).toContain('torso_tilt {\r\n\t- mouse\tUp/Down\r\n}');
+    // not inverted: the port's default, where the shipped MOUSE.CPC reverses it
+    expect(map).toContain('torso_tilt {\r\n\t+ mouse\tUp/Down\r\n}');
     expect(map.endsWith('# analog count = 2\r\n# discrete count = 59\r\n')).toBe(true);
     expect(controlsConfigName()).toBe('Default Config');
     const before = new Map(dosFiles.own);
