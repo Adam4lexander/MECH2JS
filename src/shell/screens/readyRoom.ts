@@ -36,15 +36,16 @@ function onTrial(): boolean {
  * AWODSTBL / AJFDSTBL the Dire Wolf ('da', the Daishi) - where the shell
  * asks for awo%stbl with the two-letter code: a nine-character name, which
  * DOS truncates (AWOMCSTB) and never finds. So the shipped game never
- * shows them. The port tries these names after the original's, for the two
- * chassis they exist for; no other chassis has one.
+ * shows them. The port tries these names after the original's: the Dire
+ * Wolf's for the Dire Wolf, and the Timber Wolf's for every other chassis,
+ * which have none of their own.
  *
  * @portOnly
- * @divergence the table hologram plays for the Timber Wolf and the Dire Wolf; the original's lookup never finds it
+ * @divergence the table hologram plays - the Dire Wolf's for the Dire Wolf, the Timber Wolf's for the rest; the original's lookup never finds one
  */
 function tableHologramName(career: number, animCode: string): string | null {
-  const letter = animCode === 'mc' ? 'm' : animCode === 'da' ? 'd' : null;
-  if (letter === null || (career !== 0 && career !== 1)) return null;
+  if (career !== 0 && career !== 1) return null;
+  const letter = animCode === 'da' ? 'd' : 'm';
   divergence('the MECH LAB table hologram: the CD names it with one letter, which the shell\'s awo%stbl never finds', 'screen_ready_room');
   return `${career === 0 ? 'awo' : 'ajf'}${letter}stbl`;
 }

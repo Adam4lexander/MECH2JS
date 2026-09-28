@@ -1,8 +1,8 @@
 // MECH LAB in the ready room plays the chassis's table hologram first. The
 // shell asks for awo<two-letter code>stbl, which the CD does not have; the
-// port then tries the CD's one-letter names, which exist for the Timber
-// Wolf (mc) and the Dire Wolf (da) only. A Timber Wolf in the star: the
-// hologram (SMK\AWOMSTBL, 14 frames of 264x240) plays before the lab.
+// port then tries the CD's one-letter names: the Dire Wolf's (da) for the
+// Dire Wolf, the Timber Wolf's (mc) for every other chassis. Each plays
+// (14 frames of 264x240) before the lab.
 import { describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
@@ -19,7 +19,11 @@ import { openCdImage } from '../support/cdImage.ts';
 import { gameSource, hasCdImage, hasGameData, hasShellData } from '../support/env.ts';
 
 describe.runIf(hasGameData && hasShellData && hasCdImage)('the MECH LAB table hologram', () => {
-  it('a Timber Wolf member: AWOMSTBL plays before the lab opens', async () => {
+  it.each([
+    [9, 'Timber Wolf', 'AWOMSTBL'],
+    [5, 'Mad Dog', 'AWOMSTBL'],
+    [14, 'Dire Wolf', 'AWODSTBL'],
+  ])('chassis %i (%s): %s plays before the lab opens', async (chassis, _name, file) => {
     const shellExe = ExeImage.fromExe(await gameSource().read('MW2SHELL.EXE'));
     const prj = new ProjectFile(await gameSource().read('MW2.PRJ'));
     const db = await gameSource().read('DATABASE.MW2');
@@ -37,7 +41,15 @@ describe.runIf(hasGameData && hasShellData && hasCdImage)('the MECH LAB table ho
     reg.set(Array.from('PILOT', (c) => c.charCodeAt(0)), 0x28);
     setOwnFiles(new Map([['MW2REG.CFG', reg]]));
     setOverlayFiles(null);
-    setCdDrive({ letter: 'D', read: async (p) => ((await iso.exists(p)) ? iso.read(p) : null) });
+    const stbl: string[] = [];
+    setCdDrive({
+      letter: 'D',
+      read: async (p) => {
+        const ok = await iso.exists(p);
+        if (/stbl/i.test(p) && ok) stbl.push(p.toUpperCase());
+        return ok ? iso.read(p) : null;
+      },
+    });
     const seen: number[] = [];
     const saved = new Map<number, Screen>();
     for (const state of [1, 9, 0xb, 0xc]) {
@@ -66,14 +78,14 @@ describe.runIf(hasGameData && hasShellData && hasCdImage)('the MECH LAB table ho
       click(530, 300, () => f > 60);
       click(344, 462, () => seen.includes(0xc) && f > 200);
       click(55, 330, () => seen.filter((s) => s === 1).length >= 2);
-      // in the ready room: the star's selected member becomes a Timber Wolf (chassis 9, code 'mc'); MECH LAB
+      // in the ready room: the star's selected member becomes the chassis; MECH LAB
       let patched = false;
       steps.push({
         until: () => seen.includes(0xb) && f > 0,
         act: () => {
           const s = currentStar();
           const selected = mem().i32(s + 4);
-          mem().setI32(starMember(s, selected < 0 ? 0 : selected), 9);
+          mem().setI32(starMember(s, selected < 0 ? 0 : selected), chassis);
           patched = true;
         },
       });
@@ -93,6 +105,7 @@ describe.runIf(hasGameData && hasShellData && hasCdImage)('the MECH LAB table ho
       }
       if (pump.error) throw pump.error;
       expect(hologram).toEqual({ frames: 14, w: 264, h: 240 });
+      expect(stbl.map((p) => p.split(/[\\/]/).pop())).toEqual([`${file}.SMK`]);
       expect(seen).toContain(9);
     } finally {
       for (const [state, s] of saved) shellScreens.register(state, s);
