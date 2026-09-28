@@ -10,7 +10,7 @@ import { VfxWindow, vfxWindowAllocate } from '../../engine/vfx/vfx.ts';
 import { mem } from '../memory.ts';
 import { shell } from '../state.ts';
 import { awaitHost, WAIT, type Blocking } from '../host/blocking.ts';
-import { getch, hardware, kbhit, SCREEN_H, SCREEN_W } from '../host/hardware.ts';
+import { getch, hardware, hwMouseButtonsRead, kbhit, SCREEN_H, SCREEN_W } from '../host/hardware.ts';
 import { videoDriverMarkDirty, videoDriverResume, videoDriverSuspend } from '../video/driver.ts';
 import { smackClose, smackDoFrame, smackGoto, smackNextFrame, smackOpen, smackToBuffer, smackWait, type Smack } from '../video/smack.ts';
 import { Mouse, mouseInit, mouseShutdown } from '../ui/mouse.ts';
@@ -74,7 +74,7 @@ export function* moviePlay(name: string): Blocking<number> {
     if (frame === s.frames) break;
     smackNextFrame(s);
     while (smackWait(s) !== 0) yield WAIT;
-    if ((hardware.mouseButtons & 1) !== 0) break;
+    if ((hwMouseButtonsRead() & 1) !== 0) break;
     if (kbhit()) {
       getch();
       break;

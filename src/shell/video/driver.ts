@@ -236,38 +236,67 @@ export function videoDriverPaletteRestore(d: VideoDriver, saved: Uint8Array): vo
 }
 
 /**
- * VFX_pane_copy(source, Xs, Ys, target, Xt, Yt, fill): copies the source
- * pane's pixels to the target pane at (Xt, Yt), both clipped; where the
- * source has no pixel the target gets `fill` unless it is -1.
+ * VFX_pane_copy(source, Xs, Ys, target, Xt, Yt, fill): each pane clipped to
+ * its window, then to the other shifted by (Xs - Xt, Ys - Yt); over that
+ * rectangle the target's pixel at Xt + k takes the source's at Xs + k -
+ * or, when `fill` fits in a byte (0..255), the rectangle is FILLED with
+ * that colour instead of copied (-1 copies). A copy within one window runs
+ * in the direction that leaves overlapping pixels intact. Returns 0; -1 for
+ * a window with no pixels, -2 when a pane lies outside its window, -3 when
+ * the two do not overlap.
+ * CORRECTION (2026-09-28): this used to copy wherever the source had a
+ * pixel and use `fill` only outside it, which the port had inferred from
+ * the VFX API; the code fills instead of copying, so the credits' erases
+ * (fill 0) leave black, not the screen underneath.
  *
  * @mw2shell vfx_lib_sub_045d9f 0x00045d9f
- * @fidelity partial
- * @divergence the fill behaviour outside the source window is inferred from the VFX API, not read (924 bytes of assembly); every shell call copies within bounds
+ * @fidelity exact
  */
-export function vfxPaneCopy(source: ViewWindow, sx: number, sy: number, target: ViewWindow, tx: number, ty: number, fill: number): void {
+export function vfxPaneCopy(source: ViewWindow, sx: number, sy: number, target: ViewWindow, tx: number, ty: number, fill: number): number {
   const sw = source.canvas as VfxWindow;
+  if (sw.xMax + 1 <= 0 || sw.yMax + 1 <= 0) return -1;
+  // the source pane clipped to its window, relative to the pane
+  const s0x = Math.max(source.left, 0) - source.left;
+  const s0y = Math.max(source.top, 0) - source.top;
+  const s1x = Math.min(source.right, sw.xMax) - source.left;
+  const s1y = Math.min(source.bottom, sw.yMax) - source.top;
+  if (s1x < s0x || s1y < s0y) return -2;
   const tw = target.canvas as VfxWindow;
-  const w = source.right - source.left + 1;
-  const h = source.bottom - source.top + 1;
-  const tl = Math.max(0, target.left);
-  const tt = Math.max(0, target.top);
-  const tr = Math.min(tw.xMax, target.right);
-  const tb = Math.min(tw.yMax, target.bottom);
+  if (tw.xMax + 1 <= 0 || tw.yMax + 1 <= 0) return -1;
+  const t0x = Math.max(target.left, 0) - target.left;
+  const t0y = Math.max(target.top, 0) - target.top;
+  const t1x = Math.min(target.right, tw.xMax) - target.left;
+  const t1y = Math.min(target.bottom, tw.yMax) - target.top;
+  if (t1x < t0x || t1y < t0y) return -2;
+  // the overlap, in source-pane coordinates
+  const dx = sx - tx;
+  const dy = sy - ty;
+  const x0 = Math.max(s0x, t0x + dx);
+  const y0 = Math.max(s0y, t0y + dy);
+  const x1 = Math.min(s1x, t1x + dx);
+  const y1 = Math.min(s1y, t1y + dy);
+  if (x1 < x0 || y1 < y0) return -3;
+  const w = x1 + 1 - x0;
+  const h = y1 + 1 - y0;
   const pitchS = sw.xMax + 1;
   const pitchT = tw.xMax + 1;
-  for (let j = 0; j < h; j++) {
-    const Y = target.top + ty + j;
-    if (Y < tt || Y > tb) continue;
-    for (let i = 0; i < w; i++) {
-      const X = target.left + tx + i;
-      if (X < tl || X > tr) continue;
-      const u = source.left + sx + i;
-      const v = source.top + sy + j;
-      const inside = u >= 0 && v >= 0 && u <= sw.xMax && v <= sw.yMax;
-      if (inside) tw.buffer[Y * pitchT + X] = sw.buffer[v * pitchS + u]!;
-      else if (fill !== -1) tw.buffer[Y * pitchT + X] = fill & 0xff;
-    }
+  const tx0 = target.left + x0 - dx;
+  const ty0 = target.top + y0 - dy;
+  if ((fill & ~0xff) === 0) {
+    for (let j = 0; j < h; j++) tw.buffer.fill(fill & 0xff, (ty0 + j) * pitchT + tx0, (ty0 + j) * pitchT + tx0 + w);
+    return 0;
   }
+  const sx0 = source.left + x0;
+  const sy0 = source.top + y0;
+  // copyWithin/set on a row are memmove-safe; rows run bottom-up when the source starts above the target
+  const up = sw === tw && sy0 <= ty0;
+  for (let k = 0; k < h; k++) {
+    const j = up ? h - 1 - k : k;
+    const from = (sy0 + j) * pitchS + sx0;
+    if (sw === tw) tw.buffer.copyWithin((ty0 + j) * pitchT + tx0, from, from + w);
+    else tw.buffer.set(sw.buffer.subarray(from, from + w), (ty0 + j) * pitchT + tx0);
+  }
+  return 0;
 }
 
 /** A pane over part of a window. */

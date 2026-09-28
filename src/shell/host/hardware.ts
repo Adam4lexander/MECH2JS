@@ -33,6 +33,8 @@ export const hardware = {
   mouseY: 240,
   /** bit 0 left, bit 1 right, bit 2 middle - the int 33h button word */
   mouseButtons: 0,
+  /** @portOnly button changes the host reported and the driver has not yet taken (hwMouseButtonsRead) */
+  mouseButtonQueue: [] as number[],
 
   // ---- the BIOS keyboard buffer getch reads: ASCII, or 0 then the scan code
   keys: [] as number[],
@@ -79,7 +81,22 @@ export function hwMouseMove(x: number, y: number): void {
 
 /** @portOnly the int 33h button word */
 export function hwMouseButtons(buttons: number): void {
-  hardware.mouseButtons = buttons & 7;
+  const q = hardware.mouseButtonQueue;
+  const last = q.length > 0 ? q[q.length - 1]! : hardware.mouseButtons;
+  if ((buttons & 7) !== last) q.push(buttons & 7);
+}
+
+/**
+ * The button word as a read of the driver finds it: one queued change per
+ * read, so a press and release the host saw within one of its frames still
+ * reach the shell as two states.
+ *
+ * @portOnly the host's events arrive between frames; the original's int 33h handler saw each change as it happened
+ */
+export function hwMouseButtonsRead(): number {
+  const next = hardware.mouseButtonQueue.shift();
+  if (next !== undefined) hardware.mouseButtons = next;
+  return hardware.mouseButtons;
 }
 
 /** @portOnly a key the BIOS would put in its buffer: `ascii`, or 0 then `scan` for an extended key */

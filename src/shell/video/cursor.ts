@@ -12,7 +12,7 @@
 import type { ViewWindow } from '../../generated/classes.gen.ts';
 import type { VfxWindow } from '../../engine/vfx/vfx.ts';
 import { vfxShapeOrigin } from '../../engine/vfx/vfx.ts';
-import { hardware, SCREEN_W } from '../host/hardware.ts';
+import { hardware, hwMouseButtonsRead, SCREEN_W } from '../host/hardware.ts';
 
 /**
  * Copies x0..x1, y0..y1 of the pane's window to the display, with the
@@ -112,6 +112,6 @@ export function mouseDriverSetPosition(x: number, y: number): void {
  * @fidelity exact
  */
 export function mouseReadState(): { x: number; y: number; left: number; right: number; middle: number } {
-  const b = hardware.mouseButtons;
+  const b = hwMouseButtonsRead();
   return { x: hardware.mouseX, y: hardware.mouseY, left: b & 1, right: (b >> 1) & 1, middle: (b >> 2) & 1 };
 }
