@@ -111,8 +111,11 @@ export function attachHostInput(target: HTMLElement, active: () => boolean): () 
     if (down) {
       held.add(e.code);
       stopRepeat();
-      repeatCode = e.code;
-      repeatTimer = setTimeout(repeat, typematic.delayMs);
+      // Pause sends its make sequence once and never repeats (it has no break code either)
+      if (e.code !== 'Pause') {
+        repeatCode = e.code;
+        repeatTimer = setTimeout(repeat, typematic.delayMs);
+      }
     } else {
       held.delete(e.code);
       if (e.code === repeatCode) stopRepeat();

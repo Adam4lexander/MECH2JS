@@ -5,36 +5,68 @@ React, built from the decompilation in `../decompiled`. The data structures,
 arithmetic and frame loop are the original's; the code is organised by
 subject rather than by the address ranges the decompilation inherits.
 
-**Nothing from the game is in this directory.** The port reads the original
-`MW2.PRJ`, `MW2.EXE` and loose files from the install at runtime.
+**Nothing from the game is in this directory.** The port reads the game's
+content from the install at runtime - `MW2.PRJ`, `MW2.EXE`, `MW2SHELL.EXE`,
+`DATABASE.MW2`, `ARCHWO.MW2` / `ARCHJF.MW2`, `MW2.INI`, the `GIDDI\` input
+drivers and the CD image (`*.CUE` / `*.BIN`) - and nothing else. The files the
+two programs write (the pilot registry, `MW2PRM.CFG`, `MW2*.CFG`, the star
+BWDs, the mech lab's `MEK\` variants, the controls files `INPUT.MAP`,
+`GAMEKEY.MAP` and `giddi\*.cpc`) are the port's own: it seeds them itself on a
+first run and keeps them in the browser (IndexedDB, `src/app/diskStore.ts`).
+The dev server refuses to serve the install's copies.
 
 ## Running
 
 ```sh
 npm install
-npm run dev          # http://localhost:5173 - serves the install from MW2_ROOT (default ..)
-npm test             # unit + golden tests (golden needs the install and ../decompiled)
-npm run gen          # regenerate struct schemas and PORTING.md after the decompilation changes
+npm run fetch-soundfont   # optional: a local copy of the General MIDI SoundFont (see below)
+npm run dev               # http://localhost:5173 - serves the install from MW2_ROOT (default ..)
+npm test                  # unit + golden tests (golden needs the install and ../decompiled)
+npm run gen               # regenerate struct schemas and PORTING.md after the decompilation changes
 npm run typecheck
 ```
 
 Copy `.env.example` to `.env` to point `MW2_ROOT` / `MW2_DECOMPILED` elsewhere.
 
-## Missions
+The game CD's image (e.g. `MECH2_16B.BIN` / `.CUE`) belongs in the install
+directory beside `MW2.PRJ`. It is the CD drive: the intro and in-screen
+movies, the launch pictures, the training instructor's voice (`KEATING\`) and
+the CD music tracks all come from it. Without it there is no CD drive.
 
-The shell (MW2SHELL.EXE - career, trials, mech lab) is not ported. It hands the
-game its players through loose BWD files; the port does not read those from the
-install, and sorts the missions by which of them each includes:
+The front end's music is XMIDI played through a General MIDI SoundFont
+(GeneralUser GS, free to redistribute; `tools/fetch-soundfont.ts`), which is
+not game data and not kept in git. `npm run fetch-soundfont` puts a pinned,
+checksummed copy in `public/soundfont/`; without it the synth fetches the same
+file from jsDelivr, and offline the music is silent.
+
+## The game
+
+`http://localhost:5173` runs the game as MECH2.EXE does: the intro, then the
+front end (MW2SHELL.EXE, ported under `src/shell/`) - register a pilot, the
+Clan hall, training, the Trials, briefings, the mech lab, star configuration,
+COMBAT VARIABLES and COCKPIT CONTROLS, debriefings and the career - handing
+each launch to the combat sim (MW2.EXE) and back (`src/app/mech2Loop.ts`).
+Your pilots, 'Mechs and settings persist across reloads.
+
+## The developer route (`?dev`)
+
+`http://localhost:5173/?dev` opens the mission picker and the editor instead.
+The missions are sorted by which of the shell's hand-off files (loose BWDs)
+each includes; the port builds them in the shell's own layout:
 
 - **Ready** (20) - the mission sets the player's 'Mech itself (training, the
   Trials of Position): it just launches.
 - **Choose pilot and 'Mech** (24) - the mission takes the player's star
   (`USERSTAR.BWD`). You name the pilot and pick a 'Mech - every 'Mech the
-  shipped missions field - and up to four starmates; the port builds the file
-  in the shell's own layout. The last setup is remembered.
-- **Needs opponents** (15) - these also take opponent stars (`EN01STAR`..
-  `EN05STAR`, and for ten of them `INSTMAP1`) that only the shell's opponent
-  setup writes; they are listed but not offered yet.
+  shipped missions field - and up to four starmates. The last setup is
+  remembered.
+- **Opponents** (15) - these also take opponent stars (`EN01STAR`..
+  `EN05STAR`, and for ten of them `INSTMAP1`), written by the shell's own
+  code from the mission's briefing.
+
+**NetMech…** in the picker starts a network game: MW2.EXE's own netplay
+(`src/sim/net`) over a WebRTC data channel between two browser tabs, joined
+by copying an offer and an answer between them (no server).
 
 ## Modes
 
@@ -79,9 +111,9 @@ install, and sorts the missions by which of them each includes:
   objective and wake as the mission's objectives open - in AMY_SCN1 the
   first star powers up and comes for the player straight away. When the
   mission is decided, 'Press any key to exit...' follows after 3 s and the
-  mission ends after 20; the debriefing shows the result record MW2.EXE
-  would have left in mw2msn.cfg (the port never writes the game's cfg
-  files). The objects mission scripts animate - spinning, blinking,
+  mission ends after 20; MW2.EXE's results (mw2msn.cfg, MW2CAR.CFG) go to
+  the port's own disk, and on this route the debriefing shows that record.
+  The objects mission scripts animate - spinning, blinking,
   driving and path-following - run their scheduled tasks.
   Sound is the game's own sound code (src/sim/sound): the eight streaming
   SFLX channels with their priorities and stealing, positional one-shots
@@ -94,9 +126,9 @@ install, and sorts the missions by which of them each includes:
   with the first Play; the toolbar's Sound button toggles it. The engine hum
   is a MIDI note on the player's sound card in the original - its pitch and
   level follow the game here, its timbre is a stand-in.
-  The rule toggles the original reads from mw2dif.cfg (the shell's options
-  screen writes it) are the port's own: splash damage, collision damage
-  and heat tracking on, difficulty 1 (`DEFAULT_RULES`,
+  The rule toggles the original reads from mw2dif.cfg are the port's own
+  file, which the front end's COMBAT VARIABLES screen writes; a first run
+  starts it at the shell's defaults (`DEFAULT_RULES`,
   src/sim/mech/simOptions.ts). With heat tracking off the player's mech
   never heats, as in the original.
 - **Edit** - no frame runs and time stands still; the editor shows the scene

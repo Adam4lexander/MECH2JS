@@ -41,9 +41,16 @@ async function all(): Promise<Map<string, Uint8Array>> {
 
 async function put(key: string, bytes: Uint8Array | null): Promise<void> {
   const d = await (db ??= open());
-  const s = d.transaction(STORE, 'readwrite').objectStore(STORE);
+  const tx = d.transaction(STORE, 'readwrite');
+  const s = tx.objectStore(STORE);
   if (bytes) s.put(bytes.slice().buffer, key);
   else s.delete(key);
+  // settles when the write is committed, so a failed save (quota, storage cleared) is reported
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error ?? new Error('transaction aborted'));
+  });
 }
 
 /**

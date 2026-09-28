@@ -7,7 +7,7 @@
  * @portOnly
  */
 import { SystemErrorFatal } from '../core/systemError.ts';
-import { error as logError, log } from '../core/log.ts';
+import { error as logError, log, warn } from '../core/log.ts';
 import { bootMission, bootMissionStart, bootMissionStartSteps } from '../mission/load.ts';
 import { net, type NetBlocking } from '../sim/net/netplay.ts';
 import { netplayShutdown } from '../sim/net/netSession.ts';
@@ -88,11 +88,16 @@ export class Game {
     this.pendingResults = null;
     this.playbackShown = null;
     const names = launchNamesFromArgv(argv);
-    // both art variants: which one MW2.EXE opens depends on the screen mode its start-up picks
-    for (const n of names) for (const variant of ['', '6']) await dosFilePrefetch(launchAnimPath(n, variant));
-    // the CD's keating directory, which project_scan_dev_dir lists (read once, from the CD's mounting)
-    const letter = cdDriveLetter();
-    if (letter) await dosFilePrefetchDir(`${letter}:keating`);
+    try {
+      // both art variants: which one MW2.EXE opens depends on the screen mode its start-up picks
+      for (const n of names) for (const variant of ['', '6']) await dosFilePrefetch(launchAnimPath(n, variant));
+      // the CD's keating directory, which project_scan_dev_dir lists (read once, from the CD's mounting)
+      const letter = cdDriveLetter();
+      if (letter) await dosFilePrefetchDir(`${letter}:keating`);
+    } catch (e) {
+      // a CD read that failed: MW2.EXE finds those files missing, as with an unreadable disc
+      warn('cd', `reading the CD ahead of the mission failed: ${String(e)}`);
+    }
     try {
       const finish = bootMissionStart({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, argv });
       return finish || null;

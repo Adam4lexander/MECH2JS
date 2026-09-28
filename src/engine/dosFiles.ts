@@ -175,6 +175,7 @@ let cd: CdDrive | null = null;
 /** @portOnly the host's CD drive (the game CD's image), or null for none */
 export function setCdDrive(drive: CdDrive | null): void {
   cd = drive ? { ...drive, letter: drive.letter.toUpperCase() } : null;
+  cdCache.clear();
   cdDirs.clear();
   cdDirReads.clear();
 }
@@ -192,6 +193,10 @@ export function dosFilePrefetchDir(path: string): Promise<number> {
   if (!read) {
     read = readCdDir(key);
     cdDirReads.set(key, read);
+    // a read that failed (a fetch error) is tried again next time rather than kept
+    read.catch(() => {
+      if (cdDirReads.get(key) === read) cdDirReads.delete(key);
+    });
   }
   return read;
 }

@@ -84,7 +84,7 @@
  "ProjectTypeEntry": {
   "doc": "",
   "fields": {
-   "tag": "the resource type ('TABL', 'MEK\u0000' ...); project_find_type compares 4 bytes",
+   "tag": "the resource type ('TABL', 'MEK\\0' ...); project_find_type compares 4 bytes",
    "dirOffset": "file offset of the type's directory; project_load_directories skips the type when 0",
    "dirSize": "the directory's size: project_load_directories allocates and reads this much",
    "field_0xc": "not read",

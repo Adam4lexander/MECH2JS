@@ -14,7 +14,8 @@ import { paletteApplyBrightness, palettes } from './palettes.ts';
 /**
  * table[level][i] = trunc(63 * pow(i * (1/63), 1 / (level * 0.0625 + 0.5))):
  * level 8 is the identity, lower levels darken, higher brighten. Computed in
- * doubles: the x87 works in 80 bits, but every entry whose value lies within
+ * doubles: the x87's pow runs its transcendentals in 80 bits (the 53-bit
+ * precision control both programs set does not narrow those), but every entry whose value lies within
  * 1e-7 of an integer is an exact case (i = 63, or the integer exponents of
  * levels 0 and 8) where both land just above the integer, because the
  * double 1/63 (0x90064) is rounded up.
