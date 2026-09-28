@@ -20,9 +20,9 @@ import { gameSource, hasCdImage, hasGameData, hasShellData } from '../support/en
 
 describe.runIf(hasGameData && hasShellData && hasCdImage)('the MECH LAB table hologram', () => {
   it.each([
-    [9, 'Timber Wolf', 'AWOMSTBL'],
-    [5, 'Mad Dog', 'AWOMSTBL'],
-    [14, 'Dire Wolf', 'AWODSTBL'],
+    [9, 'Timber Wolf', 'AWODSTBL'],
+    [5, 'Mad Dog', 'AWODSTBL'],
+    [14, 'Dire Wolf', 'AWOMSTBL'],
   ])('chassis %i (%s): %s plays before the lab opens', async (chassis, _name, file) => {
     const shellExe = ExeImage.fromExe(await gameSource().read('MW2SHELL.EXE'));
     const prj = new ProjectFile(await gameSource().read('MW2.PRJ'));

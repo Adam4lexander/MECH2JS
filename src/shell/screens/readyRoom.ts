@@ -31,9 +31,11 @@ function onTrial(): boolean {
 }
 
 /**
- * The table holograms on the CD are named with one letter of the chassis -
- * SMK\AWOMSTBL / AJFMSTBL the Timber Wolf (code 'mc', the Mad Cat),
- * AWODSTBL / AJFDSTBL the Dire Wolf ('da', the Daishi) - where the shell
+ * The table holograms on the CD are named with one letter - SMK\AWOMSTBL /
+ * AJFMSTBL the Dire Wolf (code 'da'), AWODSTBL / AJFDSTBL the Timber Wolf
+ * ('mc'), identified by comparing their last frames with the mech lab's
+ * awomp/ajfmp chassis shapes (a first guess from the letters, M for Mad Cat
+ * and D for Daishi, had them the wrong way round) - where the shell
  * asks for awo%stbl with the two-letter code: a nine-character name, which
  * DOS truncates (AWOMCSTB) and never finds. So the shipped game never
  * shows them. The port tries these names after the original's: the Dire
@@ -45,7 +47,7 @@ function onTrial(): boolean {
  */
 function tableHologramName(career: number, animCode: string): string | null {
   if (career !== 0 && career !== 1) return null;
-  const letter = animCode === 'da' ? 'd' : 'm';
+  const letter = animCode === 'da' ? 'm' : 'd';
   divergence('the MECH LAB table hologram: the CD names it with one letter, which the shell\'s awo%stbl never finds', 'screen_ready_room');
   return `${career === 0 ? 'awo' : 'ajf'}${letter}stbl`;
 }
