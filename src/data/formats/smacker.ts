@@ -612,6 +612,45 @@ export class SmackerDecoder {
     return f;
   }
 
+  /**
+   * One sound track's samples over the whole movie (frames 0 .. frames - 1,
+   * not the ring frame), decoding no video: each frame's audio chunk
+   * decodes on its own. Empty when the movie has no such track.
+   */
+  decodeAudioTrack(track: number): Int16Array {
+    const h = this.header;
+    const b = this.bytes;
+    const t = h.audio.find((x) => x.track === track);
+    if (!t) return new Int16Array(0);
+    const parts: Int16Array[] = [];
+    let total = 0;
+    for (let index = 0; index < h.frames; index++) {
+      let at = h.frameOffsets[index]!;
+      const end = at + h.frameSizes[index]!;
+      let flags = h.frameTypes[index]!;
+      if (flags & 1) at += b[at]! * 4;
+      flags >>= 1;
+      for (let tr = 0; tr < 7 && at < end; tr++, flags >>= 1) {
+        if (!(flags & 1)) continue;
+        const size = b[at]! | (b[at + 1]! << 8) | (b[at + 2]! << 16) | (b[at + 3]! << 24);
+        if (size < 4 || at + size > end) break;
+        if (tr === track) {
+          const r = decodeSmackerAudio(t, b, at + 4, at + size);
+          parts.push(r.samples);
+          total += r.samples.length;
+        }
+        at += size;
+      }
+    }
+    const out = new Int16Array(total);
+    let o = 0;
+    for (const p of parts) {
+      out.set(p, o);
+      o += p.length;
+    }
+    return out;
+  }
+
   private decodeFrame(index: number): SmackerFrame {
     const h = this.header;
     const b = this.bytes;

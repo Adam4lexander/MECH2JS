@@ -96,7 +96,22 @@ export async function attachShellAudio(game: Game): Promise<void> {
   // each movie's own timeline: its chunks play back to back from when it started (or last went back to
   // its first frame, whose chunk carries Smacker's lead-in), and different movies' sound mixes
   const movieTimes = new WeakMap<object, number>();
+  // what is playing for each movie, so a restart or a close can stop it
+  const movieSources = new WeakMap<object, AudioBufferSourceNode[]>();
+  const stopMovie = (stream: object) => {
+    for (const src of movieSources.get(stream) ?? []) {
+      try {
+        src.stop();
+      } catch {
+        /* not started yet, or already ended */
+      }
+    }
+    movieSources.delete(stream);
+    movieTimes.delete(stream);
+  };
+  hardware.pcmStop = stopMovie;
   hardware.pcmOut = (samples, rate, channels, stream, restart) => {
+    if (restart) stopMovie(stream);
     const frames = Math.floor(samples.length / channels);
     if (frames === 0) return;
     const buf = ctx.createBuffer(channels, frames, rate);
@@ -110,6 +125,13 @@ export async function attachShellAudio(game: Game): Promise<void> {
     const at = restart ? ctx.currentTime + 0.05 : Math.max(movieTimes.get(stream) ?? 0, ctx.currentTime + 0.05);
     src.start(at);
     movieTimes.set(stream, at + frames / rate);
+    const list = movieSources.get(stream) ?? [];
+    list.push(src);
+    movieSources.set(stream, list);
+    src.onended = () => {
+      const l = movieSources.get(stream);
+      if (l) l.splice(l.indexOf(src), 1);
+    };
   };
   // the SoundFont loads in the background; the shell starts after a few seconds either way
   await Promise.race([synth.ready, new Promise((r) => setTimeout(r, 8000))]);

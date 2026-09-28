@@ -45,6 +45,8 @@ export class Smack {
   readonly frameMs: number;
   /** the sound tracks SmackOpen was asked for (bit i: track i), which SmackDoFrame plays */
   readonly tracks: number;
+  /** each track's whole sound, decoded the first time frame 0 plays */
+  readonly trackPcm = new Map<number, Int16Array>();
 
   constructor(bytes: Uint8Array, flags: number) {
     this.tracks = (flags & SMACK_TRACKS) >>> 9;
@@ -111,15 +113,30 @@ export function smackDoFrame(s: Smack, sound = true): void {
   s.shownAt = timerRead();
 }
 
-/** A decoded frame's sound on the tracks the movie was opened with, to the host's PCM output. @portOnly */
+/**
+ * The sound of the tracks the movie was opened with. At frame 0 - the
+ * movie starting, or a looping animation going back to its start - each
+ * track goes to the host whole, as one continuous buffer (decoded ahead,
+ * no video decoded): per-frame pieces were each resampled on their own
+ * and scheduled one by one, which clicked at the joins and gapped when the
+ * page stalled. The host keeps it running until the movie is closed or
+ * restarts.
+ *
+ * @portOnly the library's sound output, through the host
+ */
 function smackFrameSound(s: Smack, f: SmackerFrame): void {
   const out = hardware.pcmOut;
-  if (!out || s.tracks === 0) return;
-  for (let i = 0; i < 7; i++) {
-    if ((s.tracks & (1 << i)) === 0) continue;
-    const t = s.decoder.header.audio[i];
-    const pcm = f.audio[i];
-    if (t && pcm && pcm.length > 0) out(pcm, t.sampleRate, t.channels, s, f.index === 0);
+  if (!out || s.tracks === 0 || f.index !== 0) return;
+  for (let track = 0; track < 7; track++) {
+    if ((s.tracks & (1 << track)) === 0) continue;
+    const t = s.decoder.header.audio.find((x) => x.track === track);
+    if (!t) continue;
+    let pcm = s.trackPcm.get(track);
+    if (!pcm) {
+      pcm = s.decoder.decodeAudioTrack(track);
+      s.trackPcm.set(track, pcm);
+    }
+    if (pcm.length > 0) out(pcm, t.sampleRate, t.channels, s, true);
   }
 }
 
@@ -142,7 +159,8 @@ export function smackGoto(s: Smack, frame: number): void {
   s.frameNum = Math.max(0, frame - 1);
 }
 
-/** @portOnly SmackClose (0x4d364) */
-export function smackClose(_s: Smack): void {
+/** @portOnly SmackClose (0x4d364): its sound stops */
+export function smackClose(s: Smack): void {
+  hardware.pcmStop?.(s);
   // the decoder holds only the file's bytes
 }

@@ -50,6 +50,8 @@ export const hardware = {
    * two movies' sound mixes), `restart` set when the movie is back at its first frame
    */
   pcmOut: null as ((samples: Int16Array, rate: number, channels: number, stream: object, restart: boolean) => void) | null,
+  /** @portOnly stops whatever the host is still playing for `stream` (a movie closed or restarted) */
+  pcmStop: null as ((stream: object) => void) | null,
   /** the sound card's digital side, as Miles drives it; null for no card (every sample call is then a no-op, as without a driver) */
   digital: null as DigitalCard | null,
   /** the MIDI side: a General MIDI synth (the MDI driver's output); null for none */
