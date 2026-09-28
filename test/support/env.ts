@@ -29,12 +29,14 @@ export const TEST_STAR: StarSetup = (() => {
 })();
 
 /**
- * The loose files as the port supplies them (upper-case keys, '/'
- * separators): what app/gameData.ts fetches from the install - the input
- * maps, MW2SND.CFG and the GIDDI drivers - plus the player's star built
- * from `star` (as Game.loadMission does). For tests of every mission, the
- * opponent stars the shell would write are supplied empty (as the install's
- * are) and INSTMAP1.BWD read from the install; the app offers neither.
+ * The loose files a mission reads (upper-case keys, '/' separators): the
+ * GIDDI drivers (what app/gameData.ts fetches), the install's INPUT.MAP,
+ * GAMEKEY.MAP and MW2SND.CFG - which the app no longer reads: it writes its
+ * own (shell/controls/seed.ts; test/sim/controlsSeed.test.ts plays on those)
+ * - plus the player's star built from `star` (as Game.loadMission does).
+ * For tests of every mission, the opponent stars the shell would write are
+ * supplied empty (as the install's are) and INSTMAP1.BWD read from the
+ * install; the app offers neither.
  */
 export function installFiles(star: StarSetup = TEST_STAR): Map<string, Uint8Array> {
   const m = new Map<string, Uint8Array>();

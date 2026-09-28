@@ -1,12 +1,14 @@
 /**
  * Everything the port reads from the install, fetched once: MW2.PRJ, MW2.EXE,
- * MW2SHELL.EXE, MW2.INI and the loose content beside them - the key maps and
- * the GIDDI input drivers - which become the disk's read-only layer
- * (engine/dosFiles.ts).
+ * MW2SHELL.EXE, MW2.INI and the loose content beside them - the GIDDI input
+ * drivers (their .DLL, .STD and .CAL files) - which become the disk's
+ * read-only layer (engine/dosFiles.ts).
  *
  * NOT the config and player files the programs write - the star BWD files
- * (USERSTAR, EN01..05STAR, INSTMAP1), MW2*.CFG, the mech lab's MEK\ variants:
- * the port keeps its own (app/diskStore.ts).
+ * (USERSTAR, EN01..05STAR, INSTMAP1), MW2*.CFG, the mech lab's MEK\ variants -
+ * nor the controls files: INPUT.MAP (the shell's output), GAMEKEY.MAP and the
+ * giddi\*.CPC configurations. The port keeps its own (app/diskStore.ts),
+ * writing the controls files on a first run (shell/controls/seed.ts).
  */
 import { ExeImage } from '../data/exe/ExeImage.ts';
 import { IniFile } from '../data/config/ini.ts';
@@ -20,7 +22,7 @@ export interface GameData {
   /** MW2SHELL.EXE, the front end */
   shellExe: ExeImage;
   ini: IniFile;
-  /** loose files by upper-case name ('INPUT.MAP', 'GIDDI/KEYBOARD.DLL') */
+  /** loose files by upper-case name ('GIDDI/KEYBOARD.DLL', 'DATABASE.MW2') */
   loose: Map<string, Uint8Array>;
   /** the game CD's cue sheet, when its image is in the install (the music) */
   cue: { name: string; text: string } | null;
@@ -61,11 +63,7 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
     /* the INI only supplies error texts */
   }
   const loose = new Map<string, Uint8Array>();
-  const names = [
-    ...(await listDir('')).filter((n) => /\.MAP$/i.test(n)),
-    ...(await listDir('GIDDI')),
-  ];
-  for (const n of names) {
+  for (const n of await listDir('GIDDI')) {
     progress(n);
     loose.set(n.toUpperCase(), await src.read(n));
   }

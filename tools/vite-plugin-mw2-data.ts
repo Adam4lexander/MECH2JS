@@ -16,15 +16,14 @@ import type { Connect, Plugin } from 'vite';
 import { mw2Decompiled, mw2Root } from './paths.ts';
 
 // The game's content only. The install's config and player files (the star
-// BWDs, MW2*.CFG, MEK\ variants) are never served: the port writes its own
-// (engine/dosFiles.ts, app/diskStore.ts).
+// BWDs, MW2*.CFG, MEK\ variants) and its controls files (INPUT.MAP,
+// GAMEKEY.MAP and the other *.MAP, GIDDI\*.CPC) are never served: the port
+// writes its own (engine/dosFiles.ts, app/diskStore.ts, shell/controls/seed.ts).
 const GAME_WHITELIST = [
   /^MW2\.PRJ$/i,
   /^MW2\.EXE$/i,
   /^MW2SHELL\.EXE$/i,
   /^(DATABASE|ARCHWO|ARCHJF)\.MW2$/i,
-  // the shipped key maps; INPUT.MAP is the shell's output, served until the controls screen writes the port's own
-  /^[A-Z0-9_]+\.MAP$/i,
   /^MW2\.INI$/i,
   /^GIDDI\/[A-Z0-9_]+\.(DLL|STD|CAL)$/i,
   // the game CD's image: its audio tracks are the mission music (read by byte range)

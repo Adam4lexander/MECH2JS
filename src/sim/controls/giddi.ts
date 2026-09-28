@@ -35,6 +35,10 @@ export interface GiddiRecord {
   analogCount: number;
   /** +0x04 */
   buttonCount: number;
+  /** +0x0c: the device's name for people ('Keyboard'); MW2SHELL.EXE's device lists show it (InputDevice.displayName) */
+  displayName: string | null;
+  /** +0x1c: the analog channels' long names; the shell's Directional list shows them (InputDevice.axisTitles) */
+  analogTitles: (string | null)[] | null;
   /** +0x20: names input_bind_channel matches against */
   analogNames: (string | null)[] | null;
   /** +0x28 */
@@ -44,7 +48,7 @@ export interface GiddiRecord {
 }
 
 export function emptyRecord(): GiddiRecord {
-  return { analogCount: 0, buttonCount: 0, analogNames: null, buttonDescriptions: null, buttonNames: null };
+  return { analogCount: 0, buttonCount: 0, displayName: null, analogTitles: null, analogNames: null, buttonDescriptions: null, buttonNames: null };
 }
 
 export interface GiddiDriver {
@@ -74,6 +78,12 @@ class ModuleReader {
     let s = '';
     for (let i = a; i < this.m.block.length && this.m.block[i] !== 0; i++) s += String.fromCharCode(this.m.block[i]!);
     return s;
+  }
+  /** the string the relocated dword at `immAt` (an instruction operand) points at */
+  ptrStr(immAt: number): string {
+    const p = this.m.fixups.get(immAt);
+    if (p === undefined) throw new Error(`GIDDI driver: no relocation at 0x${immAt.toString(16)}`);
+    return this.str(p);
   }
   /** `count` pointers from the table whose address is the relocated dword at `immAt` (an instruction operand) */
   names(immAt: number, count: number): (string | null)[] {
@@ -232,6 +242,9 @@ export class KeyboardDriver implements GiddiDriver {
   init(rec: GiddiRecord): number {
     rec.analogCount = 0;
     rec.buttonCount = 0x79;
+    // 0x8e7: +0xc -> 'Keyboard'; +0x1c = 0 (no analog titles); +0x20 is not written
+    rec.displayName = this.r.ptrStr(0x8ea);
+    rec.analogTitles = null;
     rec.buttonDescriptions = this.r.names(0x914, 0x79);
     rec.buttonNames = this.r.names(0x91b, 0x79);
     return 0;
@@ -330,6 +343,9 @@ export class MouseDriver implements GiddiDriver {
   init(rec: GiddiRecord): number {
     rec.analogCount = 2;
     rec.buttonCount = 3;
+    // 0x2f7: +0xc -> 'Mouse'; 0x313: +0x1c -> the axes' long names
+    rec.displayName = this.r.ptrStr(0x2fa);
+    rec.analogTitles = this.r.names(0x316, 2);
     rec.analogNames = this.r.names(0x324, 2);
     rec.buttonDescriptions = this.r.names(0x32b, 3);
     rec.buttonNames = this.r.names(0x332, 3);

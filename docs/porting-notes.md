@@ -87,13 +87,17 @@ In the original the shell and the sim are separate processes and the files
 are the whole contract between them (decompiled/mech2/README.md). The port
 keeps that contract: `engine/dosFiles.ts` is a virtual DOS disk both read
 and write through the ported fopen/fread/fwrite sites, in three layers -
-read-only content from the install (the key maps, the GIDDI drivers), the
+read-only content from the install (the GIDDI drivers), the
 port's own files (everything a program writes: MW2REG.CFG, mw2prm.cfg,
-MW2DIF/MW2SND/MW2CAR/mw2msn.cfg, the star BWDs, user MEKs; persisted in
-IndexedDB by `app/diskStore.ts`), and a scratch overlay (the dev mission
-picker's launches, never persisted). **The port never reads the install's
-config or player files at run time**; tests read them as the expected
-output of the ported writers (`installShellFixtures`).
+MW2DIF/MW2SND/MW2CAR/mw2msn.cfg, the star BWDs, user MEKs, INPUT.MAP and
+giddi\config00.cpc; persisted in IndexedDB by `app/diskStore.ts`), and a
+scratch overlay (the dev mission picker's launches, never persisted).
+**The port never reads the install's config or player files at run
+time**; tests read them as the expected output of the ported writers
+(`installShellFixtures`). Files the original ships and a program only
+reads - GAMEKEY.MAP, the per-device giddi\<device>.cpc profiles - are the
+port's own data, written onto the disk on a first run together with the
+controls screen's INPUT.MAP (`shell/controls/seed.ts`).
 
 `src/launcher/mech2.ts` is MECH2.EXE's loop (shell intro -> mw2prm.cfg ->
 mw2.exe -> shell sim, until an exit status of 0xff); MW2.EXE takes its argv
