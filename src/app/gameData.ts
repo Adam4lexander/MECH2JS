@@ -67,6 +67,14 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
     progress(n);
     loose.set(n.toUpperCase(), await src.read(n));
   }
+  // the pictures of MW2.EXE's fifth cheat code (read by name, vfx\<name>.bin)
+  for (const n of ['VFX/VFXJK.BIN', 'VFX/VFXHD.BIN']) {
+    try {
+      loose.set(n, await src.read(n));
+    } catch {
+      /* without them the cheat runs its transitions and the credits, as the original does */
+    }
+  }
   // the front end's archives: its screens, fonts, music and samples, and the Clan archives
   for (const n of ['DATABASE.MW2', 'ARCHWO.MW2', 'ARCHJF.MW2']) {
     progress(n);

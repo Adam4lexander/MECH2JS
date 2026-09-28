@@ -26,6 +26,8 @@ const GAME_WHITELIST = [
   /^(DATABASE|ARCHWO|ARCHJF)\.MW2$/i,
   /^MW2\.INI$/i,
   /^GIDDI\/[A-Z0-9_]+\.(DLL|STD|CAL)$/i,
+  // the two pictures MW2.EXE's fifth cheat code shows (cheat_credits_render_hook)
+  /^VFX\/VFX(JK|HD)\.BIN$/i,
   // the game CD's image: its audio tracks are the mission music (read by byte range)
   /^[A-Z0-9_]+\.(CUE|BIN)$/i,
 ];

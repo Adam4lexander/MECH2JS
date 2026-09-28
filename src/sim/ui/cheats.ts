@@ -7,7 +7,6 @@
 import { registerGlobals } from '../../engine/globals.ts';
 import { bootImage } from '../../engine/image.ts';
 import { clock } from '../../engine/clock.ts';
-import { unestablished } from '../../core/provenance.ts';
 import { CHEAT_CODE_ADDRESSES, cheatMatch } from '../../data/exe/tables/cheats.ts';
 import { results } from '../../mission/results.ts';
 import { ai } from '../ai/aiGlobals.ts';
@@ -21,6 +20,7 @@ import { mechOnDestroyed } from '../mech/damage.ts';
 import { mechs } from '../mech/mechGlobals.ts';
 import { mechRuntime } from '../mech/mechRuntime.ts';
 import { cameraSetMode } from '../mech/mechTickAi.ts';
+import { cheatCreditsHookInstall } from './cheatCredits.ts';
 import { commandExecute, commandGlobals } from './commands.ts';
 
 export const cheats = registerGlobals(
@@ -59,8 +59,9 @@ export function playerTargetMechIndex(): number {
 /**
  * A typed key (0x07xx) goes into the ring; the ring's tail is matched
  * against the 21 codes, in order: invulnerability, unlimited ammo, heat
- * tracking, 'F E I F', the "You asked for it" hook swap, the nuke on the
- * targeted mech, jumpjets, forward rear view, a refusal, destroy the
+ * tracking, 'F E I F', the "You asked for it" hook swap
+ * (cheat_credits_hook_install: two pictures, then the credits), the nuke
+ * on the targeted mech, jumpjets, forward rear view, a refusal, destroy the
  * target, hangAround, win the mission, "This ain't DOOM" (command 0x3b),
  * friendly allies, the time-compression key, bounding spheres, infinite
  * jumpjet fuel, a refusal, free eye, X-ray, time expansion. Each toggles or
@@ -68,7 +69,7 @@ export function playerTargetMechIndex(): number {
  *
  * @mw2 cheat_handle_command 0x00045780
  * @fidelity partial
- * @divergence code 4's hook swap (ui_callbacks_sub_01a820) is not established and not done; free eye's message font is a register the export lost (1 is used)
+ * @divergence free eye's message font is a register the export lost (1 is used)
  */
 export function cheatHandleCommand(key: number): number {
   if ((key & 0xff00) !== 0x700) return 0;
@@ -104,7 +105,7 @@ export function cheatHandleCommand(key: number): number {
   }
   if (is(3)) return post(0x9188c);
   if (is(4)) {
-    unestablished('cheat 4: ui_callbacks_sub_01a820 swaps the main-view hook (0x959b8) for LAB_00019f40 - not read', 'cheat_handle_command');
+    cheatCreditsHookInstall();
     return post(0x9189c);
   }
   if (is(5)) {

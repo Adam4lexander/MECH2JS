@@ -480,3 +480,40 @@ export function vfxWindowClearPane(pane: ViewWindow): void {
   const { win, pitch, cl, ct, cr, cb } = clip;
   for (let y = ct; y <= cb; y++) win.drawn.fill(0, y * pitch + cl, y * pitch + cr + 1);
 }
+
+/**
+ * Copies `count` bytes of `src` into row y of a pane, starting at its left
+ * edge (x and y relative to the pane's raw x0 and y0), cut to the clip
+ * rectangle: a run past the right edge is shortened, one starting left of
+ * it loses its first bytes, and a row above or below it draws nothing.
+ * Returns -1 / -2 for an empty window / pane, else 0.
+ *
+ * @mw2 vfx_pane_write_row 0x0005805d
+ * @fidelity exact
+ * @divergence past the clip checks the original returns whatever EAX last held (a difference, or the end of the copy), which its one caller (gif_put_pixel) ignores; the port returns 0
+ */
+export function vfxPaneWriteRow(pane: ViewWindow, y: number, src: Uint8Array, count: number): number {
+  const r = paneClip(pane);
+  if (r) return r;
+  const { win, pitch, ox, oy, cl, ct, cr, cb } = clip;
+  let x = ox;
+  const row = (y + oy) | 0;
+  let n = count | 0;
+  let s = 0;
+  const over = (cr - x + 1 - n) | 0;
+  if (over < 0) {
+    n = (n + over) | 0;
+    if (n <= 0) return 0;
+  }
+  const under = (x - cl) | 0;
+  if (under < 0) {
+    n = (n + under) | 0;
+    if (n <= 0) return 0;
+    s -= under;
+    x -= under;
+  }
+  if (cb - row < 0 || row - ct < 0) return 0;
+  const at = row * pitch + x;
+  for (let i = 0; i < n; i++) put(win, at + i, src[s + i] ?? 0);
+  return 0;
+}

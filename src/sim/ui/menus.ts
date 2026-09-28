@@ -81,6 +81,18 @@ export function uiContextFindNode(id: number): UiContext | null {
 }
 
 /**
+ * The MenuContext of the first context whose active byte is 1, or null -
+ * how cheat_credits_render_hook waits for the credits menu to close.
+ *
+ * @mw2 ui_context_active_record 0x00018660
+ * @fidelity exact
+ */
+export function uiContextActiveRecord(): MenuContext | null {
+  for (let c = ui.uiContextHead; c; c = c.next) if ((c.active & 0xff) === 1) return c.record;
+  return null;
+}
+
+/**
  * The per-frame ui step: opens or closes each context whose request differs
  * from its active byte (a failed open is retried next frame), then runs the
  * frame of the first active one - unless it sits out map transitions

@@ -12,6 +12,7 @@ import { cdiv } from '../../core/int/cint.ts';
 import { sdivShl } from '../../core/int/i64.ts';
 import type { VfxWindow } from '../../engine/vfx/vfx.ts';
 import { vfxLineDraw, vfxShapeBounds } from '../../engine/vfx/vfx.ts';
+import { gifImageSize } from '../../engine/vfx/gif.ts';
 
 /**
  * out = pane scaled by the window's size: x0, x1 times xMax, y0, y1 times
@@ -181,6 +182,24 @@ export function layoutPaneFitShape(pane: ViewWindow, out: ViewWindow, table: Uin
   const bounds = vfxShapeBounds(table, shapeNumber);
   const h = bounds & 0xffff;
   const w = bounds >> 16;
+  const sx = sdivShl(w, 16, (pane.right - pane.left + 1) | 0);
+  const sy = sdivShl(h, 16, (pane.bottom - pane.top + 1) | 0);
+  return layoutPaneScaleAboutCentre(pane, out, sx, sy);
+}
+
+/**
+ * layout_pane_fit_shape for a GIF: out = the pane shrunk (or grown) about
+ * its centre to the first image's size - gif_image_size's high word (the
+ * width) over the pane's width, its low word (the height) over the pane's
+ * height, each 16.16 by idiv.
+ *
+ * @mw2 layout_pane_fit_gif 0x000138e0
+ * @fidelity exact
+ */
+export function layoutPaneFitGif(pane: ViewWindow, out: ViewWindow, gif: Uint8Array): ViewWindow {
+  const size = gifImageSize(gif);
+  const h = size & 0xffff;
+  const w = size >> 16;
   const sx = sdivShl(w, 16, (pane.right - pane.left + 1) | 0);
   const sy = sdivShl(h, 16, (pane.bottom - pane.top + 1) | 0);
   return layoutPaneScaleAboutCentre(pane, out, sx, sy);
