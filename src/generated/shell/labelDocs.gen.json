@@ -1,4 +1,89 @@
 {
+ "optionsTextOn": {
+  "address": "0x75b38",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextOff": {
+  "address": "0x75b3c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextOnByte": {
+  "address": "0x75b41",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextOffByte": {
+  "address": "0x75b45",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextDishonorableSet": {
+  "address": "0x75b4a",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextOffSet": {
+  "address": "0x75b5c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextOffClear": {
+  "address": "0x75b61",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextDishonorableClear": {
+  "address": "0x75b66",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextHigh": {
+  "address": "0x75b78",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsTextLow": {
+  "address": "0x75b7e",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsText320x200": {
+  "address": "0x75b83",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsText640x480": {
+  "address": "0x75b8c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsText1024x768": {
+  "address": "0x75b95",
+  "kind": "raw",
+  "doc": ""
+ },
+ "videoDriverVesa480": {
+  "address": "0x75b9f",
+  "kind": "raw",
+  "doc": ""
+ },
+ "videoDriverVesa768": {
+  "address": "0x75bab",
+  "kind": "raw",
+  "doc": ""
+ },
+ "videoDriverNone": {
+  "address": "0x75bb7",
+  "kind": "raw",
+  "doc": ""
+ },
+ "optionsMovieName": {
+  "address": "0x75bf0",
+  "kind": "raw",
+  "doc": "shell_menu's COMBAT VARIABLES: movie_open_background(..., 0x75bf0, 120, 4)."
+ },
  "brf2Suffix": {
   "address": "0x7688c",
   "kind": "raw",
@@ -158,6 +243,11 @@
   "address": "0x7ca80",
   "kind": "raw",
   "doc": "credits_screen's lines: '<' heading, '>' job title, '~' heading (the date check's replacement), else a name; NULL is a blank line."
+ },
+ "difficultyNames": {
+  "address": "0x7d090",
+  "kind": "raw",
+  "doc": "---- options (S8) ---- options_draw_difficulty: label_create_under(font27, ..., [0x7d090 + byte * 4]) - '~EASY', '~MEDIUM', '~HARD' for simOptions.difficulty 0..2. Nothing bounds the byte: 3 would read optionsWidgets' first dword (x = 393) as the pointer."
  },
  "optionsWidgets": {
   "address": "0x7d09c",
@@ -723,6 +813,16 @@
   "address": "0x90490",
   "kind": "raw",
   "doc": ""
+ },
+ "optionsMovie": {
+  "address": "0x91150",
+  "kind": "raw",
+  "doc": "shell_menu's COMBAT VARIABLES: the amwlogo1 movie_open_background it keeps stepping (zeroed before, left stale after its close); options_click_slider steps it too."
+ },
+ "sliderShapes": {
+  "address": "0x91154",
+  "kind": "raw",
+  "doc": "shell_menu's COMBAT VARIABLES: mpack_db_get_item(database, 8, &0x91154, ...); options_draw_slider draws shape 1 (the bar) and shape 0 (the knob) from it."
  },
  "soundSystem": {
   "address": "0x9115c",

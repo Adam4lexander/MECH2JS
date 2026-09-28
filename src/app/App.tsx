@@ -6,24 +6,28 @@ import { Game } from './Game.ts';
 import { type GameData, loadGameData } from './gameData.ts';
 import { MissionPicker } from './MissionPicker.tsx';
 import { attachDiskStore } from './diskStore.ts';
-import { dosFileExists, dosFileWrite, setDosFiles } from '../engine/dosFiles.ts';
+import { setDosFiles } from '../engine/dosFiles.ts';
 import { seedControlFiles } from '../shell/controls/seed.ts';
-import { SHELL_LABEL } from '../generated/shell/labels.gen.ts';
+import { simOptionsFileEnsure } from '../sim/mech/simOptions.ts';
+import { soundConfigFileEnsure } from '../sim/sound/soundConfigFile.ts';
 import { GameShell } from './GameShell.tsx';
 
 /** The developer's route: the mission picker and the editor (?dev in the address). */
 const DEV = new URLSearchParams(window.location.search).has('dev');
 
 /**
- * The port's own files on a first run. MW2DIF.CFG (the rule options) starts
- * as the shell's own defaults - the simOptions its image holds, which its
- * options screen would write - so MW2.EXE never meets a missing file. The
+ * The port's own files on a first run. MW2DIF.CFG (the rule options) and
+ * MW2SND.CFG (sound and detail) start as the shell's own defaults - the
+ * simOptions and soundConfig its image holds, which its options panel would
+ * write (sim/mech/simOptions.ts, sim/sound/soundConfigFile.ts) - so neither
+ * program meets a missing file. The
  * controls files (INPUT.MAP, GAMEKEY.MAP, giddi\*.cpc) are the ported
  * controls screen's output and the port's own defaults (shell/controls/seed.ts),
  * which need the GIDDI drivers on the disk.
  */
 function seedOwnFiles(d: GameData): void {
-  if (!dosFileExists('MW2DIF.CFG')) dosFileWrite('MW2DIF.CFG', d.shellExe.slice(SHELL_LABEL.simOptions, 8));
+  simOptionsFileEnsure();
+  soundConfigFileEnsure();
   setDosFiles(d.loose);
   seedControlFiles(d.shellExe);
 }

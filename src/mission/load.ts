@@ -11,7 +11,7 @@ import { musicStartMissionTrack, soundConfigLoad, soundInitAll } from '../sim/so
 import { randomTablesInit } from '../core/random.ts';
 import { audioTimerInit, simClockReset } from '../engine/clock.ts';
 import { ui, uiContextRegister } from '../sim/ui/uiContext.ts';
-import { dosDiskSnapshot, dosFileLoad, setDosFiles, setOverlayFiles, setOwnFiles } from '../engine/dosFiles.ts';
+import { dosDiskSnapshot, setDosFiles, setOverlayFiles, setOwnFiles } from '../engine/dosFiles.ts';
 import { checkLaunchedByShell } from './commandLine.ts';
 import type { NetBlocking } from '../sim/net/netplay.ts';
 import { netplayInit, netplayStart } from '../sim/net/netSession.ts';
@@ -39,7 +39,7 @@ import { defaultCanvas, videoInit } from '../sim/display/video.ts';
 import { vfxVideoSub010320 } from '../sim/display/mainView.ts';
 import { bootLoadLaunchAnims, gameBootSub0155a0 } from '../sim/display/launchScreen.ts';
 import { setMekSource } from '../sim/mech/looseFiles.ts';
-import { DEFAULT_RULES, rulesToBytes, simOptionsLoad, type SimRules } from '../sim/mech/simOptions.ts';
+import { rulesToBytes, simOptionsFileEnsure, simOptionsLoad, type SimRules } from '../sim/mech/simOptions.ts';
 import { destructiblesReset } from '../sim/things/destructibles.ts';
 import { gamethingTableReset } from '../sim/things/gameThings.ts';
 import { simCountMechsByStatus } from '../sim/things/allegianceTally.ts';
@@ -97,8 +97,9 @@ export interface MissionBootOptions {
   looseFiles?: Map<string, Uint8Array>;
   /**
    * The rule toggles to use instead of the disk's mw2dif.cfg; null for the
-   * original's no-file zeroes. Omitted: mw2dif.cfg from the disk, or
-   * DEFAULT_RULES when the disk has none.
+   * original's no-file zeroes. Omitted: mw2dif.cfg from the disk - which
+   * the port's disk always has (simOptionsFileEnsure writes DEFAULT_RULES
+   * into a disk without one).
    */
   rules?: SimRules | null;
   /** MW2.EXE's argv, as MECH2 spawns it (argv[0] 'mw2.exe', then the command line mw2prm.cfg carries) */
@@ -154,9 +155,8 @@ export function bootMissionStartSteps(opts: MissionBootOptions): NetBlocking<boo
     if (!r.ok) return false;
     mission = r.args;
   }
-  const dif = dosFileLoad('mw2dif.cfg');
-  if (opts.rules === undefined && !dif) divergence("no mw2dif.cfg on the disk: the port's DEFAULT_RULES, not the original's all-off record", 'sim_options_load');
-  simOptionsLoad(opts.rules === undefined ? (dif ?? rulesToBytes(DEFAULT_RULES)) : opts.rules ? rulesToBytes(opts.rules) : null);
+  // sim_options_load("mw2dif.cfg", &simOptions)
+  simOptionsLoad(opts.rules === undefined ? simOptionsFileEnsure() : opts.rules ? rulesToBytes(opts.rules) : null);
   audioTimerInit();
   videoInit();
   bootLoadLaunchAnims();

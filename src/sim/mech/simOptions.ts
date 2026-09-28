@@ -1,10 +1,12 @@
 /**
  * The rule toggles: the 8-byte SimOptions record MW2.EXE reads from
- * mw2dif.cfg, which the shell's options screen writes. The file is on the
- * port's own disk (engine/dosFiles.ts); SimRules is the host's way of
- * writing one.
+ * mw2dif.cfg, which the shell's options panel (COMBAT VARIABLES) writes.
+ * The file is on the port's own disk (engine/dosFiles.ts); SimRules is the
+ * host's (and the tests') way of writing one.
  */
 import { SimOptions } from '../../generated/classes.gen.ts';
+import { divergence } from '../../core/provenance.ts';
+import { dosFileLoad, dosFileWrite } from '../../engine/dosFiles.ts';
 import { mechs } from './mechGlobals.ts';
 
 /** The SimOptions bytes, as booleans: see SimOptions in mw2_types.h for each. */
@@ -19,9 +21,11 @@ export interface SimRules {
 }
 
 /**
- * The port's default: the full rules - the values the net-game override
- * forces - at difficulty 1. These are also the shell's own boot values
- * (simOptions at 0x7d40c in MW2SHELL.EXE: 0,0,1,1,1,1).
+ * The port's MW2DIF.CFG when its disk has none (simOptionsFileEnsure): the
+ * full rules at difficulty 1 (MEDIUM). These are the shell's own boot
+ * values (simOptions at 0x7d40c in MW2SHELL.EXE: 0,0,1,1,1,1,0,0) - what
+ * its options panel writes when the file was missing - and the bytes of
+ * the install's MW2DIF.CFG (test/sim/shellOptions.test.ts checks both).
  */
 export const DEFAULT_RULES: SimRules = {
   unlimitedAmmo: false,
@@ -75,4 +79,20 @@ export function simOptionsLoad(file: Uint8Array | null): number {
     o.difficulty = 2;
   }
   return 1;
+}
+
+/**
+ * MW2DIF.CFG as MW2.EXE's main is about to open it. The port's disk always
+ * holds one: a disk that lacks it (a first run, a test's disk) is given
+ * DEFAULT_RULES, written into the port's own layer, first.
+ *
+ * @portOnly the port's first run, for sim_options_load's file
+ */
+export function simOptionsFileEnsure(): Uint8Array {
+  const f = dosFileLoad('MW2DIF.CFG');
+  if (f) return f;
+  divergence("no MW2DIF.CFG on the disk: the port writes its own (the shell's boot simOptions) rather than MW2.EXE reading none - the original's all-off, EASY record - or the installer's copy", 'sim_options_load');
+  const bytes = rulesToBytes(DEFAULT_RULES);
+  dosFileWrite('MW2DIF.CFG', bytes);
+  return bytes;
 }
