@@ -38,6 +38,7 @@ import { layoutRescaleAll } from '../sim/display/rescale.ts';
 import { defaultCanvas, videoInit } from '../sim/display/video.ts';
 import { vfxVideoSub010320 } from '../sim/display/mainView.ts';
 import { bootLoadLaunchAnims, gameBootSub0155a0 } from '../sim/display/launchScreen.ts';
+import { projectScanDevDir } from './devDir.ts';
 import { setMekSource } from '../sim/mech/looseFiles.ts';
 import { rulesToBytes, simOptionsFileEnsure, simOptionsLoad, type SimRules } from '../sim/mech/simOptions.ts';
 import { destructiblesReset } from '../sim/things/destructibles.ts';
@@ -193,7 +194,7 @@ function* bootMissionFinishSteps(opts: MissionBootOptions, mission: string): Net
   gamethingTableReset();
   destructiblesReset();
   const ok = simLoadByName(mission);
-  // project_scan_dev_dir: the loose files are the host's overlay
+  projectScanDevDir();
   layoutRescaleAll();
   dayCycleInit();
   worldRecordsBuildAll();

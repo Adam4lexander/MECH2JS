@@ -9,7 +9,7 @@ than drifting. Library code (Watcom clib, Miles, Smacker) is excluded from the t
 
 ## MW2.EXE
 
-**Game functions:** 1161  |  **ported exact:** 905  |  **partial:** 63  |  **stub:** 3  |  library functions ported: 38
+**Game functions:** 1161  |  **ported exact:** 908  |  **partial:** 62  |  **stub:** 3  |  library functions ported: 38
 
 Library groups left out of the totals: `clib`, `miles`.
 
@@ -32,7 +32,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | mission_result | mission | 7 | 7 | 0 | 0 | 0 |
 | objectives | mission | 8 | 8 | 0 | 0 | 0 |
 | netplay | netplay | 13 | 12 | 1 | 0 | 0 |
-| project_entry | project | 31 | 27 | 2 | 0 | 2 |
+| project_entry | project | 31 | 30 | 1 | 0 | 0 |
 | project_file | project | 34 | 14 | 4 | 0 | 16 |
 | project_tables | project | 39 | 34 | 0 | 1 | 4 |
 | stream_seen | project | 3 | 3 | 0 | 0 | 0 |
@@ -164,17 +164,17 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x000159c0 | net_stopwatch_reset | game_boot | exact | `netStopwatchReset` src/sim/net/netSession.ts:114 |
 | 0x000159e0 | sim_clock_reset | game_boot | exact | `simClockReset` src/engine/clock.ts:111 |
 | 0x00015e90 | game_update_pause | game_boot | exact | `gameUpdatePause` src/sim/ui/uiContext.ts:91 |
-| 0x00015f00 | game_boot_sub_015f00 | game_boot | exact | `gameBootSub015f00` src/mission/results.ts:128 |
+| 0x00015f00 | game_boot_sub_015f00 | game_boot | exact | `gameBootSub015f00` src/mission/results.ts:129 |
 | 0x00015f60 | objective_table_start | game_boot | partial | `objectiveTableStart` src/mission/objectives.ts:154 |
-| 0x00016030 | objective_target_destroyed | game_boot | exact | `objectiveTargetDestroyed` src/mission/results.ts:54 |
-| 0x000160a0 | objective_target_identified | game_boot | exact | `objectiveTargetIdentified` src/mission/results.ts:68 |
-| 0x00016190 | objective_target_reached | game_boot | exact | `objectiveTargetReached` src/mission/results.ts:91 |
-| 0x00016400 | mission_result_format | mission_result | exact | `missionResultFormat` src/mission/results.ts:164 |
-| 0x000164f0 | mission_result_text | mission_result | exact | `missionResultText` src/mission/results.ts:194 |
-| 0x000165b0 | objective_prereq_met | mission_result | exact | `objectivePrereqMet` src/mission/results.ts:229 |
-| 0x00016650 | objective_is_active | mission_result | exact | `objectiveIsActive` src/mission/results.ts:246 |
-| 0x00016720 | objective_evaluate | mission_result | exact | `objectiveEvaluate` src/mission/results.ts:282 |
-| 0x00016e80 | mission_results_update | mission_result | exact | `missionResultsUpdate` src/mission/results.ts:388 |
+| 0x00016030 | objective_target_destroyed | game_boot | exact | `objectiveTargetDestroyed` src/mission/results.ts:55 |
+| 0x000160a0 | objective_target_identified | game_boot | exact | `objectiveTargetIdentified` src/mission/results.ts:69 |
+| 0x00016190 | objective_target_reached | game_boot | exact | `objectiveTargetReached` src/mission/results.ts:92 |
+| 0x00016400 | mission_result_format | mission_result | exact | `missionResultFormat` src/mission/results.ts:154 |
+| 0x000164f0 | mission_result_text | mission_result | exact | `missionResultText` src/mission/results.ts:184 |
+| 0x000165b0 | objective_prereq_met | mission_result | exact | `objectivePrereqMet` src/mission/results.ts:219 |
+| 0x00016650 | objective_is_active | mission_result | exact | `objectiveIsActive` src/mission/results.ts:236 |
+| 0x00016720 | objective_evaluate | mission_result | exact | `objectiveEvaluate` src/mission/results.ts:272 |
+| 0x00016e80 | mission_results_update | mission_result | exact | `missionResultsUpdate` src/mission/results.ts:378 |
 | 0x000170c0 | mission_clock_update | mission_result | exact | `missionClockUpdate` src/mission/missionClock.ts:25 |
 | 0x000170e0 | mission_save_results | mission_config | exact | `missionSaveResults` src/mission/end.ts:101 |
 | 0x00017280 | mission_event_nop | mission_config | exact | `missionEventNop` src/sim/things/gameThingDamage.ts:135 |
@@ -248,7 +248,9 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00019e80 | vfx_bin_file_load | ui_callbacks | exact | `vfxBinFileLoad` src/sim/ui/cheatCredits.ts:128 |
 | 0x00019f40 | cheat_credits_render_hook | ui_callbacks | exact | `cheatCreditsRenderHook` src/sim/ui/cheatCredits.ts:166 |
 | 0x0001a820 | cheat_credits_hook_install | ui_callbacks | exact | `cheatCreditsHookInstall` src/sim/ui/cheatCredits.ts:364 |
-| 0x0001a9b0 | dev_dir_load_sfl | project_entry | partial | `devDirLoadSfl` src/mission/results.ts:149 |
+| 0x0001a850 | project_add_entry | project_entry | exact | `projectAddEntry` src/mission/devDir.ts:40 |
+| 0x0001a930 | project_scan_dev_dir | project_entry | exact | `projectScanDevDir` src/mission/devDir.ts:58 |
+| 0x0001a9b0 | dev_dir_load_sfl | project_entry | exact | `devDirLoadSfl` src/mission/devDir.ts:74 |
 | 0x0001aad0 | anim_player_step | project_entry | exact | `animPlayerStep` src/sim/mech/animTask.ts:332 |
 | 0x0001b190 | anim_scale_by_gait | project_entry | exact | `animScaleByGait` src/sim/mech/animTask.ts:80 |
 | 0x0001b1c0 | anim_ensure_loaded | project_entry | exact | `animEnsureLoaded` src/sim/mech/anim.ts:72 |
@@ -955,7 +957,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0004e540 | thing_node_queue_pop | sim_objects | exact | `thingNodeQueuePop` src/sim/mech/spawn.ts:45 |
 | 0x0004e570 | gamething_alloc | sim_objects | exact | `gamethingAlloc` src/sim/things/gameThings.ts:52 |
 | 0x0004e5d0 | project_chunk_exec | sim_objects | exact | `projectChunkExec` src/mission/vm/chunkExec.ts:110 |
-| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:62 |
+| 0x0004fc00 | sim_load_by_name | sim_objects | exact | `simLoadByName` src/mission/load.ts:63 |
 | 0x0004fd00 | sim_count_mechs_by_status | sim_objects | exact | `simCountMechsByStatus` src/sim/things/allegianceTally.ts:18 |
 | 0x0004fde0 | poly_resolve_code | sim_objects | exact | `polyResolveCode` src/engine/scene/wtboLoader.ts:80 |
 | 0x0004fe80 | poly_set_vertex_offset | sim_objects | exact | `polySetVertexOffset` src/engine/scene/wtboLoader.ts:99 |
@@ -1369,7 +1371,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x000305a0 | widget_panel_hit | shell_2a5e0 | exact | `widgetPanelHit` src/shell/ui/widgets.ts:202 |
 | 0x00030db0 | mechlab_load_mek | shell_2a5e0 | exact | `mechlabLoadMek` src/shell/mechlab/design.ts:1003 |
 | 0x000339e0 | screen_mechlab | mechlab | exact | `screenMechlab` src/shell/screens/mechlab.ts:243 |
-| 0x00036700 | main | shell_main | partial | `shellMain` src/shell/main.ts:105 |
+| 0x00036700 | main | shell_main | partial | `shellMain` src/shell/main.ts:106 |
 | 0x000374c0 | prm_load | prm | exact | `prmLoad` src/shell/handoff/prm.ts:40 |
 | 0x000375a0 | prm_save | prm | exact | `prmSave` src/shell/handoff/prm.ts:70 |
 | 0x000376a0 | mouse_init | mouse | exact | `mouseInit` src/shell/ui/mouse.ts:57 |
@@ -1380,7 +1382,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x000377b0 | mouse_right_clicked | mouse | exact | `mouseRightClicked` src/shell/ui/mouse.ts:125 |
 | 0x00037880 | mouse_inject_click | mouse | exact | `mouseInjectClick` src/shell/ui/mouse.ts:135 |
 | 0x000378a0 | mouse_update | mouse | exact | `mouseUpdate` src/shell/ui/mouse.ts:157 |
-| 0x00037a50 | screen_ready_room | ready_room | exact | `screenReadyRoom` src/shell/screens/readyRoom.ts:47 |
+| 0x00037a50 | screen_ready_room | ready_room | exact | `screenReadyRoom` src/shell/screens/readyRoom.ts:70 |
 | 0x00038130 | register_draw_heading | register | exact | `registerDrawHeading` src/shell/screens/register.ts:63 |
 | 0x00038150 | register_draw_mission_row | register | exact | `registerDrawMissionRow` src/shell/screens/register.ts:75 |
 | 0x000381d0 | register_draw_pilot_name | register | exact | `registerDrawPilotName` src/shell/screens/register.ts:90 |
@@ -1389,24 +1391,24 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x000382a0 | register_draw_mission | register | exact | `registerDrawMission` src/shell/screens/register.ts:125 |
 | 0x00038300 | register_click_nothing | register | exact | `registerClickNothing` src/shell/screens/register.ts:137 |
 | 0x00038310 | screen_register | register | partial | `screenRegister` src/shell/screens/register.ts:199 |
-| 0x00038c70 | movie_play | movies | exact | `moviePlay` src/shell/anim/movies.ts:43 |
-| 0x00038e80 | movie_play_inline | movies | exact | `moviePlayInline` src/shell/anim/movies.ts:99 |
-| 0x00039000 | movie_open_background | movies | exact | `movieOpenBackground` src/shell/anim/movies.ts:149 |
-| 0x00039140 | movie_background_close | movies | exact | `movieBackgroundClose` src/shell/anim/movies.ts:187 |
-| 0x000391e0 | movie_background_step | movies | exact | `movieBackgroundStep` src/shell/anim/movies.ts:171 |
-| 0x00039270 | anim_update_all | movies | exact | `animUpdateAll` src/shell/anim/anims.ts:324 |
-| 0x00039590 | anim_is_running | movies | exact | `animIsRunning` src/shell/anim/anims.ts:248 |
-| 0x000395d0 | anim_set_flags | movies | exact | `animSetFlags` src/shell/anim/anims.ts:260 |
-| 0x00039610 | anim_unhide | movies | exact | `animUnhide` src/shell/anim/anims.ts:272 |
-| 0x00039650 | anim_free | movies | exact | `animFree` src/shell/anim/anims.ts:224 |
-| 0x000396f0 | anim_free_all | movies | exact | `animFreeAll` src/shell/anim/anims.ts:238 |
-| 0x00039710 | anim_move | movies | exact | `animMove` src/shell/anim/anims.ts:284 |
+| 0x00038c70 | movie_play | movies | exact | `moviePlay` src/shell/anim/movies.ts:39 |
+| 0x00038e80 | movie_play_inline | movies | exact | `moviePlayInline` src/shell/anim/movies.ts:94 |
+| 0x00039000 | movie_open_background | movies | exact | `movieOpenBackground` src/shell/anim/movies.ts:143 |
+| 0x00039140 | movie_background_close | movies | exact | `movieBackgroundClose` src/shell/anim/movies.ts:181 |
+| 0x000391e0 | movie_background_step | movies | exact | `movieBackgroundStep` src/shell/anim/movies.ts:165 |
+| 0x00039270 | anim_update_all | movies | exact | `animUpdateAll` src/shell/anim/anims.ts:325 |
+| 0x00039590 | anim_is_running | movies | exact | `animIsRunning` src/shell/anim/anims.ts:249 |
+| 0x000395d0 | anim_set_flags | movies | exact | `animSetFlags` src/shell/anim/anims.ts:261 |
+| 0x00039610 | anim_unhide | movies | exact | `animUnhide` src/shell/anim/anims.ts:273 |
+| 0x00039650 | anim_free | movies | exact | `animFree` src/shell/anim/anims.ts:225 |
+| 0x000396f0 | anim_free_all | movies | exact | `animFreeAll` src/shell/anim/anims.ts:239 |
+| 0x00039710 | anim_move | movies | exact | `animMove` src/shell/anim/anims.ts:285 |
 | 0x00039780 | anim_open_smk | movies | exact | `animOpenSmk` src/shell/anim/anims.ts:85 |
-| 0x000398d0 | anim_open_shp | movies | exact | `animOpenShp` src/shell/anim/anims.ts:126 |
-| 0x000399b0 | anim_start | movies | exact | `animStart` src/shell/anim/anims.ts:173 |
-| 0x00039ad0 | anim_start_free | movies | exact | `animStartFree` src/shell/anim/anims.ts:198 |
-| 0x00039c20 | anim_play_to_end | movies | exact | `animPlayToEnd` src/shell/anim/anims.ts:422 |
-| 0x00039fb0 | anim_set_frame | movies | exact | `animSetFrame` src/shell/anim/anims.ts:302 |
+| 0x000398d0 | anim_open_shp | movies | exact | `animOpenShp` src/shell/anim/anims.ts:127 |
+| 0x000399b0 | anim_start | movies | exact | `animStart` src/shell/anim/anims.ts:174 |
+| 0x00039ad0 | anim_start_free | movies | exact | `animStartFree` src/shell/anim/anims.ts:199 |
+| 0x00039c20 | anim_play_to_end | movies | exact | `animPlayToEnd` src/shell/anim/anims.ts:423 |
+| 0x00039fb0 | anim_set_frame | movies | exact | `animSetFrame` src/shell/anim/anims.ts:303 |
 | 0x00039ff0 | music_create | movies | exact | `musicCreate` src/shell/sound/music.ts:73 |
 | 0x0003a0d0 | music_destroy | movies | exact | `musicDestroy` src/shell/sound/music.ts:97 |
 | 0x0003a110 | music_start | movies | exact | `musicStart` src/shell/sound/music.ts:115 |
@@ -1545,14 +1547,15 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/vfx/vfx.ts:493 - past the clip checks the original returns whatever EAX last held (a difference, or the end of the copy), which its one caller (gif_put_pixel) ignores; the port returns 0
 - src/mission/commandLine.ts:89 - -M / -X's mono display, -Q's quadtree switch-off, -E's mw2debug.txt and the version text are not ported; their flags are still set
 - src/mission/commandLine.ts:93 - This program must be launched from MECH2.EXE
-- src/mission/load.ts:186 - static_arena_init: no arena pre-pass; tables are allocated on demand
+- src/mission/devDir.ts:42 - the 101-bucket hash chains are a Map: the lookup's result is the same
+- src/mission/devDir.ts:60 - the directory is read through the host, which lists and fetches it off the CD ahead of the mission (dosFilePrefetchDir)
+- src/mission/load.ts:187 - static_arena_init: no arena pre-pass; tables are allocated on demand
 - src/mission/mainLoop.ts:87 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
 - src/mission/mainLoop.ts:91 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
 - src/mission/objectives.ts:62 - ${what} longer than its ${destSize}-byte field; the original overruns into the next field
 - src/mission/objectives.ts:78 - a record index past the 48 Objective slots is not written (the original writes into the next table); MW2.PRJ has none
 - src/mission/objectives.ts:96 - MTBL table ${group} has ${n} records, past the 48 objective slots
 - src/mission/objectives.ts:156 - takes the table index alone (main passes objectiveTables + i * 0x2e8a and i)
-- src/mission/results.ts:151 - no development ('keating') directory exists for the port, as none ships with the game: always null, which is what the shipped game gets
 - src/mission/tables/missionTables.ts:98 - a slot outside 0..15 is refused (the original writes outside the array); MW2.PRJ has none
 - src/mission/tables/missionTables.ts:104 - MTBL slot ${slot} outside the 16 missionTables slots; not installed
 - src/mission/vm/objExec.ts:31 - the loose-file path for an OBJ with no POLY id (poly -1) is not ported; no shipped OBJ uses it
@@ -1569,7 +1572,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/render/pipeline/fillDispatch.ts:56 - the pixels are the GPU's (SceneRenderer); with shadedFillEnabled clear the flat filler 0x59180 would fill from one vertex's index, where the port drops the dither and interpolates (as for mode 0x4000 elsewhere); the vertex loop writes the indices through mapVertexIndex; returns nothing when the current radar mode has no record, as the original does
 - src/render/pipeline/fillDispatch.ts:89 - 1- and 2-vertex polygons (points while 0x97038 is set, vfx_line_draw lines while 0x97034 is set, else the filler) are not drawn: SceneRenderer builds no geometry for them
 - src/render/pipeline/viewLatch.ts:62 - only the fields the object cull, clipper and shading read are latched: the projection (rows 0-1 premultiplied by projScale, centre, viewport bounds) is done by the GPU from the same viewer; viewerPosition itself is left to the caller, so the editor can draw from its own viewer without handing it to the simulation
-- src/shell/anim/movies.ts:45 - Smacker's full-screen output is the host's movie surface (hardware.movie), scaled to the display
+- src/shell/anim/movies.ts:41 - Smacker's full-screen output is the host's movie surface (hardware.movie), scaled to the display
 - src/shell/archive/viewer.ts:158 - the fatal exits print nothing (the message is logged as unestablished) and throw ShellExit(1)
 - src/shell/archive/viewer.ts:279 - the archive's bytes are the host's: closing it frees nothing
 - src/shell/career/brf2.ts:27 - the resource comes from the port's MW2.PRJ reader, not the shell's cache (project_stream_release has nothing to free)
@@ -1586,19 +1589,22 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/shell/controls/devices.ts:110 - the loaded module's methods are the port's implementations of the shipped drivers (sim/controls/giddi.ts, giddiDriverFor); a driver the port has none for - the joysticks, FLTSTCK, MSJSTICK, TMASTER, VIO1/2 - is dropped the way the original drops a DLL that fails to load, so the port lists only KEYBOARD and MOUSE
 - src/shell/controls/devices.ts:135 - input_devices_load: no port driver for giddi\\${lower}; dropped as a DLL that will not load
 - src/shell/controls/inputMap.ts:253 - the port's disk cannot fail to open a file, so 'Error: Could not write map file.' (0x738b4) is never shown
-- src/shell/controls/profiles.ts:160 - giddi\\${p.device}.cpc: the port's own default profile, not the install's file
+- src/shell/controls/profiles.ts:118 - a deliberate change of default, the user's choice (2026-09-28): the shipped MOUSE.CPC inverts the mouse's up/down; COCKPIT CONTROLS can still reverse it
+- src/shell/controls/profiles.ts:171 - giddi\\${p.device}.cpc: the port's own default profile, not the install's file
 - src/shell/controls/seed.ts:52 - GAMEKEY.MAP: the port writes its own table; the install\
 - src/shell/controls/seed.ts:79 - first run: the controls configuration is the device panel\
 - src/shell/handoff/starFiles.ts:227 - the bytes after each BMPJ name's NUL are uninitialised stack in the original; the port writes zeros (the shipped instmap1.bwd has zeros there)
-- src/shell/host/pump.ts:30 - the shell's loops run at ${passRate} passes a second (the original: as fast as the PC allowed)
+- src/shell/host/pump.ts:40 - the shell's loops run at ${passRate} passes a second (the original: as fast as the PC allowed)
 - src/shell/host/timer.ts:14 - the host's clock is the timer; AIL's start-up is the host's audio
-- src/shell/main.ts:107 - the mouse, CD (MSCDEX), interrupt hooks and Miles are the port's host; unported screens show a placeholder
+- src/shell/main.ts:108 - the mouse, CD (MSCDEX), interrupt hooks and Miles are the port's host; unported screens show a placeholder
 - src/shell/mechlab/design.ts:656 - the two widget_panel_redraw calls at its end are made by the registered click handler (shell/mechlab/panels.ts), which owns the widget engine
 - src/shell/mechlab/design.ts:1005 - the loose file comes off the port's virtual disk (engine/dosFiles.ts) and the stock record from the port's MW2.PRJ reader
 - src/shell/mechlab/design.ts:1276 - the virtual disk has no directories, so the first open never fails and the mkdir('mek') retry is not reached
 - src/shell/mechlab/panels.ts:205 - the product is taken in doubles (the original rounds the x87 product to a double for printf) and printed with toFixed
 - src/shell/screens/debriefing.ts:218 - the per-line scratch buffers (0x8e290 ... 0x8f190) and the sorted pointers (debriefingObjectives) are JS values; debriefingText is written to its address once complete
 - src/shell/screens/options.ts:215 - the name is stored and shown faithfully, but nothing in the port acts on it: MW2.EXE's driver DLLs (mcga, vesa480, vesa768) are not loaded and the renderer draws at the browser's resolution whatever the row says
+- src/shell/screens/readyRoom.ts:46 - the table hologram plays - the Dire Wolf's for the Dire Wolf, the Timber Wolf's for the rest; the original's lookup never finds one
+- src/shell/screens/readyRoom.ts:51 - the MECH LAB table hologram: the CD names it with one letter, which the shell\
 - src/shell/screens/register.ts:201 - the slots' name labels are kept beside the records, so MW2REG.CFG carries 0 at +0x38 where the original saved a heap pointer (cleared again by every load)
 - src/shell/sound/music.ts:57 - the drivers are the host's synth and card (hardware.midi, hardware.digital), not MDI.INI / DIG.INI
 - src/shell/text/page.ts:70 - with a negative height the original leaves [6] as malloc left it; the port's is 0 (no limit)
@@ -1832,7 +1838,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/shell/controls/panel.ts:165 - controls_next_input: the binding\
 - src/shell/controls/panel.ts:227 - controls_click_binding: controlsDevice is not a loaded device (the original reads through a NULL record)
 - src/shell/controls/panel.ts:305 - controls_click_second_button: controlsDevice is not a loaded device (the original reads through a NULL record)
-- src/shell/main.ts:254 - main: state ${current} has no screen
+- src/shell/main.ts:257 - main: state ${current} has no screen
 - src/shell/mechlab/design.ts:1020 - mechlab_load_mek: a read past the MEK resource
 - src/shell/screens/briefing.ts:37 - screen_briefing: no current pilot (the original reads missionIndex and rank through NULL)
 - src/shell/screens/briefing.ts:47 - screen_briefing: mission 15, rank 6+, career 2 - the stream name buffer is left as the stack held it

@@ -12,7 +12,7 @@ import { bootMission, bootMissionStart, bootMissionStartSteps } from '../mission
 import { net, type NetBlocking } from '../sim/net/netplay.ts';
 import { netplayShutdown } from '../sim/net/netSession.ts';
 import { setNetTransport, type NetTransport } from '../sim/net/transport.ts';
-import { dosFilePrefetch } from '../engine/dosFiles.ts';
+import { cdDriveLetter, dosFilePrefetch, dosFilePrefetchDir } from '../engine/dosFiles.ts';
 import { launchAnimPath } from '../sim/display/launchScreen.ts';
 import { defaultCanvas } from '../sim/display/video.ts';
 import type { VfxWindow } from '../engine/vfx/vfx.ts';
@@ -90,6 +90,9 @@ export class Game {
     const names = launchNamesFromArgv(argv);
     // both art variants: which one MW2.EXE opens depends on the screen mode its start-up picks
     for (const n of names) for (const variant of ['', '6']) await dosFilePrefetch(launchAnimPath(n, variant));
+    // the CD's keating directory, which project_scan_dev_dir lists (read once, from the CD's mounting)
+    const letter = cdDriveLetter();
+    if (letter) await dosFilePrefetchDir(`${letter}:keating`);
     try {
       const finish = bootMissionStart({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, argv });
       return finish || null;

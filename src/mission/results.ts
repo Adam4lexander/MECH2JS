@@ -28,6 +28,7 @@ import { things } from '../sim/things/gameThings.ts';
 import { ui } from '../sim/ui/uiContext.ts';
 import { commandGlobals } from '../sim/ui/commands.ts';
 import { worldObjectGetPos } from '../sim/world/worldRecords.ts';
+import { devDirLoadSfl } from './devDir.ts';
 import { missionClock } from './missionClock.ts';
 import { OBJECTIVES_MAX, objectives } from './objectives.ts';
 import { missionTables } from './tables/missionTables.ts';
@@ -141,17 +142,6 @@ export function gameBootSub015f00(s: string): string {
     }
   }
   return out;
-}
-
-/**
- * Loads '<name>.sfl' from the development directory when one was scanned.
- *
- * @mw2 dev_dir_load_sfl 0x0001a9b0
- * @fidelity partial
- * @divergence no development ('keating') directory exists for the port, as none ships with the game: always null, which is what the shipped game gets
- */
-export function devDirLoadSfl(_name: string): Uint8Array | null {
-  return null;
 }
 
 /**

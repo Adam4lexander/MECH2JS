@@ -8,7 +8,7 @@
  */
 import { IsoImage, RawSectorSource } from '../../data/formats/iso9660.ts';
 import { parseCue } from '../../data/formats/cue.ts';
-import { setCdDrive } from '../../engine/dosFiles.ts';
+import { dosFilePrefetchDir, setCdDrive } from '../../engine/dosFiles.ts';
 import { warn } from '../../core/log.ts';
 
 /** The letter the port's CD drive answers to (MSCDEX's first CD drive on a typical PC). */
@@ -30,7 +30,17 @@ export async function mountCd(cue: { name: string; text: string } | null): Promi
   }
   try {
     const iso = await IsoImage.open(new RawSectorSource((o, n) => rangeRead(sheet.file, o, n), data.start));
-    setCdDrive({ letter: CD_LETTER, read: async (path) => ((await iso.exists(path)) ? iso.read(path) : null) });
+    setCdDrive({
+      letter: CD_LETTER,
+      read: async (path) => ((await iso.exists(path)) ? iso.read(path) : null),
+      list: async (dir) => {
+        const e = await iso.lookup(dir);
+        if (!e || !e.directory) return null;
+        return (await iso.readDir(e)).filter((c) => !c.directory && c.name !== '.' && c.name !== '..').map((c) => c.name);
+      },
+    });
+    // the training instructor's voice (MW2.EXE's project_scan_dev_dir reads it at a mission's start-up): 2.6 MB, fetched now
+    void dosFilePrefetchDir(`${CD_LETTER}:keating`);
     return true;
   } catch (e) {
     warn('cd', `the CD image could not be read: ${String(e)}`);

@@ -66,7 +66,8 @@ export function setDiskPersistence(fn: ((key: string, bytes: Uint8Array | null) 
 
 /** @portOnly the key a DOS path is stored under */
 export function dosPathKey(path: string): string {
-  return path.replace(/\\/g, '/').replace(/^\.\//, '').toUpperCase();
+  // a drive path is relative to the drive's root either way: D:\smk\x and D:smk\x are one key
+  return path.replace(/\\/g, '/').replace(/^\.\//, '').toUpperCase().replace(/^([A-Z]):\/+/, '$1:');
 }
 
 function lookup(key: string): Uint8Array | undefined {
@@ -131,6 +132,8 @@ export function dosFindFiles(pattern: string): string[] {
   const slash = key.lastIndexOf('/');
   const dir = slash < 0 ? '' : key.slice(0, slash + 1);
   const re = new RegExp('^' + key.slice(slash + 1).replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*').replace(/\?/g, '[^/]') + '$');
+  // a directory on the CD: its listing, as the host read it ahead (dosFilePrefetchDir)
+  if (/^[A-Z]:/.test(dir)) return (cdDirs.get(dir.slice(0, -1)) ?? []).filter((n) => re.test(n)).sort();
   const names = new Set<string>();
   for (const layer of [dosFiles.files, dosFiles.own, dosFiles.overlay ?? new Map()]) {
     for (const k of layer.keys()) {
@@ -147,6 +150,10 @@ export function dosFindFiles(pattern: string): string[] {
  * of the launch pictures): 'D:/LAUNCH/SUPANM.SHP' -> bytes.
  */
 const cdCache = new Map<string, Uint8Array>();
+/** CD directories listed ahead of a synchronous directory search: 'D:KEATING' -> its file names */
+const cdDirs = new Map<string, string[]>();
+/** dosFilePrefetchDir's reads, by directory: each directory is read once */
+const cdDirReads = new Map<string, Promise<number>>();
 
 /** @portOnly reads a CD file into the cache dosFileLoad serves drive paths from; false when it is not there */
 export async function dosFilePrefetch(path: string): Promise<boolean> {
@@ -155,12 +162,50 @@ export async function dosFilePrefetch(path: string): Promise<boolean> {
   return b !== null;
 }
 
-/** The CD drive: its letter and a reader for paths on it ('SMK\MINTRO.SMK'). */
-let cd: { letter: string; read: (path: string) => Promise<Uint8Array | null> } | null = null;
+/** The host's CD drive: its letter, a reader for paths on it ('SMK\MINTRO.SMK') and, optionally, a directory lister. */
+export interface CdDrive {
+  letter: string;
+  read: (path: string) => Promise<Uint8Array | null>;
+  /** the file names in a directory ('KEATING'), or null when there is no such directory */
+  list?: (dir: string) => Promise<string[] | null>;
+}
+
+let cd: CdDrive | null = null;
 
 /** @portOnly the host's CD drive (the game CD's image), or null for none */
-export function setCdDrive(drive: { letter: string; read: (path: string) => Promise<Uint8Array | null> } | null): void {
-  cd = drive ? { letter: drive.letter.toUpperCase(), read: drive.read } : null;
+export function setCdDrive(drive: CdDrive | null): void {
+  cd = drive ? { ...drive, letter: drive.letter.toUpperCase() } : null;
+  cdDirs.clear();
+  cdDirReads.clear();
+}
+
+/**
+ * Reads a whole CD directory ('D:keating') ahead of a synchronous reader:
+ * its listing for dosFindFiles and every file for dosFileLoad. The number
+ * of files, 0 when the directory (or the drive) is not there.
+ *
+ * @portOnly the CD is read asynchronously; the programs read it synchronously
+ */
+export function dosFilePrefetchDir(path: string): Promise<number> {
+  const key = dosPathKey(path).replace(/\/+$/, '');
+  let read = cdDirReads.get(key);
+  if (!read) {
+    read = readCdDir(key);
+    cdDirReads.set(key, read);
+  }
+  return read;
+}
+
+async function readCdDir(key: string): Promise<number> {
+  const m = /^([A-Z]):(.*)$/.exec(key);
+  if (!m || !cd || m[1] !== cd.letter || !cd.list) return 0;
+  const names = await cd.list(m[2]!);
+  if (!names) return 0;
+  let n = 0;
+  for (const name of names) if (await dosFilePrefetch(`${key}/${name}`)) n++;
+  // listed once its files are in: a search never names a file a load would miss
+  cdDirs.set(key, names.map((x) => x.toUpperCase()));
+  return n;
 }
 
 /** @portOnly the CD drive's letter, or '' */
