@@ -11,17 +11,16 @@ import { launchAnimPath, launchAnimTick, launchScreen } from '../../src/sim/disp
 import { defaultCanvas } from '../../src/sim/display/video.ts';
 import { palettes } from '../../src/sim/world/palettes.ts';
 import { simTables } from '../../src/sim/effects/simTables.ts';
-import { openCdImage } from '../support/cdImage.ts';
-import { gameSource, hasCdImage, hasGameData, installFiles } from '../support/env.ts';
+import { openCd } from '../support/cdImage.ts';
+import { gameSource, hasCd, hasGameData, installFiles } from '../support/env.ts';
 
-describe.runIf(hasGameData && hasCdImage)('launch screen', () => {
+describe.runIf(hasGameData && hasCd)('launch screen', () => {
   let exe: ExeImage;
   let prj: ProjectFile;
   beforeAll(async () => {
     exe = ExeImage.fromExe(await gameSource().read('MW2.EXE'));
     prj = new ProjectFile(await gameSource().read('MW2.PRJ'));
-    const iso = await openCdImage();
-    setCdDrive({ letter: 'D', read: async (p) => ((await iso.exists(p)) ? iso.read(p) : null) });
+    setCdDrive(await openCd());
   });
 
   it('puts up launch\\ljftria.shp with the launch animation, then boots and stops it', async () => {

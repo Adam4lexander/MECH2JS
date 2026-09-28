@@ -30,6 +30,10 @@ const GAME_WHITELIST = [
   /^VFX\/VFX(JK|HD)\.BIN$/i,
   // the game CD's image: its audio tracks are the mission music (read by byte range)
   /^[A-Z0-9_]+\.(CUE|BIN)$/i,
+  // or the CD's files, copied off it into the install (a ripped CD): the directories the programs read from X:\
+  /^SMK\/[A-Z0-9_]+\.(SMK|SHP)$/i,
+  /^LAUNCH\/[A-Z0-9_]+\.SHP$/i,
+  /^KEATING\/[A-Z0-9_]+\.SFL$/i,
 ];
 
 const REF_WHITELIST = [/^mw2\/src\/.+\.[ch]$/i, /^mw2\/include\/.+\.h$/i, /^mw2\/listing\/[^/]+\.(txt|csv)$/i];

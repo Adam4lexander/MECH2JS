@@ -9,7 +9,8 @@ subject rather than by the address ranges the decompilation inherits.
 **Nothing from the game is in this directory.** The port reads the game's
 content from the install at runtime - `MW2.PRJ`, `MW2.EXE`, `MW2SHELL.EXE`,
 `DATABASE.MW2`, `ARCHWO.MW2` / `ARCHJF.MW2`, `MW2.INI`, the `GIDDI\` input
-drivers and the CD image (`*.CUE` / `*.BIN`) - and nothing else. The files the
+drivers and the game CD (its image, `*.CUE` / `*.BIN`, or its files) - and
+nothing else. The files the
 two programs write (the pilot registry, `MW2PRM.CFG`, `MW2*.CFG`, the star
 BWDs, the mech lab's `MEK\` variants, the controls files `INPUT.MAP`,
 `GAMEKEY.MAP` and `giddi\*.cpc`) are the port's own: it seeds them itself on a
@@ -43,7 +44,12 @@ npm run typecheck
 The game CD's image (e.g. `MECH2_16B.BIN` / `.CUE`) belongs in the install
 directory beside `MW2.PRJ`. It is the CD drive: the intro and in-screen
 movies, the launch pictures, the training instructor's voice (`KEATING\`) and
-the CD music tracks all come from it. Without it there is no CD drive.
+the CD music tracks all come from it. A ripped CD works too: with no image,
+the CD's `SMK\`, `LAUNCH\` and `KEATING\` directories copied into the install
+directory are the CD drive. A rip has no audio tracks, so there is no CD
+music, and whatever it left out (some leave out the Smacker movies and
+animations) the programs find missing, as on a bad disc. With neither there is
+no CD drive. The image wins when both are there.
 
 The front end's music is XMIDI played through a General MIDI SoundFont
 (GeneralUser GS, free to redistribute; `tools/fetch-soundfont.ts`), which is

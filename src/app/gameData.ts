@@ -2,7 +2,8 @@
  * Everything the port reads from the install, fetched once: MW2.PRJ, MW2.EXE,
  * MW2SHELL.EXE, MW2.INI and the loose content beside them - the GIDDI input
  * drivers (their .DLL, .STD and .CAL files) - which become the disk's
- * read-only layer (engine/dosFiles.ts).
+ * read-only layer (engine/dosFiles.ts). And whether the game CD is there,
+ * as an image or as files; the CD drive reads it as it goes.
  *
  * NOT the config and player files the programs write - the star BWD files
  * (USERSTAR, EN01..05STAR, INSTMAP1), MW2*.CFG, the mech lab's MEK\ variants -
@@ -24,9 +25,20 @@ export interface GameData {
   ini: IniFile;
   /** loose files by upper-case name ('GIDDI/KEYBOARD.DLL', 'DATABASE.MW2') */
   loose: Map<string, Uint8Array>;
-  /** the game CD's cue sheet, when its image is in the install (the music) */
-  cue: { name: string; text: string } | null;
+  /** the game CD, when the install has it; null for none */
+  cd: GameCd | null;
 }
+
+/**
+ * The game CD as the install holds it: its image (a cue sheet and BIN, whose
+ * audio tracks are the music), or its files copied off it into the install
+ * directory (SMK\, LAUNCH\, KEATING\ beside MW2.EXE - a ripped CD, with no
+ * music). The image wins when both are there.
+ */
+export type GameCd = { kind: 'image'; cue: { name: string; text: string } } | { kind: 'files' };
+
+/** The CD's directories the programs read from its drive (the movies and animations, the launch pictures, the instructor's voice). */
+const CD_DIRS = ['SMK', 'LAUNCH', 'KEATING'];
 
 export interface MissionEntry {
   /** the SCN1 stream name, e.g. AMY_SCN1 */
@@ -42,7 +54,8 @@ export interface MissionEntry {
   needs: 'ready' | 'star' | 'opponents';
 }
 
-async function listDir(dir: string): Promise<string[]> {
+/** The served files in one install directory ('' for the root), as 'DIR/NAME' paths. */
+export async function listDir(dir: string): Promise<string[]> {
   const r = await fetch(`/mw2/__list/${dir}`);
   return r.ok ? ((await r.json()) as string[]) : [];
 }
@@ -84,10 +97,11 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
       /* the front end reports a missing archive itself */
     }
   }
-  let cue: GameData['cue'] = null;
+  let cd: GameCd | null = null;
   const cueName = (await listDir('')).find((n) => /\.CUE$/i.test(n));
-  if (cueName) cue = { name: cueName, text: new TextDecoder().decode(await src.read(cueName)) };
-  return { prj, exe, shellExe, ini, loose, cue };
+  if (cueName) cd = { kind: 'image', cue: { name: cueName, text: new TextDecoder().decode(await src.read(cueName)) } };
+  else if ((await Promise.all(CD_DIRS.map(listDir))).some((l) => l.length > 0)) cd = { kind: 'files' };
+  return { prj, exe, shellExe, ini, loose, cd };
 }
 
 /**

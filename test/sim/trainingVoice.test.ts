@@ -14,27 +14,20 @@ import { mainLoopFrame } from '../../src/mission/mainLoop.ts';
 import { devDir, devDirLoadSfl } from '../../src/mission/devDir.ts';
 import { sound } from '../../src/sim/sound/mixer.ts';
 import { voice } from '../../src/sim/sound/voice.ts';
-import { openCdImage } from '../support/cdImage.ts';
-import { gameSource, hasCdImage, hasGameData, installFiles } from '../support/env.ts';
+import { openCd } from '../support/cdImage.ts';
+import { gameSource, hasCd, hasGameData, installFiles } from '../support/env.ts';
 
-describe.runIf(hasGameData && hasCdImage)('the training instructor (the CD\'s KEATING directory)', () => {
+describe.runIf(hasGameData && hasCd)('the training instructor (the CD\'s KEATING directory)', () => {
   let exe: ExeImage;
   let prj: ProjectFile;
   let first: Uint8Array;
   beforeAll(async () => {
     exe = ExeImage.fromExe(await gameSource().read('MW2.EXE'));
     prj = new ProjectFile(await gameSource().read('MW2.PRJ'));
-    const iso = await openCdImage();
-    setCdDrive({
-      letter: 'D',
-      read: async (p) => ((await iso.exists(p)) ? iso.read(p) : null),
-      list: async (dir) => {
-        const e = await iso.lookup(dir);
-        return e && e.directory ? (await iso.readDir(e)).filter((c) => !c.directory && c.name !== '.' && c.name !== '..').map((c) => c.name) : null;
-      },
-    });
+    const cd = await openCd();
+    setCdDrive(cd);
     expect(await dosFilePrefetchDir('D:keating')).toBe(51);
-    first = await iso.read('KEATING/TRN1_01S.SFL');
+    first = (await cd.read('KEATING/TRN1_01S.SFL'))!;
   });
   afterAll(() => setCdDrive(null));
 

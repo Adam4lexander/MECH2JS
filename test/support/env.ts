@@ -74,6 +74,10 @@ export const hasShellData = fs.existsSync(path.join(MW2_ROOT, 'MW2SHELL.EXE')) &
 export const hasShellDecompiled = fs.existsSync(path.join(MW2_DECOMPILED, 'mw2shell', 'listing'));
 /** The CD image the movies and most screen animations live on. */
 export const hasCdImage = fs.existsSync(path.join(MW2_ROOT, 'MECH2_16B.BIN')) && fs.existsSync(path.join(MW2_ROOT, 'MECH2_16B.CUE'));
+/** The CD's files copied into the install instead (a ripped CD): LAUNCH\ and KEATING\ (a rip may leave the Smacker files out). */
+export const hasCdFiles = ['LAUNCH', 'KEATING'].every((d) => fs.existsSync(path.join(MW2_ROOT, d)));
+/** The CD either way, as the CD drive reads it (openCd). */
+export const hasCd = hasCdImage || hasCdFiles;
 
 export function shellListingPath(name: string): string {
   return path.join(MW2_DECOMPILED, 'mw2shell', 'listing', name);

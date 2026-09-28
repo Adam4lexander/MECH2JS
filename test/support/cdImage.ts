@@ -1,13 +1,15 @@
 /**
  * The game CD image (MECH2_16B.BIN / .CUE) for tests: an IsoImage over its
  * data track, read from disk a byte range at a time as the browser reads it
- * over HTTP.
+ * over HTTP. And the CD drive either way (openCd): over the image, or over
+ * the CD's files copied into the install (a ripped CD).
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { IsoImage, RawSectorSource } from '../../src/data/formats/iso9660.ts';
 import { parseCue, type CueSheet } from '../../src/data/formats/cue.ts';
-import { MW2_ROOT } from './env.ts';
+import type { CdDrive } from '../../src/engine/dosFiles.ts';
+import { hasCdImage, MW2_ROOT } from './env.ts';
 
 export function readCdCue(): CueSheet {
   const sheet = parseCue(fs.readFileSync(path.join(MW2_ROOT, 'MECH2_16B.CUE'), 'latin1'));
@@ -41,6 +43,43 @@ export function openCdImage(): Promise<IsoImage> {
     cached = IsoImage.open(new RawSectorSource(fileRangeReader(sheet.file).read, t1.start));
   }
   return cached;
+}
+
+/** The file under MW2_ROOT at a CD path ('KEATING/TRN1_01S.SFL'), ignoring case, or null. */
+function installPath(rel: string): string | null {
+  let cur = MW2_ROOT;
+  for (const seg of rel.split('/').filter((x) => x !== '')) {
+    const hit = fs.existsSync(cur) && fs.statSync(cur).isDirectory() ? fs.readdirSync(cur).find((e) => e.toLowerCase() === seg.toLowerCase()) : undefined;
+    if (!hit) return null;
+    cur = path.join(cur, hit);
+  }
+  return cur;
+}
+
+/** Drive D: as the app mounts it (app/shell/cdDrive.ts): the image when there is one, else the CD's files in the install. */
+export async function openCd(): Promise<CdDrive> {
+  if (hasCdImage) {
+    const iso = await openCdImage();
+    return {
+      letter: 'D',
+      read: async (p) => ((await iso.exists(p)) ? iso.read(p) : null),
+      list: async (dir) => {
+        const e = await iso.lookup(dir);
+        return e && e.directory ? (await iso.readDir(e)).filter((c) => !c.directory && c.name !== '.' && c.name !== '..').map((c) => c.name) : null;
+      },
+    };
+  }
+  return {
+    letter: 'D',
+    read: async (p) => {
+      const f = installPath(p);
+      return f && fs.statSync(f).isFile() ? new Uint8Array(fs.readFileSync(f)) : null;
+    },
+    list: async (dir) => {
+      const d = installPath(dir);
+      return d && fs.statSync(d).isDirectory() ? fs.readdirSync(d).filter((n) => fs.statSync(path.join(d, n)).isFile()).map((n) => n.toUpperCase()) : null;
+    },
+  };
 }
 
 /** FNV-1a over byte arrays, as 8 hex digits. */

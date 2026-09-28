@@ -64,7 +64,7 @@ export class Game {
   private audioChosen = false;
 
   constructor(readonly data: GameData) {
-    this.audio = new AudioHost(data.cue);
+    this.audio = new AudioHost(data.cd);
     setDosFiles(data.loose);
   }
 
