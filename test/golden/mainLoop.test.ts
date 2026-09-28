@@ -15,7 +15,7 @@ function portTags(): Map<string, string> {
       if (f.isDirectory()) walk(p);
       else if (p.endsWith('.ts')) {
         const s = fs.readFileSync(p, 'utf8');
-        const re = /@mw2 (\w+) 0x[0-9a-f]+[\s\S]*?\*\/\s*export (?:function|const) (\w+)/g;
+        const re = /@mw2 (\w+) 0x[0-9a-f]+[\s\S]*?\*\/\s*export (?:function\*?|const) (\w+)/g;
         for (let m; (m = re.exec(s)); ) tags.set(m[2]!, m[1]!);
       }
     }

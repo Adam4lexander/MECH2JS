@@ -8,7 +8,10 @@
  */
 import { SystemErrorFatal } from '../core/systemError.ts';
 import { error as logError, log } from '../core/log.ts';
-import { bootMission, bootMissionStart } from '../mission/load.ts';
+import { bootMission, bootMissionStart, bootMissionStartSteps } from '../mission/load.ts';
+import { net, type NetBlocking } from '../sim/net/netplay.ts';
+import { netplayShutdown } from '../sim/net/netSession.ts';
+import { setNetTransport, type NetTransport } from '../sim/net/transport.ts';
 import { dosFilePrefetch } from '../engine/dosFiles.ts';
 import { launchAnimPath } from '../sim/display/launchScreen.ts';
 import { launchNamesFromArgv } from '../mission/commandLine.ts';
@@ -152,6 +155,66 @@ export class Game {
     if (this.loadError === null) this.setMode('play');
     engineStore.bump();
     return ok;
+  }
+
+  /** NetMech: main's start-up waiting in netplay_start's join, resumed once a display frame by playFrame; null otherwise */
+  netBoot: NetBlocking<boolean> | null = null;
+
+  /**
+   * NetMech from the dev route (app/net/NetLobby.tsx): the mission's files
+   * as the shell's code writes them (the star from `setup`), then MW2.EXE
+   * with NETDEMO's command line - `MW2 -n -g=NETWAIT <mission>`, what
+   * NETDEMO.EXE spawns (0x14260) - on `transport` as the network driver.
+   * Main's start-up runs to netplay_start's join, which then waits on the
+   * other stations a pass per display frame; the frame loop follows.
+   */
+  loadNetMission(stream: string, setup: StarSetup | null, transport: NetTransport): boolean {
+    this.audio.pause();
+    this.mission = stream;
+    this.setup = setup;
+    this.loadError = null;
+    this.results = null;
+    this.pendingResults = null;
+    this.playbackShown = null;
+    this.netBoot = null;
+    let ok = false;
+    try {
+      const entry = (this.catalog ??= missionCatalog(this.data.prj)).find((m) => m.stream === stream);
+      prepareDevMission({
+        shellExe: this.data.shellExe,
+        prj: this.data.prj,
+        stream,
+        insignia: entry?.loose.includes('INSTMAP1.BWD') ?? false,
+        userStar: setup ? buildUserStar(setup) : null,
+      });
+      setNetTransport(transport);
+      const steps = bootMissionStartSteps({ exe: this.data.exe, prj: this.data.prj, ini: this.data.ini, argv: ['MW2', '-n', '-g=NETWAIT', stream] });
+      // the start-up through the mission load, to the join's first pass - so the view binds the loaded mission
+      if (steps && !steps.next().done) this.netBoot = steps;
+      ok = steps !== false;
+    } catch (e) {
+      this.failed(e);
+    }
+    this.mode = 'edit';
+    if (ok && this.loadError === null) this.setMode('play');
+    engineStore.bump();
+    return ok;
+  }
+
+  /** One pass of the join main's start-up is waiting in; at its end the loop takes over. */
+  private stepNetBoot(): void {
+    const boot = this.netBoot!;
+    try {
+      const r = boot.next();
+      if (!r.done) return;
+      this.netBoot = null;
+      log('mission', `${this.mission ?? ''}: the network join ${net.netSessionState === 1 ? 'is complete' : 'failed'}`);
+    } catch (e) {
+      this.netBoot = null;
+      this.failed(e);
+      this.mode = 'edit';
+    }
+    engineStore.bump();
   }
 
   /** Editor override: a day phase (0 dawn, 1 day, 2 dusk, 3 night) whose palette to show, or null for the game's. */
@@ -331,6 +394,11 @@ export class Game {
       ailTimerService();
       this.pending -= 1;
     }
+    if (this.netBoot) {
+      this.stepNetBoot();
+      this.audio.pump();
+      return this.mode === 'play';
+    }
     if (this.loopRate !== null) {
       const period = 1000 / this.loopRate;
       this.passDue += ms;
@@ -382,6 +450,8 @@ export class Game {
     } catch (e) {
       this.loadError = e instanceof SystemErrorFatal ? `fatal system error: ${e.message}` : String(e instanceof Error ? (e.stack ?? e.message) : e);
       logError('frame', this.loadError);
+      // system_error's teardown signs off a network game (netplay_shutdown) before it exits
+      if (e instanceof SystemErrorFatal && net.netSessionState === 1) netplayShutdown();
       this.mode = 'edit';
       engineStore.bump();
       return false;

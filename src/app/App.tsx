@@ -6,7 +6,8 @@ import { Game } from './Game.ts';
 import { type GameData, loadGameData } from './gameData.ts';
 import { MissionPicker } from './MissionPicker.tsx';
 import { attachDiskStore } from './diskStore.ts';
-import { dosFileExists, dosFileWrite } from '../engine/dosFiles.ts';
+import { dosFileExists, dosFileWrite, setDosFiles } from '../engine/dosFiles.ts';
+import { seedControlFiles } from '../shell/controls/seed.ts';
 import { SHELL_LABEL } from '../generated/shell/labels.gen.ts';
 import { GameShell } from './GameShell.tsx';
 
@@ -16,10 +17,15 @@ const DEV = new URLSearchParams(window.location.search).has('dev');
 /**
  * The port's own files on a first run. MW2DIF.CFG (the rule options) starts
  * as the shell's own defaults - the simOptions its image holds, which its
- * options screen would write - so MW2.EXE never meets a missing file.
+ * options screen would write - so MW2.EXE never meets a missing file. The
+ * controls files (INPUT.MAP, GAMEKEY.MAP, giddi\*.cpc) are the ported
+ * controls screen's output and the port's own defaults (shell/controls/seed.ts),
+ * which need the GIDDI drivers on the disk.
  */
 function seedOwnFiles(d: GameData): void {
   if (!dosFileExists('MW2DIF.CFG')) dosFileWrite('MW2DIF.CFG', d.shellExe.slice(SHELL_LABEL.simOptions, 8));
+  setDosFiles(d.loose);
+  seedControlFiles(d.shellExe);
 }
 
 installConsoleSinks();
@@ -69,6 +75,10 @@ export function App() {
         data={data}
         onPick={(stream, setup) => {
           game.loadMission(stream, setup);
+          setInMission(true);
+        }}
+        onNet={(stream, setup, transport) => {
+          game.loadNetMission(stream, setup, transport);
           setInMission(true);
         }}
       />

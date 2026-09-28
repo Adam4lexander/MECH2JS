@@ -179,3 +179,13 @@ decompilation. Each state object registers itself with
 - **Resource cache.** MW2.PRJ is held in memory; cache_lock / unlock / release
   have no memory to manage. They are ported as no-ops where they are called.
 - **FetchSource** lives in `src/app` because `fetch` is a DOM API.
+- **NetMech.** The INT 0x65 driver is a `NetTransport` the host installs
+  (`sim/net/transport.ts`; `QueueTransport`/`MemoryNetHub` in memory,
+  `app/net/webrtcLink.ts` over a WebRTC data channel signalled by pasted
+  offer/answer text). The join blocks on the other stations, so
+  netplay_start/netplay_join are generators and main's start-up is
+  `bootMissionStartSteps` (the sync `bootMission` throws if the join would
+  wait). Loops the original spun in real time on a silent driver (a failed
+  send, the sign-off's second) spend timer ticks through `setNetSpin`
+  (default: one `timerInterrupt`). Two stations cannot share one process's
+  globals: `test/sim/netplay.test.ts` runs each in a child process.

@@ -10,9 +10,11 @@
 import { musicStartMissionTrack, soundConfigLoad, soundInitAll } from '../sim/sound/music.ts';
 import { randomTablesInit } from '../core/random.ts';
 import { audioTimerInit, simClockReset } from '../engine/clock.ts';
-import { uiContextRegister } from '../sim/ui/uiContext.ts';
+import { ui, uiContextRegister } from '../sim/ui/uiContext.ts';
 import { dosDiskSnapshot, dosFileLoad, setDosFiles, setOverlayFiles, setOwnFiles } from '../engine/dosFiles.ts';
 import { checkLaunchedByShell } from './commandLine.ts';
+import type { NetBlocking } from '../sim/net/netplay.ts';
+import { netplayInit, netplayStart } from '../sim/net/netSession.ts';
 import { inputInit } from '../sim/controls/input.ts';
 import { cameraInit } from '../sim/camera/cameraUpdate.ts';
 import { terrainTableReset } from '../sim/mech/animTask.ts';
@@ -116,6 +118,18 @@ export interface MissionBootOptions {
  * @portOnly the sequence is main's (0x15a30); every call in it is a ported function or a stated gap
  */
 export function bootMissionStart(opts: MissionBootOptions): (() => boolean) | false {
+  const steps = bootMissionStartSteps(opts);
+  return steps && (() => runBootSteps(steps));
+}
+
+/**
+ * bootMissionStart for a host that can wait: the rest of main's start-up as
+ * a generator, which in a network game yields while netplay_start's join
+ * waits on the other stations (sim/net/netplay.ts).
+ *
+ * @portOnly the sequence is main's (0x15a30)
+ */
+export function bootMissionStartSteps(opts: MissionBootOptions): NetBlocking<boolean> | false {
   setBootImage(opts.exe);
   resetAllGlobals();
   resetProvenanceSeen();
@@ -146,7 +160,14 @@ export function bootMissionStart(opts: MissionBootOptions): (() => boolean) | fa
   audioTimerInit();
   videoInit();
   bootLoadLaunchAnims();
-  return () => bootMissionFinish(opts, mission);
+  return bootMissionFinishSteps(opts, mission);
+}
+
+/** Runs the rest of the start-up to its end; a join that would wait on the network is an error here. @portOnly */
+function runBootSteps(steps: NetBlocking<boolean>): boolean {
+  const r = steps.next();
+  if (!r.done) throw new Error('a network game waits on the other stations to join: boot it with bootMissionStartSteps');
+  return r.value;
 }
 
 /**
@@ -160,13 +181,14 @@ export function bootMission(opts: MissionBootOptions): boolean {
 }
 
 /** The rest of main's start-up, after the launch screen is up (its animation running meanwhile). */
-function bootMissionFinish(opts: MissionBootOptions, mission: string): boolean {
+function* bootMissionFinishSteps(opts: MissionBootOptions, mission: string): NetBlocking<boolean> {
   // static_arena_init: the DTBL pre-pass sizes arenas; the port allocates on demand
   divergence('static_arena_init: no arena pre-pass; tables are allocated on demand', 'main');
   randomTablesInit(opts.randomSeed);
   brightnessTablesBuild();
   soundInitAll();
   vfxVideoSub010320();
+  netplayInit();
   simTablesReset();
   gamethingTableReset();
   destructiblesReset();
@@ -185,7 +207,11 @@ function bootMissionFinish(opts: MissionBootOptions, mission: string): boolean {
   for (let i = 0; i < missionTables.missionTableCount; i++) objectiveTableStart(i);
   mechDispatchHook0();
   groupsStartMission();
-  // netplay_start (single player: nothing); ui_callbacks_sub_0196a0 is an empty function
+  if ((yield* netplayStart()) === 0) {
+    ui.quitRequested = 1;
+    ui.quitCountdown = 3;
+  }
+  // ui_callbacks_sub_0196a0 is an empty function
   musicStartMissionTrack();
   simClockReset();
   worldRecordsTick();

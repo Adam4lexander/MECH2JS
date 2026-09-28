@@ -49,7 +49,8 @@ import {
   playerTargetReticle,
 } from '../ai/targeting.ts';
 import { mechDamageSlot, mechEject, mechOnDestroyed } from './damage.ts';
-import { mechUpdateMissileLock, mechWeaponsTick, weaponCycleGroup, weaponCycleNext, weaponJettisonAmmo } from '../weapons/weapons.ts';
+import { mechUpdateMissileLock, mechWeaponsTick, weaponCycleGroup, weaponCycleNext, weaponGlobals, weaponJettisonAmmo } from '../weapons/weapons.ts';
+import { netWeapons } from '../net/netWeapons.ts';
 import { loadoutAmmo, loadoutSections, loadoutWeapons } from './loadout.ts';
 import { mechs } from './mechGlobals.ts';
 import { mechRuntime } from './mechRuntime.ts';
@@ -111,8 +112,7 @@ export function mechCrashToGround(l: MechLoadout): void {
  * flags clear.
  *
  * @mw2 mech_weapons_cancel_bursts 0x00052020
- * @fidelity partial
- * @divergence the two netplay weapon-fired arrays it zeroes are not kept by the port
+ * @fidelity exact
  */
 export function mechWeaponsCancelBursts(l: MechLoadout): void {
   const w = loadoutWeapons(l);
@@ -120,6 +120,8 @@ export function mechWeaponsCancelBursts(l: MechLoadout): void {
     const fs = w[i]!.fireState;
     if (fs === 2 || fs === 3) w[i]!.fireState = 1;
   }
+  weaponGlobals.netplayWeaponFiredLocal.fill(0);
+  netWeapons.netplayWeaponFired.fill(0);
 }
 
 /**

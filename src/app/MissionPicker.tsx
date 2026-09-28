@@ -17,6 +17,8 @@ import { mechCatalog, type MechChoice } from '../data/catalog/mechs.ts';
 import { STARMATE_LIMIT, type StarSetup } from '../data/config/userStar.ts';
 import type { GameData, MissionEntry } from './gameData.ts';
 import { missionCatalog } from './gameData.ts';
+import type { NetTransport } from '../sim/net/transport.ts';
+import { NetLobby } from './net/NetLobby.tsx';
 
 const NAME_MAX = 21;
 const STORE = 'mw2.starSetup';
@@ -102,11 +104,21 @@ function StarSetupPanel({ mission, mechs, onLaunch, onCancel }: { mission: Missi
   );
 }
 
-export function MissionPicker({ data, onPick }: { data: GameData; onPick: (stream: string, setup: StarSetup | null) => void }) {
+export function MissionPicker({
+  data,
+  onPick,
+  onNet,
+}: {
+  data: GameData;
+  onPick: (stream: string, setup: StarSetup | null) => void;
+  /** NetMech: launch `stream` as a network game on `transport` */
+  onNet?: (stream: string, setup: StarSetup, transport: NetTransport) => void;
+}) {
   const missions = useMemo(() => missionCatalog(data.prj), [data]);
   const mechs = useMemo(() => mechCatalog(data.prj), [data]);
   const [filter, setFilter] = useState('');
   const [setting, setSetting] = useState<MissionEntry | null>(null);
+  const [netting, setNetting] = useState(false);
   const shown = missions.filter((m) => m.stream.toLowerCase().includes(filter.toLowerCase()));
   const item = (m: MissionEntry) => (
     <button
@@ -135,6 +147,12 @@ export function MissionPicker({ data, onPick }: { data: GameData; onPick: (strea
       </section>
     );
   };
+  if (netting && onNet)
+    return (
+      <div className="picker">
+        <NetLobby data={data} onLaunch={onNet} onCancel={() => setNetting(false)} />
+      </div>
+    );
   if (setting)
     return (
       <div className="picker">
@@ -152,6 +170,12 @@ export function MissionPicker({ data, onPick }: { data: GameData; onPick: (strea
   return (
     <div className="picker">
       <h1>MechWarrior 2 — choose a mission</h1>
+      {onNet && (
+        <div className="setup-row">
+          <button onClick={() => setNetting(true)}>NetMech…</button>
+          <span className="hint">a two-player network game over a WebRTC link</span>
+        </div>
+      )}
       <input autoFocus placeholder="filter" value={filter} onChange={(e) => setFilter(e.target.value)} />
       {section('ready', 'Ready', "The mission sets the player's 'Mech itself.")}
       {section('star', 'Choose pilot and ’Mech', 'The mission takes the player’s star (USERSTAR.BWD): you name the pilot and pick the ’Mech and any starmates.')}
