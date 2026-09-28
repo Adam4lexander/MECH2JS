@@ -133,6 +133,15 @@ input, select { background: var(--panel2); color: var(--text); border: 1px solid
   align-items: center;
   justify-content: center;
 }
+.game-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.game-view canvas {
+  display: block;
+}
 .shell-screen {
   image-rendering: pixelated;
   width: min(100vw, calc(100vh * 4 / 3));

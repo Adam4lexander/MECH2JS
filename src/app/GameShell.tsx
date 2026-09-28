@@ -13,7 +13,7 @@ import { ShellView } from './shell/ShellView.tsx';
 import { LaunchView } from './shell/LaunchView.tsx';
 import { mountCd } from './shell/cdDrive.ts';
 import { attachShellAudio } from './shell/shellAudio.ts';
-import { Viewport } from '../editor/panels/Viewport.tsx';
+import { GameView } from './GameView.tsx';
 import { mech2Main } from '../launcher/mech2.ts';
 import { splitCommandTail } from '../mission/commandLine.ts';
 import { startShellProcess } from '../shell/boot.ts';
@@ -107,7 +107,7 @@ export function GameShell({ data, game }: { data: GameData; game: Game }) {
     );
   if (showing.kind === 'shell') return <div className="shell-frame"><ShellView pump={showing.pump} onExit={onShellExit} /></div>;
   if (showing.kind === 'launch') return <div className="shell-frame"><LaunchView onDone={showing.done} /></div>;
-  if (showing.kind === 'sim') return <div className="play-frame"><Viewport game={game} /></div>;
+  if (showing.kind === 'sim') return <div className="play-frame"><GameView game={game} /></div>;
   return (
     <div className="shell-start">
       <div>MechWarrior 2: 31st Century Combat</div>
