@@ -454,6 +454,11 @@
   "kind": "raw",
   "doc": ""
  },
+ "mechlabScreenRows": {
+  "address": "0x7f26c",
+  "kind": "raw",
+  "doc": "screen_mechlab's rows: row[career].background to screen_load_background (0x33b00) and +0 / +4 to button_bar_create (0x33b19, 0x33b20): 11 buttons (EXIT LAB .. DELETE, listing/screen_buttons.txt); career 2 reuses the Wolf buttons with item 10."
+ },
  "planetAnims": {
   "address": "0x7f29c",
   "kind": "raw",
@@ -568,6 +573,26 @@
   "address": "0x83840",
   "kind": "int",
   "doc": "How many chassis NEXT / PREV CHASSIS cycle through (0 .. count - 1): screen_mechlab sets 15 (Firemoth .. Dire Wolf), or in career 2 grievance_chassis_count's 16 / 17 / 18 for the pilot names Calvin / Hobbes / Enzo, which add the Elemental, the Tarantula and the Battle Master IIC."
+ },
+ "mechlabAnimFormatWolf": {
+  "address": "0x83844",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabAnimFormatJadeFalcon": {
+  "address": "0x8384c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabAnimFormatGrievance": {
+  "address": "0x83854",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabChassisAnimFormat": {
+  "address": "0x8385c",
+  "kind": "ptr",
+  "doc": ""
  },
  "mechlabChassis": {
   "address": "0x83878",
@@ -984,6 +1009,31 @@
   "kind": "int",
   "doc": ""
  },
+ "mechlabTrimLocation": {
+  "address": "0xa2248",
+  "kind": "int",
+  "doc": "mechlab_trim_armour_to_tonnage's round-robin: the location it starts stripping points from, left where it stopped (outside the loader's cleared block)."
+ },
+ "mechlabSavePath": {
+  "address": "0xa224c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabVariantName": {
+  "address": "0xa226c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabAnimName": {
+  "address": "0xa228c",
+  "kind": "raw",
+  "doc": "screen_mechlab's name buffers: the chassis animation's name (sprintf of mechlabChassisAnimFormat with the chassis's animCode), the '%s%02dstd' name project_tabl_lookup is asked for (and the 'mek\\%s??usr.mek' pattern), SAVE's '%s%02dusr.mek' and the 'mek\\%s' path it fopen's 'wb'."
+ },
+ "mechlabSaveName": {
+  "address": "0xa229c",
+  "kind": "raw",
+  "doc": ""
+ },
  "mekTons": {
   "address": "0xa22bc",
   "kind": "int",
@@ -1033,6 +1083,21 @@
   "address": "0xa252c",
   "kind": "raw",
   "doc": ""
+ },
+ "mekFileBuffer": {
+  "address": "0xa2560",
+  "kind": "raw",
+  "doc": "mechlab_load_mek freads a loose MEK here (up to 0x800 bytes) and reads it in place."
+ },
+ "mechlabCallsign": {
+  "address": "0xa4560",
+  "kind": "raw",
+  "doc": "screen_mechlab sprintf's '~CALLSIGN: %s (%d.00 T MAX)' here from star_record(-1)'s selected member and maxTonnage; mechlabDesignPanel's first row (draw_title) shows it."
+ },
+ "mechlabChassisTitle": {
+  "address": "0xa45e0",
+  "kind": "raw",
+  "doc": "'~' + chassisTable[mechlabChassis].displayName, rewritten after every mechlab_load_mek (whose memset of the design block, 0xa45e0..0xa4d88, clears it): row 1 of both summary panels."
  },
  "designTitle": {
   "address": "0xa46e0",
@@ -1204,10 +1269,40 @@
   "kind": "raw",
   "doc": ""
  },
+ "designEquipMasc": {
+  "address": "0xa4d70",
+  "kind": "int",
+  "doc": "The EQUIPMENT panel's five flags (its draw_yes_no rows' values, flipped by mechlab_toggle_equipment with the item code in the row's extra). mechlab_load_mek sets designEquipMasc when any MEK slot is 5001 and COUNTS the other four codes in the grid (5401, 5451, 5402, 5452 - draw_equipment_name's Right Lower Arm, Right Hand, Left Lower Arm, Left Hand Actuator) before zeroing them."
+ },
+ "designEquipRightLowerArm": {
+  "address": "0xa4d74",
+  "kind": "int",
+  "doc": ""
+ },
+ "designEquipRightHand": {
+  "address": "0xa4d78",
+  "kind": "int",
+  "doc": ""
+ },
+ "designEquipLeftLowerArm": {
+  "address": "0xa4d7c",
+  "kind": "int",
+  "doc": ""
+ },
+ "designEquipLeftHand": {
+  "address": "0xa4d80",
+  "kind": "int",
+  "doc": ""
+ },
  "designMascTons": {
   "address": "0xa4d84",
   "kind": "int",
   "doc": ""
+ },
+ "designBackup": {
+  "address": "0xa4d88",
+  "kind": "raw",
+  "doc": "mechlab_load_mek copies the whole design block (0xa45e0, 0x7a8 bytes) here before clearing it. No reader has been found."
  },
  "mechlabTextNormal": {
   "address": "0xa5530",
@@ -1222,6 +1317,31 @@
  "mechlabTextWarning": {
   "address": "0xa5730",
   "kind": "raw",
+  "doc": ""
+ },
+ "mechlabPanel": {
+  "address": "0xa5830",
+  "kind": "raw",
+  "doc": "---- mech lab (S7) ---- screen_mechlab's two panels. mechlabSummaryPanel is the left column: the screen points it at mechlabDesignPanel (browsing) or mechlabCustomizingPanel (CUSTOMIZE) and widget_panel_layout's it; a click is hit-tested against it first and its row's clickFn called with no redraw. mechlabPanel is the right-hand panel on show (NULL while browsing): mechlab_open_panel frees its labels and points it at the clicked row's extra; a click that missed the left column is hit-tested against it and followed by widget_panel_redraw of both. Neither is cleared on leaving, so the next visit starts with the last panel still hit-testable (its labels freed)."
+ },
+ "mechlabSummaryPanel": {
+  "address": "0xa5834",
+  "kind": "raw",
+  "doc": ""
+ },
+ "mechlabText": {
+  "address": "0xa5838",
+  "kind": "raw",
+  "doc": "The mech lab draw functions' sprintf buffer (label_create copies it); the DELETE button builds 'mek\\%s.mek' in it for remove()."
+ },
+ "mechlabChassisAnimX": {
+  "address": "0xa593c",
+  "kind": "int",
+  "doc": "animation slot 16, the chassis: its place (x 0x146, or 0x136 in career 2; y 0x17f) and name format, set per career by screen_mechlab."
+ },
+ "mechlabChassisAnimY": {
+  "address": "0xa5940",
+  "kind": "int",
   "doc": ""
  },
  "mechlabVariants": {
