@@ -104,6 +104,27 @@ class ModuleReader {
  * 128-word ring (0xb77..0xc77) that readKey drains. poll copies the map and
  * adds three synthetic buttons: Shift (0x76), Control (0x77) and Alt (0x78).
  */
+/**
+ * The keyboard's typematic setting (repeat delay and period) as BIOS int
+ * 16h AX=0305h leaves it; the host repeats a held key at this rate. At
+ * boot it is the BIOS default, 500 ms then 10.9 a second (rate 0x0b).
+ *
+ * @portOnly the hardware below the driver
+ */
+export const typematic = { delayMs: 500, periodMs: (8 + 3) * 2 * 4.17 };
+
+/**
+ * int 16h AX=0305h, set typematic rate and delay: BH the delay in 250 ms
+ * steps (0..3), BL the rate (0..0x1f), a period of (8 + (BL & 7)) *
+ * 2^((BL >> 3) & 3) * 4.17 ms - 0 is 30 a second, 0x1f 2 a second.
+ *
+ * @portOnly the BIOS service KEYBOARD.DLL calls
+ */
+export function biosSetTypematic(bh: number, bl: number): void {
+  typematic.delayMs = ((bh & 3) + 1) * 250;
+  typematic.periodMs = (8 + (bl & 7)) * (1 << ((bl >> 3) & 3)) * 4.17;
+}
+
 export class KeyboardDriver implements GiddiDriver {
   readonly kind = 'keyboard';
   private readonly r: ModuleReader;
@@ -231,13 +252,21 @@ export class KeyboardDriver implements GiddiDriver {
     }
   }
 
-  /** +0x00 (0x890 -> 0xfe6): clears the key map and hooks interrupt 9 */
+  /**
+   * +0x00 (0x890 -> 0xfe6): clears the key map, sets the slowest typematic
+   * rate - 250 ms, then 2 a second (0x102e: int 16h AX=0305h, BH 0, BL
+   * 0x1f), so a held key barely feeds the keystroke ring - and hooks
+   * interrupt 9
+   */
   install(): number {
     this.down.fill(0);
+    biosSetTypematic(0, 0x1f);
     return 0;
   }
-  /** +0x04 (0x8b0 -> 0x104e): unhooks it */
-  remove(): void {}
+  /** +0x04 (0x8b0 -> 0x104e): unhooks it and sets the typematic rate back to 500 ms, rate 9 (0x1067) */
+  remove(): void {
+    biosSetTypematic(1, 9);
+  }
   /** +0x08 (0x8d0) */
   init(rec: GiddiRecord): number {
     rec.analogCount = 0;

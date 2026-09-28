@@ -5,14 +5,18 @@
  * DOS mouse driver's position and buttons (read by MOUSE.DLL).
  *
  * Mapping is by KeyboardEvent.code, the physical key, so the layout is the
- * PC keyboard's regardless of the user's language. A held key repeats as
- * the browser repeats it (the BIOS typematic rate the driver sets is not
- * reproduced).
+ * PC keyboard's regardless of the user's language. A held key repeats the
+ * way the PC keyboard repeats it, not as the browser does: only the last
+ * key pressed, at the typematic delay and rate the driver set through the
+ * BIOS (giddi.ts `typematic`; KEYBOARD.DLL asks for 250 ms, then 2 a
+ * second). Passing on the browser's ~30 repeats a second flooded the
+ * keystroke ring main's loop drains one key a pass from, delaying and then
+ * dropping command keys while a steering key was held.
  *
  * @portOnly hardware emulation
  */
 import { input } from '../sim/controls/input.ts';
-import { KeyboardDriver, MouseDriver } from '../sim/controls/giddi.ts';
+import { KeyboardDriver, MouseDriver, typematic } from '../sim/controls/giddi.ts';
 
 /** code -> set-1 make sequence (break = the same with 0x80 on the last byte) */
 const SCANCODES: Record<string, number[]> = {
@@ -76,6 +80,23 @@ const BUTTON_BITS = [1, 4, 2];
  */
 export function attachHostInput(target: HTMLElement, active: () => boolean): () => void {
   const held = new Set<string>();
+  // the typematic key: the last one pressed, repeated while it is held
+  let repeatCode: string | null = null;
+  let repeatTimer: ReturnType<typeof setTimeout> | null = null;
+  const stopRepeat = () => {
+    if (repeatTimer !== null) clearTimeout(repeatTimer);
+    repeatTimer = null;
+    repeatCode = null;
+  };
+  const send = (seq: number[]) => {
+    const kb = keyboard();
+    if (kb) for (const b of seq) kb.isr(b);
+  };
+  const repeat = () => {
+    if (repeatCode === null || !held.has(repeatCode) || !active()) return stopRepeat();
+    send(scancodesFor(repeatCode, true) ?? []);
+    repeatTimer = setTimeout(repeat, typematic.periodMs);
+  };
   const onKey = (e: KeyboardEvent) => {
     if (!active()) return;
     // typing into the editor's fields (the inspector, the console) is not the game's
@@ -85,10 +106,18 @@ export function attachHostInput(target: HTMLElement, active: () => boolean): () 
     const seq = scancodesFor(e.code, down);
     if (!seq) return;
     e.preventDefault();
-    if (down) held.add(e.code);
-    else held.delete(e.code);
-    const kb = keyboard();
-    if (kb) for (const b of seq) kb.isr(b);
+    // the browser's own repeats: the keyboard's typematic below stands in for them
+    if (down && e.repeat) return;
+    if (down) {
+      held.add(e.code);
+      stopRepeat();
+      repeatCode = e.code;
+      repeatTimer = setTimeout(repeat, typematic.delayMs);
+    } else {
+      held.delete(e.code);
+      if (e.code === repeatCode) stopRepeat();
+    }
+    send(seq);
   };
   const onMove = (e: MouseEvent) => {
     if (!active() || document.pointerLockElement !== target) return;
@@ -109,6 +138,7 @@ export function attachHostInput(target: HTMLElement, active: () => boolean): () 
     e.preventDefault();
   };
   const release = () => {
+    stopRepeat();
     const kb = keyboard();
     for (const code of held) for (const b of scancodesFor(code, false) ?? []) kb?.isr(b);
     held.clear();
