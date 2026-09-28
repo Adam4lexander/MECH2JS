@@ -96,6 +96,8 @@ export async function attachShellAudio(game: Game): Promise<void> {
   // each movie's own timeline: its chunks play back to back from when it started (or last went back to
   // its first frame, whose chunk carries Smacker's lead-in), and different movies' sound mixes
   const movieTimes = new WeakMap<object, number>();
+  // when each movie's sound started (its first frame's chunk), on the audio clock: the movie's clock while it sounds
+  const movieStarts = new WeakMap<object, number>();
   // what is playing for each movie, so a restart or a close can stop it
   const movieSources = new WeakMap<object, AudioBufferSourceNode[]>();
   const stopMovie = (stream: object) => {
@@ -108,8 +110,16 @@ export async function attachShellAudio(game: Game): Promise<void> {
     }
     movieSources.delete(stream);
     movieTimes.delete(stream);
+    movieStarts.delete(stream);
   };
   hardware.pcmStop = stopMovie;
+  hardware.pcmClock = (stream) => {
+    const start = movieStarts.get(stream);
+    // suspended (sound off), the audio clock stands still: the movie keeps the shell's timer instead
+    if (start === undefined || ctx.state !== 'running') return null;
+    // what is being heard now left the context outputLatency ago
+    return (ctx.currentTime - (ctx.outputLatency || 0) - start) * 1000;
+  };
   hardware.pcmOut = (samples, rate, channels, stream, restart) => {
     if (restart) stopMovie(stream);
     const frames = Math.floor(samples.length / channels);
@@ -124,6 +134,7 @@ export async function attachShellAudio(game: Game): Promise<void> {
     src.connect(out);
     const at = restart ? ctx.currentTime + 0.05 : Math.max(movieTimes.get(stream) ?? 0, ctx.currentTime + 0.05);
     src.start(at);
+    if (restart) movieStarts.set(stream, at);
     movieTimes.set(stream, at + frames / rate);
     const list = movieSources.get(stream) ?? [];
     list.push(src);

@@ -14,7 +14,8 @@
  *   SmackClose (0x4d364)
  *   SmackColorRemap (0x4e214) copy the movie's palette out
  *
- * Frame timing is the shell's timer_read (the library calls it too).
+ * Frame timing is the shell's timer_read (the library calls it too), or -
+ * for a movie whose sound is playing - the sound itself (smackWait).
  */
 import { SmackerDecoder, parseSmacker, type SmackerFrame } from '../../data/formats/smacker.ts';
 import type { VfxWindow } from '../../engine/vfx/vfx.ts';
@@ -40,8 +41,8 @@ export class Smack {
   target: { win: VfxWindow; x: number; y: number } | null = null;
   /** the last frame decoded (its sound, for the host) */
   lastFrame: SmackerFrame | null = null;
-  /** when the current frame went up (timer_read) */
-  shownAt = 0;
+  /** when frame 0 last went up (timer_read): frame n is due frameMs * n after it */
+  startedAt = 0;
   readonly frameMs: number;
   /** the sound tracks SmackOpen was asked for (bit i: track i), which SmackDoFrame plays */
   readonly tracks: number;
@@ -110,7 +111,7 @@ export function smackDoFrame(s: Smack, sound = true): void {
       }
     }
   }
-  s.shownAt = timerRead();
+  if (f.index === 0) s.startedAt = timerRead();
 }
 
 /**
@@ -145,9 +146,21 @@ export function smackNextFrame(s: Smack): void {
   s.frameNum = Math.min(s.frameNum + 1, s.frames - 1);
 }
 
-/** @portOnly SmackWait (0x4e8e0): nonzero while the current frame is still due to be up */
+/**
+ * @portOnly SmackWait (0x4e8e0): nonzero while the frame after the one last
+ * decoded is not yet due (the shell asks both before and after
+ * SmackNextFrame). Frame n is due frameMs * n into the movie, counted from
+ * frame 0 - not from when the last frame went up, which let every late
+ * frame push the rest back (the host's clock only moves once a display
+ * frame, so at 60 Hz nearly every frame was late: mintro ran 87 s to its
+ * sound's 77.5). While the movie's sound is playing, "into the movie" is
+ * how far the sound has played, so the picture keeps to what is heard;
+ * otherwise the shell's timer since frame 0.
+ */
 export function smackWait(s: Smack): number {
-  return timerRead() - s.shownAt < s.frameMs ? 1 : 0;
+  const next = s.lastFrame ? s.lastFrame.index + 1 : 0;
+  const into = hardware.pcmClock?.(s) ?? timerRead() - s.startedAt;
+  return into < next * s.frameMs ? 1 : 0;
 }
 
 /**

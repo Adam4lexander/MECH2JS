@@ -52,6 +52,11 @@ export const hardware = {
   pcmOut: null as ((samples: Int16Array, rate: number, channels: number, stream: object, restart: boolean) => void) | null,
   /** @portOnly stops whatever the host is still playing for `stream` (a movie closed or restarted) */
   pcmStop: null as ((stream: object) => void) | null,
+  /**
+   * @portOnly how far `stream`'s sound has played, in ms from its start as the listener hears it
+   * (negative before it starts); null when none of it is sounding (no sound sent, audio off)
+   */
+  pcmClock: null as ((stream: object) => number | null) | null,
   /** the sound card's digital side, as Miles drives it; null for no card (every sample call is then a no-op, as without a driver) */
   digital: null as DigitalCard | null,
   /** the MIDI side: a General MIDI synth (the MDI driver's output); null for none */
