@@ -5,6 +5,7 @@
  * campaign missions as buttons.
  */
 import { SHELL_LABEL } from '../../generated/shell/labels.gen.ts';
+import { divergence } from '../../core/provenance.ts';
 import { mpackDbGetItem, type MPackDb } from '../../data/formats/mpack.ts';
 import { driver, mouse, shell } from '../state.ts';
 import type { Blocking } from '../host/blocking.ts';
@@ -27,6 +28,25 @@ import { shellScreens } from './registry.ts';
 function onTrial(): boolean {
   const p = currentPilot();
   return careerMission(pilotField(p, 'career'), pilotField(p, 'missionIndex')).isTrial === 1;
+}
+
+/**
+ * The table holograms on the CD are named with one letter of the chassis -
+ * SMK\AWOMSTBL / AJFMSTBL the Timber Wolf (code 'mc', the Mad Cat),
+ * AWODSTBL / AJFDSTBL the Dire Wolf ('da', the Daishi) - where the shell
+ * asks for awo%stbl with the two-letter code: a nine-character name, which
+ * DOS truncates (AWOMCSTB) and never finds. So the shipped game never
+ * shows them. The port tries these names after the original's, for the two
+ * chassis they exist for; no other chassis has one.
+ *
+ * @portOnly
+ * @divergence the table hologram plays for the Timber Wolf and the Dire Wolf; the original's lookup never finds it
+ */
+function tableHologramName(career: number, animCode: string): string | null {
+  const letter = animCode === 'mc' ? 'm' : animCode === 'da' ? 'd' : null;
+  if (letter === null || (career !== 0 && career !== 1)) return null;
+  divergence('the MECH LAB table hologram: the CD names it with one letter, which the shell\'s awo%stbl never finds', 'screen_ready_room');
+  return `${career === 0 ? 'awo' : 'ajf'}${letter}stbl`;
 }
 
 /**
@@ -117,6 +137,8 @@ export function* screenReadyRoom(db: MPackDb, career: number, commandLine: { val
             // 0x77c1b 'awo%stbl', 0x77c24 'ajf%stbl'
             const name = `${career === 0 ? 'awo' : 'ajf'}${chassisEntry(chassis).animCode}stbl`;
             waitSlot = career === 0 ? yield* animStart(0, name, 0x131, 0xb9, 6, 0) : yield* animStart(0, name, 0x114, 0xa4, 6, 0);
+            const hologram = waitSlot === -1 ? tableHologramName(career, chassisEntry(chassis).animCode) : null;
+            if (hologram) waitSlot = career === 0 ? yield* animStart(0, hologram, 0x131, 0xb9, 6, 0) : yield* animStart(0, hologram, 0x114, 0xa4, 6, 0);
             next = 9;
             soundSamplePlay(sample);
           } else {
