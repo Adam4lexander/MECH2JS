@@ -7,7 +7,7 @@ Every ported function carries `@mw2 <name> <address>` (MW2.EXE, the sim) or `@mw
 `decompiled/<target>/listing/functions.csv`, so a function renamed upstream fails the build rather
 than drifting. Library code (Watcom clib, Miles, Smacker) is excluded from the totals.
 
-Checked against the decompilation at mw2-decompiled `4552c18`.
+Checked against the decompilation at mw2-decompiled `4dca853`.
 
 ## MW2.EXE
 
