@@ -42,15 +42,21 @@ export const shellInput = registerGlobals(
   {
     /** inputDevices (0x7a16c): the heap array, or null (NULL) before input_devices_load */
     devices: null as ShellInputDevice[] | null,
-    /** 0x7a168: how many records the array has room for (grown 50 at a time) */
-    capacity: 0,
   },
   () => {
     shellInput.devices = null;
-    shellInput.capacity = 0;
   },
   'mw2shell',
 );
+
+/** @portOnly inputDeviceCapacity (0x7a168): how many records the array has room for (grown 50 at a time) */
+export function inputDeviceCapacity(): number {
+  return mem().i32(SHELL_LABEL.inputDeviceCapacity);
+}
+
+function setInputDeviceCapacity(n: number): void {
+  mem().setI32(SHELL_LABEL.inputDeviceCapacity, n);
+}
 
 /** @portOnly inputDeviceCount (0x7a164) */
 export function inputDeviceCount(): number {
@@ -82,9 +88,10 @@ export function inputDeviceGet(index: number): ShellInputDevice | null {
  */
 export function inputDevicesGrow(): number {
   const d = (shellInput.devices ??= []);
-  for (let i = 0; i < 50; i++) d[shellInput.capacity + i] = emptyDevice();
-  shellInput.capacity += 50;
-  return shellInput.capacity;
+  const capacity = inputDeviceCapacity();
+  for (let i = 0; i < 50; i++) d[capacity + i] = emptyDevice();
+  setInputDeviceCapacity(capacity + 50);
+  return inputDeviceCapacity();
 }
 
 /**
@@ -113,7 +120,7 @@ export function inputDevicesLoad(): number {
     if (at < 0) continue;
     const slot = inputDeviceCount();
     setInputDeviceCount(slot + 1);
-    if (shellInput.capacity < slot + 1 && inputDevicesGrow() === 0) return 0;
+    if (inputDeviceCapacity() < slot + 1 && inputDevicesGrow() === 0) return 0;
     // "giddi\" + the file name; file_load (0x1a360) returns NULL for a file it cannot read
     const file = dosFileLoad('giddi\\' + lower);
     if (!file) {
@@ -149,5 +156,5 @@ export function inputDevicesLoad(): number {
 export function inputDevicesFree(): void {
   shellInput.devices = null;
   setInputDeviceCount(0);
-  shellInput.capacity = 0;
+  setInputDeviceCapacity(0);
 }

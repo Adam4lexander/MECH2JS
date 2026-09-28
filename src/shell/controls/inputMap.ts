@@ -22,7 +22,7 @@ import { SHELL_LABEL } from '../../generated/shell/labels.gen.ts';
 import type { Blocking } from '../host/blocking.ts';
 import { mem } from '../memory.ts';
 import { messageBox } from '../ui/messageBox.ts';
-import { BINDING, BINDING_COUNT, BINDING_SIZE, bindingAt, CONTROLS, controls, controlsSaveConfigFile, deviceRecordAt } from './config.ts';
+import { BINDING, BINDING_COUNT, BINDING_SIZE, bindingAt, CONTROLS, controlsKeyboardDevice, controlsSaveConfigFile, deviceRecordAt } from './config.ts';
 import { inputDeviceGet } from './devices.ts';
 
 /** @portOnly a FILE opened "w": fprintf appends, fclose writes it with '\n' as CRLF */
@@ -298,7 +298,7 @@ export function controlsWriteTempMap(): number {
   // a binding on the stack: kind 1 on the keyboard, flags 0, flags2 -1, input2 -1
   const fixed = new Uint8Array(BINDING_SIZE);
   setField(fixed, 'kind', 1);
-  setField(fixed, 'device', controls.keyboardDevice);
+  setField(fixed, 'device', controlsKeyboardDevice());
   setField(fixed, 'flags', 0);
   setField(fixed, 'flags2', -1);
   setField(fixed, 'input', 0x66);

@@ -19,10 +19,9 @@ import {
   bindingAt,
   bindingField,
   configFileName,
-  controls,
-  controlsChooseDevice,
   controlsConfigName,
   controlsDeviceChosen,
+  controlsKeyboardDevice,
   controlsLoadConfig,
   controlsResetDefaults,
   controlsSaveConfigFile,
@@ -31,6 +30,7 @@ import {
   deviceRecord,
 } from '../../src/shell/controls/config.ts';
 import { controlMapName, controlsAcceptConfigFiles, controlsWriteTempMap } from '../../src/shell/controls/inputMap.ts';
+import { controlsDeviceRow, controlsToggleDevice } from '../../src/shell/controls/panel.ts';
 import { KEYBOARD_PROFILE, MOUSE_PROFILE, profileToCpc } from '../../src/shell/controls/profiles.ts';
 import { seedControlFiles } from '../../src/shell/controls/seed.ts';
 import { gamekeyBindings, gamekeyMapBytes } from '../../src/sim/controls/gamekeyMap.ts';
@@ -78,7 +78,7 @@ describe.runIf(hasShellData && hasGameData)('cockpit controls configuration', ()
     expect(inputDeviceGet(2)).toBeNull();
     expect(deviceRecord(0)).toEqual({ number: 0, name: 'keyboard' });
     expect(deviceRecord(2)).toEqual({ number: -1, name: '' });
-    expect(controls.keyboardDevice).toBe(0);
+    expect(controlsKeyboardDevice()).toBe(0);
     // no config00: 'NO CONFIG', the keyboard alone chosen
     expect(controlsConfigName()).toBe('NO CONFIG');
     expect([controlsDeviceChosen(0), controlsDeviceChosen(1)]).toEqual([true, false]);
@@ -207,7 +207,9 @@ describe.runIf(hasShellData && hasGameData)('cockpit controls configuration', ()
     dosFileWrite('giddi\\keyboard.cpc', want.get('GIDDI/KEYBOARD.CPC')!);
     dosFileWrite('giddi\\mouse.cpc', want.get('GIDDI/MOUSE.CPC')!);
     controlsScreenSetup();
-    expect(controlsChooseDevice(1)).toBe(true);
+    // a click on the mouse's row of the device panel
+    controlsToggleDevice(controlsDeviceRow(1));
+    expect(controlsDeviceChosen(1)).toBe(true);
     controlsResetDefaults();
     expect(controlsConfigName()).toBe('Default Config');
     // the mouse's torso and fire controls land on page 2 (pages 0 and 1 have the keyboard's), target_reticle on page 0

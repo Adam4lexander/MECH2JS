@@ -16,3 +16,4 @@ import './archive.ts';
 import './credits.ts';
 import './hallOfHonor.ts';
 import './options.ts';
+import './controls.ts';

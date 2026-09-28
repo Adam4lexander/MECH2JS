@@ -14,7 +14,6 @@
  */
 import { quirk } from '../../core/provenance.ts';
 import { dosFileLoad, dosFileWrite } from '../../engine/dosFiles.ts';
-import { registerGlobals } from '../../engine/globals.ts';
 import { SHELL_LABEL } from '../../generated/shell/labels.gen.ts';
 import type { Blocking } from '../host/blocking.ts';
 import { fieldOffset, mem, structSize } from '../memory.ts';
@@ -47,23 +46,6 @@ export const RECORDS_BYTES = 16 * RECORD_SIZE;
 /** a whole .cpc */
 export const CPC_BYTES = CONFIG_NAME_BYTES + RECORDS_BYTES + BINDINGS_BYTES;
 
-export const controls = registerGlobals(
-  'controls',
-  {
-    /**
-     * 0x7a958: the keyboard's device number, set by controls_screen (-1, the
-     * image's value, when there is none); controls_write_temp_map's fixed
-     * legs_pan lines bind that device. Kept here until the label
-     * (controlsKeyboardDevice, Mw2shellTypes.java) is generated.
-     */
-    keyboardDevice: -1,
-  },
-  () => {
-    controls.keyboardDevice = -1;
-  },
-  'mw2shell',
-);
-
 const BINDINGS = SHELL_LABEL.controlBindings;
 const SCRATCH = SHELL_LABEL.controlDefaultsScratch;
 const RECORDS = SHELL_LABEL.controlsDeviceRecords;
@@ -80,8 +62,19 @@ export function bindingField(b: number, f: keyof typeof BINDING): number {
   return mem().i32(b + BINDING[f]);
 }
 
-function setBindingField(b: number, f: keyof typeof BINDING, v: number): void {
+/** @portOnly sets a binding's field */
+export function setBindingField(b: number, f: keyof typeof BINDING, v: number): void {
   mem().setI32(b + BINDING[f], v);
+}
+
+/** @portOnly controlsBindings[i]: control i of the page shown (controlsBindings points at its first binding) */
+export function currentBinding(i: number): number {
+  return bindingAt(mem().u32(SHELL_LABEL.controlsBindings), i);
+}
+
+/** @portOnly controlsKeyboardDevice (0x7a958): the keyboard's device number, -1 before controls_screen finds it */
+export function controlsKeyboardDevice(): number {
+  return mem().i32(SHELL_LABEL.controlsKeyboardDevice);
 }
 
 /** @portOnly device record i's address */
@@ -279,8 +272,9 @@ export function controlsLoadConfig(row: number): void {
 export function controlsSaveConfigFile(row: number): number {
   const { file, slot } = configSlotOf(row);
   setInt(SHELL_LABEL.controlsConfigSlot, slot);
-  // the path is sprintf'd into the static buffer at 0x8b0ec, which the message below reuses
   const m = mem();
+  // the path is sprintf'd into controlsSaveText, which the message reuses
+  m.strcpy(SHELL_LABEL.controlsSaveText, configFileName(file));
   if (file !== 0) {
     const name = m.cstr(NAME, CONFIG_NAME_BYTES);
     // 0x7391e 'Default Config'; 0x7393f 'Custom Config #' (strncmp, 15); 0x7392d / 0x7394f 'Custom Config #%d'
@@ -307,7 +301,12 @@ export function controlsSaveConfigFile(row: number): number {
  */
 export function* controlsSaveConfig(row: number): Blocking<void> {
   const file = controlsSaveConfigFile(row);
-  if (file !== 0) yield* messageBox(`Configuration ${file} Saved.#Ok`, 0);
+  if (file !== 0) {
+    // sprintf(controlsSaveText, 0x73964 'Configuration %d Saved.#Ok', n)
+    const m = mem();
+    m.strcpy(SHELL_LABEL.controlsSaveText, m.cstr(0x73964).replace('%d', String(file)));
+    yield* messageBox(m.cstr(SHELL_LABEL.controlsSaveText), 0);
+  }
 }
 
 /**
@@ -380,49 +379,51 @@ function stricmp(a: string, b: string): number {
 }
 
 /**
- * controls_screen's start, up to its panels: controlsConfigSlot 0; the
- * devices loaded (input_devices_load; none: the screen does nothing); the
- * 16 device records filled from the list (a missing device: number -1 and
- * an empty name), the keyboard the only device chosen and the one shown
- * (controlsDevice) - with no keyboard, "Error: keyboard.dll not found."
- * (returned false, the message left to the caller). Then the name
+ * controls_screen's start, up to its panels, which is all of it that
+ * touches the configuration: controlsConfigSlot 0; the devices loaded
+ * (input_devices_load; none: the screen does nothing); the 16 device
+ * records filled from the list (a missing device: number -1 and an empty
+ * name), the keyboard the only device chosen and the one shown
+ * (controlsDevice), its number kept in controlsKeyboardDevice for
+ * controls_write_temp_map's fixed lines. With no keyboard it stops there
+ * (the screen says "Error: keyboard.dll not found."). Then the name
  * 'NO CONFIG', the bindings cleared, config00 loaded and the chosen devices
- * re-derived from it; the first page and control.
+ * re-derived from it; the Buttons list at the top, the first page and no
+ * cell selected (controlsSelectedControl -1, the EDX the original loads
+ * before controls_clear_bindings and every call up to its store preserves).
  *
- * Returns the keyboard's device number (controls_screen keeps it at
- * 0x7a958 for controls_write_temp_map's fixed lines), or -1.
+ * Returns controlsKeyboardDevice: the keyboard's device number, or -1
+ * (inputDeviceCount() tells no devices from no keyboard).
  *
- * @portOnly the file side of controls_screen (0x21020) - the screen, its panels and its message are the screen's
+ * @portOnly controls_screen (0x21020) up to its panels: the screen runs it, and so does the first-run seed, which has no screen
  */
 export function controlsScreenSetup(): number {
   setInt(SHELL_LABEL.controlsConfigSlot, 0);
   if (inputDevicesLoad() === 0) return -1;
   const m = mem();
-  let keyboard = -1;
-  controls.keyboardDevice = -1;
+  setInt(SHELL_LABEL.controlsKeyboardDevice, -1);
   for (let i = 0; i < 16; i++) {
     const dev = inputDeviceGet(i);
     const a = deviceRecordAt(i);
     if (!dev) {
       m.setI32(a + RECORD.number, -1);
       // 0x73a59 ''
-      m.strcpy(a + RECORD.name, '');
+      m.strcpy(a + RECORD.name, m.cstr(0x73a59));
       setChosen(i, 0);
     } else {
       m.setI32(a + RECORD.number, i);
       m.strcpy(a + RECORD.name, dev.name);
-      // 0x73a50 'keyboard'
-      if (dev.name === 'keyboard') {
-        keyboard = i;
-        controls.keyboardDevice = i;
+      // strcmp(name, 0x73a50 'keyboard')
+      if (dev.name === m.cstr(0x73a50)) {
+        setInt(SHELL_LABEL.controlsKeyboardDevice, i);
         setInt(SHELL_LABEL.controlsDevice, i);
         setChosen(i, 1);
       } else setChosen(i, 0);
     }
   }
-  if (keyboard < 0) return -1;
+  if (controlsKeyboardDevice() < 0) return -1;
   // 0x73a7c 'NO CONFIG'
-  m.strcpy(NAME, 'NO CONFIG');
+  m.strcpy(NAME, m.cstr(0x73a7c));
   controlsClearBindings();
   controlsLoadConfig(0);
   controlsChooseBoundDevices();
@@ -430,25 +431,11 @@ export function controlsScreenSetup(): number {
   setInt(SHELL_LABEL.controlsSelectedColumn, 0);
   setInt(SHELL_LABEL.controlsPage, 0);
   setInt(SHELL_LABEL.controlsBindings, BINDINGS);
-  setInt(SHELL_LABEL.controlsExit, 0);
-  setInt(SHELL_LABEL.controlsDirty, 0);
-  return keyboard;
+  setInt(SHELL_LABEL.controlsSelectedControl, -1);
+  return controlsKeyboardDevice();
 }
 
-/**
- * Chooses a device the way a click on its row in the device panel does
- * when it is not chosen yet: at most four, and it marks the choice changed
- * (controlsDirty). Returns whether it is chosen.
- *
- * @portOnly controls_toggle_device's (0x1f6a0) choosing half, for a caller without the panel
- */
-export function controlsChooseDevice(index: number): boolean {
-  const dev = inputDeviceGet(index);
-  if (!dev || dev.name === 'keyboard') return chosen(index) !== 0;
-  if (chosen(index) === 0 && getInt(SHELL_LABEL.controlsDeviceCount) < 4) {
-    setInt(SHELL_LABEL.controlsDirty, 1);
-    setInt(SHELL_LABEL.controlsDeviceCount, getInt(SHELL_LABEL.controlsDeviceCount) + 1);
-    setChosen(index, 1);
-  }
-  return chosen(index) !== 0;
+/** @portOnly controlsDeviceChosen[i] = v */
+export function setControlsDeviceChosen(i: number, v: number): void {
+  setChosen(i, v);
 }

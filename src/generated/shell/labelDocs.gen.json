@@ -734,6 +734,16 @@
   "kind": "raw",
   "doc": "controls_edit_config_name's working copy of the text: up to 62 characters, the '_' cursor and a NUL. The space up to 0x8b0ec is not used by anything else found."
  },
+ "controlsSaveText": {
+  "address": "0x8b0ec",
+  "kind": "raw",
+  "doc": "controls_save_config's sprintf buffer: 'giddi\\config%02d.cpc' for its fopen, then 'Configuration %d Saved.#Ok' for its message_box. 0x40 bytes, up to controlsMovie."
+ },
+ "controlsMovie": {
+  "address": "0x8b12c",
+  "kind": "raw",
+  "doc": "---- controls screen (S8) ---- controls_screen's amwlogo1 loop: the 0x18-byte block it mallocs and hands to movie_open_background (0x73a86 'amwlogo1', at 120, 4), NULL when the malloc fails. Its steppers are controls_screen's two panel loops, controls_edit_config_name's key loop and controls_scroll_buttons' held-button loop; controls_screen closes and frees it. No other function reads 0x8b12c."
+ },
  "controlsRemapSelected": {
   "address": "0x8b130",
   "kind": "raw",
@@ -743,6 +753,11 @@
   "address": "0x8b230",
   "kind": "raw",
   "doc": ""
+ },
+ "controlsCellText": {
+  "address": "0x8b330",
+  "kind": "raw",
+  "doc": "The binding cells' text: controls_draw_binding sprintfs '%s %s' (device, input) or strcpys '----' here, controls_draw_second_button sprintfs '/%s'; each hands it to label_create_under, which copies it. 0x100 bytes, up to controlsSelectedColumn."
  },
  "controlsSelectedColumn": {
   "address": "0x8b430",

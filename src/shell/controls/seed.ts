@@ -26,9 +26,10 @@ import { resetAllGlobals } from '../../engine/globals.ts';
 import { setBootImage } from '../../engine/image.ts';
 import { emptyRecord, giddiDriverFor } from '../../sim/controls/giddi.ts';
 import { gamekeyMapBytes } from '../../sim/controls/gamekeyMap.ts';
-import { configFileName, CONTROLS, controlsChooseDevice, controlsResetDefaults, controlsScreenSetup } from './config.ts';
+import { configFileName, CONTROLS, controlsResetDefaults, controlsScreenSetup } from './config.ts';
 import { inputDeviceGet, inputDeviceCount } from './devices.ts';
 import { controlMapName, controlsAcceptConfigFiles } from './inputMap.ts';
+import { controlsDeviceRow, controlsToggleDevice } from './panel.ts';
 import { DEVICE_PROFILES, profileToCpc } from './profiles.ts';
 // the shell's memory must be registered before the process start resets it
 import '../memory.ts';
@@ -76,7 +77,8 @@ export function seedControlFiles(shellExe: ExeImage): ControlSeedReport {
   if (controlsScreenSetup() < 0) return { written };
   if (!dosFileExists(configFileName(0))) {
     divergence('first run: the controls configuration is the device panel\'s ACCEPT with the keyboard and the mouse chosen, where the original started from the files its installer left');
-    for (let i = 0; i < inputDeviceCount(); i++) if (inputDeviceGet(i)?.name === 'mouse') controlsChooseDevice(i);
+    // a click on the mouse's row of the device panel
+    for (let i = 0; i < inputDeviceCount(); i++) if (inputDeviceGet(i)?.name === 'mouse') controlsToggleDevice(controlsDeviceRow(i));
     controlsResetDefaults();
   }
   if (controlsAcceptConfigFiles()) written.push('INPUT.MAP', configFileName(0).toUpperCase());
