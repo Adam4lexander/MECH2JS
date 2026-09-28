@@ -439,6 +439,16 @@
   "kind": "raw",
   "doc": ""
  },
+ "debriefingScreenRows": {
+  "address": "0x7f17c",
+  "kind": "raw",
+  "doc": ""
+ },
+ "debriefingAftermathRows": {
+  "address": "0x7f1ac",
+  "kind": "raw",
+  "doc": "AFTERMATH's viewer: +0 / +4 go to archive_page_load (0x24f08), which pages through the debriefing's remaining pages, as briefingSituationRows does for SITUATION."
+ },
  "briefingScreenRows": {
   "address": "0x7f1dc",
   "kind": "raw",
@@ -848,6 +858,21 @@
   "address": "0x8d18c",
   "kind": "int",
   "doc": ""
+ },
+ "debriefingRemap": {
+  "address": "0x8e890",
+  "kind": "raw",
+  "doc": "Filled on every entry: [0] 0xff, [i] i. No reader has been found - nothing in the shell's functions refers to 0x8e890 but this store, and it is not passed anywhere."
+ },
+ "debriefingObjectives": {
+  "address": "0x8f390",
+  "kind": "raw",
+  "doc": "The objective pointers qsort sorts (0x23b39 fills one per objective, 4 bytes each, into the MissionRecord on screen_debriefing's stack; comparator 0x21e90)."
+ },
+ "debriefingText": {
+  "address": "0x8f450",
+  "kind": "raw",
+  "doc": "The debriefing's text: emptied on entry (strcpy from 0x759bc), then strcat'd with the objectives table, the honor lines and the Career Honor line, and passed to orders_text_build as its \\Q text (0x24c1f). Sized by the gap to menuItems (0x90490); the buffer's declared size is not established."
  },
  "menuItems": {
   "address": "0x90490",

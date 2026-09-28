@@ -18,3 +18,4 @@ import './hallOfHonor.ts';
 import './options.ts';
 import './controls.ts';
 import './mechlab.ts';
+import './debriefing.ts';

@@ -9,7 +9,7 @@ than drifting. Library code (Watcom clib, Miles, Smacker) is excluded from the t
 
 ## MW2.EXE
 
-**Game functions:** 1161  |  **ported exact:** 889  |  **partial:** 65  |  **stub:** 3  |  library functions ported: 38
+**Game functions:** 1161  |  **ported exact:** 903  |  **partial:** 65  |  **stub:** 3  |  library functions ported: 38
 
 Library groups left out of the totals: `clib`, `miles`.
 
@@ -34,7 +34,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | netplay | netplay | 13 | 12 | 1 | 0 | 0 |
 | project_entry | project | 31 | 27 | 2 | 0 | 2 |
 | project_file | project | 34 | 14 | 4 | 0 | 16 |
-| project_tables | project | 39 | 33 | 0 | 1 | 5 |
+| project_tables | project | 39 | 34 | 0 | 1 | 4 |
 | stream_seen | project | 3 | 3 | 0 | 0 | 0 |
 | render_asm | render | 74 | 42 | 9 | 0 | 23 |
 | res_cache | resource | 25 | 0 | 1 | 2 | 22 |
@@ -52,11 +52,11 @@ Library groups left out of the totals: `clib`, `miles`.
 | cheats | ui | 14 | 7 | 7 | 0 | 0 |
 | hud_debug | ui | 15 | 0 | 0 | 0 | 15 |
 | target_ui | ui | 2 | 1 | 0 | 0 | 1 |
-| ui_callbacks | ui | 34 | 29 | 0 | 0 | 5 |
+| ui_callbacks | ui | 34 | 32 | 0 | 0 | 2 |
 | screenshot | util | 3 | 1 | 0 | 0 | 2 |
 | time_format | util | 3 | 3 | 0 | 0 | 0 |
-| vfx_font | vfx | 47 | 42 | 1 | 0 | 4 |
-| vfx_lib | vfx | 42 | 16 | 2 | 0 | 24 |
+| vfx_font | vfx | 47 | 43 | 1 | 0 | 3 |
+| vfx_lib | vfx | 42 | 25 | 2 | 0 | 15 |
 | vfx_video | vfx | 51 | 41 | 6 | 0 | 4 |
 
 ### Ported functions
@@ -115,23 +115,24 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00012dd0 | ortho_view_end | vfx_font | exact | `vfxFontSub012dd0` src/sim/cockpit/radar.ts:1207 |
 | 0x00012e40 | object_view_cull | vfx_font | exact | `objectViewCull` src/render/pipeline/drawPipeline.ts:101 |
 | 0x00013130 | ortho_project_point | vfx_font | exact | `vfxFontSub013130` src/sim/cockpit/radar.ts:1245 |
-| 0x00013300 | layout_pane_to_window | vfx_font | exact | `layoutPaneToWindow` src/sim/display/layout.ts:20 |
-| 0x00013360 | layout_pane_in_pane | vfx_font | exact | `layoutPaneInPane` src/sim/display/layout.ts:40 |
-| 0x00013460 | layout_point_to_window | vfx_font | exact | `layoutPointToWindow` src/sim/display/layout.ts:60 |
-| 0x00013510 | layout_point_in_pane | vfx_font | exact | `layoutPointInPane` src/sim/display/layout.ts:75 |
-| 0x00013560 | layout_pane_to_design_aspect | vfx_font | exact | `layoutPaneToDesignAspect` src/sim/display/layout.ts:90 |
-| 0x000135f0 | layout_pane_to_fraction | vfx_font | exact | `layoutPaneToFraction` src/sim/display/layout.ts:105 |
-| 0x000136d0 | layout_point_to_fraction | vfx_font | exact | `layoutPointToFraction` src/sim/display/layout.ts:121 |
-| 0x00013710 | layout_pane_centre_in_window | vfx_font | exact | `layoutPaneCentreInWindow` src/sim/display/layout.ts:135 |
-| 0x000137a0 | layout_pane_scale_about_centre | vfx_font | exact | `layoutPaneScaleAboutCentre` src/sim/display/layout.ts:155 |
-| 0x00013860 | layout_pane_fit_shape | vfx_font | exact | `layoutPaneFitShape` src/sim/display/layout.ts:177 |
-| 0x00013960 | vfx_pane_frame | vfx_font | exact | `vfxPaneFrame` src/sim/display/layout.ts:192 |
-| 0x000139f0 | pane_rule_under_text | vfx_font | exact | `paneRuleUnderTextDraw` src/sim/ui/menus.ts:232 |
+| 0x00013300 | layout_pane_to_window | vfx_font | exact | `layoutPaneToWindow` src/sim/display/layout.ts:21 |
+| 0x00013360 | layout_pane_in_pane | vfx_font | exact | `layoutPaneInPane` src/sim/display/layout.ts:41 |
+| 0x00013460 | layout_point_to_window | vfx_font | exact | `layoutPointToWindow` src/sim/display/layout.ts:61 |
+| 0x00013510 | layout_point_in_pane | vfx_font | exact | `layoutPointInPane` src/sim/display/layout.ts:76 |
+| 0x00013560 | layout_pane_to_design_aspect | vfx_font | exact | `layoutPaneToDesignAspect` src/sim/display/layout.ts:91 |
+| 0x000135f0 | layout_pane_to_fraction | vfx_font | exact | `layoutPaneToFraction` src/sim/display/layout.ts:106 |
+| 0x000136d0 | layout_point_to_fraction | vfx_font | exact | `layoutPointToFraction` src/sim/display/layout.ts:122 |
+| 0x00013710 | layout_pane_centre_in_window | vfx_font | exact | `layoutPaneCentreInWindow` src/sim/display/layout.ts:136 |
+| 0x000137a0 | layout_pane_scale_about_centre | vfx_font | exact | `layoutPaneScaleAboutCentre` src/sim/display/layout.ts:156 |
+| 0x00013860 | layout_pane_fit_shape | vfx_font | exact | `layoutPaneFitShape` src/sim/display/layout.ts:178 |
+| 0x000138e0 | layout_pane_fit_gif | vfx_font | exact | `layoutPaneFitGif` src/sim/display/layout.ts:196 |
+| 0x00013960 | vfx_pane_frame | vfx_font | exact | `vfxPaneFrame` src/sim/display/layout.ts:211 |
+| 0x000139f0 | pane_rule_under_text | vfx_font | exact | `paneRuleUnderTextDraw` src/sim/ui/menus.ts:244 |
 | 0x00013a40 | hud_text_underline | vfx_font | exact | `vfxFontSub013a40` src/sim/cockpit/objectivesHud.ts:96 |
 | 0x00013ad0 | vfx_text_box_draw | vfx_font | exact | `vfxFontSub013ad0` src/sim/cockpit/targetDisplay.ts:265 |
-| 0x00014020 | vfx_font_sub_014020 | vfx_font | exact | `vfxFontSub014020` src/sim/display/layout.ts:211 |
+| 0x00014020 | vfx_font_sub_014020 | vfx_font | exact | `vfxFontSub014020` src/sim/display/layout.ts:230 |
 | 0x000140f0 | pane_edge_at_angle | vfx_font | exact | `vfxFontSub0140f0` src/sim/cockpit/radar.ts:1498 |
-| 0x00014240 | vfx_font_sub_014240 | vfx_font | exact | `vfxFontSub014240` src/sim/display/layout.ts:240 |
+| 0x00014240 | vfx_font_sub_014240 | vfx_font | exact | `vfxFontSub014240` src/sim/display/layout.ts:259 |
 | 0x00014410 | radar_ellipse_frame | vfx_font | exact | `vfxFontSub014410` src/sim/cockpit/radar.ts:1365 |
 | 0x00014530 | radar_ellipse_contains | vfx_font | exact | `vfxFontSub014530` src/sim/cockpit/radar.ts:1381 |
 | 0x000145a0 | radar_ellipse_clamp | vfx_font | exact | `vfxFontSub0145a0` src/sim/cockpit/radar.ts:1455 |
@@ -146,7 +147,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00014b80 | pane_transition_step | vfx_font | exact | `paneTransitionStep` src/sim/cockpit/hud.ts:289 |
 | 0x00014c50 | pane_transition_step_split | vfx_font | exact | `paneTransitionStepSplit` src/sim/cockpit/hud.ts:323 |
 | 0x00014d90 | brightness_tables_build | vfx_font | exact | `brightnessTablesBuild` src/sim/world/brightness.ts:22 |
-| 0x00014e70 | palette_apply_brightness | vfx_font | exact | `paletteApplyBrightness` src/sim/world/palettes.ts:152 |
+| 0x00014e70 | palette_apply_brightness | vfx_font | exact | `paletteApplyBrightness` src/sim/world/palettes.ts:168 |
 | 0x00014ee0 | day_cycle_init | vfx_font | exact | `dayCycleInit` src/sim/world/dayCycle.ts:57 |
 | 0x00014f80 | day_cycle_tick | vfx_font | exact | `dayCycleTick` src/sim/world/dayCycle.ts:78 |
 | 0x00015070 | day_cycle_set_phase | vfx_font | exact | `dayCycleSetPhase` src/sim/world/dayCycle.ts:111 |
@@ -189,25 +190,26 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00017570 | ui_context_register | project_tables | exact | `uiContextRegister` src/sim/ui/uiContext.ts:62 |
 | 0x000175d0 | ui_context_request_open | project_tables | exact | `uiContextRequestOpen` src/sim/ui/menus.ts:37 |
 | 0x00017610 | ui_context_toggle | project_tables | exact | `uiContextToggle` src/sim/ui/menus.ts:53 |
-| 0x000176e0 | ui_context_clear_all | project_tables | exact | `uiContextClearAll` src/sim/ui/menus.ts:165 |
+| 0x000176e0 | ui_context_clear_all | project_tables | exact | `uiContextClearAll` src/sim/ui/menus.ts:177 |
 | 0x00017710 | menu_resolve_callbacks | project_tables | exact | `menuResolveCallbacks` src/sim/ui/menuLoad.ts:207 |
 | 0x00017810 | menu_load | project_tables | exact | `menuLoad` src/sim/ui/menuLoad.ts:296 |
 | 0x000178b0 | menu_layout | project_tables | exact | `menuLayout` src/sim/ui/menuLoad.ts:245 |
-| 0x00017aa0 | menu_load_art | project_tables | exact | `menuLoadArt` src/sim/ui/menus.ts:175 |
-| 0x00017b40 | menu_open | project_tables | exact | `menuOpen` src/sim/ui/menus.ts:117 |
-| 0x00017be0 | menu_close | project_tables | exact | `menuClose` src/sim/ui/menus.ts:136 |
+| 0x00017aa0 | menu_load_art | project_tables | exact | `menuLoadArt` src/sim/ui/menus.ts:187 |
+| 0x00017b40 | menu_open | project_tables | exact | `menuOpen` src/sim/ui/menus.ts:129 |
+| 0x00017be0 | menu_close | project_tables | exact | `menuClose` src/sim/ui/menus.ts:148 |
 | 0x00017ca0 | ui_context_clear_request | project_tables | exact | `uiContextClearRequest` src/sim/ui/menuCallbacks.ts:82 |
 | 0x00017cd0 | menu_poll_key | project_tables | exact | `menuPollKey` src/sim/ui/uiContext.ts:112 |
-| 0x00017ea0 | ui_context_dispatch | project_tables | exact | `uiContextDispatch` src/sim/ui/menus.ts:90 |
-| 0x00017f30 | menu_frame | project_tables | exact | `menuFrame` src/sim/ui/menus.ts:187 |
-| 0x00017fd0 | menu_key_action | project_tables | exact | `menuKeyAction` src/sim/ui/menus.ts:208 |
-| 0x00018040 | menu_draw | project_tables | exact | `menuDraw` src/sim/ui/menus.ts:249 |
+| 0x00017ea0 | ui_context_dispatch | project_tables | exact | `uiContextDispatch` src/sim/ui/menus.ts:102 |
+| 0x00017f30 | menu_frame | project_tables | exact | `menuFrame` src/sim/ui/menus.ts:199 |
+| 0x00017fd0 | menu_key_action | project_tables | exact | `menuKeyAction` src/sim/ui/menus.ts:220 |
+| 0x00018040 | menu_draw | project_tables | exact | `menuDraw` src/sim/ui/menus.ts:261 |
 | 0x00018560 | ui_context_find | project_tables | exact | `uiContextFindNode` src/sim/ui/menus.ts:74 |
+| 0x00018660 | ui_context_active_record | project_tables | exact | `uiContextActiveRecord` src/sim/ui/menus.ts:87 |
 | 0x00018690 | ui_context_active | project_tables | exact | `uiContextActive` src/sim/ui/uiContext.ts:78 |
-| 0x000186e0 | menu_item_slider | project_tables | exact | `menuItemSlider` src/sim/ui/menus.ts:484 |
-| 0x00018ac0 | menu_item_choice | project_tables | exact | `menuItemChoice` src/sim/ui/menus.ts:380 |
-| 0x00018d00 | menu_item_toggle | project_tables | exact | `menuItemToggle` src/sim/ui/menus.ts:430 |
-| 0x00018ef0 | menu_item_text_box | project_tables | exact | `menuItemTextBox` src/sim/ui/menus.ts:555 |
+| 0x000186e0 | menu_item_slider | project_tables | exact | `menuItemSlider` src/sim/ui/menus.ts:496 |
+| 0x00018ac0 | menu_item_choice | project_tables | exact | `menuItemChoice` src/sim/ui/menus.ts:392 |
+| 0x00018d00 | menu_item_toggle | project_tables | exact | `menuItemToggle` src/sim/ui/menus.ts:442 |
+| 0x00018ef0 | menu_item_text_box | project_tables | exact | `menuItemTextBox` src/sim/ui/menus.ts:567 |
 | 0x000191a0 | menu_calibration_onload | project_tables | exact | `menuCalibrationOnload` src/sim/ui/menuCallbacks.ts:502 |
 | 0x000192d0 | menu_item_calibrate | project_tables | stub | `menuItemCalibrate` src/sim/ui/menuCallbacks.ts:545 |
 | 0x00019560 | brightness_get | project_tables | exact | `brightnessGet` src/sim/world/brightness.ts:43 |
@@ -243,6 +245,9 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00019d80 | detail_density_set | ui_callbacks | exact | `detailDensitySet` src/sim/ui/menuCallbacks.ts:435 |
 | 0x00019da0 | menu_item_abort_mission | ui_callbacks | exact | `menuItemAbortMission` src/sim/ui/menuCallbacks.ts:457 |
 | 0x00019e10 | menu_item_flee_to_dos | ui_callbacks | exact | `menuItemFleeToDos` src/sim/ui/menuCallbacks.ts:475 |
+| 0x00019e80 | vfx_bin_file_load | ui_callbacks | exact | `vfxBinFileLoad` src/sim/ui/cheatCredits.ts:128 |
+| 0x00019f40 | cheat_credits_render_hook | ui_callbacks | exact | `cheatCreditsRenderHook` src/sim/ui/cheatCredits.ts:166 |
+| 0x0001a820 | cheat_credits_hook_install | ui_callbacks | exact | `cheatCreditsHookInstall` src/sim/ui/cheatCredits.ts:364 |
 | 0x0001a9b0 | dev_dir_load_sfl | project_entry | partial | `devDirLoadSfl` src/mission/results.ts:149 |
 | 0x0001aad0 | anim_player_step | project_entry | exact | `animPlayerStep` src/sim/mech/animTask.ts:332 |
 | 0x0001b190 | anim_scale_by_gait | project_entry | exact | `animScaleByGait` src/sim/mech/animTask.ts:80 |
@@ -754,15 +759,15 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0003e1de | poly_clip_and_queue | render_asm | partial | `polyDepthKey` src/render/pipeline/drawPipeline.ts:274 |
 | 0x0003e5b0 | viewport_windows_reset | render_asm | exact | `viewportWindowsReset` src/sim/display/video.ts:114 |
 | 0x0003e600 | viewport_select | render_asm | exact | `viewportSelect` src/sim/display/video.ts:168 |
-| 0x0003e6d0 | palette_apply_pending | render_asm | exact | `paletteApplyPending` src/sim/world/palettes.ts:338 |
-| 0x0003e710 | palette_apply_slot | render_asm | exact | `paletteApplySlot` src/sim/world/palettes.ts:187 |
-| 0x0003e760 | palette_fade_step | render_asm | exact | `paletteFadeStep` src/sim/world/palettes.ts:317 |
-| 0x0003e7d0 | palette_start_fade | render_asm | exact | `paletteStartFade` src/sim/world/palettes.ts:268 |
-| 0x0003e950 | palette_fade_for_effect | render_asm | exact | `paletteFadeForEffect` src/sim/world/palettes.ts:354 |
-| 0x0003eaa0 | palette_slot_set_resource | render_asm | exact | `paletteSlotSetResource` src/sim/world/palettes.ts:168 |
-| 0x0003eae0 | palette_fade_to_new_base | render_asm | exact | `paletteFadeToNewBase` src/sim/world/palettes.ts:364 |
-| 0x0003eb10 | screen_fade_in | render_asm | partial | `screenFadeIn` src/sim/world/palettes.ts:464 |
-| 0x0003ecd0 | palette_fade_steps_left | render_asm | exact | `paletteFadeStepsLeft` src/sim/world/palettes.ts:374 |
+| 0x0003e6d0 | palette_apply_pending | render_asm | exact | `paletteApplyPending` src/sim/world/palettes.ts:354 |
+| 0x0003e710 | palette_apply_slot | render_asm | exact | `paletteApplySlot` src/sim/world/palettes.ts:203 |
+| 0x0003e760 | palette_fade_step | render_asm | exact | `paletteFadeStep` src/sim/world/palettes.ts:333 |
+| 0x0003e7d0 | palette_start_fade | render_asm | exact | `paletteStartFade` src/sim/world/palettes.ts:284 |
+| 0x0003e950 | palette_fade_for_effect | render_asm | exact | `paletteFadeForEffect` src/sim/world/palettes.ts:370 |
+| 0x0003eaa0 | palette_slot_set_resource | render_asm | exact | `paletteSlotSetResource` src/sim/world/palettes.ts:184 |
+| 0x0003eae0 | palette_fade_to_new_base | render_asm | exact | `paletteFadeToNewBase` src/sim/world/palettes.ts:380 |
+| 0x0003eb10 | screen_fade_in | render_asm | partial | `screenFadeIn` src/sim/world/palettes.ts:481 |
+| 0x0003ecd0 | palette_fade_steps_left | render_asm | exact | `paletteFadeStepsLeft` src/sim/world/palettes.ts:390 |
 | 0x0003ece0 | viewer_latch_globals | render_asm | partial | `viewerLatchGlobals` src/render/pipeline/viewLatch.ts:60 |
 | 0x0003ef30 | viewer_update_projection | render_asm | partial | `viewerUpdateProjection` src/sim/camera/projection.ts:47 |
 | 0x0003f230 | viewer_build_transform | render_asm | exact | `viewerBuildTransform` src/sim/camera/projection.ts:90 |
@@ -855,7 +860,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00045470 | netplay_sign_off | netplay | exact | `netplaySignOff` src/sim/net/netSession.ts:613 |
 | 0x00045670 | netplay_elect_master | netplay | exact | `netplayElectMaster` src/sim/net/netSession.ts:670 |
 | 0x00045720 | cheat_match | netplay | exact | `cheatMatch` src/data/exe/tables/cheats.ts:47 |
-| 0x00045780 | cheat_handle_command | cheats | partial | `cheatHandleCommand` src/sim/ui/cheats.ts:69 |
+| 0x00045780 | cheat_handle_command | cheats | partial | `cheatHandleCommand` src/sim/ui/cheats.ts:70 |
 | 0x00045d80 | key_command_update | cheats | exact | `keyCommandUpdate` src/sim/ui/uiContext.ts:173 |
 | 0x00046060 | command_execute | cheats | partial | `commandExecute` src/sim/ui/commands.ts:127 |
 | 0x00046874 | net_dos_alloc_send | cheats | partial | `netDosAllocSend` src/sim/net/transport.ts:112 |
@@ -923,7 +928,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0004be00 | res_load_hdi | res_loaders | exact | `resLoadHdi` src/sim/cockpit/resources.ts:206 |
 | 0x0004bf70 | res_load_cockpit | res_loaders | exact | `resLoadCockpit` src/sim/cockpit/resources.ts:168 |
 | 0x0004c170 | res_load_file | res_loaders | partial | `resLoadFile` src/sim/mech/looseFiles.ts:75 |
-| 0x0004c2c0 | sim_options_load | res_loaders | exact | `simOptionsLoad` src/sim/mech/simOptions.ts:55 |
+| 0x0004c2c0 | sim_options_load | res_loaders | exact | `simOptionsLoad` src/sim/mech/simOptions.ts:59 |
 | 0x0004c4b0 | screenshot_sub_04c4b0 | screenshot | exact | `screenshotSub04c4b0` src/sim/mech/looseFiles.ts:62 |
 | 0x0004c5d0 | stream_seen_add | stream_seen | exact | `streamSeenAdd` src/mission/vm/streams.ts:306 |
 | 0x0004c650 | stream_seen_find | stream_seen | exact | `streamSeenFind` src/mission/vm/streams.ts:319 |
@@ -1014,12 +1019,21 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00057e73 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:387 |
 | 0x00057e93 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:401 |
 | 0x00058026 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:459 |
+| 0x0005805d | vfx_pane_write_row | vfx_lib | exact | `vfxPaneWriteRow` src/engine/vfx/vfx.ts:491 |
+| 0x000584a7 | gif_lzw_table_reset | vfx_lib | exact | `gifLzwTableReset` src/engine/vfx/gif.ts:163 |
+| 0x000584ef | gif_read_byte | vfx_lib | exact | `gifReadByte` src/engine/vfx/gif.ts:182 |
+| 0x00058508 | gif_read_bits | vfx_lib | exact | `gifReadBits` src/engine/vfx/gif.ts:196 |
+| 0x0005854e | gif_lzw_add_code | vfx_lib | exact | `gifLzwAddCode` src/engine/vfx/gif.ts:220 |
+| 0x00058594 | gif_put_pixel | vfx_lib | exact | `gifPutPixel` src/engine/vfx/gif.ts:241 |
+| 0x00058611 | gif_decode | vfx_lib | exact | `gifDecode` src/engine/vfx/gif.ts:274 |
+| 0x0005882a | gif_palette_read | vfx_lib | exact | `gifPaletteRead` src/engine/vfx/gif.ts:141 |
+| 0x0005888b | gif_image_size | vfx_lib | exact | `gifImageSize` src/engine/vfx/gif.ts:129 |
 | 0x000588c3 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:259 |
 | 0x000588e5 | vfx_shape_origin | vfx_lib | exact | `vfxShapeOrigin` src/engine/vfx/vfx.ts:249 |
 | 0x00058908 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:235 |
 | 0x00058966 | vfx_lib_sub_058966 | vfx_lib | exact | `vfxLibSub058966` src/sim/display/launchScreen.ts:69 |
 | 0x00058a43 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:224 |
-| 0x00058e0d | palette_fade_used_colours | vfx_lib | partial | `paletteFadeUsedColours` src/sim/world/palettes.ts:387 |
+| 0x00058e0d | palette_fade_used_colours | vfx_lib | partial | `paletteFadeUsedColours` src/sim/world/palettes.ts:403 |
 | 0x0005dc10 | AIL_install_DIG_driver_file | miles_ail | stub | `ailInstallDigDriverFile` src/engine/miles/ail.ts:168 |
 | 0x0005dd90 | AIL_allocate_sample_handle | miles_ail | partial | `ailAllocateSampleHandle` src/engine/miles/ail.ts:186 |
 | 0x0005de90 | AIL_allocate_file_sample | miles_ail | partial | `ailAllocateFileSample` src/engine/miles/ail.ts:242 |
@@ -1053,9 +1067,9 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00061fb0 | timer_set_paused | clib_start | exact | `timerSetPaused` src/engine/timer.ts:128 |
 | 0x00062cc3 | qsort_median3 | clib | exact | `median3` src/engine/qsort.ts:23 |
 | 0x00062d1b | qsort | clib | exact | `watcomQsort` src/engine/qsort.ts:54 |
-| 0x00063860 | palette_set_entries | clib | exact | `paletteSetEntries` src/sim/world/palettes.ts:129 |
-| 0x00063a70 | palette_fade_state_build | clib | exact | `paletteFadeStateBuild` src/sim/world/palettes.ts:205 |
-| 0x00063b50 | palette_fade_state_step | clib | exact | `paletteFadeStateStep` src/sim/world/palettes.ts:235 |
+| 0x00063860 | palette_set_entries | clib | exact | `paletteSetEntries` src/sim/world/palettes.ts:145 |
+| 0x00063a70 | palette_fade_state_build | clib | exact | `paletteFadeStateBuild` src/sim/world/palettes.ts:221 |
+| 0x00063b50 | palette_fade_state_step | clib | exact | `paletteFadeStateStep` src/sim/world/palettes.ts:251 |
 | 0x0007617f | miles_driver_sub_07617f | miles_driver | exact | `milesRand` src/core/random.ts:32 |
 | 0x000761a3 | miles_driver_sub_0761a3 | miles_driver | exact | `milesSrand` src/core/random.ts:24 |
 
@@ -1101,7 +1115,7 @@ Library groups left out of the totals: `clib`, `miles`.
 
 ## MW2SHELL.EXE
 
-**Game functions:** 430  |  **ported exact:** 201  |  **partial:** 18  |  **stub:** 0  |  library functions ported: 5
+**Game functions:** 431  |  **ported exact:** 313  |  **partial:** 19  |  **stub:** 0  |  library functions ported: 5
 
 Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code left out: `wasm`.
 
@@ -1110,26 +1124,26 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | module | group | functions | exact | partial | stub | not started |
 |---|---|---:|---:|---:|---:|---:|
 | archive_db | archive | 2 | 2 | 0 | 0 | 0 |
-| mpack_db | archive | 7 | 6 | 0 | 0 | 1 |
+| mpack_db | archive | 8 | 7 | 0 | 0 | 1 |
 | shell_main | boot | 3 | 0 | 1 | 0 | 2 |
 | career | career | 3 | 3 | 0 | 0 | 0 |
 | pilots | career | 5 | 4 | 1 | 0 | 0 |
 | ready_room | career | 1 | 1 | 0 | 0 | 0 |
 | register | career | 10 | 7 | 1 | 0 | 2 |
-| controls | controls | 42 | 11 | 0 | 0 | 31 |
+| controls | controls | 42 | 42 | 0 | 0 | 0 |
 | mission_prep | handoff | 10 | 7 | 3 | 0 | 0 |
-| mission_result | handoff | 1 | 0 | 0 | 0 | 1 |
+| mission_result | handoff | 1 | 1 | 0 | 0 | 0 |
 | prm | handoff | 2 | 2 | 0 | 0 | 0 |
 | star_files | handoff | 4 | 4 | 0 | 0 | 0 |
 | shell_input | input | 36 | 5 | 7 | 0 | 24 |
-| mechlab | mechlab | 1 | 0 | 0 | 0 | 1 |
+| mechlab | mechlab | 1 | 1 | 0 | 0 | 0 |
 | star_select | mechlab | 10 | 10 | 0 | 0 | 0 |
 | movies | movies | 25 | 23 | 0 | 0 | 2 |
 | res_cache | resource | 15 | 0 | 0 | 0 | 15 |
 | credits | screens | 1 | 1 | 0 | 0 | 0 |
-| options | screens | 19 | 1 | 1 | 0 | 17 |
+| options | screens | 19 | 16 | 1 | 0 | 2 |
 | shell_263d0 | screens | 12 | 12 | 0 | 0 | 0 |
-| shell_2a5e0 | screens | 73 | 8 | 0 | 0 | 65 |
+| shell_2a5e0 | screens | 73 | 71 | 1 | 0 | 1 |
 | shell_3d980 | screens | 1 | 1 | 0 | 0 | 0 |
 | stats | screens | 2 | 2 | 0 | 0 | 0 |
 | text_markup | screens | 21 | 19 | 0 | 0 | 2 |
@@ -1151,10 +1165,10 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x00010200 | collection_append | collection | exact | `collectionAppend` src/shell/util/collection.ts:48 |
 | 0x000102c0 | collection_remove | collection | exact | `collectionRemove` src/shell/util/collection.ts:61 |
 | 0x00010470 | collection_get | collection | partial | `collectionGet` src/shell/util/collection.ts:74 |
-| 0x0001a530 | input_devices_load | shell_input | partial | `inputDevicesLoad` src/shell/controls/devices.ts:100 |
-| 0x0001a690 | input_device_get | shell_input | exact | `inputDeviceGet` src/shell/controls/devices.ts:67 |
-| 0x0001a6c0 | input_devices_free | shell_input | exact | `inputDevicesFree` src/shell/controls/devices.ts:146 |
-| 0x0001a8e0 | input_devices_grow | shell_input | exact | `inputDevicesGrow` src/shell/controls/devices.ts:80 |
+| 0x0001a530 | input_devices_load | shell_input | partial | `inputDevicesLoad` src/shell/controls/devices.ts:107 |
+| 0x0001a690 | input_device_get | shell_input | exact | `inputDeviceGet` src/shell/controls/devices.ts:73 |
+| 0x0001a6c0 | input_devices_free | shell_input | exact | `inputDevicesFree` src/shell/controls/devices.ts:153 |
+| 0x0001a8e0 | input_devices_grow | shell_input | exact | `inputDevicesGrow` src/shell/controls/devices.ts:86 |
 | 0x0001af70 | shell_input_sub_01af70 | shell_input | partial | `cursorShow` src/shell/video/cursor.ts:62 |
 | 0x0001b010 | shell_input_sub_01b010 | shell_input | partial | `cursorSetShape` src/shell/video/cursor.ts:50 |
 | 0x0001b0e0 | mouse_read_state | shell_input | exact | `mouseReadState` src/shell/video/cursor.ts:111 |
@@ -1180,17 +1194,48 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x0001da70 | career_registry_load | career | exact | `careerRegistryLoad` src/shell/career/registry.ts:23 |
 | 0x0001db50 | career_registry_save | career | exact | `careerRegistrySave` src/shell/career/registry.ts:48 |
 | 0x0001dbe0 | screen_career | career | exact | `screenCareer` src/shell/screens/career.ts:36 |
+| 0x0001e060 | controls_draw_label | controls | exact | `controlsDrawLabel` src/shell/screens/controls.ts:113 |
+| 0x0001e350 | controls_edit_config_name | controls | exact | `controlsEditConfigName` src/shell/screens/controls.ts:132 |
+| 0x0001e6a0 | controls_draw_binding | controls | exact | `controlsDrawBinding` src/shell/screens/controls.ts:207 |
+| 0x0001e810 | controls_draw_second_button | controls | exact | `controlsDrawSecondButton` src/shell/screens/controls.ts:240 |
+| 0x0001e8f0 | controls_draw_control_name | controls | exact | `controlsDrawControlName` src/shell/screens/controls.ts:264 |
+| 0x0001e960 | controls_draw_config_page | controls | exact | `controlsDrawConfigPage` src/shell/screens/controls.ts:274 |
+| 0x0001e990 | controls_next_config_page | controls | exact | `controlsNextConfigPage` src/shell/controls/panel.ts:76 |
+| 0x0001e9d0 | controls_draw_axis_direction | controls | exact | `controlsDrawAxisDirection` src/shell/screens/controls.ts:286 |
+| 0x0001ea30 | controls_toggle_axis_direction | controls | exact | `controlsToggleAxisDirection` src/shell/controls/panel.ts:91 |
+| 0x0001ea50 | controls_draw_modifier | controls | exact | `controlsDrawModifier` src/shell/screens/controls.ts:302 |
+| 0x0001eab0 | controls_cycle_modifier | controls | exact | `controlsCycleModifier` src/shell/controls/panel.ts:105 |
+| 0x0001eaf0 | controls_abort | controls | exact | `controlsAbort` src/shell/controls/panel.ts:123 |
+| 0x0001eb00 | controls_scroll_to_selection | controls | exact | `controlsScrollToSelection` src/shell/controls/panel.ts:137 |
+| 0x0001eb90 | controls_next_input | controls | exact | `controlsNextInput` src/shell/controls/panel.ts:159 |
+| 0x0001ec10 | controls_click_binding | controls | exact | `controlsClickBinding` src/shell/controls/panel.ts:211 |
+| 0x0001ef30 | controls_click_second_button | controls | exact | `controlsClickSecondButton` src/shell/controls/panel.ts:283 |
+| 0x0001f170 | controls_draw_axis_entry | controls | exact | `controlsDrawAxisEntry` src/shell/screens/controls.ts:316 |
+| 0x0001f230 | controls_draw_button_entry | controls | exact | `controlsDrawButtonEntry` src/shell/screens/controls.ts:338 |
+| 0x0001f2c0 | controls_pick_axis | controls | exact | `controlsPickAxis` src/shell/controls/panel.ts:332 |
+| 0x0001f350 | controls_draw_scroll_arrow | controls | exact | `controlsDrawScrollArrow` src/shell/screens/controls.ts:365 |
+| 0x0001f3c0 | controls_scroll_buttons | controls | exact | `controlsScrollButtons` src/shell/screens/controls.ts:387 |
+| 0x0001f460 | controls_pick_button | controls | exact | `controlsPickButton` src/shell/controls/panel.ts:362 |
+| 0x0001f5e0 | controls_draw_device_tab | controls | exact | `controlsDrawDeviceTab` src/shell/screens/controls.ts:415 |
+| 0x0001f640 | controls_draw_device | controls | exact | `controlsDrawDevice` src/shell/screens/controls.ts:432 |
+| 0x0001f6a0 | controls_toggle_device | controls | exact | `controlsToggleDevice` src/shell/controls/panel.ts:401 |
+| 0x0001f740 | controls_show_device | controls | exact | `controlsShowDevice` src/shell/controls/panel.ts:428 |
+| 0x0001f770 | controls_draw_divider | controls | exact | `controlsDrawDivider` src/shell/screens/controls.ts:451 |
+| 0x0001f7a0 | controls_draw_config_slot | controls | exact | `controlsDrawConfigSlot` src/shell/screens/controls.ts:464 |
+| 0x0001f7e0 | controls_accept | controls | exact | `controlsAccept` src/shell/controls/panel.ts:444 |
+| 0x0001f810 | controls_custom_config | controls | exact | `controlsCustomConfig` src/shell/controls/panel.ts:462 |
 | 0x0001f830 | controls_write_modifier_lines | controls | exact | `controlsWriteModifierLines` src/shell/controls/inputMap.ts:93 |
 | 0x0001f930 | controls_write_jumpjet_enable | controls | exact | `controlsWriteJumpjetEnable` src/shell/controls/inputMap.ts:129 |
 | 0x0001fc40 | controls_write_map_entry | controls | exact | `controlsWriteMapEntry` src/shell/controls/inputMap.ts:165 |
 | 0x000201a0 | controls_write_temp_map | controls | exact | `controlsWriteTempMap` src/shell/controls/inputMap.ts:251 |
-| 0x00020540 | controls_choose_bound_devices | controls | exact | `controlsChooseBoundDevices` src/shell/controls/config.ts:208 |
-| 0x00020620 | controls_renumber_devices | controls | exact | `controlsRenumberDevices` src/shell/controls/config.ts:169 |
-| 0x00020730 | controls_clear_bindings | controls | exact | `controlsClearBindings` src/shell/controls/config.ts:137 |
-| 0x00020a40 | controls_load_config | controls | exact | `controlsLoadConfig` src/shell/controls/config.ts:253 |
-| 0x00020b00 | controls_save_config | controls | exact | `controlsSaveConfig` src/shell/controls/config.ts:304 |
-| 0x00020c10 | controls_reset_defaults | controls | exact | `controlsResetDefaults` src/shell/controls/config.ts:323 |
+| 0x00020540 | controls_choose_bound_devices | controls | exact | `controlsChooseBoundDevices` src/shell/controls/config.ts:201 |
+| 0x00020620 | controls_renumber_devices | controls | exact | `controlsRenumberDevices` src/shell/controls/config.ts:162 |
+| 0x00020730 | controls_clear_bindings | controls | exact | `controlsClearBindings` src/shell/controls/config.ts:130 |
+| 0x00020a40 | controls_load_config | controls | exact | `controlsLoadConfig` src/shell/controls/config.ts:246 |
+| 0x00020b00 | controls_save_config | controls | exact | `controlsSaveConfig` src/shell/controls/config.ts:298 |
+| 0x00020c10 | controls_reset_defaults | controls | exact | `controlsResetDefaults` src/shell/controls/config.ts:322 |
 | 0x00020e60 | controls_accept_config | controls | exact | `controlsAcceptConfig` src/shell/controls/inputMap.ts:354 |
+| 0x00021020 | controls_screen | controls | exact | `controlsScreen` src/shell/screens/controls.ts:507 |
 | 0x00021400 | credits_screen | credits | exact | `creditsScreen` src/shell/screens/credits.ts:51 |
 | 0x00021810 | mpack_db_open | mpack_db | exact | `mpackDbOpen` src/data/formats/mpack.ts:35 |
 | 0x00021a30 | mpack_db_get_item | mpack_db | exact | `mpackDbGetItem` src/data/formats/mpack.ts:64 |
@@ -1198,7 +1243,24 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x00021cf0 | mpack_db_read_at | mpack_db | exact | `mpackDbReadAt` src/data/formats/mpack.ts:146 |
 | 0x00021d50 | mpack_db_read_line | mpack_db | exact | `mpackDbReadLine` src/data/formats/mpack.ts:160 |
 | 0x00021de0 | mpack_db_read_string | mpack_db | exact | `mpackDbReadString` src/data/formats/mpack.ts:184 |
-| 0x000255f0 | sim_options_read | options | exact | `simOptionsRead` src/shell/options/simOptions.ts:13 |
+| 0x00021e90 | debriefing_objective_compare | mpack_db | exact | `debriefingObjectiveCompare` src/shell/screens/debriefing.ts:154 |
+| 0x00023890 | screen_debriefing | mission_result | exact | `screenDebriefing` src/shell/screens/debriefing.ts:216 |
+| 0x000251a0 | options_draw_difficulty | options | exact | `optionsDrawDifficulty` src/shell/screens/options.ts:94 |
+| 0x000251e0 | options_draw_on_off | options | exact | `optionsDrawOnOff` src/shell/screens/options.ts:105 |
+| 0x00025230 | options_draw_on_off_byte | options | exact | `optionsDrawOnOffByte` src/shell/screens/options.ts:115 |
+| 0x00025280 | options_draw_dishonorable_when_set | options | exact | `optionsDrawDishonorableWhenSet` src/shell/screens/options.ts:128 |
+| 0x000252d0 | options_draw_dishonorable_when_clear | options | exact | `optionsDrawDishonorableWhenClear` src/shell/screens/options.ts:140 |
+| 0x00025320 | options_draw_high_low | options | exact | `optionsDrawHighLow` src/shell/screens/options.ts:151 |
+| 0x00025370 | options_draw_resolution | options | exact | `optionsDrawResolution` src/shell/screens/options.ts:164 |
+| 0x000253c0 | options_click_cycle3 | options | exact | `optionsClickCycle3` src/shell/screens/options.ts:176 |
+| 0x000253e0 | options_click_toggle | options | exact | `optionsClickToggle` src/shell/screens/options.ts:189 |
+| 0x00025400 | options_click_toggle_byte | options | exact | `optionsClickToggleByte` src/shell/screens/options.ts:200 |
+| 0x00025410 | options_click_resolution | options | exact | `optionsClickResolution` src/shell/screens/options.ts:213 |
+| 0x00025460 | options_draw_rect | options | exact | `optionsDrawRect` src/shell/screens/options.ts:231 |
+| 0x00025480 | options_draw_slider | options | exact | `optionsDrawSlider` src/shell/screens/options.ts:244 |
+| 0x000254f0 | options_click_slider | options | exact | `optionsClickSlider` src/shell/screens/options.ts:266 |
+| 0x000255b0 | sound_config_read | options | exact | `soundConfigRead` src/shell/options/soundConfig.ts:18 |
+| 0x000255f0 | sim_options_read | options | exact | `simOptionsRead` src/shell/options/simOptions.ts:15 |
 | 0x000258e0 | shell_menu | options | partial | `shellMenu` src/shell/ui/shellMenu.ts:117 |
 | 0x000263d0 | message_box | shell_263d0 | exact | `messageBox` src/shell/ui/messageBox.ts:57 |
 | 0x000267f0 | font_holder_init | shell_263d0 | exact | `fontHolderInit` src/shell/ui/labels.ts:28 |
@@ -1241,7 +1303,72 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x0002ac90 | widget_panel_layout | shell_2a5e0 | exact | `widgetPanelLayout` src/shell/ui/widgets.ts:144 |
 | 0x0002ad30 | widget_panel_redraw | shell_2a5e0 | exact | `widgetPanelRedraw` src/shell/ui/widgets.ts:173 |
 | 0x0002ada0 | widget_panel_free_labels | shell_2a5e0 | exact | `widgetPanelFreeLabels` src/shell/ui/widgets.ts:189 |
+| 0x0002ae40 | mechlab_place_item | shell_2a5e0 | exact | `mechlabPlaceItem` src/shell/mechlab/design.ts:356 |
+| 0x0002b0d0 | mechlab_remove_item_slots | shell_2a5e0 | exact | `mechlabRemoveItemSlots` src/shell/mechlab/design.ts:381 |
+| 0x0002bbd0 | mechlab_trim_armour_to_tonnage | shell_2a5e0 | exact | `mechlabTrimArmourToTonnage` src/shell/mechlab/design.ts:423 |
+| 0x0002bd20 | mechlab_show_location_marker | shell_2a5e0 | exact | `mechlabShowLocationMarker` src/shell/mechlab/panels.ts:130 |
+| 0x0002bd70 | mechlab_draw_mass | shell_2a5e0 | exact | `mechlabDrawMass` src/shell/mechlab/panels.ts:144 |
+| 0x0002bde0 | mechlab_draw_used_mass | shell_2a5e0 | exact | `mechlabDrawUsedMass` src/shell/mechlab/panels.ts:155 |
+| 0x0002bed0 | mechlab_draw_engine_rating | shell_2a5e0 | exact | `mechlabDrawEngineRating` src/shell/mechlab/panels.ts:168 |
+| 0x0002bf40 | mechlab_draw_engine_type | shell_2a5e0 | exact | `mechlabDrawEngineType` src/shell/mechlab/panels.ts:181 |
+| 0x0002bf80 | mechlab_draw_engine_maker | shell_2a5e0 | exact | `mechlabDrawEngineMaker` src/shell/mechlab/panels.ts:192 |
+| 0x0002bfe0 | mechlab_draw_speed | shell_2a5e0 | exact | `mechlabDrawSpeed` src/shell/mechlab/panels.ts:203 |
+| 0x0002c080 | mechlab_draw_heat_sink_count | shell_2a5e0 | exact | `mechlabDrawHeatSinkCount` src/shell/mechlab/panels.ts:216 |
+| 0x0002c100 | mechlab_draw_heat_sink_type | shell_2a5e0 | exact | `mechlabDrawHeatSinkType` src/shell/mechlab/panels.ts:228 |
+| 0x0002c130 | mechlab_draw_int | shell_2a5e0 | exact | `mechlabDrawInt` src/shell/mechlab/panels.ts:239 |
+| 0x0002c1b0 | mechlab_widget_draw_label | shell_2a5e0 | exact | `mechlabWidgetDrawLabel` src/shell/mechlab/panels.ts:250 |
+| 0x0002c1e0 | mechlab_draw_title | shell_2a5e0 | exact | `mechlabDrawTitle` src/shell/mechlab/panels.ts:261 |
+| 0x0002c210 | mechlab_draw_structure_type | shell_2a5e0 | exact | `mechlabDrawStructureType` src/shell/mechlab/panels.ts:272 |
+| 0x0002c240 | mechlab_draw_armour_type | shell_2a5e0 | exact | `mechlabDrawArmourType` src/shell/mechlab/panels.ts:283 |
+| 0x0002c270 | mechlab_draw_selected_armour | shell_2a5e0 | exact | `mechlabDrawSelectedArmour` src/shell/mechlab/panels.ts:295 |
+| 0x0002c300 | mechlab_draw_location_armour | shell_2a5e0 | exact | `mechlabDrawLocationArmour` src/shell/mechlab/panels.ts:310 |
+| 0x0002c370 | mechlab_draw_location_name | shell_2a5e0 | exact | `mechlabDrawLocationName` src/shell/mechlab/panels.ts:328 |
+| 0x0002c3d0 | mechlab_draw_selected_location | shell_2a5e0 | exact | `mechlabDrawSelectedLocation` src/shell/mechlab/panels.ts:341 |
+| 0x0002c430 | mechlab_draw_weapon_slot | shell_2a5e0 | exact | `mechlabDrawWeaponSlot` src/shell/mechlab/panels.ts:356 |
+| 0x0002c5c0 | mechlab_draw_weapon_row | shell_2a5e0 | exact | `mechlabDrawWeaponRow` src/shell/mechlab/panels.ts:384 |
+| 0x0002c690 | mechlab_draw_weapon_info | shell_2a5e0 | exact | `mechlabDrawWeaponInfo` src/shell/mechlab/panels.ts:400 |
+| 0x0002caf0 | mechlab_draw_location_title | shell_2a5e0 | exact | `mechlabDrawLocationTitle` src/shell/mechlab/panels.ts:466 |
+| 0x0002cb30 | mechlab_draw_slot | shell_2a5e0 | exact | `mechlabDrawSlot` src/shell/mechlab/panels.ts:495 |
+| 0x0002ccf0 | mechlab_draw_unplaced | shell_2a5e0 | exact | `mechlabDrawUnplaced` src/shell/mechlab/panels.ts:519 |
+| 0x0002ce90 | mechlab_draw_more | shell_2a5e0 | exact | `mechlabDrawMore` src/shell/mechlab/panels.ts:543 |
+| 0x0002ced0 | mechlab_draw_yes_no | shell_2a5e0 | exact | `mechlabDrawYesNo` src/shell/mechlab/panels.ts:554 |
+| 0x0002cf00 | mechlab_draw_equipment_name | shell_2a5e0 | exact | `mechlabDrawEquipmentName` src/shell/mechlab/panels.ts:566 |
+| 0x0002cf80 | mechlab_open_panel | shell_2a5e0 | exact | `mechlabOpenPanel` src/shell/mechlab/panels.ts:595 |
+| 0x0002d020 | mechlab_open_weapons_panel | shell_2a5e0 | exact | `mechlabOpenWeaponsPanel` src/shell/mechlab/panels.ts:612 |
+| 0x0002d060 | mechlab_open_armour_panel | shell_2a5e0 | exact | `mechlabOpenArmourPanel` src/shell/mechlab/panels.ts:630 |
+| 0x0002d090 | mechlab_open_criticals_panel | shell_2a5e0 | exact | `mechlabOpenCriticalsPanel` src/shell/mechlab/panels.ts:647 |
+| 0x0002d0d0 | mechlab_edit_variant_title | shell_2a5e0 | exact | `mechlabEditVariantTitle` src/shell/mechlab/panels.ts:666 |
+| 0x0002d130 | mechlab_engine_faster | shell_2a5e0 | exact | `mechlabEngineFaster` src/shell/mechlab/design.ts:493 |
+| 0x0002d490 | mechlab_engine_slower | shell_2a5e0 | exact | `mechlabEngineSlower` src/shell/mechlab/design.ts:503 |
+| 0x0002d7f0 | mechlab_toggle_xl_engine | shell_2a5e0 | exact | `mechlabToggleXlEngine` src/shell/mechlab/design.ts:517 |
+| 0x0002dc90 | mechlab_add_jump_jet | shell_2a5e0 | exact | `mechlabAddJumpJet` src/shell/mechlab/design.ts:555 |
+| 0x0002deb0 | mechlab_delete_jump_jet | shell_2a5e0 | exact | `mechlabDeleteJumpJet` src/shell/mechlab/design.ts:579 |
+| 0x0002e0a0 | mechlab_add_heat_sink | shell_2a5e0 | exact | `mechlabAddHeatSink` src/shell/mechlab/design.ts:593 |
+| 0x0002e270 | mechlab_delete_heat_sink | shell_2a5e0 | exact | `mechlabDeleteHeatSink` src/shell/mechlab/design.ts:607 |
+| 0x0002e450 | mechlab_toggle_heat_sink_type | shell_2a5e0 | exact | `mechlabToggleHeatSinkType` src/shell/mechlab/design.ts:622 |
+| 0x0002e6b0 | mechlab_add_armour | shell_2a5e0 | exact | `mechlabAddArmour` src/shell/mechlab/design.ts:640 |
+| 0x0002e7d0 | mechlab_delete_armour | shell_2a5e0 | exact | `mechlabDeleteArmour` src/shell/mechlab/design.ts:652 |
+| 0x0002e900 | mechlab_toggle_ferro_fibrous | shell_2a5e0 | exact | `mechlabToggleFerroFibrous` src/shell/mechlab/design.ts:673 |
+| 0x0002ebe0 | mechlab_toggle_endo_steel | shell_2a5e0 | partial | `mechlabToggleEndoSteel` src/shell/mechlab/design.ts:688 |
+| 0x0002eee0 | mechlab_add_item_and_recompute | shell_2a5e0 | exact | `mechlabAddItemAndRecompute` src/shell/mechlab/design.ts:708 |
+| 0x0002f230 | mechlab_remove_item_and_recompute | shell_2a5e0 | exact | `mechlabRemoveItemAndRecompute` src/shell/mechlab/design.ts:741 |
+| 0x0002f590 | mechlab_add_ammo | shell_2a5e0 | exact | `mechlabAddAmmo` src/shell/mechlab/design.ts:785 |
+| 0x0002f820 | mechlab_delete_ammo | shell_2a5e0 | exact | `mechlabDeleteAmmo` src/shell/mechlab/design.ts:801 |
+| 0x0002fab0 | mechlab_click_weapon_slot | shell_2a5e0 | exact | `mechlabClickWeaponSlot` src/shell/mechlab/panels.ts:714 |
+| 0x0002faf0 | mechlab_click_weapon_row | shell_2a5e0 | exact | `mechlabClickWeaponRow` src/shell/mechlab/panels.ts:732 |
+| 0x0002fb20 | mechlab_next_location | shell_2a5e0 | exact | `mechlabNextLocation` src/shell/mechlab/panels.ts:752 |
+| 0x0002fb50 | mechlab_click_location | shell_2a5e0 | exact | `mechlabClickLocation` src/shell/mechlab/panels.ts:769 |
+| 0x0002fb70 | mechlab_click_unplaced | shell_2a5e0 | exact | `mechlabClickUnplaced` src/shell/mechlab/panels.ts:786 |
+| 0x0002fc80 | mechlab_click_more | shell_2a5e0 | exact | `mechlabClickMore` src/shell/mechlab/panels.ts:797 |
+| 0x0002fc90 | mechlab_click_slot | shell_2a5e0 | exact | `mechlabClickSlot` src/shell/mechlab/panels.ts:806 |
+| 0x0002fd90 | mechlab_armour_front_up | shell_2a5e0 | exact | `mechlabArmourFrontUp` src/shell/mechlab/design.ts:889 |
+| 0x0002fe20 | mechlab_armour_front_down | shell_2a5e0 | exact | `mechlabArmourFrontDown` src/shell/mechlab/design.ts:919 |
+| 0x0002fe50 | mechlab_armour_rear_up | shell_2a5e0 | exact | `mechlabArmourRearUp` src/shell/mechlab/design.ts:934 |
+| 0x0002fed0 | mechlab_armour_rear_down | shell_2a5e0 | exact | `mechlabArmourRearDown` src/shell/mechlab/design.ts:959 |
+| 0x0002ff00 | mechlab_toggle_equipment | shell_2a5e0 | exact | `mechlabToggleEquipment` src/shell/mechlab/design.ts:978 |
 | 0x000305a0 | widget_panel_hit | shell_2a5e0 | exact | `widgetPanelHit` src/shell/ui/widgets.ts:202 |
+| 0x00030db0 | mechlab_load_mek | shell_2a5e0 | exact | `mechlabLoadMek` src/shell/mechlab/design.ts:1037 |
+| 0x000339e0 | screen_mechlab | mechlab | exact | `screenMechlab` src/shell/screens/mechlab.ts:243 |
 | 0x00036700 | main | shell_main | partial | `shellMain` src/shell/main.ts:105 |
 | 0x000374c0 | prm_load | prm | exact | `prmLoad` src/shell/handoff/prm.ts:40 |
 | 0x000375a0 | prm_save | prm | exact | `prmSave` src/shell/handoff/prm.ts:70 |
@@ -1414,12 +1541,13 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/systemErrors.ts:31 - a FATAL code throws SystemErrorFatal instead of tearing the game down and exiting
 - src/engine/tasks/taskList.ts:53 - the node is a JS object rather than static_malloc(0x18) from the TLIS arena
 - src/engine/timer.ts:71 - the scan stops at the table's 64 entries; the original scans on for a zero or -1 word, which only matters past 64 live stopwatches
+- src/engine/vfx/gif.ts:276 - the original's 1-bit output path (EDX == 1), which its own code never takes (EDX is always 8), is not ported; a corrupt GIF whose codes run past the table stops where the original would read or write past its work block
 - src/engine/vfx/vfx.ts:176 - takes window coordinates and the clip vfx_shape_draw has set up, not (pane, shape, x, y, pitch)
 - src/engine/vfx/vfx.ts:216 - takes window coordinates and the clip vfx_shape_remap_draw has set up
 - src/engine/vfx/vfx.ts:316 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
+- src/engine/vfx/vfx.ts:493 - past the clip checks the original returns whatever EAX last held (a difference, or the end of the copy), which its one caller (gif_put_pixel) ignores; the port returns 0
 - src/mission/commandLine.ts:89 - -M / -X's mono display, -Q's quadtree switch-off, -E's mw2debug.txt and the version text are not ported; their flags are still set
 - src/mission/commandLine.ts:93 - This program must be launched from MECH2.EXE
-- src/mission/load.ts:158 - no mw2dif.cfg on the disk: the port's DEFAULT_RULES, not the original's all-off record
 - src/mission/load.ts:186 - static_arena_init: no arena pre-pass; tables are allocated on demand
 - src/mission/mainLoop.ts:87 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
 - src/mission/mainLoop.ts:91 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
@@ -1456,18 +1584,24 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/shell/career/orders.ts:138 - the host owns MW2.PRJ; only the handle is closed
 - src/shell/career/orders.ts:159 - the NUL is forced into the port's copy of the stream, not the cached resource (the same byte each time, so nothing reads the difference)
 - src/shell/clib.ts:55 - counts the host's timer (hardware.timeMs, which runs from the machine's start, not the program's) rather than the DOS time of day; only rand's seed depends on it
-- src/shell/controls/config.ts:306 - returns nothing: the original returns the message box's answer or the second fclose's result, and every caller discards it
-- src/shell/controls/devices.ts:102 - the directory is listed in name order (dosFindFiles), where DOS's readdir gives the FAT directory's order; the install's giddi\ lists alphabetically (its .cpc device records say so), so the two agree there
-- src/shell/controls/devices.ts:103 - the loaded module's methods are the port's implementations of the shipped drivers (sim/controls/giddi.ts, giddiDriverFor); a driver the port has none for - the joysticks, FLTSTCK, MSJSTICK, TMASTER, VIO1/2 - is dropped the way the original drops a DLL that fails to load, so the port lists only KEYBOARD and MOUSE
-- src/shell/controls/devices.ts:128 - input_devices_load: no port driver for giddi\\${lower}; dropped as a DLL that will not load
+- src/shell/controls/config.ts:300 - returns nothing: the original returns the message box's answer or the second fclose's result, and every caller discards it
+- src/shell/controls/devices.ts:109 - the directory is listed in name order (dosFindFiles), where DOS's readdir gives the FAT directory's order; the install's giddi\ lists alphabetically (its .cpc device records say so), so the two agree there
+- src/shell/controls/devices.ts:110 - the loaded module's methods are the port's implementations of the shipped drivers (sim/controls/giddi.ts, giddiDriverFor); a driver the port has none for - the joysticks, FLTSTCK, MSJSTICK, TMASTER, VIO1/2 - is dropped the way the original drops a DLL that fails to load, so the port lists only KEYBOARD and MOUSE
+- src/shell/controls/devices.ts:135 - input_devices_load: no port driver for giddi\\${lower}; dropped as a DLL that will not load
 - src/shell/controls/inputMap.ts:253 - the port's disk cannot fail to open a file, so 'Error: Could not write map file.' (0x738b4) is never shown
 - src/shell/controls/profiles.ts:160 - giddi\\${p.device}.cpc: the port's own default profile, not the install's file
-- src/shell/controls/seed.ts:51 - GAMEKEY.MAP: the port writes its own table; the install\
-- src/shell/controls/seed.ts:78 - first run: the controls configuration is the device panel\
+- src/shell/controls/seed.ts:52 - GAMEKEY.MAP: the port writes its own table; the install\
+- src/shell/controls/seed.ts:79 - first run: the controls configuration is the device panel\
 - src/shell/handoff/starFiles.ts:227 - the bytes after each BMPJ name's NUL are uninitialised stack in the original; the port writes zeros (the shipped instmap1.bwd has zeros there)
 - src/shell/host/pump.ts:30 - the shell's loops run at ${passRate} passes a second (the original: as fast as the PC allowed)
 - src/shell/host/timer.ts:14 - the host's clock is the timer; AIL's start-up is the host's audio
 - src/shell/main.ts:107 - the mouse, CD (MSCDEX), interrupt hooks and Miles are the port's host; unported screens show a placeholder
+- src/shell/mechlab/design.ts:690 - the two widget_panel_redraw calls at its end are made by the registered click handler (shell/mechlab/panels.ts), which owns the widget engine
+- src/shell/mechlab/design.ts:1039 - the loose file comes off the port's virtual disk (engine/dosFiles.ts) and the stock record from the port's MW2.PRJ reader
+- src/shell/mechlab/design.ts:1310 - the virtual disk has no directories, so the first open never fails and the mkdir('mek') retry is not reached
+- src/shell/mechlab/panels.ts:205 - the product is taken in doubles (the original rounds the x87 product to a double for printf) and printed with toFixed
+- src/shell/screens/debriefing.ts:218 - the per-line scratch buffers (0x8e290 ... 0x8f190) and the sorted pointers (debriefingObjectives) are JS values; debriefingText is written to its address once complete
+- src/shell/screens/options.ts:215 - the name is stored and shown faithfully, but nothing in the port acts on it: MW2.EXE's driver DLLs (mcga, vesa480, vesa768) are not loaded and the renderer draws at the browser's resolution whatever the row says
 - src/shell/screens/register.ts:203 - the slots' name labels are kept beside the records, so MW2REG.CFG carries 0 at +0x38 where the original saved a heap pointer (cleared again by every load)
 - src/shell/sound/music.ts:57 - the drivers are the host's synth and card (hardware.midi, hardware.digital), not MDI.INI / DIG.INI
 - src/shell/text/page.ts:70 - with a negative height the original leaves [6] as malloc left it; the port's is 0 (no limit)
@@ -1543,6 +1677,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/mech/looseFiles.ts:77 - no file handle is returned or closed, and no arena: the caller gets the bytes; the failure line goes to the log channel 'symlog' rather than symlog.txt
 - src/sim/mech/mechTickAi.ts:308 - the monochrome-screen AI debug display (mission_log_sub_0214a0, run for the player's mech while monoDebugPresent) is not ported
 - src/sim/mech/resourceRef.ts:30 - no static-arena copy (arenaTag): the port's buffers need no arena, so the arenaTag path returns the bytes it loaded
+- src/sim/mech/simOptions.ts:94 - no MW2DIF.CFG on the disk: the port writes its own (the shell's boot simOptions) rather than MW2.EXE reading none - the original's all-off, EASY record - or the installer's copy
 - src/sim/mech/spawn.ts:71 - cannot fail (the original returns 0 when static_malloc does)
 - src/sim/mech/spawn.ts:86 - the dwords at +0x24, +0xe0 and +0xe4 (padding in the header, no port fields) are zeroed in the original
 - src/sim/net/netSession.ts:166 - a generator: the join waits on the network across host frames
@@ -1572,8 +1707,11 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/sound/music.ts:211 - a paused drive at the very start of the first track is replayed rather than resumed in the original; the port resumes
 - src/sim/sound/music.ts:227 - one stop request to the drive interface
 - src/sim/sound/music.ts:313 - sound_release_sequences has no sequence to release (no XMIDI is loaded in a mission)
+- src/sim/sound/soundConfigFile.ts:96 - no MW2SND.CFG on the disk: the port writes the shell's boot soundConfig, where each original program fell back to its own image's (and the installer may have left one)
 - src/sim/things/gameThingDamage.ts:93 - the original sets 0x200 on worldRecords[geomIndex] before testing geomIndex for -1, and reads gameThings[-1] for a replacement with no gamething; the port skips both out-of-table accesses (the first cannot happen - a thing with geomIndex -1 already has flags 4)
-- src/sim/ui/cheats.ts:71 - code 4's hook swap (ui_callbacks_sub_01a820) is not established and not done; free eye's message font is a register the export lost (1 is used)
+- src/sim/ui/cheatCredits.ts:143 - vfxWindowRefresh (0x9fd60, the VFX driver copying the window to the screen at once) is the host\
+- src/sim/ui/cheatCredits.ts:168 - vfxWindowRefresh, the driver's immediate copy of the window to the screen, is the host's frame; the blocking fades are played by the host after the frame (palettes.dacPlayback), each with a copy of the window as it stood when the fade ran
+- src/sim/ui/cheats.ts:72 - free eye's message font is a register the export lost (1 is used)
 - src/sim/ui/commands.ts:91 - the wait is split across host frames (keyPauseActive) instead of a blocking loop
 - src/sim/ui/commands.ts:129 - the screenshot (0x52) command is reported, not run; debug commands (hangAround) are not ported
 - src/sim/ui/commands.ts:136 - command 0x${cmd.toString(16)} (${what}) is not ported yet
@@ -1581,7 +1719,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/ui/menuCallbacks.ts:547 - the calibration loop (input_sub_048cd0 / _048ce0 / _048d90) is not ported
 - src/sim/ui/menuLoad.ts:209 - the indices are held beside the records (MenuModule.indices) rather than in the callback fields they are replaced in
 - src/sim/ui/menuLoad.ts:298 - the module is read into objects (readModule); a failed load leaves node.record and node.module set, as the original does
-- src/sim/ui/menus.ts:138 - the loaded block is dropped rather than freed
+- src/sim/ui/menus.ts:150 - the loaded block is dropped rather than freed
 - src/sim/ui/uiContext.ts:64 - the node is a JS object rather than malloc(0x12)
 - src/sim/weapons/projectiles.ts:227 - the original faults (idiv by zero) when the round is exactly on the target's origin; the port stops after the proximity bit instead
 - src/sim/weapons/projectiles.ts:266 - projectile_home: the round is on its target; the original divides by zero here and faults
@@ -1596,8 +1734,8 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/world/groundQuadtree.ts:273 - nothing to free in JS; kept so object_free_bounds' class-5 branch has its callee
 - src/sim/world/objectTasks.ts:265 - INIT's two products are evaluated in doubles, not the x87's 80 bits (0x1b66e..0x1b6ae); every shipped lap is a small integer, which leaves them far from a rounding boundary
 - src/sim/world/objectTasks.ts:424 - the -1 arm: task_list_notify_rebuilt neither sets currentTask nor passes an argument (0x17450..0x17477), so the C works on whatever task last ran (usually none: address 4) and atoi's a null pointer; the port answers 0 with the task untouched when there is no current task, and otherwise keeps the object slot rather than atoi'ing nothing
-- src/sim/world/palettes.ts:389 - the port's window holds only the 2D; wherever a pixel is not drawn the GPU's 3D view shows, so when any is undrawn every colour not seen in the drawn ones counts as used, in ascending order. The waits are the host's: each pass's DAC is kept in dacPlayback with the waits that follow it
-- src/sim/world/palettes.ts:466 - a non-zero mode (calibration_menu_run's dissolve) is not ported
+- src/sim/world/palettes.ts:405 - the port's window holds only the 2D; wherever a pixel is not drawn the GPU's 3D view shows, so when any is undrawn every colour not seen in the drawn ones counts as used, in ascending order. The waits are the host's: each pass's DAC is kept in dacPlayback with the waits that follow it
+- src/sim/world/palettes.ts:483 - a non-zero mode (calibration_menu_run's dissolve) is not ported
 - src/sim/world/projectMaps.ts:41 - capacities are fixed and large; the original takes them from arena_budget_bytes (the DTBL totals the pre-pass sums)
 - src/sim/world/projectMaps.ts:45 - project id maps sized to a fixed large capacity instead of the DTBL arena budget
 - src/sim/world/scrounge.ts:79 - scrounge_install: vertexCount beyond the vertices the port holds
@@ -1616,9 +1754,14 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/mission/vm/chunkExec.ts:346 - GP with no object: the original clears the PREVIOUS gamepiece node
 - src/mission/vm/streams.ts:197 - '.BWD' is appended in the caller's own reference buffer
 - src/render/SceneRenderer.ts:406 - the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled
-- src/shell/controls/config.ts:196 - controls_renumber_devices: strncpy of 16 bytes into record 15\
-- src/shell/controls/config.ts:295 - controls_save_config: fclose is called a second time on the closed file
+- src/shell/controls/config.ts:189 - controls_renumber_devices: strncpy of 16 bytes into record 15\
+- src/shell/controls/config.ts:289 - controls_save_config: fclose is called a second time on the closed file
 - src/shell/controls/inputMap.ts:80 - controls_write_map_entry: a NULL input name prints as (null)
+- src/shell/controls/panel.ts:115 - controls_cycle_modifier: a reversed axis with no modifier cannot be given one (only flags == 0 steps to Ctrl)
+- src/shell/mechlab/design.ts:1211 - mechlab_load_mek: the second search for a 6001 slot reads the MEK record again, not the grid it just cleared, so any slotted heat sink makes the type double
+- src/shell/screens/debriefing.ts:422 - screen_debriefing: a member with no chassis reads chassisTable[-1]
+- src/shell/screens/mechlab.ts:283 - screen_mechlab: CUSTOMIZE and DELETE are disabled at entry by the chassis and variant of the previous visit (mechlabChassis / mechlabVariant are set only after)
+- src/shell/screens/options.ts:284 - the slider preview sets soundConfig.sfxVolume around sound_sample_play, which never reads it: sound102 plays at its own volume whichever slider moves
 - src/shell/screens/register.ts:340 - DELETE MECHWARRIOR with no pilot writes through a NULL currentPilot (the button is disabled then)
 - src/shell/text/page.ts:209 - text_layout_page: a space with no word before it (text starting with a space) never advances
 - src/sim/ai/aiGeometry.ts:94 - mech_probe_ray: the flank point is transformed with the probe end\
@@ -1649,7 +1792,9 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/sound/voice.ts:154 - sound_seq_queue_message: a dropped duplicate keeps its VoiceLine marked in use
 - src/sim/sound/voice.ts:165 - sound_seq_queue_message: a dropped duplicate keeps its VoiceLine marked in use
 - src/sim/sound/voice.ts:246 - voice_queue_advance: a posted text line is dropped while its endTick is still ahead
-- src/sim/ui/menus.ts:309 - menu_draw: a digit on a menu\
+- src/sim/ui/cheatCredits.ts:305 - the second picture (320x200) is drawn in the pane fitted to the first (320x211), from its top row: it sits about 5 rows above centre, with black below
+- src/sim/ui/cheatCredits.ts:352 - the HUD comes back on (savedHudEnabled = 1) whatever it was before the cheat
+- src/sim/ui/menus.ts:321 - menu_draw: a digit on a menu\
 - src/sim/weapons/weapons.ts:78 - weapons[-1].fireGroup: reads the loadout dword at +0xb2 (throttleScale >> 16 | weaponCycleLock << 16)
 - src/sim/weapons/weapons.ts:565 - player_weapon_set_fire_group with no weapon selected writes loadout +0xb2 (throttleScale high word, weaponCycleLock low word)
 - src/sim/world/objectTasks.ts:336 - task_object_sound: INIT never sets the gate, so a chunk without it leaves the heap\
@@ -1666,6 +1811,12 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/miles/xmidiSequencer.ts:544 - XMIDI: callback prefix (cc 108) with no callback; passed to the device
 - src/engine/miles/xmidiSequencer.ts:551 - XMIDI: channel lock controller ${d1} is not reproduced (the port's device has no other users)
 - src/engine/resources/preload.ts:112 - sim_preload_data: ai_rule_tables_load is not installed
+- src/engine/vfx/gif.ts:83 - gif_decode: a code past the table (a corrupt GIF) reads past the work block in the original
+- src/engine/vfx/gif.ts:92 - gif_decode: the table grew past 0x1000 codes (no clear code) - the original writes past the work block
+- src/engine/vfx/gif.ts:101 - gif_decode: a code past the table (a corrupt GIF) reads past the work block in the original
+- src/engine/vfx/gif.ts:110 - gif_decode: the table grew past 0x1000 codes (no clear code) - the original writes past the work block
+- src/engine/vfx/gif.ts:335 - gif_decode: a code chain longer than the stack (a corrupt GIF) runs over the tables in the original
+- src/engine/vfx/gif.ts:344 - gif_decode: the data ran out before the end code; the original reads on past the file
 - src/engine/vfx/vfx.ts:322 - vfx_line_draw: a callback mode (above 1) is not ported
 - src/mission/commandLine.ts:118 - -E: mw2debug.txt is not opened; the trace goes to the port log
 - src/mission/end.ts:134 - mission_save_results: an objective text runs past the end of the record, onto the stack
@@ -1681,9 +1832,26 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/shell/career/orders.ts:225 - orders_text_build: an empty text after the codes - text_layout_page is handed NULL
 - src/shell/controls/inputMap.ts:74 - controls_write_map_entry: a binding on a device that is not loaded (the original reads through a NULL record)
 - src/shell/controls/inputMap.ts:293 - controls_write_temp_map: a bound record of an unused control slot (controlMapNames is NULL there)
+- src/shell/controls/panel.ts:147 - controls_scroll_to_selection: controlsDevice is not a loaded device (the original reads through a NULL record)
+- src/shell/controls/panel.ts:165 - controls_next_input: the binding\
+- src/shell/controls/panel.ts:227 - controls_click_binding: controlsDevice is not a loaded device (the original reads through a NULL record)
+- src/shell/controls/panel.ts:305 - controls_click_second_button: controlsDevice is not a loaded device (the original reads through a NULL record)
 - src/shell/main.ts:254 - main: state ${current} has no screen
+- src/shell/mechlab/design.ts:1054 - mechlab_load_mek: a read past the MEK resource
 - src/shell/screens/briefing.ts:37 - screen_briefing: no current pilot (the original reads missionIndex and rank through NULL)
 - src/shell/screens/briefing.ts:47 - screen_briefing: mission 15, rank 6+, career 2 - the stream name buffer is left as the stack held it
+- src/shell/screens/controls.ts:95 - ${what}: an input past the device's name table (the original reads whatever follows it)
+- src/shell/screens/controls.ts:370 - controls_draw_scroll_arrow: controlsDevice is not a loaded device (the original reads through a NULL record)
+- src/shell/screens/controls.ts:392 - controls_scroll_buttons: controlsDevice is not a loaded device (the original reads through a NULL record)
+- src/shell/screens/debriefing.ts:135 - printf %.1f of ${v}: ${reduced} or ${exact}, by the FPU's precision
+- src/shell/screens/debriefing.ts:258 - screen_debriefing: MW2MSN.CFG or MW2CAR.CFG missing or short - the original scores the stack as it lay (the port: zeroes)
+- src/shell/screens/debriefing.ts:269 - screen_debriefing: restoring the pilot record with no copy taken (career 2) or no current pilot - the original copies its stack over it
+- src/shell/screens/debriefing.ts:278 - screen_debriefing: currentPilot->${f} with no current pilot
+- src/shell/screens/debriefing.ts:286 - screen_debriefing: currentPilot->${f} += with no current pilot
+- src/shell/screens/debriefing.ts:299 - screen_debriefing: no current pilot to copy (the original copies from NULL)
+- src/shell/screens/debriefing.ts:310 - screen_debriefing: ${n} objectives - the pointer table holds 48 and the record 48
+- src/shell/screens/debriefing.ts:356 - screen_debriefing: an objective text runs off the end of MW2CAR.CFG on the stack
+- src/shell/screens/debriefing.ts:463 - screen_debriefing: difficulty ${difficulty} - the multiplier and its name are left as the stack and 0x8e690 held them
 - src/sim/ai/behaviours.ts:144 - ai_choose_behaviour: no behaviour set for gamepieceClass ${mech.gamepieceClass}
 - src/sim/ai/behaviours.ts:365 - point_around_target: a gamething with a node leaves y uninitialised (0 here)
 - src/sim/ai/behaviours.ts:368 - point_around_target: handle 0x${targetHandle.toString(16)} is neither a mech nor a gamething, and the C uses an uninitialised node
@@ -1737,14 +1905,14 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/things/gameThingDamage.ts:46 - gamething_apply_damage: the destroyed thing has no world object (the original reads its type through a null pointer)
 - src/sim/things/gameThingDamage.ts:104 - gamething_destroy_world_record: replacement record ${record} has no gamething; the original tests the word before gameThings (0xf4a80)
 - src/sim/things/gameThingDamage.ts:125 - gamething_allegiance: affiliation ${a} is past the 8-entry table
-- src/sim/ui/cheats.ts:107 - cheat 4: ui_callbacks_sub_01a820 swaps the main-view hook (0x959b8) for LAB_00019f40 - not read
+- src/sim/ui/cheatCredits.ts:107 - cheat_credits_render_hook: currentViewportMode ${i} is outside viewportModes - the original reads and writes the memory there
 - src/sim/ui/menuCallbacks.ts:141 - lance_point_menu_onload: no item record after the list
 - src/sim/ui/menuCallbacks.ts:155 - lance_order_selected: a negative slot reads before the table
 - src/sim/ui/menuCallbacks.ts:187 - lance_slot_ai_state: an empty mechTable slot, read through a null pointer
 - src/sim/ui/menuCallbacks.ts:550 - menu_item_calibrate: a device calibration was started, and it is not ported
 - src/sim/ui/menuLoad.ts:122 - menu control data: a list with a suffix callback in the module
 - src/sim/ui/menuLoad.ts:197 - ${MENU_TABLES[kind].label}[${index}] (0x${address.toString(16)}) is not ported
-- src/sim/ui/menus.ts:325 - menu_draw: a menu without a title underlines at uninitialised coordinates
+- src/sim/ui/menus.ts:337 - menu_draw: a menu without a title underlines at uninitialised coordinates
 - src/sim/weapons/weapons.ts:181 - mech_weapons_tick: weapons[${next}] is past the ten slots (the C reads the sections that follow)
 - src/sim/weapons/weapons.ts:307 - mech_weapon_fire: a weapon with ammo has no bin (the C would dereference null)
 - src/sim/weapons/weapons.ts:315 - mech_weapon_fire: the next ammo bin is past the loadout\
@@ -1760,6 +1928,6 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/world/objectTasks.ts:441 - task_object_track: REBUILT looks its object up by atoi(NULL); the port keeps the slot it has
 - src/sim/world/objectTasks.ts:465 - task_object_track: fewer than three words - the rest are uninitialised stack buffers in the C (empty here)
 - src/sim/world/objectTasks.ts:528 - task_object_track: a point with duration 0 faults the divide in the C
-- src/sim/world/palettes.ts:174 - palette_slot_set_resource: a slot outside the 20-entry table writes past it in the original; ignored
-- src/sim/world/palettes.ts:331 - palette_fade_step: paletteCycleActive is set, and palette_cycle_step is not ported
-- src/sim/world/palettes.ts:479 - screen_fade_in: the dissolve (a non-zero mode) is not ported
+- src/sim/world/palettes.ts:190 - palette_slot_set_resource: a slot outside the 20-entry table writes past it in the original; ignored
+- src/sim/world/palettes.ts:347 - palette_fade_step: paletteCycleActive is set, and palette_cycle_step is not ported
+- src/sim/world/palettes.ts:496 - screen_fade_in: the dissolve (a non-zero mode) is not ported
