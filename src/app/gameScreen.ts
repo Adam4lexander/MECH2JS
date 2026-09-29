@@ -247,7 +247,7 @@ export class GameScreen {
     webgl.domElement.addEventListener('webglcontextrestored', this.onRestored);
     // Play: the PC's keyboard and mouse feed the game's GIDDI drivers
     this.detachInput = attachHostInput(webgl.domElement, () => game.mode === 'play');
-    this.views = new IndexedViews(webgl, sr.uniforms);
+    this.views = new IndexedViews(webgl, sr.uniforms, this.hudOverlay.insetUniforms);
     renderPort.current = this.views;
     // the renderer's loop: the window's animation frames, or the headset's while a session is on
     const loop = (now: number) => {

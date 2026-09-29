@@ -25,6 +25,7 @@
  */
 import * as THREE from 'three';
 import { cropRect, fitRect, MAT_COUNT, Mat, PANE_WIDGETS, type CockpitDesign, type Kit, type PaneName, type Slot } from './kit.ts';
+import { WINDOW_GLSL, type InsetUniforms } from '../passes/hudOverlay.ts';
 
 /** A rectangle of the game's window, pixels. */
 export interface Pane {
@@ -126,7 +127,7 @@ const screenFragment = /* glsl */ `
 precision highp float;
 precision highp int;
 uniform sampler2D uPalette;
-uniform sampler2D uWindow;   // RG8: index, drawn (passes/hudOverlay.ts)
+${WINDOW_GLSL}
 uniform vec2 uWindowSize;
 uniform vec4 uRect;          // the piece of the pane: x, y, w, h in window pixels
 uniform vec4 uFit;           // where it sits in the slot: u0, v0, u1, v1 (v down)
@@ -138,8 +139,10 @@ void main() {
   int i = uBlank;
   if (t.x >= 0.0 && t.y >= 0.0 && t.x < 1.0 && t.y < 1.0) {
     ivec2 p = clamp(ivec2(floor(uRect.xy + t * uRect.zw)), ivec2(0), ivec2(uWindowSize) - 1);
-    vec2 w = texelFetch(uWindow, p, 0).rg;
-    if (w.g >= 0.5) i = int(w.r * 255.0 + 0.5);
+    // the window's pixel, or an inset view's where one stands over it (the target display's view)
+    int layer;
+    int w = windowPixel(p, layer);
+    if (w >= 0) i = w;
   }
   outColor = vec4(texelFetch(uPalette, ivec2(i & 255, 0), 0).rgb, 1.0);
 }
@@ -169,7 +172,7 @@ export interface CockpitControls {
   tilt: number;
 }
 
-type HudUniforms = { uPalette: { value: unknown }; uWindow: { value: unknown }; uWindowSize: { value: THREE.Vector2 } };
+type HudUniforms = { uPalette: { value: unknown }; uWindow: { value: unknown }; uWindowSize: { value: THREE.Vector2 } } & InsetUniforms;
 
 export class CockpitRenderer {
   /** drawn after the cockpit pass, against its depth */
@@ -299,6 +302,11 @@ export class CockpitRenderer {
         uPalette: this.hud.uPalette,
         uWindow: this.hud.uWindow,
         uWindowSize: this.hud.uWindowSize,
+        uInset0: this.hud.uInset0,
+        uInset1: this.hud.uInset1,
+        uInset2: this.hud.uInset2,
+        uInset3: this.hud.uInset3,
+        uInsetRect: this.hud.uInsetRect,
         uRect: { value: new THREE.Vector4(0, 0, 1, 1) },
         uFit: { value: new THREE.Vector4(0, 0, 0, 0) },
         uBlank: { value: 0 },

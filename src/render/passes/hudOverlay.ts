@@ -19,6 +19,15 @@
  * with what they mark (the pixel's layer rides in the texture's second
  * channel as 255 - layer).
  *
+ * The inset 3D views the game draws into the window mid-frame - the damage
+ * display's rear view, the target display, the satellite map - are the
+ * GPU's too: each is drawn into a texture of palette indices of its own
+ * (passes/indexedView.ts) and marked on the window's pixels it covers
+ * (engine/vfx/vfx.ts vfxWindowMarkInset). Every surface that shows the
+ * window resolves a pixel through WINDOW_GLSL's windowPixel: the view's
+ * index where it drew, the window's own pixel elsewhere. Nothing is read
+ * back from the GPU.
+ *
  * @portOnly
  */
 import * as THREE from 'three';
@@ -29,11 +38,68 @@ const vertexShader = /* glsl */ `
 void main() { gl_Position = vec4(position.xy, 0.0, 1.0); }
 `;
 
+/** the inset views a window can hold at once (texture units in every shader that shows the window) */
+export const INSET_SLOTS = 4;
+
+/**
+ * The window's pixels for a shader: uWindow (RGBA8: the palette index, 255 -
+ * layer where drawn or 0, the inset view marked there as its id + 1 or 0),
+ * the inset views' textures and where each stands (x, y, w, h in window
+ * pixels), and windowPixel(p, layer) - the palette index to show at window
+ * pixel p, or -1 for none, with the HUD layer it was drawn in (0 for an
+ * inset view's pixel).
+ */
+export const WINDOW_GLSL = /* glsl */ `
+uniform sampler2D uWindow;
+uniform sampler2D uInset0;
+uniform sampler2D uInset1;
+uniform sampler2D uInset2;
+uniform sampler2D uInset3;
+uniform vec4 uInsetRect[${INSET_SLOTS}];
+int windowPixel(ivec2 p, out int layer) {
+  vec4 t = texelFetch(uWindow, p, 0);
+  layer = 0;
+  int id = int(t.b * 255.0 + 0.5) - 1;
+  if (id >= 0 && id < ${INSET_SLOTS}) {
+    vec4 r = uInsetRect[id];
+    ivec2 q = p - ivec2(r.xy);
+    if (q.x >= 0 && q.y >= 0 && q.x < int(r.z) && q.y < int(r.w)) {
+      // the view's rows run up
+      q.y = int(r.w) - 1 - q.y;
+      vec4 s = id == 0 ? texelFetch(uInset0, q, 0) : id == 1 ? texelFetch(uInset1, q, 0) : id == 2 ? texelFetch(uInset2, q, 0) : texelFetch(uInset3, q, 0);
+      if (s.a >= 0.5) return int(s.r * 255.0 + 0.5);
+    }
+  }
+  if (t.g < 0.5) return -1;
+  layer = 255 - int(t.g * 255.0 + 0.5);
+  return int(t.r * 255.0 + 0.5);
+}
+`;
+
+/** The inset views' uniforms, shared by every material that shows the window: filled in by passes/indexedView.ts. */
+export interface InsetUniforms {
+  uInset0: { value: THREE.Texture | null };
+  uInset1: { value: THREE.Texture | null };
+  uInset2: { value: THREE.Texture | null };
+  uInset3: { value: THREE.Texture | null };
+  uInsetRect: { value: THREE.Vector4[] };
+}
+
+function insetUniforms(): InsetUniforms {
+  return {
+    uInset0: { value: null },
+    uInset1: { value: null },
+    uInset2: { value: null },
+    uInset3: { value: null },
+    uInsetRect: { value: Array.from({ length: INSET_SLOTS }, () => new THREE.Vector4()) },
+  };
+}
+
 const fragmentShader = /* glsl */ `
 precision highp float;
 precision highp int;
 uniform sampler2D uPalette;
-uniform sampler2D uWindow;   // RG8: index, drawn
+${WINDOW_GLSL}
 uniform vec2 uWindowSize;    // window width, height
 uniform vec2 uTarget;        // render target width, height
 uniform vec4 uExclude[8];    // window rectangles (x, y, w, h) shown elsewhere (the cockpit's screens)
@@ -47,9 +113,9 @@ void main() {
     vec4 r = uExclude[k];
     if (float(p.x) >= r.x && float(p.y) >= r.y && float(p.x) < r.x + r.z && float(p.y) < r.y + r.w) discard;
   }
-  vec2 t = texelFetch(uWindow, p, 0).rg;
-  if (t.g < 0.5) discard;
-  int i = int(t.r * 255.0 + 0.5);
+  int layer;
+  int i = windowPixel(p, layer);
+  if (i < 0) discard;
   fragColour = vec4(texelFetch(uPalette, ivec2(i, 0), 0).rgb, 1.0);
 }
 `;
@@ -66,7 +132,7 @@ const worldFragmentShader = /* glsl */ `
 precision highp float;
 precision highp int;
 uniform sampler2D uPalette;
-uniform sampler2D uWindow;
+${WINDOW_GLSL}
 uniform vec2 uWindowSize;
 uniform int uLayers;   // bit n: draw the pixels of HUD layer n
 uniform vec4 uExclude[8];   // window rectangles (x, y, w, h) shown elsewhere (the VR cockpit's screens)
@@ -81,11 +147,10 @@ void main() {
     vec4 r = uExclude[k];
     if (float(p.x) >= r.x && float(p.y) >= r.y && float(p.x) < r.x + r.z && float(p.y) < r.y + r.w) discard;
   }
-  vec2 t = texelFetch(uWindow, p, 0).rg;
-  if (t.g < 0.5) discard;
-  int layer = 255 - int(t.g * 255.0 + 0.5);
+  int layer;
+  int i = windowPixel(p, layer);
+  if (i < 0) discard;
   if (((uLayers >> layer) & 1) == 0) discard;
-  int i = int(t.r * 255.0 + 0.5);
   fragColour = vec4(texelFetch(uPalette, ivec2(i, 0), 0).rgb, 1.0);
 }
 `;
@@ -105,6 +170,7 @@ export class HudOverlay {
     uWindow: { value: null as THREE.DataTexture | null },
     uWindowSize: { value: new THREE.Vector2(1, 1) },
     uTarget: { value: new THREE.Vector2(1, 1) },
+    ...insetUniforms(),
   };
 
   constructor(shared: IndexedUniforms) {
@@ -150,8 +216,13 @@ export class HudOverlay {
   /** the flat pass's material (screen space) */
   private readonly screenMaterial: THREE.ShaderMaterial;
 
-  /** The palette and window-texture uniform holders, for other surfaces that show the window (the VR cockpit's screens). */
-  get windowUniforms(): { uPalette: { value: THREE.DataTexture | null }; uWindow: { value: THREE.DataTexture | null }; uWindowSize: { value: THREE.Vector2 } } {
+  /** The palette, window-texture and inset uniform holders, for other surfaces that show the window (the cockpit's screens, through WINDOW_GLSL). */
+  get windowUniforms(): { uPalette: { value: THREE.DataTexture | null }; uWindow: { value: THREE.DataTexture | null }; uWindowSize: { value: THREE.Vector2 } } & InsetUniforms {
+    return this.u;
+  }
+
+  /** The inset views' textures and rectangles, which passes/indexedView.ts fills in. */
+  get insetUniforms(): InsetUniforms {
     return this.u;
   }
 
@@ -176,8 +247,8 @@ export class HudOverlay {
     if (w <= 0 || h <= 0 || win.buffer.length < w * h) return false;
     if (!this.tex || this.tex.image.width !== w || this.tex.image.height !== h) {
       this.tex?.dispose();
-      this.data = new Uint8Array(w * h * 2);
-      this.tex = new THREE.DataTexture(this.data, w, h, THREE.RGFormat, THREE.UnsignedByteType);
+      this.data = new Uint8Array(w * h * 4);
+      this.tex = new THREE.DataTexture(this.data, w, h, THREE.RGBAFormat, THREE.UnsignedByteType);
       this.tex.magFilter = THREE.NearestFilter;
       this.tex.minFilter = THREE.NearestFilter;
       this.u.uWindow.value = this.tex;
@@ -187,14 +258,16 @@ export class HudOverlay {
     const b = win.buffer;
     const m = win.drawn;
     const l = win.layer;
+    const k = win.inset;
     const reticle = HUD_LAYER.reticle;
     let rx = 0;
     let ry = 0;
     let rn = 0;
-    // drawn: 255 - its layer (every drawn pixel stays >= 0.5 for the screen pass); not drawn: 0
+    // drawn: 255 - its layer (every drawn pixel stays >= 0.5 for the screen pass); not drawn: 0; then the inset mark
     for (let i = 0, n = w * h; i < n; i++) {
-      d[i * 2] = b[i]!;
-      d[i * 2 + 1] = m[i] ? 255 - l[i]! : 0;
+      d[i * 4] = b[i]!;
+      d[i * 4 + 1] = m[i] ? 255 - l[i]! : 0;
+      d[i * 4 + 2] = k[i] ?? 0;
       if (m[i] && l[i] === reticle) {
         rx += i % w;
         ry += (i / w) | 0;

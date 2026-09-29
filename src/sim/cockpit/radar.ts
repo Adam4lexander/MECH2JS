@@ -1312,6 +1312,7 @@ export function vfxEllipseDraw(pane: ViewWindow, xc: number, yc: number, rx: num
     win.buffer[at] = c;
     win.drawn[at] = 1;
     win.layer[at] = 0;
+    win.inset[at] = 0;
   };
   const four = (x: number, y: number) => {
     put(cx + x, cy + y);

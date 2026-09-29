@@ -69,6 +69,9 @@ function windowSnapshot(w: VfxWindow): VfxWindow {
   s.yMax = w.yMax;
   s.buffer = w.buffer.slice();
   s.drawn = w.drawn.slice();
+  s.layer = w.layer.slice();
+  // the inset views' marks: what they show is the views' pixels as they stand when the frame is drawn
+  s.inset = w.inset.slice();
   return s;
 }
 
@@ -402,7 +405,7 @@ export function paletteFadeStepsLeft(): number {
  *
  * @mw2 palette_fade_used_colours 0x00058e0d
  * @fidelity partial
- * @divergence the port's window holds only the 2D; wherever a pixel is not drawn the GPU's 3D view shows, so when any is undrawn every colour not seen in the drawn ones counts as used, in ascending order. The waits are the host's: each pass's DAC is kept in dacPlayback with the waits that follow it
+ * @divergence the port's window holds only the 2D; wherever a pixel is not drawn (or an inset view stands over it) the GPU's 3D view shows, so when any is undrawn every colour not seen in the drawn ones counts as used, in ascending order. The waits are the host's: each pass's DAC is kept in dacPlayback with the waits that follow it
  */
 export function paletteFadeUsedColours(canvas: VfxWindow, target: Uint8Array, duration: number): void {
   const p = palettes;
@@ -420,7 +423,8 @@ export function paletteFadeUsedColours(canvas: VfxWindow, target: Uint8Array, du
   const n = (canvas.yMax + 1) * (canvas.xMax + 1);
   let undrawn = false;
   for (let i = 0; i < n; i++) {
-    if (canvas.drawn[i] === 0) {
+    // an inset view's pixels are the GPU's, as the main view's are
+    if (canvas.drawn[i] === 0 || canvas.inset[i] !== 0) {
       undrawn = true;
       continue;
     }
