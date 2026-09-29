@@ -64,3 +64,22 @@ export function farther(v: Viewer, k: number): Viewer {
   v.field_0xb4 = far(v.field_0xb4);
   return v;
 }
+
+/** Faithful (VGA) or Modern (native resolution), remembered like the rest; Modern at first. */
+const FAITHFUL_KEY = 'mw2.faithful';
+
+export function recallFaithful(): boolean {
+  try {
+    return localStorage.getItem(FAITHFUL_KEY) === 'faithful';
+  } catch {
+    return false;
+  }
+}
+
+export function storeFaithful(on: boolean): void {
+  try {
+    localStorage.setItem(FAITHFUL_KEY, on ? 'faithful' : 'modern');
+  } catch {
+    /* private window: not remembered */
+  }
+}

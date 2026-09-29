@@ -162,10 +162,11 @@ node in step, which the tick hooks do in play. Mech detail levels come from
 the game's own `mech_lod_update`, evaluated from the editor camera.
 
 The viewport bar's **Faithful** / **Modern** buttons pick how the view is
-drawn, and the choice is remembered. The bar, and with it Modern, the
-enhancements and VR below, is the developer route's: the game itself
-(without `?dev`) plays Faithful, as the original drew it. Both draw through
-the same screen (`src/app/gameScreen.ts`). Faithful renders at 640x480, scaled up
+drawn, and the choice is remembered; Modern at first. The bar is the
+developer route's, but the game itself (without `?dev`) draws with the same
+remembered choices - Modern, the enhancements and the hand-built cockpits
+below, at first - all but VR. Both draw through the same screen
+(`src/app/gameScreen.ts`). Faithful renders at 640x480, scaled up
 with nearest filtering, at the original's draw and detail distances. Modern
 renders at native resolution and draws further out, as a headset always
 does (`src/render/viewSettings.ts`). The original's distances were tuned for

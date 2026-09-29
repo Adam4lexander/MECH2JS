@@ -19,7 +19,9 @@
  * Modern (native resolution, drawn further out), the enhancements, Fill (the
  * view alone over the browser window, for recording) and VR where the
  * browser has a headset - the game's camera with the pilot's head inside it,
- * never the scene camera.
+ * never the scene camera. All of it is remembered, Modern with the
+ * enhancements and the hand-built cockpits at first, and the game
+ * (GameView) draws with the same choices.
  *
  * @portOnly
  */
@@ -43,30 +45,13 @@ import { FreeFly } from '../viewport/freeFly.ts';
 import { syncFieldsFromNode } from '../inspector/poseSync.ts';
 import { structOf } from './Inspector.tsx';
 import { recallXrSettings, storeXrSettings, type XrSettings } from '../../render/xr/xrSettings.ts';
-import { recallViewSettings, storeViewSettings, type ViewSettings } from '../../render/viewSettings.ts';
+import { recallFaithful, recallViewSettings, storeFaithful, storeViewSettings, type ViewSettings } from '../../render/viewSettings.ts';
 import { recallSpectatorSettings, storeSpectatorSettings, type SpectatorMode, type SpectatorSettings } from '../../render/xr/spectator.ts';
 import { DESIGNS } from '../../render/cockpit/designs/index.ts';
 import { ENHANCE_LABELS, recallEnhanceSettings, storeEnhanceSettings, type EnhanceSettings } from '../../render/enhance/enhanceSettings.ts';
 
 /** which camera Edit looks through */
 type EditView = 'scene' | 'game';
-
-/** Faithful (VGA) or Modern (native resolution), remembered (localStorage, as the loop rate is); Faithful at first. */
-const FAITHFUL_KEY = 'mw2.faithful';
-function recallFaithful(): boolean {
-  try {
-    return localStorage.getItem(FAITHFUL_KEY) !== 'modern';
-  } catch {
-    return true;
-  }
-}
-function storeFaithful(on: boolean): void {
-  try {
-    localStorage.setItem(FAITHFUL_KEY, on ? 'faithful' : 'modern');
-  } catch {
-    /* private window: not remembered */
-  }
-}
 
 export function Viewport({ game }: { game: Game }) {
   useRevision(engineStore);

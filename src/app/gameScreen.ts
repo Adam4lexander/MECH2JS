@@ -19,8 +19,10 @@
  * is the headset's while a session is on; the page shows the left eye or a
  * spectator camera (render/xr/spectator.ts).
  *
- * The game itself (GameView.tsx) is this with ORIGINAL_SETTINGS. The editor's
- * Viewport builds on it: its settings, and `lookThrough` to show its free
+ * The game itself (GameView.tsx) is this with the remembered settings
+ * (recallScreenSettings: Modern, the enhancements and the hand-built cockpits
+ * at first) and no VR. The editor's Viewport builds on it: the settings from
+ * its bar, VR, and `lookThrough` to show its free
  * camera instead of the game's (no cockpit shell or HUD then, which are the
  * game camera's; never in a headset).
  *
@@ -40,18 +42,18 @@ import { HudOverlay } from '../render/passes/hudOverlay.ts';
 import { IndexedViews } from '../render/passes/indexedView.ts';
 import { renderOptions } from '../render/shading/polygonColour.ts';
 import { renderView } from '../render/pipeline/viewLatch.ts';
-import { farther, type ViewSettings } from '../render/viewSettings.ts';
+import { farther, recallFaithful, recallViewSettings, type ViewSettings } from '../render/viewSettings.ts';
 import { XrRig, playerTargetPosition } from '../render/xr/xrRig.ts';
 import { XrSky } from '../render/xr/xrSky.ts';
 import { aimDepth } from '../render/xr/aim.ts';
-import { XR_DEFAULTS, type XrSettings } from '../render/xr/xrSettings.ts';
-import { Spectator, SPECTATOR_DEFAULTS, type SpectatorMode, type SpectatorSettings } from '../render/xr/spectator.ts';
+import { recallXrSettings, XR_DEFAULTS, type XrSettings } from '../render/xr/xrSettings.ts';
+import { recallSpectatorSettings, Spectator, SPECTATOR_DEFAULTS, type SpectatorMode, type SpectatorSettings } from '../render/xr/spectator.ts';
 import { GroundField } from '../render/enhance/groundField.ts';
 import { lightDirection, Shadows, SHADOW_LAYER } from '../render/enhance/shadows.ts';
 import { OwnChassis } from '../render/enhance/ownChassis.ts';
 import { skyPaletteChoice, type SkyChoice } from '../render/enhance/skyDetail.ts';
 import { groundShades } from '../render/enhance/paletteRuns.ts';
-import { ENHANCE_DEFAULTS, type EnhanceSettings } from '../render/enhance/enhanceSettings.ts';
+import { ENHANCE_DEFAULTS, recallEnhanceSettings, type EnhanceSettings } from '../render/enhance/enhanceSettings.ts';
 import { commonRamps, CockpitRenderer, darkestIndex, nearestIndex, slotPanes } from '../render/cockpit/cockpit.ts';
 import { cockpitChassis } from '../render/cockpit/chassis.ts';
 import { buildDesign, DESIGNS } from '../render/cockpit/designs/index.ts';
@@ -86,7 +88,7 @@ export interface ScreenSettings {
   spectator: SpectatorSettings;
 }
 
-/** The game as the original drew it: Faithful, its own distances, nothing added. */
+/** The game as the original drew it: Faithful, its own distances, nothing added. The default without `settings`. */
 export const ORIGINAL_SETTINGS: ScreenSettings = {
   faithful: true,
   view: { viewDistance: 1, detail: 1 },
@@ -94,6 +96,14 @@ export const ORIGINAL_SETTINGS: ScreenSettings = {
   xr: XR_DEFAULTS,
   spectator: SPECTATOR_DEFAULTS,
 };
+
+/**
+ * The settings last chosen on the editor's bar, which remembers them: Modern,
+ * with the enhancements and the hand-built cockpits, at first.
+ */
+export function recallScreenSettings(): ScreenSettings {
+  return { faithful: recallFaithful(), view: recallViewSettings(), enhance: recallEnhanceSettings(), xr: recallXrSettings(), spectator: recallSpectatorSettings() };
+}
 
 /** A camera other than the game's to draw a frame through (the editor's). */
 export interface OutsideView {
