@@ -152,46 +152,81 @@ describe('cockpit screens', () => {
 describe("the scrounge field's copies", () => {
   // one quad (a fan of 2 triangles, slots for 3) that is also a sprite (6 slots after the fan)
   const SPRITE = 0x3005;
-  const src = {
-    block: { polygonCount: 1, polygons: [{ vertexCount: 4 }] },
-    draw: new Float32Array(15).fill(NOT_DRAWN),
-    polyStart: Int32Array.of(0),
-    polyTris: Int32Array.of(3),
-    spriteStart: Int32Array.of(9),
-  } as unknown as Pick<MeshEntry, 'block' | 'draw' | 'polyStart' | 'polyTris' | 'spriteStart'>;
-  const fan = new Float32Array(1).fill(NOT_DRAWN);
-  const sprite = new Float32Array(1).fill(NOT_DRAWN);
-  const out = new Float32Array(15).fill(NOT_DRAWN);
-  const draw = (fanWord: number, tris: number, spriteWord: number) => {
-    src.draw.fill(NOT_DRAWN);
-    src.draw.fill(fanWord, 0, tris * 3);
-    src.draw.fill(spriteWord, 9, 15);
+  const make = () => {
+    const src = {
+      block: { polygonCount: 1, polygons: [{ vertexCount: 4 }] },
+      draw: new Float32Array(15).fill(NOT_DRAWN),
+      polyStart: Int32Array.of(0),
+      polyTris: Int32Array.of(3),
+      spriteStart: Int32Array.of(9),
+    } as unknown as Pick<MeshEntry, 'block' | 'draw' | 'polyStart' | 'polyTris' | 'spriteStart'>;
+    const fan = new Float32Array(1).fill(NOT_DRAWN);
+    const sprite = new Float32Array(1).fill(NOT_DRAWN);
+    const out = new Float32Array(15).fill(NOT_DRAWN);
+    /** the game's draw words for the patch this frame: the fan's (over `tris` triangles) and the sprite's */
+    const draw = (fanWord: number, tris: number, spriteWord: number) => {
+      src.draw.fill(NOT_DRAWN);
+      src.draw.fill(fanWord, 0, tris * 3);
+      src.draw.fill(spriteWord, 9, 15);
+    };
+    const copy = (wireframe: number, drawn = true) => copyDrawWords(src, fan, sprite, out, wireframe, drawn);
+    const words = () => [...new Set(out.subarray(0, 9))].concat([...new Set(out.subarray(9))]);
+    return { draw, copy, out, words };
   };
-  const words = () => [...new Set(out.subarray(0, 9))].concat([...new Set(out.subarray(9))]);
 
-  it('drop the black fans enhanced imaging drew once it ends', () => {
+  it('are black in enhanced imaging and their own again after it, drawn or not', () => {
+    const { draw, copy, out, words } = make();
     draw(NOT_DRAWN, 0, SPRITE);
-    expect(copyDrawWords(src, fan, sprite, out)).toBe(true);
+    expect(copy(0)).toBe(true);
     expect(words()).toEqual([NOT_DRAWN, SPRITE]);
     // enhanced imaging: filled black (word 0) and outlined; no sprite
     draw(0, 2, NOT_DRAWN);
-    expect(copyDrawWords(src, fan, sprite, out)).toBe(true);
+    expect(copy(1)).toBe(true);
     expect([...out.subarray(0, 6)]).toEqual(Array(6).fill(0));
     expect([...out.subarray(6)]).toEqual(Array(9).fill(NOT_DRAWN));
-    // and off again: the sprite, and no fan under it
-    draw(NOT_DRAWN, 0, SPRITE);
-    expect(copyDrawWords(src, fan, sprite, out)).toBe(true);
+    // and off, with the polygon turned from the game's eye (not queued): the sprite as it was before
+    draw(NOT_DRAWN, 0, NOT_DRAWN);
+    expect(copy(0)).toBe(true);
     expect(words()).toEqual([NOT_DRAWN, SPRITE]);
   });
 
-  it('keep what they had while the game does not draw the patch, and draw the whole fan of a clipped one', () => {
+  it("go black in enhanced imaging even for a polygon the game does not draw, and keep nothing of it", () => {
+    const { draw, copy, words } = make();
+    draw(NOT_DRAWN, 0, SPRITE);
+    copy(0);
+    // turned away, or its mesh not drawn at all, throughout
     draw(NOT_DRAWN, 0, NOT_DRAWN);
-    expect(copyDrawWords(src, fan, sprite, out)).toBe(false);
+    copy(1, false);
+    expect(words()).toEqual([0, NOT_DRAWN, NOT_DRAWN]);
+    // the black the game draws in enhanced imaging is never taken as the polygon's own
+    draw(0, 2, NOT_DRAWN);
+    copy(1);
+    draw(0, 2, NOT_DRAWN);
+    copy(0, false);
+    expect(words()).toEqual([NOT_DRAWN, SPRITE]);
+  });
+
+  it('show nothing in the see-through wireframe', () => {
+    const { draw, copy, words } = make();
+    draw(NOT_DRAWN, 0, SPRITE);
+    copy(0);
+    draw(NOT_DRAWN, 0, NOT_DRAWN);
+    copy(2);
+    expect(words()).toEqual([NOT_DRAWN, NOT_DRAWN]);
+  });
+
+  it("take nothing from a mesh the game did not draw this frame, and draw the whole fan of a clipped one", () => {
+    const { draw, copy, out, words } = make();
+    draw(NOT_DRAWN, 0, SPRITE);
+    copy(0);
+    // stale words in a mesh the game hid
+    draw(0x44f0, 2, NOT_DRAWN);
+    expect(copy(0, false)).toBe(false);
     expect(words()).toEqual([NOT_DRAWN, SPRITE]);
     // near-clipped to one triangle in the game's view: the copies are unclipped, so both of theirs are drawn
     draw(0x44f0, 1, NOT_DRAWN);
-    expect(copyDrawWords(src, fan, sprite, out)).toBe(true);
+    expect(copy(0)).toBe(true);
     expect([...out.subarray(0, 9)]).toEqual([...Array(6).fill(0x44f0), NOT_DRAWN, NOT_DRAWN, NOT_DRAWN]);
-    expect(copyDrawWords(src, fan, sprite, out)).toBe(false);
+    expect(copy(0)).toBe(false);
   });
 });
