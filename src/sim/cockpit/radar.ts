@@ -1310,7 +1310,7 @@ export function vfxEllipseDraw(pane: ViewWindow, xc: number, yc: number, rx: num
     if (x < cl || x > cr || y < ct || y > cb) return;
     const at = y * width + x;
     win.buffer[at] = c;
-    win.drawn[at] = 1;
+    win.drawn[at] = win.drawnMark;
   };
   const four = (x: number, y: number) => {
     put(cx + x, cy + y);

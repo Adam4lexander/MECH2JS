@@ -15,21 +15,38 @@
  *
  * The port's window carries, beside the pixels, a mask of the pixels written
  * since the frame was last cleared, because the 3D view underneath is drawn
- * by the GPU rather than into the same buffer (see vfxWindowClear).
+ * by the GPU rather than into the same buffer (see vfxWindowClearPane). The
+ * mask also says in which part of a pass a pixel was drawn (DRAWN_*), and
+ * for the part that draws world-anchored 2D it keeps what was under each
+ * pixel: the host redraws that 2D between passes (engine/scene/present.ts),
+ * lifting the pass's own draw out of the window.
  */
 import { ViewWindow } from '../../generated/classes.gen.ts';
 import { unestablished } from '../../core/provenance.ts';
+
+/** drawn[]: a pixel written before the pass's world-anchored 2D, or in a pass without any */
+export const DRAWN = 1;
+/** drawn[]: a pixel written by the pass's world-anchored 2D (the HUD's reticle and target marker) */
+export const DRAWN_ANCHORED = 2;
+/** drawn[]: a pixel written after it, which stays over it wherever it is redrawn */
+export const DRAWN_AFTER = 3;
 
 /** A VFX window. @portOnly the layout of the original's {buffer, xMax, yMax} */
 export class VfxWindow {
   /** +0: the pixels, palette indices, row-major, width = xMax + 1 */
   buffer: Uint8Array = new Uint8Array(0);
-  /** @portOnly 1 where a pixel has been written since vfxWindowClear */
+  /** @portOnly non-zero (a DRAWN_* value) where a pixel has been written since it was last cleared */
   drawn: Uint8Array = new Uint8Array(0);
   /** +4 */
   xMax = -1;
   /** +8 */
   yMax = -1;
+  /** @portOnly the DRAWN_* value writes store now */
+  drawnMark = DRAWN;
+  /** @portOnly the pixel under a DRAWN_ANCHORED one, as it was before the anchored draw */
+  under: Uint8Array = new Uint8Array(0);
+  /** @portOnly its drawn[] value */
+  underDrawn: Uint8Array = new Uint8Array(0);
 }
 
 /** Gives a window a buffer of width x height. @portOnly video_init allocates it */
@@ -40,11 +57,7 @@ export function vfxWindowAllocate(w: VfxWindow, width: number, height: number): 
   w.yMax = height - 1;
 }
 
-/**
- * Forgets what the 2D code drew: the frame's 3D render covers the whole
- * window in the original, so nothing drawn before it survives into the
- * frame. @portOnly
- */
+/** Forgets everything drawn in the window. @portOnly */
 export function vfxWindowClear(w: VfxWindow): void {
   w.drawn.fill(0);
 }
@@ -84,8 +97,17 @@ function paneClip(pane: ViewWindow): number {
 }
 
 function put(win: VfxWindow, at: number, c: number): void {
+  const mark = win.drawnMark;
+  if (mark === DRAWN_ANCHORED && win.drawn[at] !== DRAWN_ANCHORED) {
+    if (win.under.length !== win.buffer.length) {
+      win.under = new Uint8Array(win.buffer.length);
+      win.underDrawn = new Uint8Array(win.buffer.length);
+    }
+    win.under[at] = win.buffer[at]!;
+    win.underDrawn[at] = win.drawn[at]!;
+  }
   win.buffer[at] = c;
-  win.drawn[at] = 1;
+  win.drawn[at] = mark;
 }
 
 const u32 = (b: Uint8Array, o: number): number => (b[o]! | (b[o + 1]! << 8) | (b[o + 2]! << 16) | (b[o + 3]! << 24)) >>> 0;

@@ -346,8 +346,8 @@ export class Game {
       // leave the fixed-step mode Step uses; the next frame steps its last 12 ticks and hands back to real time
       clock.dat00095828 = 0;
       this.pending = 0;
-      // the first display frame runs a pass
-      this.passDue = this.loopRate === null ? 0 : 1000 / this.loopRate;
+      // the first pass comes a step of real time in
+      this.sinceLast = 0;
     }
     this.mode = m;
     engineStore.bump();
@@ -366,16 +366,18 @@ export class Game {
    * pass or truncate small per-pass amounts: the 0x1000 velocity snap in
    * mech_std_tick_terrain, jump fuel's tickDelta / 4 refill, the push-back
    * off walls, the keyboard's analog ramps. At one pass per 60 Hz display
-   * frame (tickDelta 3) those behave differently, so the port paces the loop
-   * at a period-like rate by default. This is the original's own -F option
-   * (simFrameMinTicks, sim_clock_step) done by the host, which waits real
-   * time instead of busy-waiting on the timer.
+   * frame (tickDelta 3) those behave differently, so the port runs the loop
+   * at a period-like rate by default, and at a FIXED step: every pass covers
+   * exactly ticksPerPass() ticks (the original on a PC faster than its own -F
+   * cap - simFrameMinTicks, sim_clock_step - leaving its busy-wait on the
+   * tick). The display draws between passes (presentAlpha,
+   * engine/scene/present.ts).
    */
   loopRate: number | null = recallLoopRate();
 
   setLoopRate(rate: number | null): void {
     this.loopRate = rate;
-    this.passDue = rate === null ? 0 : 1000 / rate;
+    this.sinceLast = 0;
     try {
       localStorage.setItem(LOOP_RATE_KEY, rate === null ? 'display' : String(rate));
     } catch {
@@ -384,16 +386,37 @@ export class Game {
     engineStore.bump();
   }
 
-  /** real time, in ms, owed toward the next pass of main's loop */
-  private passDue = 0;
+  /** The 182 Hz ticks each pass covers at the loop rate (182 / rate, rounded), or null for one pass per display frame. */
+  ticksPerPass(): number | null {
+    return this.loopRate === null ? null : Math.max(1, Math.round(182 / this.loopRate));
+  }
+
+  /** timer ticks fed since the last pass of main's loop */
+  private sinceLast = 0;
+
+  /** the most passes one display frame may run to catch up; past it, the next pass covers the ticks owed */
+  private static readonly MAX_PASSES_PER_FRAME = 4;
+
+  /**
+   * Where the display stands between the last two passes, 16.16: 0 at the
+   * end of the one before the last, 0x10000 at the end of the last. Always
+   * 0x10000 outside Play at a fixed step.
+   */
+  presentAlpha(): number {
+    const n = this.ticksPerPass();
+    if (this.mode !== 'play' || n === null) return 0x10000;
+    return Math.min(0x10000, Math.floor(((this.sinceLast + this.pending) / n) * 0x10000));
+  }
 
   /**
    * Play: feeds the 182 Hz timer for `ms` of real time (the sound runs on
-   * it, every display frame), then runs one pass of main's loop when one is
-   * due at the loop rate - `onPass` first. The pass's tickDelta is the ticks
-   * since the last one. Returns false once the loop has ended (quit).
+   * it, every display frame) one tick at a time, and runs a pass of main's
+   * loop on every ticksPerPass()-th tick - `onPass` before it, `afterPass`
+   * after - so each pass's tickDelta is exactly the step. With no loop rate,
+   * the ticks are fed and one pass runs, its tickDelta the ticks since the
+   * last. Returns false once the loop has ended (quit).
    */
-  playFrame(ms: number, onPass?: () => void): boolean {
+  playFrame(ms: number, onPass?: () => void, afterPass?: () => void): boolean {
     if (this.showPlayback()) return true;
     if (this.pendingResults) {
       // the end fade has been shown: the debriefing
@@ -405,27 +428,38 @@ export class Game {
       return false;
     }
     this.pending = Math.min(this.pending + (ms * 182) / 1000, Game.MAX_TICKS_PER_FRAME);
+    const n = this.netBoot ? null : this.ticksPerPass();
+    if (n === null) {
+      while (this.pending >= 1) {
+        ailTimerService();
+        this.pending -= 1;
+      }
+      if (this.netBoot) {
+        this.stepNetBoot();
+        this.audio.pump();
+        return this.mode === 'play';
+      }
+      onPass?.();
+      const ok = this.runFrame();
+      afterPass?.();
+      this.audio.pump();
+      return ok;
+    }
+    let ok = true;
+    let passes = 0;
     while (this.pending >= 1) {
       ailTimerService();
       this.pending -= 1;
-    }
-    if (this.netBoot) {
-      this.stepNetBoot();
-      this.audio.pump();
-      return this.mode === 'play';
-    }
-    if (this.loopRate !== null) {
-      const period = 1000 / this.loopRate;
-      this.passDue += ms;
-      if (this.passDue < period) {
-        this.audio.pump();
-        return true;
+      this.sinceLast++;
+      if (this.sinceLast >= n && passes < Game.MAX_PASSES_PER_FRAME) {
+        this.sinceLast = 0;
+        passes++;
+        onPass?.();
+        ok = this.runFrame();
+        afterPass?.();
+        if (!ok) break;
       }
-      // keep the remainder so the rate holds on average; never owe more than one pass (a hidden tab)
-      this.passDue = Math.min(this.passDue - period, period);
     }
-    onPass?.();
-    const ok = this.runFrame();
     this.audio.pump();
     return ok;
   }

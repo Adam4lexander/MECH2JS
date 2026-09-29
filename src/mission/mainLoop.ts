@@ -48,6 +48,9 @@ import { soundFrameUpdate } from '../sim/sound/mixer.ts';
 import { musicUpdate } from '../sim/sound/music.ts';
 import { voiceQueueAdvance } from '../sim/sound/voice.ts';
 import { missionResultsUpdate } from './results.ts';
+import { presentPassBegin } from '../engine/scene/present.ts';
+import { DRAWN } from '../engine/vfx/vfx.ts';
+import { defaultCanvas } from '../sim/display/video.ts';
 
 /**
  * DAT_00097074: the frame's render call. main's loop calls it between
@@ -101,6 +104,8 @@ export function vfxVideoSub0106d0(): void {
  * @portOnly the body of main's while loop, in order; main (0x15a30) itself is claimed by nothing
  */
 export function mainLoopFrame(): void {
+  // port-only: what the window is drawn with is drawn before any world-anchored 2D (engine/vfx/vfx.ts DRAWN)
+  defaultCanvas.drawnMark = DRAWN;
   netplayFrameExchange();
   simClockStep();
   inputPollControls();
@@ -134,13 +139,17 @@ export function mainLoopFrame(): void {
 }
 
 /**
- * What the host calls once per display frame: one pass of the loop, or,
- * while PAUSE_GAME is waiting for a key (cheats_sub_046ac0), one turn of
- * that wait - input_poll_controls and the sound refill - until a key comes.
+ * What the host calls for each pass: one pass of the loop, or, while
+ * PAUSE_GAME is waiting for a key (cheats_sub_046ac0), one turn of that
+ * wait - input_poll_controls and the sound refill - until a key comes.
+ * Either way it is a pass boundary for the presentation model
+ * (engine/scene/present.ts): what the pass writes is drawn moving from where
+ * it was before.
  *
  * @portOnly the host's entry into main's loop
  */
 export function mainLoopStep(): void {
+  presentPassBegin();
   if (commandGlobals.keyPauseActive !== 0) {
     inputPollControls();
     soundFrameUpdate();

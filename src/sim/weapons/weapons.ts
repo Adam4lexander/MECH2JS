@@ -32,6 +32,7 @@ import {
 import { aiBearingToTarget, mechCanJump, mechHeadingError, mechProbeRay } from '../ai/aiGeometry.ts';
 import { viewerProjectPoint } from '../camera/projection.ts';
 import { cameraGlobals } from '../camera/viewer.ts';
+import type { DrawView } from '../camera/viewerPresent.ts';
 import { messagePost } from '../cockpit/messages.ts';
 import { effectSpawnOnMount } from '../effects/effects.ts';
 import { PROJECTILE_COUNT, simTables, statsWordAdd } from '../effects/simTables.ts';
@@ -717,16 +718,19 @@ export function mechUpdateMissileLock(l: MechLoadout): void {
 /**
  * The fire position of `loadout`'s aim point on screen: the fire ray cut to
  * aimRange, projected. Returns viewer_project_point's result and sx, sy.
+ * `view`, when given, is the HUD's: the point is its anchor 'reticle' and is
+ * projected through its viewer (sim/camera/viewerPresent.ts).
  *
  * @mw2 aim_point_to_screen 0x00029860
  * @fidelity exact
  */
-export function aimPointToScreen(l: MechLoadout): { visible: number; sx: number; sy: number } {
+export function aimPointToScreen(l: MechLoadout, view?: DrawView): { visible: number; sx: number; sy: number } {
   const ray = new Ray();
   weaponBuildFireRay(l.entity!, ray);
   raySetLength(ray, mechAimRange(l.entity!));
   const p = [ray.endX, ray.endY, ray.endZ];
-  const visible = viewerProjectPoint(viewerPos(), p);
+  view?.anchor('reticle', p);
+  const visible = viewerProjectPoint(view?.viewer ?? viewerPos(), p);
   return { visible, sx: p[0]!, sy: p[1]! };
 }
 

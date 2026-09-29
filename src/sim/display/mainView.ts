@@ -14,6 +14,7 @@ import { mainLoop } from '../../mission/mainLoop.ts';
 import { cam } from '../camera/cameraUpdate.ts';
 import { viewerBuildTransform, viewerUpdateProjection } from '../camera/projection.ts';
 import { viewer } from '../camera/viewer.ts';
+import { viewerPresentLatch } from '../camera/viewerPresent.ts';
 import { lighting } from '../world/environment.ts';
 import { worldObjectGetPos } from '../world/worldRecords.ts';
 import { HOOK, renderOptions } from './renderState.ts';
@@ -61,6 +62,8 @@ export const vfxVideoSub010490 = registerCode('vfx_video_sub_010490', 0x10490, (
     return;
   }
   viewerBuildTransform(v);
+  // the pose this pass's view is drawn from, for the host to draw between passes (port-only; changes nothing the game reads)
+  viewerPresentLatch(v);
   const wipe = r.dat00097050 !== 0 || r.wireframeMode !== 0 ? r.dat00096ea4 : null;
   const l = lighting;
   if (l.lightObjectFlag !== 0 && l.lightObjectFollow !== 0 && l.lightObjectRecord !== -1) {

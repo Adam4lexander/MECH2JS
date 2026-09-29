@@ -8,6 +8,11 @@
  * flags bit 1: allocated from the static arena; bit 2: heap-allocated
  * (scene_subtree_destroy frees only those). The port has a garbage
  * collector, so both are kept only as markers.
+ *
+ * Every write of a world transform first tells the presentation model
+ * (present.ts: presentNoteWorldWrite, presentNoteFresh), so the host can draw
+ * a node between where it was before the pass and where the pass left it.
+ * The calls only record; they change nothing the game reads.
  */
 
 import { SceneNode, type WorldObject } from '../../generated/classes.gen.ts';
@@ -17,6 +22,7 @@ import { imageI32 } from '../image.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import { objectAddToWorld, objectMoveToAltList, objectMoveToAuxList, objectMoveToWorldList, objectRemoveFromWorld } from './objectLists.ts';
 import { objectSetClass, objectUpdateWorldPos } from './worldObject.ts';
+import { presentNoteFresh, presentNoteWorldWrite } from './present.ts';
 
 export const sceneGlobals = registerGlobals(
   'scene',
@@ -70,6 +76,7 @@ export function sceneNodeCreate(parent: SceneNode | null, options: number): Scen
   matrixIdentity(n.localBlock);
   if (!parent) matrixIdentity(n.worldBlock);
   else n.worldBlock.set(parent.worldBlock);
+  presentNoteFresh(n);
   n.flags |= 1;
   n.renormCountdown = nextRenormSeed();
   n.userData = null;
@@ -94,6 +101,7 @@ export function sceneNodeInitInPlace(parent: SceneNode | null, node: SceneNode):
   matrixIdentity(node.localBlock);
   if (!parent) matrixIdentity(node.worldBlock);
   else node.worldBlock.set(parent.worldBlock);
+  presentNoteFresh(node);
   node.renormCountdown = nextRenormSeed();
   node.userData = null;
   node.flags = 1;
@@ -305,6 +313,7 @@ export function sceneSubtreeClearTypeBits(node: SceneNode, bits: number): void {
  */
 export function sceneNodeRebuildSubtree(node: SceneNode): void {
   node.flags &= 0xfe;
+  presentNoteWorldWrite(node);
   if (!node.parent) node.worldBlock.set(node.localBlock);
   else transformCompose(node.parent.worldBlock, node.localBlock, node.worldBlock);
   const obj = node.userData;

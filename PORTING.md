@@ -66,11 +66,11 @@ Library groups left out of the totals: `clib`, `miles`.
 | address | original | module | fidelity | port |
 |---|---|---|---|---|
 | 0x00010210 | video_init | vfx_video | partial | `videoInit` src/sim/display/video.ts:133 |
-| 0x00010320 | vfx_video_sub_010320 | vfx_video | partial | `vfxVideoSub010320` src/sim/display/mainView.ts:84 |
+| 0x00010320 | vfx_video_sub_010320 | vfx_video | partial | `vfxVideoSub010320` src/sim/display/mainView.ts:87 |
 | 0x000103c0 | vfx_video_sub_0103c0 | vfx_video | exact | `vfxVideoSub0103c0` src/sim/world/viewScene.ts:46 |
-| 0x00010490 | vfx_video_sub_010490 | vfx_video | partial | `vfxVideoSub010490` src/sim/display/mainView.ts:44 |
+| 0x00010490 | vfx_video_sub_010490 | vfx_video | partial | `vfxVideoSub010490` src/sim/display/mainView.ts:45 |
 | 0x000106c0 | viewport_select_main | vfx_video | exact | `vfxVideoSub0106c0` src/sim/cockpit/radar.ts:1224 |
-| 0x000106d0 | vfx_video_sub_0106d0 | vfx_video | partial | `vfxVideoSub0106d0` src/mission/mainLoop.ts:85 |
+| 0x000106d0 | vfx_video_sub_0106d0 | vfx_video | partial | `vfxVideoSub0106d0` src/mission/mainLoop.ts:88 |
 | 0x00010b50 | frame_prj_add | vfx_video | exact | `framePrjAdd` src/sim/world/framePrj.ts:48 |
 | 0x00010bd0 | frame_prj_reset | vfx_video | exact | `framePrjReset` src/sim/world/framePrj.ts:69 |
 | 0x00010c10 | frame_prj_slot_clear | vfx_video | exact | `framePrjSlotClear` src/sim/world/framePrj.ts:82 |
@@ -298,43 +298,43 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0001dc40 | ray_set_end_at_height | terrain | exact | `raySetEndAtHeight` src/engine/collision/ray.ts:218 |
 | 0x0001dc70 | ray_copy | terrain | exact | `rayCopy` src/engine/collision/ray.ts:170 |
 | 0x0001dca0 | ray_slab_intersect | terrain | exact | `raySlabIntersect` src/engine/collision/ray.ts:244 |
-| 0x0001dd60 | scene_node_create | terrain | exact | `sceneNodeCreate` src/engine/scene/sceneGraph.ts:43 |
-| 0x0001de60 | scene_node_init_in_place | terrain | exact | `sceneNodeInitInPlace` src/engine/scene/sceneGraph.ts:83 |
-| 0x0001def0 | scene_node_set_userdata | terrain | exact | `sceneNodeSetUserdata` src/engine/scene/sceneGraph.ts:105 |
-| 0x0001df00 | scene_node_get_userdata | terrain | exact | `sceneNodeGetUserdata` src/engine/scene/sceneGraph.ts:114 |
-| 0x0001df40 | scene_node_get_world_euler | terrain | exact | `sceneNodeGetWorldEuler` src/engine/scene/sceneGraph.ts:124 |
-| 0x0001df60 | scene_node_get_world_pos | terrain | exact | `sceneNodeGetWorldPos` src/engine/scene/sceneGraph.ts:132 |
-| 0x0001dfa0 | scene_node_set_origin | terrain | exact | `sceneNodeSetOrigin` src/engine/scene/sceneGraph.ts:140 |
-| 0x0001dfc0 | scene_node_translate | terrain | exact | `sceneNodeTranslate` src/engine/scene/sceneGraph.ts:151 |
-| 0x0001dff0 | scene_node_set_transform | terrain | exact | `sceneNodeSetTransform` src/engine/scene/sceneGraph.ts:162 |
-| 0x0001e070 | scene_node_set_local_matrix | terrain | exact | `sceneNodeSetLocalMatrix` src/engine/scene/sceneGraph.ts:171 |
-| 0x0001e0b0 | scene_node_rotate_local | terrain | exact | `sceneNodeRotateLocal` src/engine/scene/sceneGraph.ts:182 |
-| 0x0001e100 | scene_node_set_euler | terrain | exact | `sceneNodeSetEuler` src/engine/scene/sceneGraph.ts:199 |
-| 0x0001e140 | scene_node_rotate_euler | terrain | exact | `sceneNodeRotateEuler` src/engine/scene/sceneGraph.ts:208 |
+| 0x0001dd60 | scene_node_create | terrain | exact | `sceneNodeCreate` src/engine/scene/sceneGraph.ts:49 |
+| 0x0001de60 | scene_node_init_in_place | terrain | exact | `sceneNodeInitInPlace` src/engine/scene/sceneGraph.ts:90 |
+| 0x0001def0 | scene_node_set_userdata | terrain | exact | `sceneNodeSetUserdata` src/engine/scene/sceneGraph.ts:113 |
+| 0x0001df00 | scene_node_get_userdata | terrain | exact | `sceneNodeGetUserdata` src/engine/scene/sceneGraph.ts:122 |
+| 0x0001df40 | scene_node_get_world_euler | terrain | exact | `sceneNodeGetWorldEuler` src/engine/scene/sceneGraph.ts:132 |
+| 0x0001df60 | scene_node_get_world_pos | terrain | exact | `sceneNodeGetWorldPos` src/engine/scene/sceneGraph.ts:140 |
+| 0x0001dfa0 | scene_node_set_origin | terrain | exact | `sceneNodeSetOrigin` src/engine/scene/sceneGraph.ts:148 |
+| 0x0001dfc0 | scene_node_translate | terrain | exact | `sceneNodeTranslate` src/engine/scene/sceneGraph.ts:159 |
+| 0x0001dff0 | scene_node_set_transform | terrain | exact | `sceneNodeSetTransform` src/engine/scene/sceneGraph.ts:170 |
+| 0x0001e070 | scene_node_set_local_matrix | terrain | exact | `sceneNodeSetLocalMatrix` src/engine/scene/sceneGraph.ts:179 |
+| 0x0001e0b0 | scene_node_rotate_local | terrain | exact | `sceneNodeRotateLocal` src/engine/scene/sceneGraph.ts:190 |
+| 0x0001e100 | scene_node_set_euler | terrain | exact | `sceneNodeSetEuler` src/engine/scene/sceneGraph.ts:207 |
+| 0x0001e140 | scene_node_rotate_euler | terrain | exact | `sceneNodeRotateEuler` src/engine/scene/sceneGraph.ts:216 |
 | 0x0001e180 | object_refresh_mesh | terrain | exact | `objectRefreshMesh` src/engine/scene/worldObject.ts:527 |
-| 0x0001e1b0 | scene_subtree_move_to_alt_list | terrain | exact | `sceneSubtreeMoveToAltList` src/engine/scene/sceneGraph.ts:224 |
-| 0x0001e1f0 | scene_subtree_move_to_world_list | terrain | exact | `sceneSubtreeMoveToWorldList` src/engine/scene/sceneGraph.ts:234 |
-| 0x0001e240 | scene_node_remove_subtree_from_world | terrain | exact | `sceneNodeRemoveSubtreeFromWorld` src/engine/scene/sceneGraph.ts:244 |
-| 0x0001e280 | scene_node_link_subtree | terrain | exact | `sceneNodeLinkSubtree` src/engine/scene/sceneGraph.ts:252 |
-| 0x0001e2c0 | scene_subtree_move_to_aux_list | terrain | exact | `sceneSubtreeMoveToAuxList` src/engine/scene/sceneGraph.ts:260 |
-| 0x0001e300 | scene_subtree_set_object_type | terrain | exact | `sceneSubtreeSetObjectType` src/engine/scene/sceneGraph.ts:268 |
-| 0x0001e340 | scene_subtree_set_object_index | terrain | exact | `sceneSubtreeSetObjectIndex` src/engine/scene/sceneGraph.ts:276 |
-| 0x0001e380 | scene_subtree_set_object_class | terrain | exact | `sceneSubtreeSetObjectClass` src/engine/scene/sceneGraph.ts:284 |
-| 0x0001e3c0 | scene_subtree_clear_type_bits | terrain | exact | `sceneSubtreeClearTypeBits` src/engine/scene/sceneGraph.ts:292 |
-| 0x0001e400 | scene_node_rebuild_subtree | terrain | exact | `sceneNodeRebuildSubtree` src/engine/scene/sceneGraph.ts:303 |
-| 0x0001e480 | scene_node_walk | terrain | exact | `sceneNodeWalk` src/engine/scene/sceneGraph.ts:321 |
-| 0x0001e4e0 | scene_node_first_child | terrain | exact | `sceneNodeFirstChild` src/engine/scene/sceneGraph.ts:333 |
-| 0x0001e4f0 | scene_node_next_sibling | terrain | exact | `sceneNodeNextSibling` src/engine/scene/sceneGraph.ts:341 |
-| 0x0001e510 | scene_node_copy_transform | terrain | exact | `sceneNodeCopyTransform` src/engine/scene/sceneGraph.ts:351 |
-| 0x0001e540 | scene_node_transform | terrain | exact | `sceneNodeTransform` src/engine/scene/sceneGraph.ts:361 |
-| 0x0001e580 | scene_node_detach_keep_world | terrain | exact | `sceneNodeDetachKeepWorld` src/engine/scene/sceneGraph.ts:371 |
-| 0x0001e6a0 | scene_subtree_destroy | terrain | exact | `sceneSubtreeDestroy` src/engine/scene/sceneGraph.ts:394 |
-| 0x0001e6f0 | scene_node_find_by_name | terrain | exact | `sceneNodeFindByName` src/engine/scene/sceneGraph.ts:412 |
-| 0x0001e750 | scene_node_child_from_last | terrain | exact | `sceneNodeChildFromLast` src/engine/scene/sceneGraph.ts:427 |
-| 0x0001e7a0 | scene_subtree_find_location | terrain | exact | `sceneSubtreeFindLocation` src/engine/scene/sceneGraph.ts:444 |
+| 0x0001e1b0 | scene_subtree_move_to_alt_list | terrain | exact | `sceneSubtreeMoveToAltList` src/engine/scene/sceneGraph.ts:232 |
+| 0x0001e1f0 | scene_subtree_move_to_world_list | terrain | exact | `sceneSubtreeMoveToWorldList` src/engine/scene/sceneGraph.ts:242 |
+| 0x0001e240 | scene_node_remove_subtree_from_world | terrain | exact | `sceneNodeRemoveSubtreeFromWorld` src/engine/scene/sceneGraph.ts:252 |
+| 0x0001e280 | scene_node_link_subtree | terrain | exact | `sceneNodeLinkSubtree` src/engine/scene/sceneGraph.ts:260 |
+| 0x0001e2c0 | scene_subtree_move_to_aux_list | terrain | exact | `sceneSubtreeMoveToAuxList` src/engine/scene/sceneGraph.ts:268 |
+| 0x0001e300 | scene_subtree_set_object_type | terrain | exact | `sceneSubtreeSetObjectType` src/engine/scene/sceneGraph.ts:276 |
+| 0x0001e340 | scene_subtree_set_object_index | terrain | exact | `sceneSubtreeSetObjectIndex` src/engine/scene/sceneGraph.ts:284 |
+| 0x0001e380 | scene_subtree_set_object_class | terrain | exact | `sceneSubtreeSetObjectClass` src/engine/scene/sceneGraph.ts:292 |
+| 0x0001e3c0 | scene_subtree_clear_type_bits | terrain | exact | `sceneSubtreeClearTypeBits` src/engine/scene/sceneGraph.ts:300 |
+| 0x0001e400 | scene_node_rebuild_subtree | terrain | exact | `sceneNodeRebuildSubtree` src/engine/scene/sceneGraph.ts:311 |
+| 0x0001e480 | scene_node_walk | terrain | exact | `sceneNodeWalk` src/engine/scene/sceneGraph.ts:330 |
+| 0x0001e4e0 | scene_node_first_child | terrain | exact | `sceneNodeFirstChild` src/engine/scene/sceneGraph.ts:342 |
+| 0x0001e4f0 | scene_node_next_sibling | terrain | exact | `sceneNodeNextSibling` src/engine/scene/sceneGraph.ts:350 |
+| 0x0001e510 | scene_node_copy_transform | terrain | exact | `sceneNodeCopyTransform` src/engine/scene/sceneGraph.ts:360 |
+| 0x0001e540 | scene_node_transform | terrain | exact | `sceneNodeTransform` src/engine/scene/sceneGraph.ts:370 |
+| 0x0001e580 | scene_node_detach_keep_world | terrain | exact | `sceneNodeDetachKeepWorld` src/engine/scene/sceneGraph.ts:380 |
+| 0x0001e6a0 | scene_subtree_destroy | terrain | exact | `sceneSubtreeDestroy` src/engine/scene/sceneGraph.ts:403 |
+| 0x0001e6f0 | scene_node_find_by_name | terrain | exact | `sceneNodeFindByName` src/engine/scene/sceneGraph.ts:421 |
+| 0x0001e750 | scene_node_child_from_last | terrain | exact | `sceneNodeChildFromLast` src/engine/scene/sceneGraph.ts:436 |
+| 0x0001e7a0 | scene_subtree_find_location | terrain | exact | `sceneSubtreeFindLocation` src/engine/scene/sceneGraph.ts:453 |
 | 0x0001e7e0 | scene_subtree_raise_damage_level | terrain | exact | `sceneSubtreeRaiseDamageLevel` src/sim/mech/damage.ts:195 |
 | 0x0001e850 | mech_detach_section_geometry | terrain | exact | `mechDetachSectionGeometry` src/sim/mech/damage.ts:503 |
-| 0x0001e8b0 | scene_node_size | terrain | exact | `sceneNodeSize` src/engine/scene/sceneGraph.ts:457 |
+| 0x0001e8b0 | scene_node_size | terrain | exact | `sceneNodeSize` src/engine/scene/sceneGraph.ts:466 |
 | 0x0001e900 | object_ensure_bounds | terrain | exact | `objectEnsureBounds` src/sim/world/collision.ts:96 |
 | 0x0001ea20 | object_compute_bounds | terrain | exact | `objectComputeBounds` src/sim/world/collision.ts:64 |
 | 0x0001eb00 | object_free_bounds | terrain | exact | `objectFreeBounds` src/engine/scene/worldObject.ts:441 |
@@ -359,17 +359,17 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0001f490 | mech_anim_clear_request | terrain | exact | `mechAnimClearRequest` src/sim/mech/animTask.ts:346 |
 | 0x0001f4f0 | mech_anim_select_gait | terrain | exact | `mechAnimSelectGait` src/sim/mech/animTask.ts:397 |
 | 0x0001f630 | mech_play_anim_transition_sound | terrain | exact | `mechPlayAnimTransitionSound` src/sim/mech/animTask.ts:372 |
-| 0x0001f730 | object_lists_reset | terrain | exact | `objectListsReset` src/engine/scene/objectLists.ts:71 |
-| 0x0001f7c0 | object_link | terrain | exact | `objectLink` src/engine/scene/objectLists.ts:88 |
-| 0x0001f860 | object_unlink | terrain | exact | `objectUnlink` src/engine/scene/objectLists.ts:108 |
-| 0x0001f8e0 | object_move_to_aux_list | terrain | exact | `objectMoveToAuxList` src/engine/scene/objectLists.ts:128 |
-| 0x0001f950 | object_add_to_world | terrain | exact | `objectAddToWorld` src/engine/scene/objectLists.ts:144 |
-| 0x0001f9b0 | object_remove_from_world | terrain | exact | `objectRemoveFromWorld` src/engine/scene/objectLists.ts:162 |
-| 0x0001fa10 | object_move_to_alt_list | terrain | exact | `objectMoveToAltList` src/engine/scene/objectLists.ts:177 |
-| 0x0001fa90 | object_move_to_world_list | terrain | exact | `objectMoveToWorldList` src/engine/scene/objectLists.ts:194 |
-| 0x0001fb90 | object_list_unlink | terrain | exact | `objectListUnlink` src/engine/scene/objectLists.ts:209 |
-| 0x0001fbd0 | object_list_insert_after | terrain | exact | `objectListInsertAfter` src/engine/scene/objectLists.ts:217 |
-| 0x0001fbf0 | scenery_c0_set_visible | terrain | exact | `sceneryC0SetVisible` src/engine/scene/objectLists.ts:246 |
+| 0x0001f730 | object_lists_reset | terrain | exact | `objectListsReset` src/engine/scene/objectLists.ts:73 |
+| 0x0001f7c0 | object_link | terrain | exact | `objectLink` src/engine/scene/objectLists.ts:90 |
+| 0x0001f860 | object_unlink | terrain | exact | `objectUnlink` src/engine/scene/objectLists.ts:112 |
+| 0x0001f8e0 | object_move_to_aux_list | terrain | exact | `objectMoveToAuxList` src/engine/scene/objectLists.ts:132 |
+| 0x0001f950 | object_add_to_world | terrain | exact | `objectAddToWorld` src/engine/scene/objectLists.ts:148 |
+| 0x0001f9b0 | object_remove_from_world | terrain | exact | `objectRemoveFromWorld` src/engine/scene/objectLists.ts:166 |
+| 0x0001fa10 | object_move_to_alt_list | terrain | exact | `objectMoveToAltList` src/engine/scene/objectLists.ts:181 |
+| 0x0001fa90 | object_move_to_world_list | terrain | exact | `objectMoveToWorldList` src/engine/scene/objectLists.ts:198 |
+| 0x0001fb90 | object_list_unlink | terrain | exact | `objectListUnlink` src/engine/scene/objectLists.ts:215 |
+| 0x0001fbd0 | object_list_insert_after | terrain | exact | `objectListInsertAfter` src/engine/scene/objectLists.ts:223 |
+| 0x0001fbf0 | scenery_c0_set_visible | terrain | exact | `sceneryC0SetVisible` src/engine/scene/objectLists.ts:252 |
 | 0x0001fca0 | mech_move_step | terrain | exact | `mechMoveStep` src/sim/world/collision.ts:833 |
 | 0x000200d0 | mech_collide_mechs | terrain | exact | `mechCollideMechs` src/sim/world/collision.ts:718 |
 | 0x00020570 | mech_collide_obstacles | terrain | exact | `mechCollideObstacles` src/sim/world/collision.ts:763 |
@@ -464,7 +464,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00028670 | mech_std_cockpit_release | ai_group | exact | `mechStdCockpitRelease` src/sim/mech/tickHooks.ts:47 |
 | 0x00028690 | mech_std_create_loadout | ai_group | exact | `mechStdCreateLoadout` src/sim/mech/loadout.ts:91 |
 | 0x000287b0 | mech_loadout_size | ai_group | exact | `mechLoadoutSize` src/sim/mech/loadout.ts:79 |
-| 0x000287f0 | weapon_fire_sound_play | ai_group | exact | `weaponFireSoundPlay` src/sim/weapons/weapons.ts:628 |
+| 0x000287f0 | weapon_fire_sound_play | ai_group | exact | `weaponFireSoundPlay` src/sim/weapons/weapons.ts:629 |
 | 0x00028810 | render_view_from_pose | ai_group | exact | `renderViewFromPose` src/sim/display/insetView.ts:68 |
 | 0x00028910 | death_flash | ai_group | exact | `deathFlash` src/sim/mech/mechTickAi.ts:88 |
 | 0x00028930 | damage_flash | ai_group | exact | `damageFlash` src/sim/cockpit/hud.ts:600 |
@@ -473,16 +473,16 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00028ae0 | mech_jump_jet_effects | ai_group | exact | `mechJumpJetEffects` src/sim/mech/mechTickAi.ts:130 |
 | 0x00028be0 | mech_play_landing | ai_group | exact | `mechPlayLanding` src/sim/mech/mechTickTerrain.ts:50 |
 | 0x00028c70 | view_shake_impulse | ai_group | exact | `viewShakeImpulse` src/sim/camera/cameraUpdate.ts:301 |
-| 0x00028e30 | hud_overlay_draw | ai_group | exact | `hudOverlayDraw` src/sim/cockpit/overlay.ts:434 |
-| 0x00028ed0 | hud_altitude_tape_draw | ai_group | exact | `hudAltitudeTapeDraw` src/sim/cockpit/overlay.ts:165 |
-| 0x000290d0 | hud_tapes_init | ai_group | exact | `hudTapesInit` src/sim/cockpit/overlay.ts:111 |
-| 0x00029360 | hud_reticle_draw | ai_group | exact | `hudReticleDraw` src/sim/cockpit/overlay.ts:293 |
-| 0x00029470 | hud_target_marker_draw | ai_group | exact | `hudTargetMarkerDraw` src/sim/cockpit/overlay.ts:405 |
-| 0x00029570 | hud_compass_markers_draw | ai_group | exact | `hudCompassMarkersDraw` src/sim/cockpit/overlay.ts:249 |
-| 0x00029760 | hud_compass_tape_draw | ai_group | exact | `hudCompassTapeDraw` src/sim/cockpit/overlay.ts:216 |
-| 0x00029860 | aim_point_to_screen | ai_group | exact | `aimPointToScreen` src/sim/weapons/weapons.ts:721 |
-| 0x000298c0 | hud_target_brackets_mech | ai_group | exact | `hudTargetBracketsMech` src/sim/cockpit/overlay.ts:358 |
-| 0x00029a30 | hud_target_brackets_object | ai_group | exact | `hudTargetBracketsObject` src/sim/cockpit/overlay.ts:379 |
+| 0x00028e30 | hud_overlay_draw | ai_group | exact | `hudOverlayDraw` src/sim/cockpit/overlay.ts:441 |
+| 0x00028ed0 | hud_altitude_tape_draw | ai_group | exact | `hudAltitudeTapeDraw` src/sim/cockpit/overlay.ts:166 |
+| 0x000290d0 | hud_tapes_init | ai_group | exact | `hudTapesInit` src/sim/cockpit/overlay.ts:112 |
+| 0x00029360 | hud_reticle_draw | ai_group | exact | `hudReticleDraw` src/sim/cockpit/overlay.ts:294 |
+| 0x00029470 | hud_target_marker_draw | ai_group | exact | `hudTargetMarkerDraw` src/sim/cockpit/overlay.ts:408 |
+| 0x00029570 | hud_compass_markers_draw | ai_group | exact | `hudCompassMarkersDraw` src/sim/cockpit/overlay.ts:250 |
+| 0x00029760 | hud_compass_tape_draw | ai_group | exact | `hudCompassTapeDraw` src/sim/cockpit/overlay.ts:217 |
+| 0x00029860 | aim_point_to_screen | ai_group | exact | `aimPointToScreen` src/sim/weapons/weapons.ts:724 |
+| 0x000298c0 | hud_target_brackets_mech | ai_group | exact | `hudTargetBracketsMech` src/sim/cockpit/overlay.ts:359 |
+| 0x00029a30 | hud_target_brackets_object | ai_group | exact | `hudTargetBracketsObject` src/sim/cockpit/overlay.ts:381 |
 | 0x00029bb0 | hud_shape_draw | ai_group | exact | `hudShapeDraw` src/sim/cockpit/hud.ts:374 |
 | 0x00029c10 | hud_shape_draw_in_pane | ai_group | exact | `hudShapeDrawInPane` src/sim/cockpit/hud.ts:389 |
 | 0x00029c90 | tracked_object_create | ai_group | exact | `trackedObjectCreate` src/sim/ai/tracked.ts:38 |
@@ -558,7 +558,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0002e300 | ai_update_jumpjets | damage | exact | `aiUpdateJumpjets` src/sim/ai/pilot.ts:63 |
 | 0x0002e3d0 | mech_can_jump | damage | exact | `mechCanJump` src/sim/ai/aiGeometry.ts:36 |
 | 0x0002e400 | object_node_userdata | damage | exact | `objectNodeUserdata` src/sim/ai/handles.ts:72 |
-| 0x0002e450 | weapon_fire_alert_target | damage | exact | `weaponFireAlertTarget` src/sim/weapons/weapons.ts:746 |
+| 0x0002e450 | weapon_fire_alert_target | damage | exact | `weaponFireAlertTarget` src/sim/weapons/weapons.ts:750 |
 | 0x0002e6f0 | ai_behind_pick_sector | damage | exact | `aiBehindPickSector` src/sim/ai/pilot.ts:388 |
 | 0x0002e820 | ai_blocked_ends_behaviour | damage | exact | `aiBlockedEndsBehaviour` src/sim/ai/pilot.ts:203 |
 | 0x0002e860 | ai_pilot_update | damage | exact | `aiPilotUpdate` src/sim/ai/pilot.ts:353 |
@@ -989,41 +989,41 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00051e90 | nuke_detonate | cockpit | exact | `nukeDetonate` src/sim/effects/effects.ts:439 |
 | 0x00051f50 | nuke_blast_update | cockpit | exact | `nukeBlastUpdate` src/sim/effects/effects.ts:419 |
 | 0x00052020 | mech_weapons_cancel_bursts | cockpit | exact | `mechWeaponsCancelBursts` src/sim/mech/mechTickAi.ts:114 |
-| 0x00052080 | mech_weapons_tick | cockpit | exact | `mechWeaponsTick` src/sim/weapons/weapons.ts:129 |
-| 0x00052620 | mech_weapon_fire | cockpit | exact | `mechWeaponFire` src/sim/weapons/weapons.ts:292 |
-| 0x000528b0 | weapon_select_next_in_group | cockpit | exact | `weaponSelectNextInGroup` src/sim/weapons/weapons.ts:483 |
-| 0x00052950 | weapon_cycle_next | cockpit | exact | `weaponCycleNext` src/sim/weapons/weapons.ts:575 |
-| 0x000529d0 | weapon_select_next_group | cockpit | exact | `weaponSelectNextGroup` src/sim/weapons/weapons.ts:509 |
-| 0x00052a60 | weapon_select_group | cockpit | exact | `weaponSelectGroup` src/sim/weapons/weapons.ts:448 |
-| 0x00052af0 | selected_weapon_ready | cockpit | exact | `selectedWeaponReady` src/sim/weapons/weapons.ts:470 |
-| 0x00052b20 | weapon_jettison_ammo | weapons | exact | `weaponJettisonAmmo` src/sim/weapons/weapons.ts:607 |
+| 0x00052080 | mech_weapons_tick | cockpit | exact | `mechWeaponsTick` src/sim/weapons/weapons.ts:130 |
+| 0x00052620 | mech_weapon_fire | cockpit | exact | `mechWeaponFire` src/sim/weapons/weapons.ts:293 |
+| 0x000528b0 | weapon_select_next_in_group | cockpit | exact | `weaponSelectNextInGroup` src/sim/weapons/weapons.ts:484 |
+| 0x00052950 | weapon_cycle_next | cockpit | exact | `weaponCycleNext` src/sim/weapons/weapons.ts:576 |
+| 0x000529d0 | weapon_select_next_group | cockpit | exact | `weaponSelectNextGroup` src/sim/weapons/weapons.ts:510 |
+| 0x00052a60 | weapon_select_group | cockpit | exact | `weaponSelectGroup` src/sim/weapons/weapons.ts:449 |
+| 0x00052af0 | selected_weapon_ready | cockpit | exact | `selectedWeaponReady` src/sim/weapons/weapons.ts:471 |
+| 0x00052b20 | weapon_jettison_ammo | weapons | exact | `weaponJettisonAmmo` src/sim/weapons/weapons.ts:608 |
 | 0x00052be0 | weapons_preload_sounds | weapons | exact | `weaponsPreloadSounds` src/engine/resources/preload.ts:67 |
-| 0x00052c40 | weapon_set_fire_group | weapons | exact | `weaponSetFireGroup` src/sim/weapons/weapons.ts:536 |
-| 0x00052c60 | player_weapon_set_fire_group | weapons | exact | `playerWeaponSetFireGroup` src/sim/weapons/weapons.ts:554 |
-| 0x00052c90 | weapon_cycle_group | weapons | exact | `weaponCycleGroup` src/sim/weapons/weapons.ts:595 |
+| 0x00052c40 | weapon_set_fire_group | weapons | exact | `weaponSetFireGroup` src/sim/weapons/weapons.ts:537 |
+| 0x00052c60 | player_weapon_set_fire_group | weapons | exact | `playerWeaponSetFireGroup` src/sim/weapons/weapons.ts:555 |
+| 0x00052c90 | weapon_cycle_group | weapons | exact | `weaponCycleGroup` src/sim/weapons/weapons.ts:596 |
 | 0x00052cb0 | netplay_weapons_start_burst | weapons | exact | `netplayWeaponsStartBurst` src/sim/net/netWeapons.ts:39 |
-| 0x00052d60 | player_fire_group | weapons | exact | `playerFireGroup` src/sim/weapons/weapons.ts:427 |
-| 0x00052ea0 | mech_update_missile_lock | weapons | exact | `mechUpdateMissileLock` src/sim/weapons/weapons.ts:661 |
+| 0x00052d60 | player_fire_group | weapons | exact | `playerFireGroup` src/sim/weapons/weapons.ts:428 |
+| 0x00052ea0 | mech_update_missile_lock | weapons | exact | `mechUpdateMissileLock` src/sim/weapons/weapons.ts:662 |
 | 0x00053190 | mech_update_aim_range | weapons | exact | `mechUpdateAimRange` src/sim/weapons/aim.ts:69 |
 | 0x00053240 | mech_aim_range | weapons | exact | `mechAimRange` src/sim/weapons/aim.ts:89 |
-| 0x00053250 | mech_shot_direction | weapons | exact | `mechShotDirection` src/sim/weapons/weapons.ts:410 |
+| 0x00053250 | mech_shot_direction | weapons | exact | `mechShotDirection` src/sim/weapons/weapons.ts:411 |
 | 0x000532c0 | weapon_build_fire_ray | weapons | exact | `weaponBuildFireRay` src/sim/weapons/aim.ts:50 |
 | 0x00053330 | weapon_get_aim_direction | weapons | exact | `weaponGetAimDirection` src/sim/weapons/aim.ts:34 |
 | 0x000533c0 | effect_align_to_mount | weapons | exact | `effectAlignToMount` src/sim/effects/effects.ts:276 |
-| 0x00053410 | projectile_place_on_fire | weapons | exact | `projectilePlaceOnFire` src/sim/weapons/weapons.ts:379 |
-| 0x00053821 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:313 |
-| 0x0005435c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:155 |
-| 0x00054760 | vfx_shape_draw_unclipped | vfx_lib | exact | `vfxShapeDrawUnclipped` src/engine/vfx/vfx.ts:174 |
-| 0x00054827 | vfx_shape_remap_set | vfx_lib | exact | `vfxShapeRemapSet` src/engine/vfx/vfx.ts:187 |
-| 0x00054846 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:197 |
-| 0x00054d1e | vfx_shape_remap_draw_unclipped | vfx_lib | exact | `vfxShapeRemapDrawUnclipped` src/engine/vfx/vfx.ts:214 |
-| 0x000561f0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:270 |
+| 0x00053410 | projectile_place_on_fire | weapons | exact | `projectilePlaceOnFire` src/sim/weapons/weapons.ts:380 |
+| 0x00053821 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:335 |
+| 0x0005435c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:177 |
+| 0x00054760 | vfx_shape_draw_unclipped | vfx_lib | exact | `vfxShapeDrawUnclipped` src/engine/vfx/vfx.ts:196 |
+| 0x00054827 | vfx_shape_remap_set | vfx_lib | exact | `vfxShapeRemapSet` src/engine/vfx/vfx.ts:209 |
+| 0x00054846 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:219 |
+| 0x00054d1e | vfx_shape_remap_draw_unclipped | vfx_lib | exact | `vfxShapeRemapDrawUnclipped` src/engine/vfx/vfx.ts:236 |
+| 0x000561f0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:292 |
 | 0x00056868 | vfx_ellipse_draw | vfx_lib | exact | `vfxEllipseDraw` src/sim/cockpit/radar.ts:1290 |
-| 0x00057e60 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:376 |
-| 0x00057e73 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:387 |
-| 0x00057e93 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:401 |
-| 0x00058026 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:459 |
-| 0x0005805d | vfx_pane_write_row | vfx_lib | exact | `vfxPaneWriteRow` src/engine/vfx/vfx.ts:491 |
+| 0x00057e60 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:398 |
+| 0x00057e73 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:409 |
+| 0x00057e93 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:423 |
+| 0x00058026 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:481 |
+| 0x0005805d | vfx_pane_write_row | vfx_lib | exact | `vfxPaneWriteRow` src/engine/vfx/vfx.ts:513 |
 | 0x000584a7 | gif_lzw_table_reset | vfx_lib | exact | `gifLzwTableReset` src/engine/vfx/gif.ts:163 |
 | 0x000584ef | gif_read_byte | vfx_lib | exact | `gifReadByte` src/engine/vfx/gif.ts:182 |
 | 0x00058508 | gif_read_bits | vfx_lib | exact | `gifReadBits` src/engine/vfx/gif.ts:196 |
@@ -1032,11 +1032,11 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00058611 | gif_decode | vfx_lib | exact | `gifDecode` src/engine/vfx/gif.ts:274 |
 | 0x0005882a | gif_palette_read | vfx_lib | exact | `gifPaletteRead` src/engine/vfx/gif.ts:141 |
 | 0x0005888b | gif_image_size | vfx_lib | exact | `gifImageSize` src/engine/vfx/gif.ts:129 |
-| 0x000588c3 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:259 |
-| 0x000588e5 | vfx_shape_origin | vfx_lib | exact | `vfxShapeOrigin` src/engine/vfx/vfx.ts:249 |
-| 0x00058908 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:235 |
+| 0x000588c3 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:281 |
+| 0x000588e5 | vfx_shape_origin | vfx_lib | exact | `vfxShapeOrigin` src/engine/vfx/vfx.ts:271 |
+| 0x00058908 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:257 |
 | 0x00058966 | vfx_lib_sub_058966 | vfx_lib | exact | `vfxLibSub058966` src/sim/display/launchScreen.ts:69 |
-| 0x00058a43 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:224 |
+| 0x00058a43 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:246 |
 | 0x00058e0d | palette_fade_used_colours | vfx_lib | partial | `paletteFadeUsedColours` src/sim/world/palettes.ts:403 |
 | 0x0005dc10 | AIL_install_DIG_driver_file | miles_ail | stub | `ailInstallDigDriverFile` src/engine/miles/ail.ts:168 |
 | 0x0005dd90 | AIL_allocate_sample_handle | miles_ail | partial | `ailAllocateSampleHandle` src/engine/miles/ail.ts:186 |
@@ -1482,20 +1482,20 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x0003ee80 | labels_clear | video_driver | exact | `labelsClear` src/shell/ui/labels.ts:345 |
 | 0x0003f4a0 | timer_start | sound_detect | partial | `timerStart` src/shell/host/timer.ts:12 |
 | 0x0003f508 | timer_read | sound_detect | exact | `timerRead` src/shell/host/timer.ts:23 |
-| 0x000432f1 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:314 |
-| 0x00043e2c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:156 |
-| 0x00044316 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:198 |
-| 0x00045cc0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:271 |
+| 0x000432f1 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:336 |
+| 0x00043e2c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:178 |
+| 0x00044316 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:220 |
+| 0x00045cc0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:293 |
 | 0x00045d9f | vfx_lib_sub_045d9f | vfx_lib | exact | `vfxPaneCopy` src/shell/video/driver.ts:252 |
-| 0x00047930 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:377 |
-| 0x00047943 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:388 |
-| 0x00047963 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:402 |
-| 0x00047af6 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:460 |
+| 0x00047930 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:399 |
+| 0x00047943 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:410 |
+| 0x00047963 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:424 |
+| 0x00047af6 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:482 |
 | 0x00047ea3 | vfx_lib_sub_047ea3 | vfx_lib | exact | `pcxDecode` src/data/formats/pcx.ts:38 |
 | 0x00047f25 | vfx_lib_sub_047f25 | vfx_lib | exact | `pcxPalette` src/data/formats/pcx.ts:24 |
-| 0x00048393 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:260 |
-| 0x000483d8 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:236 |
-| 0x00048513 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:225 |
+| 0x00048393 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:282 |
+| 0x000483d8 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:258 |
+| 0x00048513 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:247 |
 | 0x00048d69 | qsort_median3 | clib | exact | `median3` src/engine/qsort.ts:24 |
 | 0x00048dc1 | qsort | clib | exact | `watcomQsort` src/engine/qsort.ts:55 |
 | 0x0004bc39 | rand | miles_driver | exact | `rand` src/shell/clib.ts:15 |
@@ -1534,7 +1534,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/resources/cache.ts:60 - nothing is cached
 - src/engine/resources/preload.ts:44 - resource_load_ref: no loose-file fallback (${ref.name}${ext}) in the port
 - src/engine/resources/preload.ts:69 - reads the two tables from the boot image (the live tables are not ported yet); does nothing without one
-- src/engine/scene/sceneGraph.ts:396 - heap nodes are dropped for the garbage collector rather than freed
+- src/engine/scene/sceneGraph.ts:405 - heap nodes are dropped for the garbage collector rather than freed
 - src/engine/scene/worldObject.ts:133 - indexOffset is left 0; the index bytes are MeshPolygon.indices
 - src/engine/scene/worldObject.ts:443 - nothing to free; the reference is dropped
 - src/engine/scene/worldObject.ts:452 - releases references for the garbage collector
@@ -1543,17 +1543,17 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/tasks/taskList.ts:53 - the node is a JS object rather than static_malloc(0x18) from the TLIS arena
 - src/engine/timer.ts:71 - the scan stops at the table's 64 entries; the original scans on for a zero or -1 word, which only matters past 64 live stopwatches
 - src/engine/vfx/gif.ts:276 - the original's 1-bit output path (EDX == 1), which its own code never takes (EDX is always 8), is not ported; a corrupt GIF whose codes run past the table stops where the original would read or write past its work block
-- src/engine/vfx/vfx.ts:176 - takes window coordinates and the clip vfx_shape_draw has set up, not (pane, shape, x, y, pitch)
-- src/engine/vfx/vfx.ts:216 - takes window coordinates and the clip vfx_shape_remap_draw has set up
-- src/engine/vfx/vfx.ts:316 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
-- src/engine/vfx/vfx.ts:493 - past the clip checks the original returns whatever EAX last held (a difference, or the end of the copy), which its one caller (gif_put_pixel) ignores; the port returns 0
+- src/engine/vfx/vfx.ts:198 - takes window coordinates and the clip vfx_shape_draw has set up, not (pane, shape, x, y, pitch)
+- src/engine/vfx/vfx.ts:238 - takes window coordinates and the clip vfx_shape_remap_draw has set up
+- src/engine/vfx/vfx.ts:338 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
+- src/engine/vfx/vfx.ts:515 - past the clip checks the original returns whatever EAX last held (a difference, or the end of the copy), which its one caller (gif_put_pixel) ignores; the port returns 0
 - src/mission/commandLine.ts:89 - -M / -X's mono display, -Q's quadtree switch-off, -E's mw2debug.txt and the version text are not ported; their flags are still set
 - src/mission/commandLine.ts:93 - This program must be launched from MECH2.EXE
 - src/mission/devDir.ts:42 - the 101-bucket hash chains are a Map: the lookup's result is the same
 - src/mission/devDir.ts:60 - the directory is read through the host, which lists and fetches it off the CD ahead of the mission (dosFilePrefetchDir)
 - src/mission/load.ts:187 - static_arena_init: no arena pre-pass; tables are allocated on demand
-- src/mission/mainLoop.ts:87 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
-- src/mission/mainLoop.ts:91 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
+- src/mission/mainLoop.ts:90 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
+- src/mission/mainLoop.ts:94 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
 - src/mission/objectives.ts:62 - ${what} longer than its ${destSize}-byte field; the original overruns into the next field
 - src/mission/objectives.ts:78 - a record index past the 48 Objective slots is not written (the original writes into the next table); MW2.PRJ has none
 - src/mission/objectives.ts:96 - MTBL table ${group} has ${n} records, past the 48 objective slots
@@ -1630,7 +1630,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/cockpit/damageDisplay.ts:292 - the arguments (loadout EAX, pane EDX) and every call in the body are read from the disassembly (0x2f790..0x2fa7f); the exported C loses most of them
 - src/sim/cockpit/hud.ts:447 - the +0x14 dword of each MechWeapon (no port field) is not carried over
 - src/sim/cockpit/objectivesHud.ts:181 - for any other result (1, or above 4) the original skips its sprintf and draws its uninitialised 256-byte stack buffer; the port draws an empty string there
-- src/sim/cockpit/overlay.ts:113 - each cache_unlock is passed vfx_shape_size's result + the base id - a wrong id the port's cache ignores (cache_unlock does nothing here)
+- src/sim/cockpit/overlay.ts:114 - each cache_unlock is passed vfx_shape_size's result + the base id - a wrong id the port's cache ignores (cache_unlock does nothing here)
 - src/sim/cockpit/radar.ts:1150 - viewer_latch_globals is the render layer's, which latches the viewer itself when it draws; the sim's projection (vfxFontSub013130) reads the viewer directly
 - src/sim/cockpit/radar.ts:1194 - empty_stub_37e70 is empty
 - src/sim/cockpit/radar.ts:1209 - viewer_latch_globals is the render layer's, which latches the viewer itself when it draws
@@ -1649,9 +1649,9 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/controls/input.ts:751 - no keyboard device is open, so no keystroke is read
 - src/sim/display/insetView.ts:70 - viewer_latch_globals (before and after the draw) is the render layer's, which latches the viewer itself when it draws; empty_stub_37e70 is empty
 - src/sim/display/launchScreen.ts:109 - the timer that runs launch_anim_tick is the host's (MW2.EXE's start-up is synchronous in the port)
-- src/sim/display/mainView.ts:46 - the drawing - sky and ground, backdrop, world, cockpit - is the host's, beneath the 2D window (renderPort.mainView): the viewport's window pixels are handed back to it (vfxWindowClearPane) where the original paints them, and a wipe instead of sky and ground becomes the host view's background rather than window pixels. viewer_latch_globals and the draw counter at 0x95510 are the render layer's. mainViewWindow's memset of the buffer at 0xa46fc (a window the shipped game never selects) and vfx_video_sub_010a50 (the cheat at 0x954e0) are not ported
-- src/sim/display/mainView.ts:86 - render_buffers_init(0x80, 0x5dc) and polysDrawnLimit = 0x578 size the software renderer's arenas and draw budget, which the port's renderer does not have
-- src/sim/display/mainView.ts:89 - vfx_video_sub_010320: no render arenas or polygon budget (render_buffers_init, polysDrawnLimit)
+- src/sim/display/mainView.ts:47 - the drawing - sky and ground, backdrop, world, cockpit - is the host's, beneath the 2D window (renderPort.mainView): the viewport's window pixels are handed back to it (vfxWindowClearPane) where the original paints them, and a wipe instead of sky and ground becomes the host view's background rather than window pixels. viewer_latch_globals and the draw counter at 0x95510 are the render layer's. mainViewWindow's memset of the buffer at 0xa46fc (a window the shipped game never selects) and vfx_video_sub_010a50 (the cheat at 0x954e0) are not ported
+- src/sim/display/mainView.ts:89 - render_buffers_init(0x80, 0x5dc) and polysDrawnLimit = 0x578 size the software renderer's arenas and draw budget, which the port's renderer does not have
+- src/sim/display/mainView.ts:92 - vfx_video_sub_010320: no render arenas or polygon budget (render_buffers_init, polysDrawnLimit)
 - src/sim/display/rescale.ts:58 - hud_debug_sub_049a90 (the debug text's layout) is not ported yet
 - src/sim/display/rescale.ts:89 - hud_debug_sub_049a90 (the debug text layout) is not ported
 - src/sim/display/video.ts:135 - vfx_load_drivers and the driver's set-up call (DAT_0009fd4c) are the host's; the mode is display.screenMode rather than the driver's record; the VGA/data selectors and the copy of the pane at 0xa4694 are not kept
@@ -1727,7 +1727,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/ui/uiContext.ts:64 - the node is a JS object rather than malloc(0x12)
 - src/sim/weapons/projectiles.ts:227 - the original faults (idiv by zero) when the round is exactly on the target's origin; the port stops after the proximity bit instead
 - src/sim/weapons/projectiles.ts:266 - projectile_home: the round is on its target; the original divides by zero here and faults
-- src/sim/weapons/weapons.ts:748 - returns nothing: the C's return is whatever EAX last held, and both callers discard it
+- src/sim/weapons/weapons.ts:752 - returns nothing: the C's return is whatever EAX last held, and both callers discard it
 - src/sim/world/anim2d.ts:45 - takes the chunk rather than its four fields; the malloc cannot fail
 - src/sim/world/anim2d.ts:102 - a play-once animation that finishes without bit 1 leaves the frame variable unset in the original; nothing is drawn in that state, so it is never read
 - src/sim/world/bitmap3d.ts:67 - ${fn}: slot ${slot} is outside bitmap3dTable; the original reads/writes past the table
@@ -1757,7 +1757,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/mission/tables/missionTables.ts:86 - the marking loops read all 48 records, past the table copy
 - src/mission/vm/chunkExec.ts:346 - GP with no object: the original clears the PREVIOUS gamepiece node
 - src/mission/vm/streams.ts:183 - '.BWD' is appended in the caller's own reference buffer
-- src/render/SceneRenderer.ts:406 - the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled
+- src/render/SceneRenderer.ts:405 - the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled
 - src/shell/controls/config.ts:189 - controls_renumber_devices: strncpy of 16 bytes into record 15\
 - src/shell/controls/config.ts:289 - controls_save_config: fclose is called a second time on the closed file
 - src/shell/controls/inputMap.ts:80 - controls_write_map_entry: a NULL input name prints as (null)
@@ -1774,8 +1774,8 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/ai/states.ts:221 - ai_follow_formation_slot: the slot waypoint takes the slot heading as its y
 - src/sim/ai/states.ts:314 - ai_apply_state: the patrol return point is gated on the leader of group (groupId != playerMechIndex)
 - src/sim/cockpit/objectivesHud.ts:226 - hud_objectives_draw: this result draws an uninitialised stack buffer; the port draws nothing
-- src/sim/cockpit/overlay.ts:98 - hud_tapes_init unlocks id vfx_shape_size() + base rather than assetVariant + base
-- src/sim/cockpit/overlay.ts:344 - ${where}: an allegiance above 2 draws with uninitialised shape ids; the port draws nothing
+- src/sim/cockpit/overlay.ts:99 - hud_tapes_init unlocks id vfx_shape_size() + base rather than assetVariant + base
+- src/sim/cockpit/overlay.ts:345 - ${where}: an allegiance above 2 draws with uninitialised shape ids; the port draws nothing
 - src/sim/cockpit/radar.ts:1024 - radar nav points: seenByGroups is ORed with the player group bit (0x1202a / 0x11e9e), so the reached test is flags & 0x20 alone
 - src/sim/cockpit/weaponList.ts:75 - hud_weapon_widget_tick: a ready weapon in a fire group above 2 leaves the colour unset
 - src/sim/groups/orders.ts:207 - group_assign_objective_task passes the MechEntity to mech_has_no_usable_weapon
@@ -1799,8 +1799,8 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/ui/cheatCredits.ts:305 - the second picture (320x200) is drawn in the pane fitted to the first (320x211), from its top row: it sits about 5 rows above centre, with black below
 - src/sim/ui/cheatCredits.ts:352 - the HUD comes back on (savedHudEnabled = 1) whatever it was before the cheat
 - src/sim/ui/menus.ts:321 - menu_draw: a digit on a menu\
-- src/sim/weapons/weapons.ts:78 - weapons[-1].fireGroup: reads the loadout dword at +0xb2 (throttleScale >> 16 | weaponCycleLock << 16)
-- src/sim/weapons/weapons.ts:565 - player_weapon_set_fire_group with no weapon selected writes loadout +0xb2 (throttleScale high word, weaponCycleLock low word)
+- src/sim/weapons/weapons.ts:79 - weapons[-1].fireGroup: reads the loadout dword at +0xb2 (throttleScale >> 16 | weaponCycleLock << 16)
+- src/sim/weapons/weapons.ts:566 - player_weapon_set_fire_group with no weapon selected writes loadout +0xb2 (throttleScale high word, weaponCycleLock low word)
 - src/sim/world/objectTasks.ts:336 - task_object_sound: INIT never sets the gate, so a chunk without it leaves the heap\
 
 ## Unestablished (gaps the decompilation has not closed)
@@ -1821,7 +1821,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/vfx/gif.ts:110 - gif_decode: the table grew past 0x1000 codes (no clear code) - the original writes past the work block
 - src/engine/vfx/gif.ts:335 - gif_decode: a code chain longer than the stack (a corrupt GIF) runs over the tables in the original
 - src/engine/vfx/gif.ts:344 - gif_decode: the data ran out before the end code; the original reads on past the file
-- src/engine/vfx/vfx.ts:322 - vfx_line_draw: a callback mode (above 1) is not ported
+- src/engine/vfx/vfx.ts:344 - vfx_line_draw: a callback mode (above 1) is not ported
 - src/mission/commandLine.ts:118 - -E: mw2debug.txt is not opened; the trace goes to the port log
 - src/mission/end.ts:134 - mission_save_results: an objective text runs past the end of the record, onto the stack
 - src/mission/vm/objExec.ts:45 - OBJ with no POLY id loads a loose .wtb file; not ported
@@ -1873,8 +1873,8 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/cockpit/messages.ts:82 - message_post: a slot of priority 0x29a compares against an uninitialised local
 - src/sim/cockpit/radar.ts:401 - radar function table: 0x${a.toString(16)} is not ported
 - src/sim/controls/input.ts:623 - input device ${input.devices[i]!.name} asks for calibration; the calibration screen is not ported
-- src/sim/display/mainView.ts:50 - vfx_video_sub_010490: mainViewWindow is set - the memset of the buffer at 0xa46fc is not ported
-- src/sim/display/mainView.ts:72 - vfx_video_sub_010490: the 0x954e0 cheat draw (vfx_video_sub_010a50) is not ported
+- src/sim/display/mainView.ts:51 - vfx_video_sub_010490: mainViewWindow is set - the memset of the buffer at 0xa46fc is not ported
+- src/sim/display/mainView.ts:75 - vfx_video_sub_010490: the 0x954e0 cheat draw (vfx_video_sub_010a50) is not ported
 - src/sim/effects/effects.ts:282 - effect_align_to_mount: the mech has no mountNode (the original would read through a null pointer)
 - src/sim/effects/effects.ts:313 - sim_slots_update: an area effect with no node object (the original reads its radius through a null pointer)
 - src/sim/groups/groups.ts:53 - formation slot ${i}: outside the StarFormation record
@@ -1917,10 +1917,10 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/ui/menuLoad.ts:122 - menu control data: a list with a suffix callback in the module
 - src/sim/ui/menuLoad.ts:197 - ${MENU_TABLES[kind].label}[${index}] (0x${address.toString(16)}) is not ported
 - src/sim/ui/menus.ts:337 - menu_draw: a menu without a title underlines at uninitialised coordinates
-- src/sim/weapons/weapons.ts:181 - mech_weapons_tick: weapons[${next}] is past the ten slots (the C reads the sections that follow)
-- src/sim/weapons/weapons.ts:307 - mech_weapon_fire: a weapon with ammo has no bin (the C would dereference null)
-- src/sim/weapons/weapons.ts:315 - mech_weapon_fire: the next ammo bin is past the loadout\
-- src/sim/weapons/weapons.ts:543 - weapon_set_fire_group: weapons[${weaponIndex}] is outside the ten slots
+- src/sim/weapons/weapons.ts:182 - mech_weapons_tick: weapons[${next}] is past the ten slots (the C reads the sections that follow)
+- src/sim/weapons/weapons.ts:308 - mech_weapon_fire: a weapon with ammo has no bin (the C would dereference null)
+- src/sim/weapons/weapons.ts:316 - mech_weapon_fire: the next ammo bin is past the loadout\
+- src/sim/weapons/weapons.ts:544 - weapon_set_fire_group: weapons[${weaponIndex}] is outside the ten slots
 - src/sim/world/objectTasks.ts:148 - task_object_colour_cycle: no values - the C divides by the count (0) and faults
 - src/sim/world/objectTasks.ts:209 - task_object_rotate: fewer than four values - the rest are uninitialised stack in the C (0 here)
 - src/sim/world/objectTasks.ts:217 - task_object_rotate: no parameters - the angles and period stay as malloc left them (0 here)

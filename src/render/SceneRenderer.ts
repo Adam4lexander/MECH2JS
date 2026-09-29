@@ -65,6 +65,7 @@ import { cameraGlobals } from '../sim/camera/viewer.ts';
 import { quirk } from '../core/provenance.ts';
 import { objectsOnList, worldRootNode } from '../engine/scene/objectLists.ts';
 import { objectRefreshMesh } from '../engine/scene/worldObject.ts';
+import { presenting, presentRefreshMesh, presentUnwear, presentWear, presentWearMesh, presentWorldBlock } from '../engine/scene/present.ts';
 import { blockToMatrix4, CM_TO_UNITS } from './bridge/space.ts';
 import { renderOptions, type LightLatch } from './shading/polygonColour.ts';
 import { mapVertexIndex } from './shading/mapColour.ts';
@@ -73,6 +74,14 @@ import { clipLerp, clipRecordCount, clipRecords, meshResetClipState, objectCullB
 import { objectCullCockpit, objectCullHook, polygonDrawHook, type ColourFn } from './pipeline/hooks.ts';
 import { FillKind, polyFillDispatch, type PolyDraw } from './pipeline/fillDispatch.ts';
 import { makeIndexedMaterial, makeLineMaterial, makeUniforms, NOT_DRAWN, setLuma, setPalette, type IndexedUniforms } from './materials/indexedMaterial.ts';
+
+/** object_refresh_mesh, for object_draw_lod_mesh; objects without a node had their world vertices baked at load */
+const refreshMesh = (o: WorldObject): void => {
+  if (o.node) objectRefreshMesh(o);
+};
+
+/** The three parts of the main view's walk (SceneRenderer.walkMainView). */
+type MainViewPart = 'backdrop' | 'world' | 'cockpit';
 
 /** A polygon's outline slots: (vertex count + 1) segments, enough for a near-clipped shape. */
 interface LineEntry {
@@ -349,11 +358,71 @@ export class SceneRenderer {
   }
 
   /**
+   * The main view's walk, as vfx_video_sub_010490 draws it: backdropNode's
+   * tree (render_scene_tree_sorted, the far clip lifted by
+   * viewer_set_far_clip(0x7fffffff), the cull hook at 0x3f780, an object with
+   * flags bit 0x1000 skipped), then render_object_list over the world list
+   * with objectCullHook, then - while cockpitViewActive - cockpitHeadNode's
+   * tree with the near clip at 8 (viewer_set_near_clip) and the cull hook at
+   * 0x3f970. `visit` gets each object with whether it is drawn; the cockpit
+   * pass visits only what it draws.
+   *
+   * scene_tree_draw_objects does not set polySortFlags, so the backdrop's
+   * polygons keep the value the previous walk left; the cockpit cull
+   * (0x3f970) rejects an object with flags bit 0x1000 and nothing else - no
+   * depth, far or side test, and it does not write objectViewDepth, so its
+   * LOD walk reads the view depth of the last object the world pass culled,
+   * and polySortFlags is the last world object's (quirks, kept).
+   *
+   * Between passes (engine/scene/present.ts) each object is worn at its
+   * presented pose for its cull and draw, and put back after.
+   */
+  private walkMainView(viewer: Viewer, visit: (obj: WorldObject, part: MainViewPart, drawn: boolean) => void): void {
+    const wear = presenting();
+    const each = (obj: WorldObject, part: MainViewPart, cull: (o: WorldObject) => number): void => {
+      if (wear) presentWear(obj);
+      try {
+        const drawn = cull(obj) === 0;
+        if (part !== 'cockpit' || drawn) visit(obj, part, drawn);
+      } finally {
+        if (wear) presentUnwear();
+      }
+    };
+    if (viewScene.backdropNode) {
+      const far = renderView.viewFarClipScaled;
+      renderView.viewFarClipScaled = 0x7fffffff;
+      const cullBackdrop = (o: WorldObject): number => ((o.flags & 0x1000) !== 0 ? 1 : objectCullBackdrop(o));
+      const walk = (n: SceneNode): void => {
+        if (n.userData) each(n.userData, 'backdrop', cullBackdrop);
+        for (let c = n.firstChild; c; c = c.nextSibling) walk(c);
+      };
+      walk(viewScene.backdropNode);
+      renderView.viewFarClipScaled = far;
+    }
+    const cull = objectCullHook();
+    for (const obj of objectsOnList(worldRootNode)) each(obj, 'world', cull);
+    if (cameraGlobals.cockpitViewActive !== 0 && viewScene.cockpitHeadNode) {
+      quirk('the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled', 'vfx_video_sub_010490');
+      const near = [viewer.nearClip, renderView.viewNearClip, renderView.viewNearClipScaled] as const;
+      viewer.nearClip = 8;
+      renderView.viewNearClip = 8;
+      renderView.viewNearClipScaled = 8 * 4;
+      const walk = (n: SceneNode): void => {
+        if (n.userData) each(n.userData, 'cockpit', objectCullCockpit);
+        for (let c = n.firstChild; c; c = c.nextSibling) walk(c);
+      };
+      walk(viewScene.cockpitHeadNode);
+      [viewer.nearClip, renderView.viewNearClip, renderView.viewNearClipScaled] = near;
+    }
+  }
+
+  /**
    * Mirrors engine state into the three.js scene for one frame of the main
    * view, drawn from `viewer` the way vfx_video_sub_010490 draws:
    * viewer_latch_globals, the backdrop, render_object_list, the cockpit
    * shell. The viewer's rotation and translation must be the camera three.js
-   * draws with (render/bridge/cameraViewer.ts).
+   * draws with (render/bridge/cameraViewer.ts) - between passes, the
+   * presented viewer (sim/camera/viewerPresent.ts).
    */
   sync(viewer: Viewer): void {
     const L = this.beginPass(viewer);
@@ -361,66 +430,23 @@ export class SceneRenderer {
     const seen = new Set<WorldObject>();
     let polys = 0;
     let drawn = 0;
-    // the backdrop first: render_scene_tree_sorted(backdropNode) with the far clip lifted
-    // (viewer_set_far_clip(0x7fffffff)) and the cull hook at 0x3f780. scene_tree_draw_objects
-    // does not set polySortFlags, so its polygons keep the last value the previous frame's
-    // world walk left (a quirk, reproduced).
-    if (viewScene.backdropNode) {
-      const far = renderView.viewFarClipScaled;
-      renderView.viewFarClipScaled = 0x7fffffff;
-      const walk = (n: SceneNode) => {
-        const obj = n.userData;
-        if (obj) {
-          seen.add(obj);
-          const e = this.entry(obj, this.backdropScene);
-          const skip = (obj.flags & 0x1000) !== 0 || objectCullBackdrop(obj) !== 0;
-          e.group.visible = !skip;
-          if (!skip) {
-            drawn++;
-            polys += this.drawObject(obj, e, L, colour);
-          }
-        }
-        for (let c = n.firstChild; c; c = c.nextSibling) walk(c);
-      };
-      walk(viewScene.backdropNode);
-      renderView.viewFarClipScaled = far;
-    }
-    const cull = objectCullHook();
-    for (const obj of objectsOnList(worldRootNode)) {
-      seen.add(obj);
-      const e = this.entry(obj, this.scene);
-      const culled = cull(obj) !== 0;
-      e.group.visible = !culled;
-      if (culled) continue;
-      drawn++;
-      renderView.polySortFlags = obj.flags & 0xffff;
-      polys += this.drawObject(obj, e, L, colour);
-    }
-    // the cockpit shell: while cockpitViewActive, after the world, cockpitHeadNode's tree with
-    // the near clip at 8 (viewer_set_near_clip) and the cull hook at 0x3f970, which rejects an
-    // object with flags bit 0x1000 and nothing else - no depth, far or side test, and it does
-    // not write objectViewDepth, so the LOD walk reads the view depth of the last object the
-    // world pass culled, and polySortFlags is the last world object's (both quirks, kept)
     for (const e of this.cockpitEntries.values()) e.group.visible = false;
-    if (cameraGlobals.cockpitViewActive !== 0 && viewScene.cockpitHeadNode) {
-      quirk('the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled', 'vfx_video_sub_010490');
-      const near = [viewer.nearClip, renderView.viewNearClip, renderView.viewNearClipScaled] as const;
-      viewer.nearClip = 8;
-      renderView.viewNearClip = 8;
-      renderView.viewNearClipScaled = 8 * 4;
-      const walk = (n: SceneNode) => {
-        const obj = n.userData;
-        if (obj && objectCullCockpit(obj) === 0) {
-          const e = this.entry(obj, this.cockpitScene, this.cockpitEntries);
-          e.group.visible = true;
-          drawn++;
-          polys += this.drawObject(obj, e, L, colour);
-        }
-        for (let c = n.firstChild; c; c = c.nextSibling) walk(c);
-      };
-      walk(viewScene.cockpitHeadNode);
-      [viewer.nearClip, renderView.viewNearClip, renderView.viewNearClipScaled] = near;
-    }
+    this.walkMainView(viewer, (obj, part, on) => {
+      if (part === 'cockpit') {
+        const e = this.entry(obj, this.cockpitScene, this.cockpitEntries);
+        e.group.visible = true;
+        drawn++;
+        polys += this.drawObject(obj, e, L, colour);
+        return;
+      }
+      seen.add(obj);
+      const e = this.entry(obj, part === 'backdrop' ? this.backdropScene : this.scene);
+      e.group.visible = on;
+      if (!on) return;
+      drawn++;
+      if (part === 'world') renderView.polySortFlags = obj.flags & 0xffff;
+      polys += this.drawObject(obj, e, L, colour);
+    });
     for (const [obj, e] of this.entries) {
       if (!seen.has(obj)) {
         this.dispose(e);
@@ -429,6 +455,26 @@ export class SceneRenderer {
     }
     this.stats.objects = drawn;
     this.stats.polygons = polys;
+  }
+
+  /**
+   * What drawing the main view at the end of a pass leaves in the game's
+   * state, without drawing it: each drawn object's LOD mesh chosen
+   * (object_draw_lod_mesh sets currentMesh) and its world vertices brought up
+   * to date (object_refresh_mesh). The simulation reads both - a class-2
+   * object's collision tests its currentMesh's vertices - so the host calls
+   * this after every pass that asks for the main view, and the draws between
+   * passes put back whatever they change.
+   *
+   * @portOnly the state half of the main view's draw, at the pass
+   */
+  latch(viewer: Viewer): void {
+    viewerLatchGlobals(viewer);
+    this.walkMainView(viewer, (obj, part, on) => {
+      if (!on) return;
+      if (part === 'world') renderView.polySortFlags = obj.flags & 0xffff;
+      objectSelectLodMesh(obj, renderView.objectViewDepth, refreshMesh);
+    });
   }
 
   /**
@@ -512,7 +558,7 @@ export class SceneRenderer {
       e = this.build(obj, into);
       entries.set(obj, e);
     }
-    if (obj.node) blockToMatrix4(obj.node.worldBlock, e.group.matrix);
+    if (obj.node) blockToMatrix4(presentWorldBlock(obj.node), e.group.matrix);
     else e.group.matrix.identity();
     e.group.matrixWorldNeedsUpdate = true;
     return e;
@@ -520,10 +566,10 @@ export class SceneRenderer {
 
   /** object_draw_lod_mesh: the LOD mesh at objectViewDepth, then every polygon through the clipper. */
   private drawObject(obj: WorldObject, e: ObjEntry, L: LightLatch, colour: ColourFn): number {
-    const block = objectSelectLodMesh(obj, renderView.objectViewDepth, (o) => {
-      // object_refresh_mesh; objects without a node had their world vertices baked at load
-      if (o.node) objectRefreshMesh(o);
-    });
+    const between = presenting();
+    const block = objectSelectLodMesh(obj, renderView.objectViewDepth, between ? presentRefreshMesh : refreshMesh);
+    // between passes, an object in motion is drawn from its presented vertices
+    if (block && between) presentWearMesh(block);
     const chosen = e.meshes.find((m) => m.block === block);
     for (const m of e.meshes) {
       m.mesh.visible = m === chosen;

@@ -25,9 +25,11 @@ import { registerGlobals } from '../../engine/globals.ts';
 import { imageI32s } from '../../engine/image.ts';
 import { cacheLoadResource, cacheUnlock } from '../../engine/resources/cache.ts';
 import { objectGetPosRadius } from '../../engine/scene/worldObject.ts';
-import { vfxShapeOrigin, vfxShapeSize } from '../../engine/vfx/vfx.ts';
-import { cameraGlobals } from '../camera/viewer.ts';
+import { DRAWN_AFTER, DRAWN_ANCHORED, vfxShapeOrigin, vfxShapeSize, vfxWindowClear, type VfxWindow } from '../../engine/vfx/vfx.ts';
+import { present, presentLerp, presenting } from '../../engine/scene/present.ts';
 import { viewerProjectPoint } from '../camera/projection.ts';
+import { passView, type DrawView } from '../camera/viewerPresent.ts';
+import { viewer } from '../camera/viewer.ts';
 import { display } from '../display/video.ts';
 import { layoutPointInPane, vfxFontSub014020 } from '../display/layout.ts';
 import { mechAllegiance } from '../groups/groups.ts';
@@ -86,7 +88,6 @@ export const overlay = registerGlobals('overlay', bootOverlay(), () => {
   Object.assign(overlay, bootOverlay());
 });
 
-const viewer = (): Viewer => cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer;
 const entityOf = (l: MechLoadout): MechEntity => l.entity!;
 
 /** Loads SHP id + assetVariant and measures shape 0; returns null when it is missing. */
@@ -293,7 +294,7 @@ export function hudCompassMarkersDraw(l: MechLoadout, _a: number, _b: number, be
  * @mw2 hud_reticle_draw 0x00029360
  * @fidelity exact
  */
-export function hudReticleDraw(l: MechLoadout, bearingTorso: number, tilt: number, range: number): number {
+export function hudReticleDraw(l: MechLoadout, bearingTorso: number, tilt: number, range: number, view: DrawView = passView()): number {
   const sel = l.selectedWeapon;
   const wp = loadoutWeapons(l)[sel];
   let result = 0;
@@ -316,14 +317,14 @@ export function hudReticleDraw(l: MechLoadout, bearingTorso: number, tilt: numbe
     else if (((l.flags >>> 8) & 0x80) !== 0) shape = 0x70;
     else shape = 0x6d;
   }
-  const p = aimPointToScreen(l);
+  const p = aimPointToScreen(l, view);
   if (p.visible !== 0) hudShapeDraw(p.sx, p.sy, shape);
   return result;
 }
 
 /** ((int64)focalScale * r >> 8) / depth >> 6 - a bracket's half-size. */
-function bracketSize(r: number, depth: number): number {
-  const q = ((BigInt(viewer().focalScale | 0) * BigInt(r | 0)) >> 8n) / BigInt(depth | 0);
+function bracketSize(v: Viewer, r: number, depth: number): number {
+  const q = ((BigInt(v.focalScale | 0) * BigInt(r | 0)) >> 8n) / BigInt(depth | 0);
   return Number(BigInt.asIntN(32, q)) >> 6;
 }
 
@@ -358,15 +359,16 @@ function drawBrackets(x: number, y: number, s: number, a: number, where: string)
  * @mw2 hud_target_brackets_mech 0x000298c0
  * @fidelity exact
  */
-export function hudTargetBracketsMech(m: MechEntity, allegiance: number): void {
+export function hudTargetBracketsMech(m: MechEntity, allegiance: number, view: DrawView = passView()): void {
   const p = [m.posX, m.posY, m.posZ];
-  if (viewerProjectPoint(viewer(), p) === 0) {
+  view.anchor(m, p);
+  if (viewerProjectPoint(view.viewer, p) === 0) {
     const q = Int32Array.of(p[0]!, p[1]!);
     vfxFontSub014020(display.currentViewport, q, q);
     hudShapeDraw(q[0]!, q[1]!, offScreenShape(allegiance & 0xff));
     return;
   }
-  const s = bracketSize(m.loadout!.radius, p[2]!);
+  const s = bracketSize(view.viewer, m.loadout!.radius, p[2]!);
   drawBrackets(p[0]!, p[1]!, s, allegiance & 0xff, 'hud_target_brackets_mech');
 }
 
@@ -379,18 +381,19 @@ export function hudTargetBracketsMech(m: MechEntity, allegiance: number): void {
  * @mw2 hud_target_brackets_object 0x00029a30
  * @fidelity exact
  */
-export function hudTargetBracketsObject(node: SceneNode | null, allegiance: number): void {
+export function hudTargetBracketsObject(node: SceneNode | null, allegiance: number, view: DrawView = passView()): void {
   if (!node || !node.userData) return;
   const o = objectGetPosRadius(node.userData);
   const p = [o.x, o.y, o.z];
-  if (viewerProjectPoint(viewer(), p) === 0) {
+  view.anchor(node, p);
+  if (viewerProjectPoint(view.viewer, p) === 0) {
     const q = Int32Array.of(p[0]!, p[1]!);
     vfxFontSub014020(display.currentViewport, q, q);
     hudShapeDraw(q[0]!, q[1]!, offScreenShape(allegiance & 0xff));
     return;
   }
-  let s = bracketSize(o.radius >> 1, p[2]!);
-  const cap = viewer().halfWidth >> 1;
+  let s = bracketSize(view.viewer, o.radius >> 1, p[2]!);
+  const cap = view.viewer.halfWidth >> 1;
   if (cap < s) s = cap;
   drawBrackets(p[0]!, p[1]!, s, allegiance & 0xff, 'hud_target_brackets_object');
 }
@@ -405,7 +408,7 @@ export function hudTargetBracketsObject(node: SceneNode | null, allegiance: numb
  * @mw2 hud_target_marker_draw 0x00029470
  * @fidelity exact
  */
-export function hudTargetMarkerDraw(l: MechLoadout): void {
+export function hudTargetMarkerDraw(l: MechLoadout, view: DrawView = passView()): void {
   const e = entityOf(l);
   const h = e.targetHandle >>> 0;
   if (h === 0 || (h & 0x1000) !== 0) return;
@@ -414,19 +417,23 @@ export function hudTargetMarkerDraw(l: MechLoadout): void {
   if (type < 0x200) {
     if (type !== 0x100) return;
     const p = [e.targetX, e.targetY, e.targetZ];
-    if (viewerProjectPoint(viewer(), p) === 0) {
+    if (viewerProjectPoint(view.viewer, p) === 0) {
       const q = Int32Array.of(p[0]!, p[1]!);
       vfxFontSub014020(display.currentViewport, q, q);
       hudShapeDraw(q[0]!, q[1]!, 0xeb);
     } else hudShapeDraw(p[0]!, p[1]!, 0xe5);
-  } else if (type === 0x200) hudTargetBracketsMech(mechs.mechTable[index]!, mechAllegiance(index) & 0xff);
-  else if (type === 0x400) hudTargetBracketsObject(playerTargetNode(), gamethingAllegiance(index) & 0xff);
+  } else if (type === 0x200) hudTargetBracketsMech(mechs.mechTable[index]!, mechAllegiance(index) & 0xff, view);
+  else if (type === 0x400) hudTargetBracketsObject(playerTargetNode(), gamethingAllegiance(index) & 0xff, view);
 }
 
 /**
  * The overlay, while the HUD is on: the compass (tape and markers) when
  * hudCompassOn, the reticle in the pilot's view when hudReticleOn, the
  * target marker when hudTargetMarkerOn, the altitude tape when hudAltitudeOn.
+ * The reticle and target marker stand on points in the world; the window
+ * marks their pixels (DRAWN_ANCHORED) and the port records the call, so the
+ * host can redraw them between passes where the 3D is drawn
+ * (hudAnchoredPresent).
  * Arguments (loadout EAX, legs EDX, torso EBX, bearing ECX, then
  * bearingTorso, tilt, range and pilotView on the stack; ret 0x10), from the
  * disassembly 0x28e30..0x28ec9.
@@ -444,8 +451,87 @@ export const hudOverlayDraw = registerCode(
       hudCompassTapeDraw(0x73, 0x10, legsDeg, torsoDeg);
       hudCompassMarkersDraw(l, 0x73, 0x10, bearing, bearingTorso, tilt);
     }
-    if (pilotView !== 0 && h.hudReticleOn !== 0) hudReticleDraw(l, bearingTorso, tilt, range);
-    if (h.hudTargetMarkerOn !== 0) hudTargetMarkerDraw(l);
+    const reticle = pilotView !== 0 && h.hudReticleOn !== 0;
+    const marker = h.hudTargetMarkerOn !== 0;
+    if (reticle || marker) {
+      // the world-anchored part, drawn as the original draws it and recorded for the host to
+      // redraw between passes (port-only; the window's pixels are the original's)
+      const pane = display.currentViewport;
+      const last = hudAnchored.call;
+      hudAnchored.prev = last && last.generation === ((present.generation - 1) | 0) ? last : null;
+      const call: AnchoredCall = { generation: present.generation, l, bearingTorso, tilt, range, reticle, marker, pane: [pane.left, pane.top, pane.right, pane.bottom], anchors: new Map() };
+      hudAnchored.call = call;
+      const win = pane.canvas as VfxWindow | null;
+      if (win) win.drawnMark = DRAWN_ANCHORED;
+      hudOverlayAnchoredDraw(call, { viewer: viewer(), anchor: (k, q) => call.anchors.set(k, [q[0]!, q[1]!, q[2]!]) });
+      if (win) win.drawnMark = DRAWN_AFTER;
+    }
     if (h.hudAltitudeOn !== 0) hudAltitudeTapeDraw(l);
   },
 );
+
+/** One pass's world-anchored HUD draw: hud_overlay_draw's arguments and switches, and the pane it drew in. @portOnly */
+interface AnchoredCall {
+  /** the pass (present.generation) that drew it */
+  generation: number;
+  l: MechLoadout;
+  bearingTorso: number;
+  tilt: number;
+  range: number;
+  reticle: boolean;
+  marker: boolean;
+  /** display.currentViewport's left, top, right, bottom as it drew */
+  pane: [number, number, number, number];
+  /** the world points it stood on, by anchor key (DrawView.anchor) */
+  anchors: Map<unknown, number[]>;
+}
+
+/** The last world-anchored HUD draw, and the one the pass before made. @portOnly */
+export const hudAnchored = registerGlobals('hudAnchored', { call: null as AnchoredCall | null, prev: null as AnchoredCall | null }, () => {
+  hudAnchored.call = null;
+  hudAnchored.prev = null;
+});
+
+/** hud_overlay_draw's reticle and target marker, through `view`. @portOnly */
+function hudOverlayAnchoredDraw(c: AnchoredCall, view: DrawView): void {
+  if (c.reticle) hudReticleDraw(c.l, c.bearingTorso, c.tilt, c.range, view);
+  if (c.marker) hudTargetMarkerDraw(c.l, view);
+}
+
+/**
+ * The host, between passes: redraws the last pass's reticle and target
+ * marker into `layer` (cleared first) - the same ported draws, into the same
+ * pane - through `v` (the presented viewer), each world point they stand on
+ * moved from where the pass before drew it to where the last pass did. The
+ * points themselves are interpolated, not carried with a node: the aim point
+ * takes its pitch and range from ramps no node follows. A point the pass
+ * before did not draw (a new target) is drawn where it is. Returns false when
+ * the last pass drew none, and the window's own pixels then stand as they
+ * are.
+ *
+ * @portOnly the host draws between passes (engine/scene/present.ts)
+ */
+export function hudAnchoredPresent(layer: VfxWindow, v: Viewer): boolean {
+  vfxWindowClear(layer);
+  const c = hudAnchored.call;
+  if (!c || c.generation !== present.generation) return false;
+  const before = hudAnchored.prev;
+  const view: DrawView = {
+    viewer: v,
+    anchor: (k, p) => {
+      const q = before?.anchors.get(k);
+      if (!q || !presenting()) return;
+      for (let i = 0; i < 3; i++) p[i] = presentLerp(q[i]!, p[i]!);
+    },
+  };
+  const pane = display.currentViewport;
+  const saved = [pane.canvas, pane.left, pane.top, pane.right, pane.bottom] as const;
+  pane.canvas = layer;
+  [pane.left, pane.top, pane.right, pane.bottom] = c.pane;
+  try {
+    hudOverlayAnchoredDraw(c, view);
+  } finally {
+    [pane.canvas, pane.left, pane.top, pane.right, pane.bottom] = saved;
+  }
+  return true;
+}

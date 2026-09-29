@@ -8,6 +8,13 @@
  * Faithful renders at VGA resolution (640 x 480, aspect-fitted) and scales
  * up with nearest filtering; otherwise at native resolution.
  *
+ * In Play the game runs at a fixed step and the display draws between its
+ * passes (engine/scene/present.ts): the world, the camera and the HUD's
+ * world-anchored 2D where they stand `game.presentAlpha()` of the way from
+ * the pass before the last to the last; after every pass that asks for the
+ * main view, the renderer's latch leaves the game's state as drawing it then
+ * would have.
+ *
  * The game itself (GameView.tsx) is this alone. The editor's Viewport builds
  * on it: `lookThrough` shows its free camera instead of the game's (no
  * cockpit or HUD then, which are the game camera's), and it adds its handles
@@ -26,6 +33,9 @@ import { HudOverlay } from '../render/passes/hudOverlay.ts';
 import { IndexedViews } from '../render/passes/indexedView.ts';
 import { renderOptions } from '../render/shading/polygonColour.ts';
 import { viewer } from '../sim/camera/viewer.ts';
+import { presentedViewer } from '../sim/camera/viewerPresent.ts';
+import { hudAnchoredPresent } from '../sim/cockpit/overlay.ts';
+import { ALPHA_ONE, presentFrameBegin, presentFrameEnd, presenting } from '../engine/scene/present.ts';
 import { defaultCanvas } from '../sim/display/video.ts';
 import { renderPort } from '../sim/display/renderPort.ts';
 import { lighting } from '../sim/world/environment.ts';
@@ -102,8 +112,13 @@ export class GameScreen {
     const elapsedMs = now - this.last;
     this.last = now;
     const playing = game.mode === 'play';
-    // the game's render requests are per pass of its loop: between passes the last one is drawn again
-    if (playing && !game.playFrame(elapsedMs, () => this.views.beginFrame())) game.setMode('edit');
+    // the game's render requests are per pass of its loop: between passes the last one is drawn again,
+    // as presented; after each pass, what drawing its main view leaves in the game's state
+    const afterPass = (): void => {
+      if (this.views.mainRequested) sr.latch(viewer());
+    };
+    if (playing && !game.playFrame(elapsedMs, () => this.views.beginFrame(), afterPass)) game.setMode('edit');
+    presentFrameBegin(playing ? game.presentAlpha() : ALPHA_ONE);
     // after the frame: the loop may have ended and left Edit
     const outside = this.opts.lookThrough?.(dt) ?? null;
     const camera = outside?.camera ?? this.gameCamera;
@@ -132,13 +147,15 @@ export class GameScreen {
       webgl.domElement.style.imageRendering = 'auto';
       aspect = w / h;
     }
+    // the game's viewer as presented (its own at the last pass)
+    const shown = presentedViewer();
     if (outside) {
       camera.aspect = aspect;
       camera.updateProjectionMatrix();
-    } else cameraFromViewer(viewer(), camera, aspect);
+    } else cameraFromViewer(shown, camera, aspect);
     game.updateTextures(sr);
     // the game's viewer as the cull, LOD and clipper see it: its own, or standing at the outside camera
-    sr.sync(outside ? outside.viewer() : viewer());
+    sr.sync(outside ? outside.viewer() : shown);
     webgl.getDrawingBufferSize(drawSize);
     // Play: the main view only when the game's render hook asked for it this frame (not while the
     // map has the hook), with its wipe colour in place of sky and ground when it gave one
@@ -171,8 +188,14 @@ export class GameScreen {
         camera.updateProjectionMatrix();
       }
     }
-    // the game's 2D (HUD, radar, cockpit text) over it all, through the game's camera
-    if (!outside && this.hudOverlay.update(game.windowShown(), drawSize.x, drawSize.y)) webgl.render(this.hudOverlay.scene, this.hudOverlay.camera);
+    // the game's 2D (HUD, radar, cockpit text) over it all, through the game's camera; between
+    // passes its reticle and target marker redrawn where the world is presented
+    if (!outside) {
+      const win = game.windowShown();
+      const lift = presenting() && win === defaultCanvas && hudAnchoredPresent(this.hudOverlay.layerFor(win), shown);
+      if (this.hudOverlay.update(win, lift, drawSize.x, drawSize.y)) webgl.render(this.hudOverlay.scene, this.hudOverlay.camera);
+    }
+    presentFrameEnd();
     this.opts.afterFrame?.(now, camera);
     this.raf = requestAnimationFrame(this.frame);
   };

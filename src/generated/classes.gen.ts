@@ -1199,6 +1199,16 @@ export class SceneNode {
   flags: number = 0;
   /** +0x078 int */
   renormCountdown: number = 0;
+  /** port-only: presentation: worldBlock as it stood before the pass numbered presentGen first wrote it */
+  prevWorldBlock: Int32Array = new Int32Array(12);
+  /** port-only: presentation: the pass (present.generation) that last wrote worldBlock */
+  presentGen: number = -1;
+  /** port-only: presentation: the pass that created the node or brought its object into the drawn world, which has no previous transform to be drawn from */
+  presentFreshGen: number = -1;
+  /** port-only: presentation: the world transform between passes, as last presented */
+  presentBlock: Int32Array = new Int32Array(12);
+  /** port-only: presentation: the display frame (present.frame) presentBlock was computed for */
+  presentFrame: number = -1;
 }
 
 /** WorldRecord - 124 (0x7c) bytes. */
@@ -1636,6 +1646,10 @@ export class Viewer {
   field_0xb4: number = 0;
   /** +0x0b8 int */
   lodScale: number = 0;
+  /** port-only: presentation: the pose (viewerPoseSave's order) the main view was drawn from - [0..5] the pass before, [6..11] the pass numbered presentGen */
+  presentPose: Int32Array = new Int32Array(12);
+  /** port-only: presentation: the pass whose main view presentPose[6..11] is */
+  presentGen: number = -1;
 }
 
 /** MissionTableChunk - 189 (0xbd) bytes. */

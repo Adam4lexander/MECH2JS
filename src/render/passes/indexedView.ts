@@ -232,7 +232,7 @@ export class IndexedViews implements RenderPort {
         const x = pane.left + gx;
         if (x < 0 || x > win.xMax) continue;
         win.buffer[y * pitch + x] = px[i]!;
-        win.drawn[y * pitch + x] = 1;
+        win.drawn[y * pitch + x] = win.drawnMark;
       }
     }
   }

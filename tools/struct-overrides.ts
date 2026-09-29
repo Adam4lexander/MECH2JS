@@ -10,6 +10,9 @@
  *  - PORT-ONLY FIELDS stand in for C layouts that are byte offsets into a
  *    shared allocation - e.g. MeshPolygon.indexOffset, which points at index
  *    bytes stored after the polygon table, becomes MeshPolygon.indices.
+ *  - PRESENTATION FIELDS are the port's own: what a scene node or the viewer
+ *    was before the last pass of main's loop, so the host can draw between
+ *    passes (engine/scene/present.ts). The simulation never reads them.
  *
  * Code pointers (hooks, method tables) are typed `CodePtr` - an original code
  * address resolved through engine/codeRegistry.ts.
@@ -63,6 +66,17 @@ export const VARIABLE_ARRAYS = new Set<string>(['MeshBlock.vertices', 'QuadtreeN
 export const EXTRA_FIELDS: Record<string, Array<[string, string, string, string]>> = {
   MeshBlock: [['polygons', 'MeshPolygon[]', '[]', 'the polygon table that follows the vertices at polygonOffset in the C allocation']],
   MeshPolygon: [['indices', 'number[]', '[]', 'the vertex-index bytes the C record reaches through indexOffset']],
+  SceneNode: [
+    ['prevWorldBlock', 'Int32Array', 'new Int32Array(12)', 'presentation: worldBlock as it stood before the pass numbered presentGen first wrote it'],
+    ['presentGen', 'number', '-1', 'presentation: the pass (present.generation) that last wrote worldBlock'],
+    ['presentFreshGen', 'number', '-1', 'presentation: the pass that created the node or brought its object into the drawn world, which has no previous transform to be drawn from'],
+    ['presentBlock', 'Int32Array', 'new Int32Array(12)', 'presentation: the world transform between passes, as last presented'],
+    ['presentFrame', 'number', '-1', 'presentation: the display frame (present.frame) presentBlock was computed for'],
+  ],
+  Viewer: [
+    ['presentPose', 'Int32Array', 'new Int32Array(12)', "presentation: the pose (viewerPoseSave's order) the main view was drawn from - [0..5] the pass before, [6..11] the pass numbered presentGen"],
+    ['presentGen', 'number', '-1', 'presentation: the pass whose main view presentPose[6..11] is'],
+  ],
 };
 
 /**

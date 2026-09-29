@@ -15,6 +15,8 @@
 
 import { WorldObject } from '../../generated/classes.gen.ts';
 import { registerGlobals } from '../globals.ts';
+import { presentNoteFresh } from './present.ts';
+
 
 export const worldRootNode = new WorldObject(); // 0xf44c0
 export const altRootNode = new WorldObject(); // 0xf44ac
@@ -91,6 +93,8 @@ export function objectListsReset(): void {
 export function objectLink(obj: WorldObject | null): void {
   if (objectLists.worldRoot !== worldRootNode || !obj) return;
   const parent = (hi(obj) & 0x10) === 0 ? worldRootNode : altRootNode;
+  // port-only: an object entering the drawn world has nothing on screen to be drawn from (present.ts)
+  if (parent === worldRootNode && obj.node) presentNoteFresh(obj.node);
   if (parent.listNext) parent.listNext.listPrev = obj;
   obj.listNext = parent.listNext;
   parent.listNext = obj;
@@ -197,6 +201,8 @@ export function objectMoveToAltList(obj: WorldObject | null): void {
 export function objectMoveToWorldList(obj: WorldObject | null): void {
   if (!obj || (hi(obj) & 0x10) === 0 || (obj.type & 0xf0) === 0x70) return;
   setHi(obj, hi(obj) & 0xef);
+  // port-only: back in the drawn world, from nowhere on screen (present.ts)
+  if (obj.node) presentNoteFresh(obj.node);
   if (!obj.listPrev) return;
   listRemove(obj);
   if (H.worldListHead) H.worldListHead.listPrev = obj;

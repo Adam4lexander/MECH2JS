@@ -162,6 +162,56 @@ opens the mission picker and editor instead of the game.
 - x87 code (`clib_fp_trunc`, `ROUND`) is ported with doubles and `Math.trunc`;
   say so with `@divergence` if the precision could matter.
 
+## Drawing between passes
+
+In Play the sim runs at a fixed step: every pass of main's loop covers
+exactly `ticksPerPass()` timer ticks (9 at the default 20 passes a second;
+`app/Game.ts`), the original on a PC faster than its own `-F` cap. The
+display draws more often than that, at `alpha` - how far it stands from the
+end of the pass before the last (0) to the end of the last (`0x10000`). The
+model is `engine/scene/present.ts`:
+
+- **The pass boundary** is `presentPassBegin` (from `mainLoopStep`, pause
+  turns included): it numbers the passes and sets alpha back to 1.
+- **Scene nodes** keep their world transform as it stood before the pass
+  first wrote it (`SceneNode.prevWorldBlock`, taken by the scene graph just
+  before it writes `worldBlock`) and which pass wrote it. A node the last
+  pass did not write is drawn where it is; one it created, or whose object
+  joined worldRootNode's list (a pooled projectile or effect, reused and put
+  where it is fired from), has nothing to be drawn from. `presentWorldBlock` and `presentObjectPos` give what is
+  presented, in the game's own formats.
+- **The viewer** keeps the pose each pass's main view was drawn from
+  (`viewerPresentLatch`, from vfx_video_sub_010490);
+  `sim/camera/viewerPresent.ts` interpolates the pose and builds the view
+  transform with viewer_build_transform. A change of camera mode or subject
+  is a cut.
+- **The HUD's world-anchored 2D** (reticle, target marker) is drawn by the
+  pass into the window as the original draws it, its pixels marked
+  `DRAWN_ANCHORED` with what was under them kept, and each world point it
+  stands on recorded under a key (`DrawView.anchor`); the host redraws the
+  same calls with each point interpolated from the pass before's to this
+  pass's (`hudAnchoredPresent`) and lays them in the original's order
+  (`render/passes/hudOverlay.ts`). Interpolate the points themselves - a point
+  derived from a node is not rigidly attached to it (the aim point's pitch and
+  range come from ramps).
+
+The rules that keep the sim exact:
+
+- At alpha = 1 every accessor returns the sim's own objects, so a draw then is
+  the pass's draw. The sim never reads a presented value.
+- A draw between passes puts back everything it touches: an object's
+  position, its `currentMesh`, and every mesh's vertices, normals and stamp
+  (`presentWear` / `presentUnwear`) - the sim reads them (a class-2 object's
+  collision reads its currentMesh's vertices unstamped).
+- What drawing the main view leaves in the sim (the LOD choice, the refreshed
+  vertices) is done at the pass by `SceneRenderer.latch`, after every pass
+  that asks for the main view.
+- `test/sim/present.test.ts` runs a mission drawing only at the passes and
+  again drawing between them, and requires the same game pass for pass.
+
+Anything new the renderer draws from sim state, or new world-anchored 2D,
+goes through this model, not around it.
+
 ## Structs
 
 `npm run gen` turns `mw2_types.h` into `src/generated/structs.gen.ts`
