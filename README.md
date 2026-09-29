@@ -33,10 +33,10 @@ npm test                  # unit + golden tests
 npm run typecheck
 ```
 
-Most golden suites also check the port against the decompilation's
-listings, and `npm run gen` regenerates from them. The decompilation is not
-public: without it those suites skip and `npm run gen` stops. Neither is
-needed to build or play.
+The tests need only the install (`MW2_ROOT`). `npm run gen` regenerates the
+port's struct classes and labels from the decompilation, which is not
+public: without it `npm run gen` stops. It is not needed to build, play or
+test.
 
 The game CD's image (e.g. `MECH2_16B.BIN` / `.CUE`) belongs in the install
 directory beside `MW2.PRJ`. It is the CD drive: the intro and in-screen

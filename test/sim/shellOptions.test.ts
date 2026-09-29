@@ -1,9 +1,7 @@
 // COMBAT VARIABLES (the shell's options panel) and the two files it edits,
-// MW2SND.CFG and MW2DIF.CFG. The install's copies are read here only as
-// fixtures (the port never reads them at run time): the shell's reader and
-// writer must hand them back byte for byte, and a headless session through
-// the Esc menu must leave exactly the edited bytes on the port's disk, which
-// MW2.EXE's start-up then reads.
+// MW2SND.CFG and MW2DIF.CFG: the port's defaults are the shell's own, and a
+// headless session through the Esc menu changes exactly the settings it
+// edits, which MW2.EXE's start-up then reads.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
@@ -15,15 +13,13 @@ import { ShellPump } from '../../src/shell/host/pump.ts';
 import { hardware, hwMouseButtons, hwMouseMove } from '../../src/shell/host/hardware.ts';
 import { mem } from '../../src/shell/memory.ts';
 import { widgetLabel, widgetRow } from '../../src/shell/ui/widgets.ts';
-import { simOptionsRead, simOptionsWrite } from '../../src/shell/options/simOptions.ts';
-import { soundConfigRead, soundConfigWrite } from '../../src/shell/options/soundConfig.ts';
 import '../../src/shell/screens/options.ts';
 import { bootMission } from '../../src/mission/load.ts';
 import { mechs } from '../../src/sim/mech/mechGlobals.ts';
 import { sound } from '../../src/sim/sound/mixer.ts';
 import { DEFAULT_RULES, rulesToBytes } from '../../src/sim/mech/simOptions.ts';
 import { DEFAULT_SOUND_CONFIG, soundConfigFromBytes, soundConfigToBytes } from '../../src/sim/sound/soundConfigFile.ts';
-import { gameSource, hasGameData, hasShellData, installFiles, installShellFixtures } from '../support/env.ts';
+import { gameSource, hasGameData, hasShellData, installFiles } from '../support/env.ts';
 
 const TABLE = SHELL_LABEL.optionsWidgets;
 /** optionsWidgets rows, by what they edit */
@@ -43,38 +39,15 @@ describe.runIf(hasGameData && hasShellData)('COMBAT VARIABLES', () => {
     shellExe = ExeImage.fromExe(await gameSource().read('MW2SHELL.EXE'));
     prj = new ProjectFile(await gameSource().read('MW2.PRJ'));
     db = await gameSource().read('DATABASE.MW2');
-    const fx = installShellFixtures(['MW2SND.CFG', 'MW2DIF.CFG']);
-    snd = fx.get('MW2SND.CFG')!;
-    dif = fx.get('MW2DIF.CFG')!;
-    expect(snd.length).toBe(0x3c);
-    expect(dif.length).toBe(8);
+    // the settings the session starts from: the defaults, in 640x480
+    snd = soundConfigToBytes({ ...DEFAULT_SOUND_CONFIG, videoDriver: 'vesa480.dll' });
+    dif = rulesToBytes(DEFAULT_RULES);
   });
 
   it("the port's defaults are the shell's boot values", () => {
     startShellProcess(shellExe, prj);
     expect(hex(rulesToBytes(DEFAULT_RULES))).toBe(hex(mem().view(SHELL_LABEL.simOptions, 8).slice()));
     expect(hex(soundConfigToBytes(DEFAULT_SOUND_CONFIG))).toBe(hex(mem().view(SHELL_LABEL.soundConfig, 0x3c).slice()));
-    // the install's MW2DIF.CFG is the same record; its MW2SND.CFG differs only in the driver name
-    expect(hex(rulesToBytes(DEFAULT_RULES))).toBe(hex(dif));
-    expect({ ...soundConfigFromBytes(snd), videoDriver: '' }).toEqual(DEFAULT_SOUND_CONFIG);
-    expect(hex(soundConfigToBytes(soundConfigFromBytes(snd)))).toBe(hex(snd));
-  });
-
-  it("the install's files load and save unchanged through the shell's reader and writer", () => {
-    startShellProcess(shellExe, prj);
-    setDosFiles(new Map());
-    setOverlayFiles(null);
-    setOwnFiles(new Map([['MW2SND.CFG', snd], ['MW2DIF.CFG', dif]]));
-    // scribble over both records first, so a reader that read nothing cannot pass
-    mem().fill(SHELL_LABEL.soundConfig, 0xa5, 0x3c);
-    mem().fill(SHELL_LABEL.simOptions, 0xa5, 8);
-    soundConfigRead();
-    simOptionsRead();
-    setOwnFiles(new Map());
-    soundConfigWrite();
-    simOptionsWrite();
-    expect(hex(dosFileLoad('MW2SND.CFG'))).toBe(hex(snd));
-    expect(hex(dosFileLoad('MW2DIF.CFG'))).toBe(hex(dif));
   });
 
   it('Esc menu -> COMBAT VARIABLES: rules, a slider and the resolution, written back and read by MW2.EXE', async () => {
@@ -126,7 +99,7 @@ describe.runIf(hasGameData && hasShellData)('COMBAT VARIABLES', () => {
     hwMouseMove(0, 0);
     await step(5);
     await openPanel();
-    // the install's settings as the panel shows them
+    // the settings on the disk as the panel shows them
     expect(text(ROW.difficulty)).toBe('MEDIUM');
     expect(text(ROW.invulnerability)).toBe('OFF');
     expect(text(ROW.collisionDamage)).toBe('OFF');

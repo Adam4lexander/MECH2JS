@@ -1,14 +1,14 @@
-// MGEO has no decompilation listing, so this is structural: every MGEO
-// resource in MW2.PRJ parses, is exactly the 28 bytes res_load_mgeo reads
-// (so no byte of any record goes unaccounted for), resolves by name through
-// TABL 5 (the table resource_load_ref is given for MGEO) to its own id, and
-// holds the invariants res_load_mgeo's note records for all 55 records.
+// Every MGEO resource in MW2.PRJ parses, is exactly the 28 bytes
+// res_load_mgeo reads (so no byte of any record goes unaccounted for),
+// resolves by name through TABL 5 (the table resource_load_ref is given for
+// MGEO) to its own id, and holds the invariants res_load_mgeo's note records
+// for all 55 records.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ProjectFile, resourceIdByName } from '../../src/data/prj/ProjectFile.ts';
 import { MGEO_RECORD_SIZE, parseMgeo } from '../../src/data/formats/mgeo.ts';
-import { gameSource, hasDecompiled, hasGameData } from '../support/env.ts';
+import { gameSource, hasGameData } from '../support/env.ts';
 
-describe.runIf(hasGameData && hasDecompiled)('MGEO resources', () => {
+describe.runIf(hasGameData)('MGEO resources', () => {
   let prj: ProjectFile;
   beforeAll(async () => {
     prj = new ProjectFile(await gameSource().read('MW2.PRJ'));

@@ -1,6 +1,6 @@
 // The mission-stream cluster (src/mission/vm/streams.ts, projectWalk.ts,
-// src/mission/tables/*, src/mission/objectives.ts) run against MW2.PRJ, the
-// loose .BWD files beside it and the decompilation's objectives listing.
+// src/mission/tables/*, src/mission/objectives.ts) run against MW2.PRJ and
+// the loose .BWD files a mission's disk has.
 //
 // What each check would catch:
 //   - by-name opening: a TABL 14 lookup that returned a neighbour's id (each
@@ -11,14 +11,8 @@
 //   - arena budgets: a walk that mis-summed, double-counted or failed to
 //     dedupe - compared per mission, all ten budgets on one line, against an
 //     independent re-walk written here from the C;
-//   - MTBL install: fields attached to the wrong objective or table - the
-//     runtime ObjectiveTables are printed in objectives.txt's exact format
-//     and compared line for line with the listing dump_objectives.py wrote
-//     from the static records;
 //   - target marking: masks compared per (mission, stream) with masks
 //     computed from the decoded records.
-import fs from 'node:fs';
-import path from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ProjectFile, resourceIdByName } from '../../src/data/prj/ProjectFile.ts';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
@@ -29,38 +23,16 @@ import { setLogSink } from '../../src/core/log.ts';
 import { globalGroups } from '../../src/engine/globals.ts';
 import { setBootImage } from '../../src/engine/image.ts';
 import { setMainProject } from '../../src/engine/resources/cache.ts';
-import {
-  preloadLooseFiles,
-  projectGpspecApply,
-  projectItemApply,
-  projectOpenStream,
-  setLooseFiles,
-  SHIPPED_LOOSE_STREAMS,
-  streams,
-} from '../../src/mission/vm/streams.ts';
+import { projectGpspecApply, projectItemApply, projectOpenStream, setLooseFiles, SHIPPED_LOOSE_STREAMS, streams } from '../../src/mission/vm/streams.ts';
 import { ARENA_BUDGET_COUNT, arenaBudgetBytes, projectLoadByName, projectWalk, tagDword } from '../../src/mission/vm/projectWalk.ts';
-import { missionMarkByName, missionRecordTargetName, missionTableLoad, missionTables } from '../../src/mission/tables/missionTables.ts';
+import { missionMarkByName, missionTableLoad, missionTables } from '../../src/mission/tables/missionTables.ts';
 import { objectiveStartLinks, objectiveTableStart, objectives } from '../../src/mission/objectives.ts';
 import { missionClock } from '../../src/mission/missionClock.ts';
 import { clock } from '../../src/engine/clock.ts';
 import { trackedGlobals } from '../../src/sim/ai/tracked.ts';
-import { gameSource, hasDecompiled, hasGameData, MW2_ROOT, readListing } from '../support/env.ts';
-import { expectSameLines, lines, padL, padR } from '../support/listing.ts';
+import { gameSource, hasGameData, installFiles } from '../support/env.ts';
+import { expectSameLines } from '../support/listing.ts';
 import { namedStreams, type NamedStream } from '../support/bwdHelpers.ts';
-
-// dump_objectives.TYPES / CATEGORY (as test/golden/bwdPayloads.test.ts)
-const TYPES = new Map<number, string>([
-  [0x0, 'timer'], [0x1, 'destroy'], [0x2, 'destroy'], [0x4, 'protect'],
-  [0x8, 'identify'], [0x10, 'start'], [0x20, 'identify+req'],
-  [0x100, 'reach'], [0x200, 'timer:follow'], [0x400, 'timer:rest'], [0x800, 'timer:shutdown'],
-  [0x1000, 'immediate'], [0x2000, 'avoid'],
-  [0x10000, 'WIN mission'], [0x20000, 'LOSE mission'],
-  [0x40000, 'toggle listed'], [0x80000, 'force fail'],
-  [0x100000, 'force succeed'],
-]);
-const CATEGORY = new Map<number, string>([[1, 'Primary'], [2, 'Secondary'], [8, 'Return']]);
-/** the installer's condition codes back to the data's letters */
-const CONDITION = new Map<number, string>([[1, 'C'], [2, 'S'], [3, 'F']]);
 
 const RESET = ['streams', 'scenario', 'missionTables', 'objectives', 'projectWalk', 'missionClock', 'mechs', 'tracked', 'clock'];
 function resetMissionState(): void {
@@ -78,11 +50,10 @@ function capturingErrors<T>(fn: () => T): { result: T; errors: string[] } {
   }
 }
 
-describe.runIf(hasGameData && hasDecompiled)('mission streams and tables', () => {
+describe.runIf(hasGameData)('mission streams and tables', () => {
   let prj: ProjectFile;
   let streamsInPrj: NamedStream[];
   let loose: Map<string, Uint8Array>;
-  const looseOnDisk = new Set<string>();
 
   beforeAll(async () => {
     const src = gameSource();
@@ -90,20 +61,21 @@ describe.runIf(hasGameData && hasDecompiled)('mission streams and tables', () =>
     setMainProject(prj);
     setBootImage(ExeImage.fromExe(await src.read('MW2.EXE')));
     setLogSink(() => {});
-    for (const f of fs.readdirSync(MW2_ROOT)) if (f.toUpperCase().endsWith('.BWD')) looseOnDisk.add(f.toUpperCase());
-    loose = await preloadLooseFiles(src);
+    // the loose streams as a mission's disk has them: the player's star and the (empty) enemy
+    // stars the shell writes before a mission, and INSTMAP1.BWD (test/support/env.ts)
+    const disk = installFiles();
+    loose = new Map(SHIPPED_LOOSE_STREAMS.map((n) => [n, disk.get(n)!]));
     setLooseFiles(loose);
     resetMissionState();
     streamsInPrj = namedStreams(prj);
   });
 
-  it('the shipped loose-stream list is exactly the id -2 INCL names in MW2.PRJ, and each is beside MW2.PRJ', () => {
+  it("the loose-stream list is exactly the id -2 INCL names in MW2.PRJ, and a mission's disk has each", () => {
     const used = new Set<string>();
     for (const s of streamsInPrj)
       for (const c of s.chunks) if (c.tag === 'INCL' && c.i16(8) === -2) used.add(`${c.str(0xa, 12).toUpperCase()}.BWD`);
     expect([...used].sort()).toEqual([...SHIPPED_LOOSE_STREAMS].sort());
-    for (const n of SHIPPED_LOOSE_STREAMS) expect(looseOnDisk.has(n), n).toBe(true);
-    expect([...loose.keys()].sort()).toEqual([...SHIPPED_LOOSE_STREAMS].sort());
+    for (const n of SHIPPED_LOOSE_STREAMS) expect(loose.get(n), n).toBeDefined();
   });
 
   it('MW2.PRJ has no STBL chunk and no by-name (-1) or ^ reference: the scenario substitution is never exercised', () => {
@@ -149,7 +121,7 @@ describe.runIf(hasGameData && hasDecompiled)('mission streams and tables', () =>
         else gps++;
         const where = `${s.name}+${c.offset} ${c.tag} (${id}, ${name})`;
         // expected: a numeric id is the resource whose record header carries that name;
-        // -2 is the loose file NAME.BWD beside MW2.PRJ
+        // -2 is the loose file NAME.BWD on the mission's disk
         if (id >= 0) want.push(`${where} -> BWD ${id} ${name.toLowerCase()} same-bytes`);
         else want.push(`${where} -> loose ${name.toUpperCase()}.BWD same-bytes`);
         let opened: ProjectItem | null = null;
@@ -168,8 +140,8 @@ describe.runIf(hasGameData && hasDecompiled)('mission streams and tables', () =>
           got.push(`${where} -> BWD ${it.resourceId} ${rn} ${sameBytes(it.base, prj.readResource('BWD', it.resourceId)) ? 'same-bytes' : 'OTHER-bytes'}`);
         } else {
           const file = `${name.toUpperCase()}.BWD`;
-          const disk = fs.readFileSync(path.join(MW2_ROOT, [...looseOnDisk].find((f) => f === file) ?? file));
-          got.push(`${where} -> loose ${file} ${sameBytes(it.base, new Uint8Array(disk)) ? 'same-bytes' : 'OTHER-bytes'}`);
+          const onDisk = loose.get(file);
+          got.push(`${where} -> loose ${file} ${onDisk && sameBytes(it.base, onDisk) ? 'same-bytes' : 'OTHER-bytes'}`);
         }
       }
     }
@@ -214,81 +186,6 @@ describe.runIf(hasGameData && hasDecompiled)('mission streams and tables', () =>
       const line = got.find((l) => l.startsWith(n + ' '));
       if (line) console.info(line);
     }
-  });
-
-  it('MTBL tables install for every stream, and the runtime objective tables correspond line for line to objectives.txt', () => {
-    const out: string[] = ['MW2 mission objectives - MW2.PRJ', ''];
-    let tables = 0;
-    let records = 0;
-    const names = new Set(streamsInPrj.map((s) => s.name.toLowerCase()));
-    const looseNames = new Set([...looseOnDisk].map((f) => f.slice(0, -4).toLowerCase()));
-    let named = 0;
-    let inPrj = 0;
-    let inFile = 0;
-    let none = 0;
-    const errorsSeen: string[] = [];
-    const unresolvedSounds = new Set<string>();
-    for (const s of streamsInPrj) {
-      resetMissionState();
-      for (const c of s.chunks) {
-        if (c.tag !== 'MTBL' || c.size < MTBL_RECORDS_AT) continue;
-        const { result, errors } = capturingErrors(() => missionTableLoad(c));
-        if (result !== 1 || errors.length) errorsSeen.push(`${s.name}+${c.offset}: result=${result} ${errors.join('; ')}`);
-        const g = c.i32(8);
-        const t = objectives.objectiveTables[g]!;
-        const copy = missionTables.missionTables[g]!;
-        tables++;
-        records += t.count;
-        if (missionTables.missionTableCount < g + 1) errorsSeen.push(`${s.name}: missionTableCount ${missionTables.missionTableCount} below table ${g}`);
-        for (const [nm, id] of [[t.successSoundName, t.successSound], [t.failureSoundName, t.failureSound]] as const)
-          if (nm && id === -1) unresolvedSounds.add(nm);
-        out.push(
-          `${s.name} (BWD ${s.rid})  table ${g >>> 0}  limit ${t.timeLimit > 0 ? `${t.timeLimit}s` : 'none'}  mission ok=${t.successSoundName} fail=${t.failureSoundName}  ${t.count} objectives`,
-        );
-        for (let i = 0; i < t.count; i++) {
-          const o = t.objectives[i]!;
-          if (o.state !== 0 || o.targetCount !== 0 || o.targets[0]!.index !== 0 || o.targets[0]!.kind !== 8 || o.startedAt !== -1 || o.changedAt !== -1)
-            errorsSeen.push(`${s.name} table ${g} objective ${i}: not reset as the installer resets it`);
-          for (const [nm, id] of [[o.successSoundName, o.successSound], [o.failureSoundName, o.failureSound]] as const)
-            if (nm && id === -1) unresolvedSounds.add(nm);
-          const pre: string[] = [];
-          for (const p of o.prerequisites) {
-            const code = CONDITION.get(p.condition);
-            if (!code) break;
-            pre.push(`${code}(${p.objective},${p.table})`);
-          }
-          const preText = pre.length ? `${o.prereqAll ? 'all' : 'any'}:${pre.join(',')}` : '';
-          // stream= is the static record's targetStreamName, read from the installed copy
-          let stream = missionRecordTargetName(copy, i);
-          const sl = stream.toLowerCase();
-          if (sl) {
-            named++;
-            if (sl === 'null') none++;
-            else if (names.has(sl)) inPrj++;
-            else if (looseNames.has(sl)) {
-              inFile++;
-              stream += '@';
-            } else stream += '?';
-          }
-          const typ = o.type >>> 0;
-          const type = `${padR('0x' + typ.toString(16), 7)} ${padR(TYPES.get(typ) ?? '?', 13)}`;
-          out.push(
-            `  ${padL(i, 2)} ${type} limit=${padR(o.timeLimit, 4)} ${o.listed ? 'Y' : '-'}${o.isPrerequisite ? 'M' : '-'} cat=${padR(`${o.category} ${CATEGORY.get(o.category) ?? 'Tertiary'}`, 9)}` +
-              ` quota=${padR(o.membersPerTarget || 'all', 3)} restraint=${o.restraint} stream=${padR(stream, 10)} ${padR(preText, 18)} ok=${padR(o.successSoundName, 9)} fail=${padR(o.failureSoundName, 9)} ${o.text}`,
-          );
-        }
-        out.push('');
-      }
-    }
-    out.splice(
-      1,
-      0,
-      `${tables} objective tables, ${records} objectives. stream= names: ${named} in all - ${inPrj} a BWD stream in this file, ${inFile} a loose .BWD beside it (marked @), ${none} NULL, ${named - inPrj - inFile - none} unknown (marked ?)`,
-    );
-    expect(errorsSeen).toEqual([]);
-    // Not an error: most announcement names are not in SNDTABLE (mission_result_format loads them by name through dev_dir_load_sfl).
-    if (unresolvedSounds.size) console.info(`${unresolvedSounds.size} announcement names SNDTABLE does not resolve (id -1), e.g. ${[...unresolvedSounds].sort().slice(0, 8).join(' ')}`);
-    expectSameLines('objectives.txt (from the installed tables)', lines(readListing('objectives.txt')), out);
   });
 
   it("objective_table_start places the group at objective 0's tracked-object target and stamps the start times", () => {

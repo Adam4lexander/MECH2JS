@@ -26,9 +26,7 @@ import { careerRegistryLoad, careerRegistrySave } from '../../src/shell/career/r
 import { prmLoad, prmSave } from '../../src/shell/handoff/prm.ts';
 import { starConfigure, starSetMember } from '../../src/shell/handoff/stars.ts';
 import { mem } from '../../src/shell/memory.ts';
-import { gameSource, hasGameData, hasShellData, MW2_ROOT } from '../support/env.ts';
-import fs from 'node:fs';
-import path from 'node:path';
+import { firstRunDisk, gameSource, hasGameData, hasShellData } from '../support/env.ts';
 
 describe('check_launched_by_shell', () => {
   it('takes the scenario and the shell options', () => {
@@ -59,11 +57,8 @@ describe.runIf(hasGameData && hasShellData)('MECH2 loop, headless', () => {
   });
 
   it('shell -> mw2prm.cfg -> sim -> mw2msn.cfg -> shell resumes', async () => {
-    // the read-only layer: the input drivers the sim needs (and, for this test, the install's maps)
-    const assets = new Map<string, Uint8Array>();
-    for (const f of fs.readdirSync(MW2_ROOT)) if (/\.MAP$/i.test(f)) assets.set(f.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(MW2_ROOT, f))));
-    for (const f of fs.readdirSync(path.join(MW2_ROOT, 'GIDDI'))) assets.set('GIDDI/' + f.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(MW2_ROOT, 'GIDDI', f))));
-    setDosFiles(assets);
+    // the read-only layer: the drivers and controls files the port has on a first run
+    setDosFiles(firstRunDisk());
     setOwnFiles(new Map());
     setOverlayFiles(null);
 

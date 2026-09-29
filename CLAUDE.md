@@ -11,9 +11,10 @@ adding code**. `PORTING.md` (generated) says what is ported.
 game install) and `MW2_DECOMPILED` (the decompilation). `.env.example` has
 only `MW2_ROOT`: the decompilation is not public, so `MW2_DECOMPILED` is the
 maintainer's, added to `.env.local` by hand. `tools/paths.ts`
-loads it for the dev server, the tests and `npm run gen` alike. With it
-unset the golden tests *skip* rather than fail - a test run showing skips
-means the setup is missing, not that the port is fine.
+loads it for the dev server, the tests and `npm run gen` alike. The tests
+need only `MW2_ROOT` - none reads the decompilation - and skip rather than
+fail without it: a test run showing skips means the install is missing, not
+that the port is fine. `npm run gen` needs the decompilation too.
 
 ## The decompilation is a separate repo
 
@@ -39,8 +40,13 @@ finding things it got wrong or left unnamed:
 - The port is self-contained: it reads the original files only as content
   (MW2.PRJ, the EXEs, the .MW2 archives, MW2.INI, GIDDI drivers, the CD
   image). Everything the programs write - cfgs, controls files, star BWDs,
-  MEKs, the pilot registry - is the port's own, kept in the browser. Tests
-  may read the install's copies as expected output; the app never does.
+  MEKs, the pilot registry - is the port's own, kept in the browser. Neither
+  the app nor the tests read a player's saved files from the install: a
+  test builds the inputs it needs.
+- The port recreates the original's gameplay. Its own files need not match
+  the original's byte for byte; test behaviour (scoring, rules, what a
+  mission loads) by running the game, not a file's bytes or the port's
+  source text.
 - The user usually has the dev server open (http://localhost:5173) while
   work happens. Editing `src/` hot-reloads into their running game and can
   leave it in a state no real run produces. Instrument in a scratch test
@@ -53,4 +59,4 @@ npm run gen && npm run typecheck && npm run lint && npm test
 ```
 
 `npm run gen` must leave the tree clean, and `npm test` should show no skipped
-suites on a machine with `.env.local` set.
+suites on a machine with `MW2_ROOT` set.

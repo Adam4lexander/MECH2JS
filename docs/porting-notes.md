@@ -7,8 +7,7 @@ the method rules there apply here too. Paths below written `decompiled/...`
 are in that repo - locally, under `MW2_DECOMPILED` (`.env.local`). The
 decompilation is not public, so `.env.example` leaves `MW2_DECOMPILED` out
 and the README does not mention it: add it to `.env.local` by hand. Without
-it the game builds and plays, most golden suites skip and `npm run gen`
-stops.
+it the game builds, plays and passes its tests; only `npm run gen` stops.
 
 ## Two repos
 
@@ -111,9 +110,9 @@ port's own files (everything a program writes: MW2REG.CFG, mw2prm.cfg,
 MW2DIF/MW2SND/MW2CAR/mw2msn.cfg, the star BWDs, user MEKs, INPUT.MAP and
 giddi\config00.cpc; persisted in IndexedDB by `app/diskStore.ts`), and a
 scratch overlay (the dev mission picker's launches, never persisted).
-**The port never reads the install's config or player files at run
-time**; tests read them as the expected output of the ported writers
-(`installShellFixtures`). Files the original ships and a program only
+**The port never reads the install's config or player files** - nor do
+the tests, which build what they need (a registry, a mission's results, a
+user MEK) so they pass on any install. Files the original ships and a program only
 reads - GAMEKEY.MAP, the per-device giddi\<device>.cpc profiles - are the
 port's own data, written onto the disk on a first run together with the
 controls screen's INPUT.MAP (`shell/controls/seed.ts`).
@@ -183,12 +182,16 @@ decompilation. Each state object registers itself with
 ## Tests
 
 - `test/unit` - no game data needed.
-- `test/golden` - checks against the real MW2.PRJ / MW2.EXE and against the
-  decompilation's listings. **Correspondence, not counts**: print the port's
-  reading in the listing's exact format and compare line by line with
-  `expectSameLines` (test/support/listing.ts). A test that only compares
-  totals would pass a parser that shuffled records.
-- Suites that need data use `describe.runIf(hasGameData && hasDecompiled)`.
+- `test/golden`, `test/sim` - the port run on the real MW2.PRJ / MW2.EXE /
+  MW2SHELL.EXE from `MW2_ROOT`. No test reads the decompilation: the port
+  must stand alone. Test behaviour - what the game does - not agreement with
+  a second reader of the same data (the decompilation's dump tools) or a
+  file's bytes. **Correspondence, not counts**: where a test compares many
+  records, compare them one to one (`expectSameLines`,
+  test/support/listing.ts), with the expected side worked out
+  independently in the test.
+- Suites that need data use `describe.runIf(hasGameData)` (or
+  `hasShellData`, `hasCd`).
 
 ## Decisions log
 

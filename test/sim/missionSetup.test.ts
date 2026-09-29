@@ -1,31 +1,22 @@
-// The port's stand-in for the shell's mission setup. The star builder writes
-// the shell's own layout: for the setup this install's USERSTAR.BWD holds it
-// gives that file byte for byte, and with no 'Mechs the install's empty
-// opponent stars. The mission list splits by the loose files each mission
-// includes; the 'Mech list is every 'Mech the missions field; and a star
-// built from a setup puts the chosen pilot, 'Mech and starmates in the game.
-import fs from 'node:fs';
-import path from 'node:path';
+// The port's stand-in for the shell's mission setup. The mission list splits
+// by the loose files each mission includes; the 'Mech list is every 'Mech the
+// missions field; and a star built from a setup puts the chosen pilot, 'Mech
+// and starmates in the game.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { missionCatalog } from '../../src/app/gameData.ts';
 import { mechCatalog, type MechChoice } from '../../src/data/catalog/mechs.ts';
-import { buildEmptyStar, buildUserStar, STARMATE_LIMIT } from '../../src/data/config/userStar.ts';
+import { STARMATE_LIMIT } from '../../src/data/config/userStar.ts';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { parseMek } from '../../src/data/formats/mek.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
 import { bootMission } from '../../src/mission/load.ts';
 import { aiCombatSub0246b0, lanceMechForSlot } from '../../src/sim/groups/orders.ts';
 import { mechs } from '../../src/sim/mech/mechGlobals.ts';
-import { gameSource, hasGameData, installFiles, MW2_ROOT, TEST_STAR } from '../support/env.ts';
+import { gameSource, hasGameData, installFiles, TEST_STAR } from '../support/env.ts';
 
 let exe: ExeImage;
 let prj: ProjectFile;
 let catalog: MechChoice[];
-
-const onDisk = (name: string): Uint8Array | null => {
-  const p = path.join(MW2_ROOT, name);
-  return fs.existsSync(p) ? new Uint8Array(fs.readFileSync(p)) : null;
-};
 
 describe.runIf(hasGameData)('mission setup', () => {
   beforeAll(async () => {
@@ -35,12 +26,7 @@ describe.runIf(hasGameData)('mission setup', () => {
     catalog = mechCatalog(prj);
   });
 
-  it("builds the shell's star files: the install's USERSTAR.BWD and empty EN01STAR.BWD byte for byte", () => {
-    const user = onDisk('USERSTAR.BWD');
-    const en = onDisk('EN01STAR.BWD');
-    if (user) expect(Array.from(buildUserStar(TEST_STAR))).toEqual(Array.from(user));
-    if (en) expect(Array.from(buildEmptyStar())).toEqual(Array.from(en));
-    // the test star's 'Mech is the catalog's own Mad Dog
+  it("the test star's 'Mech is the catalog's own Mad Dog", () => {
     expect(catalog.find((m) => m.config === 'mdg00std')).toEqual(TEST_STAR.pilot.mech);
   });
 

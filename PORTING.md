@@ -921,12 +921,12 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0004b410 | project_load_by_name | project_file | exact | `projectLoadByName` src/mission/vm/projectWalk.ts:237 |
 | 0x0004b4a0 | project_walk_chunks | project_file | exact | `projectWalkChunks` src/mission/vm/projectWalk.ts:125 |
 | 0x0004b690 | arena_budget_build | project_file | exact | `arenaBudgetBuild` src/mission/vm/projectWalk.ts:180 |
-| 0x0004b7d0 | project_open_stream | project_file | exact | `projectOpenStream` src/mission/vm/streams.ts:175 |
+| 0x0004b7d0 | project_open_stream | project_file | exact | `projectOpenStream` src/mission/vm/streams.ts:161 |
 | 0x0004ba30 | project_next_chunk | project_file | exact | `projectNextChunk` src/data/bwd/stream.ts:114 |
-| 0x0004baa0 | project_item_release | project_file | exact | `projectItemRelease` src/mission/vm/streams.ts:217 |
+| 0x0004baa0 | project_item_release | project_file | exact | `projectItemRelease` src/mission/vm/streams.ts:203 |
 | 0x0004bad0 | project_tag_to_keyword | project_file | exact | `readProjectTags` src/data/exe/tables/projectTags.ts:22 |
-| 0x0004bb00 | debug_log | project_file | partial | `debugLog` src/mission/vm/streams.ts:135 |
-| 0x0004bb40 | project_trace_chunk | project_file | exact | `projectTraceChunk` src/mission/vm/streams.ts:148 |
+| 0x0004bb00 | debug_log | project_file | partial | `debugLog` src/mission/vm/streams.ts:121 |
+| 0x0004bb40 | project_trace_chunk | project_file | exact | `projectTraceChunk` src/mission/vm/streams.ts:134 |
 | 0x0004bb80 | res_load_mgeo | res_loaders | exact | `resLoadMgeo` src/sim/mech/config.ts:366 |
 | 0x0004bc60 | res_load_anim | res_loaders | exact | `resLoadAnim` src/sim/mech/anim.ts:115 |
 | 0x0004be00 | res_load_hdi | res_loaders | exact | `resLoadHdi` src/sim/cockpit/resources.ts:206 |
@@ -934,24 +934,24 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0004c170 | res_load_file | res_loaders | partial | `resLoadFile` src/sim/mech/looseFiles.ts:75 |
 | 0x0004c2c0 | sim_options_load | res_loaders | exact | `simOptionsLoad` src/sim/mech/simOptions.ts:59 |
 | 0x0004c4b0 | screenshot_sub_04c4b0 | screenshot | exact | `screenshotSub04c4b0` src/sim/mech/looseFiles.ts:62 |
-| 0x0004c5d0 | stream_seen_add | stream_seen | exact | `streamSeenAdd` src/mission/vm/streams.ts:306 |
-| 0x0004c650 | stream_seen_find | stream_seen | exact | `streamSeenFind` src/mission/vm/streams.ts:319 |
-| 0x0004c6a0 | stream_seen_clear | stream_seen | exact | `streamSeenClear` src/mission/vm/streams.ts:333 |
+| 0x0004c5d0 | stream_seen_add | stream_seen | exact | `streamSeenAdd` src/mission/vm/streams.ts:292 |
+| 0x0004c650 | stream_seen_find | stream_seen | exact | `streamSeenFind` src/mission/vm/streams.ts:305 |
+| 0x0004c6a0 | stream_seen_clear | stream_seen | exact | `streamSeenClear` src/mission/vm/streams.ts:319 |
 | 0x0004c760 | mech_load_config | mech_config | exact | `mechLoadConfig` src/sim/mech/config.ts:162 |
 | 0x0004cf20 | mech_loadout_rating | mech_config | exact | `mechLoadoutRating` src/sim/mech/config.ts:103 |
 | 0x0004d0a0 | objective_table_install | mech_config | exact | `objectiveTableInstall` src/mission/objectives.ts:76 |
 | 0x0004d550 | mission_mark_by_name | mech_config | exact | `missionMarkByName` src/mission/tables/missionTables.ts:125 |
 | 0x0004d640 | mission_record_add_value | mech_config | exact | `missionRecordAddValue` src/mission/tables/missionTables.ts:153 |
 | 0x0004d720 | mission_marks_scan_nop | mech_config | exact | `missionMarksScanNop` src/mission/tables/missionTables.ts:195 |
-| 0x0004d7a0 | project_chunk_read_values | mech_config | partial | `projectChunkReadValues` src/mission/vm/streams.ts:345 |
+| 0x0004d7a0 | project_chunk_read_values | mech_config | partial | `projectChunkReadValues` src/mission/vm/streams.ts:331 |
 | 0x0004d7f0 | scenario_table_load | mech_config | exact | `scenarioTableLoad` src/mission/tables/scenario.ts:38 |
 | 0x0004d880 | mission_table_load | mech_config | exact | `missionTableLoad` src/mission/tables/missionTables.ts:96 |
 | 0x0004d930 | path_table_load | mech_config | exact | `pathTableLoad` src/sim/groups/paths.ts:33 |
 | 0x0004da50 | formation_table_load | mech_config | exact | `formationTableLoad` src/sim/groups/formations.ts:152 |
-| 0x0004db00 | project_item_apply | mech_config | exact | `projectItemApply` src/mission/vm/streams.ts:236 |
+| 0x0004db00 | project_item_apply | mech_config | exact | `projectItemApply` src/mission/vm/streams.ts:222 |
 | 0x0004dbf0 | star_table_load | mech_config | exact | `starTableLoad` src/sim/groups/formations.ts:121 |
 | 0x0004dcb0 | group_formations_load | mech_config | exact | `groupFormationsLoad` src/sim/groups/formations.ts:105 |
-| 0x0004dcf0 | project_gpspec_apply | mech_config | exact | `projectGpspecApply` src/mission/vm/streams.ts:284 |
+| 0x0004dcf0 | project_gpspec_apply | mech_config | exact | `projectGpspecApply` src/mission/vm/streams.ts:270 |
 | 0x0004dd60 | mission_tables_free | mech_config | exact | `missionTablesFree` src/mission/tables/missionTables.ts:205 |
 | 0x0004e110 | project_mangle_id | mech_config | exact | `projectMangleId` src/sim/world/projectMaps.ts:109 |
 | 0x0004e120 | project_set_mangle | mech_config | exact | `projectSetMangle` src/sim/world/projectMaps.ts:117 |
@@ -1562,10 +1562,10 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/mission/tables/missionTables.ts:104 - MTBL slot ${slot} outside the 16 missionTables slots; not installed
 - src/mission/vm/objExec.ts:31 - the loose-file path for an OBJ with no POLY id (poly -1) is not ported; no shipped OBJ uses it
 - src/mission/vm/projectWalk.ts:182 - mech_loadout_size (0x287b0) and task_node_size (0x17520) are not ported in their own modules yet; their constant answers, 0x852 and 0x18, are used here
-- src/mission/vm/streams.ts:121 - loose files are read from a map pre-loaded before the load (setLooseFiles), not from disk
-- src/mission/vm/streams.ts:137 - goes to the log sink (channel 'mw2debug') instead of the file and hud_debug_sub_0499c0's overlay
-- src/mission/vm/streams.ts:177 - the item is allocated here instead of being the caller's 28-byte local; the 0x2b message names the item (projectItemFromStream) rather than the reference
-- src/mission/vm/streams.ts:347 - the optional third output (the (size - 0x10) / 4 dwords from +0x10) is not offered: all three callers pass null for it, so the copy never runs in this build
+- src/mission/vm/streams.ts:107 - loose files are read from a map pre-loaded before the load (setLooseFiles), not from disk
+- src/mission/vm/streams.ts:123 - goes to the log sink (channel 'mw2debug') instead of the file and hud_debug_sub_0499c0's overlay
+- src/mission/vm/streams.ts:163 - the item is allocated here instead of being the caller's 28-byte local; the 0x2b message names the item (projectItemFromStream) rather than the reference
+- src/mission/vm/streams.ts:333 - the optional third output (the (size - 0x10) / 4 dwords from +0x10) is not offered: all three callers pass null for it, so the copy never runs in this build
 - src/render/pipeline/drawPipeline.ts:44 - the lateral tests after 0x3f62a (against rotation rows 0 and 1) are not read upstream; objects to the side of the view are returned 0 and left to the GPU's frustum clip, which does not change what is visible
 - src/render/pipeline/drawPipeline.ts:73 - the lateral tests after 0x3f835 are not read; objects to the side are left to the GPU's frustum clip
 - src/render/pipeline/drawPipeline.ts:162 - split in two: this is the selection half; meshResetClipState and polyDepthKey are the draw half, run by SceneRenderer per polygon; the frameHasRoom / draw-list budget is not modelled
@@ -1756,7 +1756,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/mission/objectives.ts:205 - group_apply_objective reads objectives[-1].restraint when the group has no current objective
 - src/mission/tables/missionTables.ts:86 - the marking loops read all 48 records, past the table copy
 - src/mission/vm/chunkExec.ts:346 - GP with no object: the original clears the PREVIOUS gamepiece node
-- src/mission/vm/streams.ts:197 - '.BWD' is appended in the caller's own reference buffer
+- src/mission/vm/streams.ts:183 - '.BWD' is appended in the caller's own reference buffer
 - src/render/SceneRenderer.ts:406 - the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled
 - src/shell/controls/config.ts:189 - controls_renumber_devices: strncpy of 16 bytes into record 15\
 - src/shell/controls/config.ts:289 - controls_save_config: fclose is called a second time on the closed file

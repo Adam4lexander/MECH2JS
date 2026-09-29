@@ -22,10 +22,10 @@ import { codeInfo, resolveCode } from '../../src/engine/codePtr.ts';
 import { WIDGET, WIDGET_ROW } from '../../src/shell/ui/widgets.ts';
 import { prmSave } from '../../src/shell/handoff/prm.ts';
 import { readStar, starConfigure, starSetMember } from '../../src/shell/handoff/stars.ts';
-import { gameSource, hasGameData, hasShellData, hasShellDecompiled } from '../support/env.ts';
+import { gameSource, hasGameData, hasShellData } from '../support/env.ts';
 import '../../src/shell/screens/index.ts';
 
-describe.runIf(hasGameData && hasShellData && hasShellDecompiled)('shell mech lab', () => {
+describe.runIf(hasGameData && hasShellData)('shell mech lab', () => {
   let shellExe: ExeImage;
   let prj: ProjectFile;
   let db: Uint8Array;

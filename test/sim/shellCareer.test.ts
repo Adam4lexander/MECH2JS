@@ -21,7 +21,7 @@ import { mem } from '../../src/shell/memory.ts';
 import { codeInfo, resolveCode } from '../../src/engine/codePtr.ts';
 import { shell } from '../../src/shell/state.ts';
 import { WIDGET, WIDGET_ROW } from '../../src/shell/ui/widgets.ts';
-import { gameSource, hasGameData, hasShellData, hasShellDecompiled } from '../support/env.ts';
+import { gameSource, hasGameData, hasShellData } from '../support/env.ts';
 
 /** One action of a script: taken `after` frames once `until` holds. */
 interface Step {
@@ -95,7 +95,7 @@ function pilotAt(reg: Uint8Array, i: number) {
   };
 }
 
-describe.runIf(hasGameData && hasShellData && hasShellDecompiled)('shell career screens', () => {
+describe.runIf(hasGameData && hasShellData)('shell career screens', () => {
   let shellExe: ExeImage;
   let prj: ProjectFile;
   let db: Uint8Array;

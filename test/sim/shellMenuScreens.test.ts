@@ -1,17 +1,18 @@
 // HALL OF HONOR and THE KESHIK, opened from the Esc menu over the title
 // screen, headless: each draws, runs until a key, and hands back to the
-// menu; the Hall ranks the install's registry (a test-only read of
-// MW2REG.CFG, as the port's own copy would hold it).
+// menu; the Hall ranks a registry of two pilots made here.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
-import { setCdDrive, setDosFiles, setOverlayFiles, setOwnFiles } from '../../src/engine/dosFiles.ts';
+import { dosFileLoad, setCdDrive, setDosFiles, setOverlayFiles, setOwnFiles } from '../../src/engine/dosFiles.ts';
 import { SHELL_LABEL } from '../../src/generated/shell/labels.gen.ts';
 import { startShellProcess } from '../../src/shell/boot.ts';
 import { shellMain } from '../../src/shell/main.ts';
 import { ShellPump } from '../../src/shell/host/pump.ts';
 import { hardware, hwMouseButtons, hwMouseMove } from '../../src/shell/host/hardware.ts';
 import { mem } from '../../src/shell/memory.ts';
+import { careerRegistryLoad, careerRegistrySave, pilotRecord } from '../../src/shell/career/registry.ts';
+import { PILOT } from '../../src/shell/career/missions.ts';
 import '../../src/shell/screens/credits.ts';
 import '../../src/shell/screens/hallOfHonor.ts';
 import { gameSource, hasGameData, hasShellData } from '../support/env.ts';
@@ -25,7 +26,24 @@ describe.runIf(hasGameData && hasShellData)('shell menu screens', () => {
     shellExe = ExeImage.fromExe(await gameSource().read('MW2SHELL.EXE'));
     prj = new ProjectFile(await gameSource().read('MW2.PRJ'));
     db = await gameSource().read('DATABASE.MW2');
-    reg = await gameSource().read('MW2REG.CFG');
+    // MW2REG.CFG with two pilots in it, as the shell's registry code writes it
+    setDosFiles(new Map());
+    setOwnFiles(new Map());
+    setOverlayFiles(null);
+    startShellProcess(shellExe, prj);
+    careerRegistryLoad();
+    const m = mem();
+    for (const [slot, name, honor] of [
+      [0, 'ADAM', 12000],
+      [1, 'FRIEND', 3000],
+    ] as const) {
+      const p = pilotRecord(slot);
+      m.setI32(p + PILOT.inUse, 1);
+      m.setI32(p + PILOT.careerHonor, honor);
+      m.strcpy(p + PILOT.pilotName, name);
+    }
+    careerRegistrySave();
+    reg = dosFileLoad('MW2REG.CFG')!;
   });
 
   it('Hall of Honor, then the Keshik, then Flee to DOS', async () => {
