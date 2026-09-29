@@ -184,21 +184,42 @@ Two sliders beside Modern set how far, and are remembered:
 
 ## VR
 
-With a WebXR headset the viewport bar shows **VR** (Play only): you sit in
+With a WebXR headset the game's start screen offers **Start in VR**: the
+whole game plays in the headset, from the intro to the quit
+(`src/app/xrHost.ts`). One session lasts the whole run, because a browser
+only starts one from a click and the game goes from the front end to a
+mission and back without one. The front end, its movies and the launch
+screen show on a curved screen in a dark room (`src/render/xr/screenRoom.ts`),
+the same pixels the page shows. The missions put you in the cockpit, as
+below. If the session ends (the headset taken off, the system menu), the
+game carries on on the page, and the **Enter VR** button in the corner puts
+it back.
+
+Play the front end with the mouse and keyboard, as on the page. You can't
+see the page's pointer from the headset, so the first click on the screen
+locks the mouse to it, and its movement moves the shell's own pointer. A
+mission takes the mouse with a click of its own, as it does on the page.
+
+In the editor, the viewport bar shows **VR** (Play only): you sit in
 the cockpit. Nothing of the game changes. The game's viewer poses a rig and
 your head moves inside it (`src/render/xr/xrRig.ts`). At a fixed loop
 rate the rig is drawn one loop pass behind, interpolated between passes, so
 the cockpit doesn't judder at 20 Hz. At "display rate" every frame is a
 pass, so the rig stands at the last one.
 
-While you're in VR, the page's viewport shows a spectator camera, for
-recording (`src/render/xr/spectator.ts`). The **page** menu by the VR
-sliders picks it, and it is remembered:
+While you're in VR, the page shows the headset's left eye, cropped to the
+viewport's shape. It is copied from the headset's framebuffer, not drawn
+again, so it costs nothing, but every glance and shake of your head is in
+it.
 
-- **eye**: the headset's left eye, cropped to the viewport's shape. It is
-  copied from the headset's framebuffer, not drawn again, so it costs
-  nothing, but every glance and shake of your head is in it.
-- **smooth** (the default): your view from the cockpit, HUD and all. It
+For recording, the page can show a spectator camera of its own instead
+(`src/render/xr/spectator.ts`). Each one draws the frame a third time, so
+they are off unless the address asks for them: `?spectator=smooth`,
+`?spectator=chase`, or `?spectator` alone for the one you last picked
+(smooth at first), alongside `?dev` if you want it. With the parameter, a
+**page** menu by the VR sliders switches between them and **eye**:
+
+- **smooth**: your view from the cockpit, HUD and all. It
   turns after your head, eased over **ease** seconds (0.35 by default),
   with the head's roll left out, at its own **fov** (90 degrees across).
   It stands at your head every frame; only the turn is eased.
@@ -208,7 +229,7 @@ sliders picks it, and it is remembered:
   renderer's cull and facing are the head's, so it syncs a second time
   from the chase camera, or it would miss most of the mech.
 
-Each spectator frame is drawn a second time, on top of the headset's two
+Each spectator frame is drawn once more, on top of the headset's two
 eyes, at the viewport's size (up to about 3 megapixels). **Fill** on the
 viewport bar makes the view fill the browser window, without the bar or
 text. Esc leaves it while the game is paused; while it plays, Esc is the
@@ -242,7 +263,7 @@ Three things are specific to stereo:
 When a headset is present, sliders next to **VR** tune these sizes live:
 cockpit size, HUD width, seat height and HUD distance. They are remembered.
 
-Controllers (`src/app/xrInput.ts`) press the game's own keys:
+In a mission the controllers (`src/app/xrInput.ts`) press the game's own keys:
 
 | Control | Action |
 |---|---|

@@ -21,7 +21,9 @@
  *
  * The game itself (GameView.tsx) is this with the remembered settings
  * (recallScreenSettings: Modern, the enhancements and the hand-built cockpits
- * at first) and no VR. The editor's Viewport builds on it: the settings from
+ * at first), in the game's headset when the player chose VR at the start
+ * (app/xrHost.ts, which holds the session from the front end to the mission
+ * and back). The editor's Viewport builds on it: the settings from
  * its bar, VR, and `lookThrough` to show its free
  * camera instead of the game's (no cockpit shell or HUD then, which are the
  * game camera's; never in a headset).
@@ -34,6 +36,7 @@ import { Viewer } from '../generated/classes.gen.ts';
 import type { Game } from './Game.ts';
 import { attachHostInput } from './hostInput.ts';
 import { XrInput } from './xrInput.ts';
+import type { XrHost } from './xrHost.ts';
 import { SceneRenderer } from '../render/SceneRenderer.ts';
 import { fromThree, toThree } from '../render/bridge/space.ts';
 import { cameraFromViewer, copyViewer, viewerFromCamera } from '../render/bridge/cameraViewer.ts';
@@ -126,6 +129,12 @@ export interface GameScreenOptions {
   settings?: () => ScreenSettings;
   /** WebXR on the renderer, for toggleVr */
   vr?: boolean;
+  /**
+   * the game's headset (app/xrHost.ts): its renderer is drawn with and its loop gives the frames, and
+   * closing the view leaves both - and the session - to the next view. VR follows its session; toggleVr
+   * is not used
+   */
+  host?: XrHost;
   onVrState?: (s: VrState) => void;
   /** after the game's pass: another camera to draw this frame through, or null for the game's (always null while presenting) */
   lookThrough?: (dt: number, presenting: boolean) => OutsideView | null;
@@ -134,7 +143,7 @@ export interface GameScreenOptions {
 }
 
 export class GameScreen {
-  readonly webgl = new THREE.WebGLRenderer({ antialias: false });
+  readonly webgl: THREE.WebGLRenderer;
   readonly sr = new SceneRenderer();
   /** the game's view: set from the game's viewer every frame it is shown */
   readonly gameCamera = new THREE.PerspectiveCamera(60, 4 / 3, 0.5, 20000);
@@ -193,6 +202,7 @@ export class GameScreen {
   private spectatorTarget: THREE.WebGLRenderTarget | null = null;
   private spectatorMode: SpectatorMode | null = null;
   private vrState: VrState = { on: false, pending: false };
+  private xrWas = false;
   /**
    * Entering VR, timed (one console line once the headset has had five frames): the session's grant,
    * three's setSession (which awaits makeXRCompatible - a context the headset's GPU cannot use is
@@ -208,6 +218,7 @@ export class GameScreen {
     private readonly game: Game,
     private readonly opts: GameScreenOptions = {},
   ) {
+    this.webgl = opts.host?.renderer ?? new THREE.WebGLRenderer({ antialias: false });
     const { webgl, sr } = this;
     webgl.setPixelRatio(1);
     webgl.autoClear = false;
@@ -239,7 +250,7 @@ export class GameScreen {
     this.views = new IndexedViews(webgl, sr.uniforms);
     renderPort.current = this.views;
     // the renderer's loop: the window's animation frames, or the headset's while a session is on
-    webgl.setAnimationLoop((now: number) => {
+    const loop = (now: number) => {
       const start = performance.now();
       // the headset's framebuffer for this frame: three binds it before calling back
       const xrTarget = webgl.xr.isPresenting ? webgl.getRenderTarget() : null;
@@ -249,7 +260,9 @@ export class GameScreen {
         else if (this.mirror.on) this.spectate(xrTarget);
       }
       this.timeXrFrame(start);
-    });
+    };
+    if (opts.host) opts.host.present(loop);
+    else webgl.setAnimationLoop(loop);
   }
 
   /** The palette is set again next frame (the editor's fixed day phase changed). */
@@ -349,6 +362,9 @@ export class GameScreen {
     this.last = now;
     const session = renderer.xr.isPresenting ? renderer.xr.getSession() : null;
     const xr = session !== null;
+    // a session that ended (the host's, which this view does not hear end) lets go of the controllers' keys
+    if (!xr && this.xrWas) this.xrInput.release();
+    this.xrWas = xr;
     // the controllers are read before the pass, as the keyboard's interrupts arrive before it
     if (session) this.xrInput.poll(session, game.mode === 'play');
     // the draw and LOD distances: pushed out in Modern and in a headset, the original's in Faithful - set
@@ -775,10 +791,13 @@ export class GameScreen {
 
   dispose(): void {
     const { webgl } = this;
-    webgl.setAnimationLoop(null);
+    const host = this.opts.host;
+    // a host's renderer, loop and session go on to the next view
+    if (host) host.present(null);
+    else webgl.setAnimationLoop(null);
     webgl.domElement.removeEventListener('webglcontextlost', this.onLost);
     webgl.domElement.removeEventListener('webglcontextrestored', this.onRestored);
-    void webgl.xr.getSession()?.end();
+    if (!host) void webgl.xr.getSession()?.end();
     this.xrInput.release();
     this.detachInput();
     if (renderPort.current === this.views) renderPort.current = null;
@@ -789,7 +808,7 @@ export class GameScreen {
     this.cockpit.dispose();
     this.spectatorTarget?.dispose();
     this.sr.clear();
-    webgl.dispose();
+    if (!host) webgl.dispose();
     this.el.removeChild(webgl.domElement);
   }
 }

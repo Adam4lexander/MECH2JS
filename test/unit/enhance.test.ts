@@ -2,7 +2,9 @@
 // palette's own ramps, and the cockpit's screens come from the widget panes.
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { groundFade, groundLevel } from '../../src/render/enhance/groundField.ts';
+import { copyDrawWords, groundFade, groundLevel } from '../../src/render/enhance/groundField.ts';
+import { NOT_DRAWN } from '../../src/render/materials/indexedMaterial.ts';
+import type { MeshEntry } from '../../src/render/SceneRenderer.ts';
 import { shadowTable } from '../../src/render/enhance/shadows.ts';
 import { skyPaletteChoice } from '../../src/render/enhance/skyDetail.ts';
 import { commonRamps, slotPanes } from '../../src/render/cockpit/cockpit.ts';
@@ -144,5 +146,52 @@ describe('cockpit screens', () => {
   it('are coloured in the ramps the cockpit shell uses, most used first', () => {
     expect(commonRamps([0x1043, 0x4045, 0x40c2, 0x4047, 0x5010, -1])).toEqual([0x40, 0xc0]);
     expect(commonRamps([-1, 0x3000, 0x5012])).toEqual([]);
+  });
+});
+
+describe("the scrounge field's copies", () => {
+  // one quad (a fan of 2 triangles, slots for 3) that is also a sprite (6 slots after the fan)
+  const SPRITE = 0x3005;
+  const src = {
+    block: { polygonCount: 1, polygons: [{ vertexCount: 4 }] },
+    draw: new Float32Array(15).fill(NOT_DRAWN),
+    polyStart: Int32Array.of(0),
+    polyTris: Int32Array.of(3),
+    spriteStart: Int32Array.of(9),
+  } as unknown as Pick<MeshEntry, 'block' | 'draw' | 'polyStart' | 'polyTris' | 'spriteStart'>;
+  const fan = new Float32Array(1).fill(NOT_DRAWN);
+  const sprite = new Float32Array(1).fill(NOT_DRAWN);
+  const out = new Float32Array(15).fill(NOT_DRAWN);
+  const draw = (fanWord: number, tris: number, spriteWord: number) => {
+    src.draw.fill(NOT_DRAWN);
+    src.draw.fill(fanWord, 0, tris * 3);
+    src.draw.fill(spriteWord, 9, 15);
+  };
+  const words = () => [...new Set(out.subarray(0, 9))].concat([...new Set(out.subarray(9))]);
+
+  it('drop the black fans enhanced imaging drew once it ends', () => {
+    draw(NOT_DRAWN, 0, SPRITE);
+    expect(copyDrawWords(src, fan, sprite, out)).toBe(true);
+    expect(words()).toEqual([NOT_DRAWN, SPRITE]);
+    // enhanced imaging: filled black (word 0) and outlined; no sprite
+    draw(0, 2, NOT_DRAWN);
+    expect(copyDrawWords(src, fan, sprite, out)).toBe(true);
+    expect([...out.subarray(0, 6)]).toEqual(Array(6).fill(0));
+    expect([...out.subarray(6)]).toEqual(Array(9).fill(NOT_DRAWN));
+    // and off again: the sprite, and no fan under it
+    draw(NOT_DRAWN, 0, SPRITE);
+    expect(copyDrawWords(src, fan, sprite, out)).toBe(true);
+    expect(words()).toEqual([NOT_DRAWN, SPRITE]);
+  });
+
+  it('keep what they had while the game does not draw the patch, and draw the whole fan of a clipped one', () => {
+    draw(NOT_DRAWN, 0, NOT_DRAWN);
+    expect(copyDrawWords(src, fan, sprite, out)).toBe(false);
+    expect(words()).toEqual([NOT_DRAWN, SPRITE]);
+    // near-clipped to one triangle in the game's view: the copies are unclipped, so both of theirs are drawn
+    draw(0x44f0, 1, NOT_DRAWN);
+    expect(copyDrawWords(src, fan, sprite, out)).toBe(true);
+    expect([...out.subarray(0, 9)]).toEqual([...Array(6).fill(0x44f0), NOT_DRAWN, NOT_DRAWN, NOT_DRAWN]);
+    expect(copyDrawWords(src, fan, sprite, out)).toBe(false);
   });
 });

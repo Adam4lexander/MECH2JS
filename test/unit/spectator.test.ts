@@ -3,7 +3,7 @@
 // facing, looking over the mech; the field of view horizontal.
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { CHASE, levelQuaternion, Spectator, SPECTATOR_DEFAULTS, yawPitch } from '../../src/render/xr/spectator.ts';
+import { CHASE, levelQuaternion, Spectator, SPECTATOR_DEFAULTS, spectatorModeFor, spectatorUnlocked, yawPitch } from '../../src/render/xr/spectator.ts';
 
 function posed(pos: [number, number, number], yaw: number, pitch: number, roll = 0): THREE.Object3D {
   const o = new THREE.Object3D();
@@ -81,4 +81,22 @@ it('levelQuaternion and yawPitch invert each other', () => {
   const { yaw, pitch } = yawPitch(levelQuaternion(-2.1, 0.7));
   expect(yaw).toBeCloseTo(-2.1, 6);
   expect(pitch).toBeCloseTo(0.7, 6);
+});
+
+describe('the spectator mode from the address', () => {
+  it('mirrors the eye without ?spectator, whatever was picked before', () => {
+    expect(SPECTATOR_DEFAULTS.mode).toBe('mirror');
+    expect(spectatorUnlocked('')).toBe(false);
+    expect(spectatorModeFor('', 'chase')).toBe('mirror');
+    expect(spectatorModeFor('?dev', 'smooth')).toBe('mirror');
+  });
+
+  it('takes the mode ?spectator names, or bare, the one last picked (smooth at first)', () => {
+    expect(spectatorUnlocked('?dev&spectator')).toBe(true);
+    expect(spectatorModeFor('?spectator=chase', 'smooth')).toBe('chase');
+    expect(spectatorModeFor('?dev&spectator=smooth', undefined)).toBe('smooth');
+    expect(spectatorModeFor('?spectator', 'chase')).toBe('chase');
+    expect(spectatorModeFor('?spectator', undefined)).toBe('smooth');
+    expect(spectatorModeFor('?spectator=nonsense', undefined)).toBe('smooth');
+  });
 });

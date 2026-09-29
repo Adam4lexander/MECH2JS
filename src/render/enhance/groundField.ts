@@ -101,8 +101,46 @@ interface Copy {
   src: MeshEntry;
   mesh: THREE.Mesh;
   draw: Float32Array;
-  /** each slot's last word the game drew the patch with */
-  last: Float32Array;
+  /** each polygon's last fan and sprite words the game drew the patch with (copyDrawWords) */
+  fan: Float32Array;
+  sprite: Float32Array;
+}
+
+/**
+ * The patch's draw words onto a copy's slots (`out`, over the mesh as built):
+ * per polygon, its fan's word and its sprite quad's, as the game last drew
+ * it. A polygon the game did not draw this frame - culled, facing away from
+ * the game's eye, which is not the copies' - keeps what it had; one it did
+ * draw takes both words, a part it left undrawn included, so a polygon that
+ * changes how it is filled (enhanced imaging fills every one black, sprites
+ * too, and gives them back when it ends) does not keep its old fill. The fan
+ * is the whole polygon (the copies are unclipped), whatever the patch's
+ * near-plane clip left of it. Returns whether any slot changed.
+ * (Correction: the words were first kept slot by slot, the last one drawn in
+ * each; enhanced imaging's black fans stayed on every copy after it ended,
+ * the sprites drawn back over them.)
+ */
+export function copyDrawWords(src: Pick<MeshEntry, 'block' | 'draw' | 'polyStart' | 'polyTris' | 'spriteStart'>, fan: Float32Array, sprite: Float32Array, out: Float32Array): boolean {
+  let changed = false;
+  const polys = src.block.polygons;
+  for (let p = 0; p < src.block.polygonCount; p++) {
+    const s0 = src.polyStart[p]!;
+    const cap = src.polyTris[p]!;
+    const q0 = src.spriteStart[p]!;
+    // a fan the game drew has its first slot drawn; a sprite, all six
+    const f = cap > 0 ? src.draw[s0]! : NOT_DRAWN;
+    const q = q0 >= 0 ? src.draw[q0]! : NOT_DRAWN;
+    if (f === NOT_DRAWN && q === NOT_DRAWN) continue;
+    if (f === fan[p] && q === sprite[p]) continue;
+    fan[p] = f;
+    sprite[p] = q;
+    const whole = Math.max(0, polys[p]!.vertexCount - 2) * 3;
+    out.fill(f, s0, s0 + whole);
+    out.fill(NOT_DRAWN, s0 + whole, s0 + cap * 3);
+    if (q0 >= 0) out.fill(q, q0, q0 + 6);
+    changed = true;
+  }
+  return changed;
 }
 
 export class GroundField {
@@ -224,18 +262,7 @@ export class GroundField {
         g.visible = e.group.visible;
       }
       for (const cp of c.meshes) {
-        let changed = false;
-        const d = cp.src.draw;
-        for (let i = 0; i < d.length; i++) {
-          if (d[i] !== NOT_DRAWN && cp.last[i] !== d[i]) {
-            cp.last[i] = d[i]!;
-            changed = true;
-          }
-        }
-        if (changed) {
-          cp.draw.set(cp.last);
-          (cp.mesh.geometry.getAttribute('aDraw') as THREE.BufferAttribute).needsUpdate = true;
-        }
+        if (copyDrawWords(cp.src, cp.fan, cp.sprite, cp.draw)) (cp.mesh.geometry.getAttribute('aDraw') as THREE.BufferAttribute).needsUpdate = true;
         const vis = cp.src.mesh.visible;
         for (const g of c.offsets) {
           const m = g.children[c.meshes.indexOf(cp)];
@@ -263,7 +290,8 @@ export class GroundField {
       group.add(m);
       mesh ??= m;
     }
-    return { src, mesh: mesh!, draw, last: new Float32Array(src.draw.length).fill(NOT_DRAWN) };
+    const n = src.block.polygonCount;
+    return { src, mesh: mesh!, draw, fan: new Float32Array(n).fill(NOT_DRAWN), sprite: new Float32Array(n).fill(NOT_DRAWN) };
   }
 
   private forget(obj: WorldObject, c: { offsets: THREE.Group[]; meshes: Copy[] }): void {

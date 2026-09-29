@@ -3,7 +3,10 @@
  * driver blitted (through the DAC), or a full-screen movie while one plays,
  * with the mouse pointer drawn over it; the pointer and keyboard fed to the
  * shell's int 33h mouse and BIOS keyboard. Each animation frame runs the
- * shell's pump.
+ * shell's pump. With a headset (app/xrHost.ts) the frames are its loop's and
+ * the canvas is also its panel; there, where the page's pointer cannot be
+ * seen, a click locks the mouse to the screen and its motion moves the
+ * shell's.
  *
  * @portOnly the monitor, mouse and keyboard of the shell's PC
  */
@@ -13,6 +16,7 @@ import type { ShellPump } from '../../shell/host/pump.ts';
 import { vfxShapeBounds, vfxShapeDraw, VfxWindow, vfxWindowAllocate } from '../../engine/vfx/vfx.ts';
 import { ViewWindow } from '../../generated/classes.gen.ts';
 import { biosKey } from './keymap.ts';
+import { everyFrame, type XrHost } from '../xrHost.ts';
 
 /** 6-bit DAC values to 8-bit (the VGA's 63 is full brightness). */
 const dac8 = (v: number) => (v << 2) | (v >> 4);
@@ -41,7 +45,7 @@ function pointerImage(shapes: Uint8Array, n: number): { w: number; h: number; ox
   return { w, h, ox: -x0, oy: -y0, pixels: win.buffer, drawn: win.drawn };
 }
 
-export function ShellView({ pump, onExit }: { pump: ShellPump; onExit: (status: number) => void }) {
+export function ShellView({ pump, onExit, host }: { pump: ShellPump; onExit: (status: number) => void; host?: XrHost | null }) {
   const canvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -54,7 +58,6 @@ export function ShellView({ pump, onExit }: { pump: ShellPump; onExit: (status: 
     let pointer: ReturnType<typeof pointerImage> | null = null;
     let pointerFor: unknown = null;
     let last = performance.now();
-    let raf = 0;
     let ended = false;
 
     const paint = () => {
@@ -100,19 +103,22 @@ export function ShellView({ pump, onExit }: { pump: ShellPump; onExit: (status: 
     };
 
     const tick = (now: number) => {
-      const ms = Math.min(100, now - last);
+      if (ended) return;
+      // the headset's frame times and the window's are one clock, but a frame can arrive stamped before the last
+      const ms = Math.max(0, Math.min(100, now - last));
       last = now;
       const running = pump.frame(ms);
       paint();
-      if (!running && !ended) {
+      if (!running) {
         ended = true;
+        stop();
         if (pump.error) console.error('[shell]', pump.error);
         onExit(pump.status ?? 1);
-        return;
       }
-      raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
+    // the frames: the window's, or the headset's while it shows the screen (app/xrHost.ts)
+    const stop = everyFrame(host, tick);
+    host?.showScreen(cv);
     // debug: run frames by hand (a hidden tab gets no animation frames)
     (window as unknown as { mw2shell?: Record<string, unknown> }).mw2shell!.step = (n = 1, ms = 1000 / 60) => {
       for (let i = 0; i < n && pump.frame(ms); i++);
@@ -120,7 +126,13 @@ export function ShellView({ pump, onExit }: { pump: ShellPump; onExit: (status: 
       return pump.status;
     };
 
+    const locked = () => document.pointerLockElement === cv;
     const toScreen = (e: PointerEvent) => {
+      // locked (in the headset): the mouse's motion, as a mouse driver takes its mickeys
+      if (locked()) {
+        hwMouseMove(hardware.mouseX + e.movementX, hardware.mouseY + e.movementY);
+        return;
+      }
       const r = cv.getBoundingClientRect();
       hwMouseMove(((e.clientX - r.left) / r.width) * SCREEN_W, ((e.clientY - r.top) / r.height) * SCREEN_H);
     };
@@ -133,7 +145,14 @@ export function ShellView({ pump, onExit }: { pump: ShellPump; onExit: (status: 
       buttons(e);
     };
     const onDown = (e: PointerEvent) => {
-      cv.setPointerCapture(e.pointerId);
+      // in the headset the page's pointer cannot be seen, so the first click locks the mouse to the
+      // screen (the shell draws its own pointer, on the headset's panel too)
+      if (host?.presenting && !locked()) {
+        void cv.requestPointerLock();
+        e.preventDefault();
+        return;
+      }
+      if (!locked()) cv.setPointerCapture(e.pointerId);
       toScreen(e);
       buttons(e);
       e.preventDefault();
@@ -152,14 +171,17 @@ export function ShellView({ pump, onExit }: { pump: ShellPump; onExit: (status: 
     cv.addEventListener('contextmenu', noMenu);
     window.addEventListener('keydown', onKey);
     return () => {
-      cancelAnimationFrame(raf);
+      stop();
+      host?.hideScreen(cv);
+      // the next view (a mission) takes the mouse with a click of its own
+      if (locked()) document.exitPointerLock();
       cv.removeEventListener('pointermove', onMove);
       cv.removeEventListener('pointerdown', onDown);
       cv.removeEventListener('pointerup', onMove);
       cv.removeEventListener('contextmenu', noMenu);
       window.removeEventListener('keydown', onKey);
     };
-  }, [pump, onExit]);
+  }, [pump, onExit, host]);
 
   return <canvas ref={canvas} className="shell-screen" width={SCREEN_W} height={SCREEN_H} />;
 }

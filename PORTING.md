@@ -1505,7 +1505,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 
 ## Divergences (deliberate differences)
 
-- src/app/shell/LaunchView.tsx:24 - the launch screen is held up for ${LAUNCH_MIN_MS} ms: the port's start-up is near instant
+- src/app/shell/LaunchView.tsx:25 - the launch screen is held up for ${LAUNCH_MIN_MS} ms: the port's start-up is near instant
 - src/core/provenance.ts:8 - <why>                  a deliberate difference, and its reason
 - src/core/random.ts:56 - the seed is a parameter; the original's is the argv pointer
 - src/data/config/ini.ts:95 - reads the INI from memory instead of opening mw2.ini

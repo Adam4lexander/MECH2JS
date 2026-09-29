@@ -46,7 +46,7 @@ import { syncFieldsFromNode } from '../inspector/poseSync.ts';
 import { structOf } from './Inspector.tsx';
 import { recallXrSettings, storeXrSettings, type XrSettings } from '../../render/xr/xrSettings.ts';
 import { recallFaithful, recallViewSettings, storeFaithful, storeViewSettings, type ViewSettings } from '../../render/viewSettings.ts';
-import { recallSpectatorSettings, storeSpectatorSettings, type SpectatorMode, type SpectatorSettings } from '../../render/xr/spectator.ts';
+import { recallSpectatorSettings, spectatorUnlocked, storeSpectatorSettings, type SpectatorMode, type SpectatorSettings } from '../../render/xr/spectator.ts';
 import { DESIGNS } from '../../render/cockpit/designs/index.ts';
 import { ENHANCE_LABELS, recallEnhanceSettings, storeEnhanceSettings, type EnhanceSettings } from '../../render/enhance/enhanceSettings.ts';
 
@@ -381,15 +381,18 @@ export function Viewport({ game }: { game: Game }) {
             <Slider label="HUD" title="the HUD's width as a share of the game's view (the reticle and target brackets are drawn in the world, not on it)" value={xrSettings.hudScale} min={0.3} max={1} step={0.05} unit="%" onChange={(v) => setXrSettings((s) => ({ ...s, hudScale: v }))} />
             <Slider label="seat" title="VR cockpit: how far the cockpit sits below its place (a taller or shorter pilot)" value={xrSettings.dashDrop} min={-0.3} max={0.3} step={0.02} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, dashDrop: v }))} />
             <Slider label="at" title="how far ahead of your eye the HUD stands" value={xrSettings.hudDistance} min={0.5} max={5} step={0.1} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, hudDistance: v }))} />
-            <select
-              title="what the page shows while you play in the headset, for recording: the left eye as you see it, your view with the head's shake eased out, or a camera behind the mech"
-              value={spectatorSettings.mode}
-              onChange={(e) => setSpectatorSettings((s) => ({ ...s, mode: e.target.value as SpectatorMode }))}
-            >
-              <option value="mirror">page: eye</option>
-              <option value="smooth">page: smooth</option>
-              <option value="chase">page: chase</option>
-            </select>
+            {/* the drawn page cameras are the address's (?spectator): each draws the frame a third time */}
+            {spectatorUnlocked() && (
+              <select
+                title="what the page shows while you play in the headset, for recording: the left eye as you see it, your view with the head's shake eased out, or a camera behind the mech"
+                value={spectatorSettings.mode}
+                onChange={(e) => setSpectatorSettings((s) => ({ ...s, mode: e.target.value as SpectatorMode }))}
+              >
+                <option value="mirror">page: eye</option>
+                <option value="smooth">page: smooth</option>
+                <option value="chase">page: chase</option>
+              </select>
+            )}
             {spectatorSettings.mode !== 'mirror' && (
               <>
                 <Slider label="fov" title="the page camera's horizontal field of view" value={spectatorSettings.fov} min={50} max={120} step={5} unit="deg" onChange={(v) => setSpectatorSettings((s) => ({ ...s, fov: v }))} />

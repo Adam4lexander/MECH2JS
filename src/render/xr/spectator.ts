@@ -20,7 +20,12 @@
  * chase offset from it) every frame: easing a position after a mech doing
  * 30 m/s would leave the camera metres behind it.
  *
- * Remembered (localStorage, as the other VR settings are).
+ * Smooth and chase draw the frame a third time, on top of the headset's two
+ * eyes, so they are the address's to ask for: `?spectator=smooth`,
+ * `?spectator=chase`, or `?spectator` alone for the one last picked (smooth
+ * at first). Without it the page mirrors the eye, whatever was picked
+ * before. The field of view and the easing are remembered (localStorage, as
+ * the other VR settings are), and the mode last picked.
  *
  * @portOnly
  */
@@ -36,30 +41,52 @@ export interface SpectatorSettings {
   smooth: number;
 }
 
-export const SPECTATOR_DEFAULTS: SpectatorSettings = { mode: 'smooth', fov: 90, smooth: 0.35 };
+export const SPECTATOR_DEFAULTS: SpectatorSettings = { mode: 'mirror', fov: 90, smooth: 0.35 };
 
 /** the chase camera: metres back from the eye, up from it, and how far below the eye it looks at, along the torso's facing */
 export const CHASE = { back: 16, up: 4, lookDown: 3 };
 
 const KEY = 'mw2.spectator';
 
+/** the page's address query ('' outside a browser, as in the tests) */
+const pageSearch = (): string => (globalThis as { location?: { search?: string } }).location?.search ?? '';
+
+const isMode = (v: unknown): v is SpectatorMode => v === 'mirror' || v === 'smooth' || v === 'chase';
+
+/** Whether the address asks for the drawn spectator cameras (`?spectator`). */
+export function spectatorUnlocked(search = pageSearch()): boolean {
+  return new URLSearchParams(search).has('spectator');
+}
+
+/** The mode the address gives: mirror without `?spectator`; its value; or, bare, the one last picked (smooth at first). */
+export function spectatorModeFor(search: string, stored: unknown): SpectatorMode {
+  const p = new URLSearchParams(search);
+  if (!p.has('spectator')) return 'mirror';
+  const v = p.get('spectator');
+  if (isMode(v)) return v;
+  return isMode(stored) ? stored : 'smooth';
+}
+
 export function recallSpectatorSettings(): SpectatorSettings {
   try {
     const s = JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<SpectatorSettings>;
     const num = (v: unknown, d: number, lo: number, hi: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d);
     return {
-      mode: s.mode === 'mirror' || s.mode === 'smooth' || s.mode === 'chase' ? s.mode : SPECTATOR_DEFAULTS.mode,
+      mode: spectatorModeFor(pageSearch(), s.mode),
       fov: num(s.fov, SPECTATOR_DEFAULTS.fov, 40, 130),
       smooth: num(s.smooth, SPECTATOR_DEFAULTS.smooth, 0, 2),
     };
   } catch {
-    return { ...SPECTATOR_DEFAULTS };
+    return { ...SPECTATOR_DEFAULTS, mode: spectatorModeFor(pageSearch(), undefined) };
   }
 }
 
+/** Remembers the settings - the mode only when the address let it be picked (without `?spectator` it is mirror, not a pick). */
 export function storeSpectatorSettings(s: SpectatorSettings): void {
   try {
-    localStorage.setItem(KEY, JSON.stringify(s));
+    let mode: unknown = s.mode;
+    if (!spectatorUnlocked()) mode = (JSON.parse(localStorage.getItem(KEY) ?? '{}') as Partial<SpectatorSettings>).mode;
+    localStorage.setItem(KEY, JSON.stringify({ ...s, mode }));
   } catch {
     /* private window: not remembered */
   }
