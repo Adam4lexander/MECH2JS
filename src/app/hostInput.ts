@@ -169,3 +169,41 @@ export function attachHostInput(target: HTMLElement, active: () => boolean): () 
     target.removeEventListener('contextmenu', onContext);
   };
 }
+
+/**
+ * Keys pressed by something other than the keyboard (the VR controllers,
+ * app/xrInput.ts), fed through the same scancodes. Each code is sent once
+ * on press and once on release; releaseSentKeys lets go of any still down.
+ */
+const sent = new Set<string>();
+
+export function sendKey(code: string, down: boolean): void {
+  if (down === sent.has(code)) return;
+  const seq = scancodesFor(code, down);
+  if (!seq) return;
+  if (down) sent.add(code);
+  else sent.delete(code);
+  const kb = keyboard();
+  if (kb) for (const b of seq) kb.isr(b);
+}
+
+export function releaseSentKeys(): void {
+  for (const code of [...sent]) sendKey(code, false);
+}
+
+/**
+ * Sets the mouse as an analogue stick: x and y in -1..1 put the pointer
+ * that far from the centre of the driver's range, which poll reads as the
+ * same deflection of its centring-joystick axes. False when the game has no
+ * mouse device.
+ */
+export function setMouseStick(x: number, y: number): boolean {
+  const m = mouse();
+  if (!m) return false;
+  const cx = m.width / 2;
+  const cy = m.height / 2;
+  const px = Math.max(0, Math.min(m.width - 1, Math.round(cx + x * cx)));
+  const py = Math.max(0, Math.min(m.height - 1, Math.round(cy + y * cy)));
+  m.hostMove(px * 8 - m.rawX, py * 8 - m.rawY);
+  return true;
+}

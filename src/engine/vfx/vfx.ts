@@ -26,6 +26,8 @@ export class VfxWindow {
   buffer: Uint8Array = new Uint8Array(0);
   /** @portOnly 1 where a pixel has been written since vfxWindowClear */
   drawn: Uint8Array = new Uint8Array(0);
+  /** @portOnly the HUD layer (HUD_LAYER) each drawn pixel was written in */
+  layer: Uint8Array = new Uint8Array(0);
   /** +4 */
   xMax = -1;
   /** +8 */
@@ -36,6 +38,7 @@ export class VfxWindow {
 export function vfxWindowAllocate(w: VfxWindow, width: number, height: number): void {
   w.buffer = new Uint8Array(width * height);
   w.drawn = new Uint8Array(width * height);
+  w.layer = new Uint8Array(width * height);
   w.xMax = width - 1;
   w.yMax = height - 1;
 }
@@ -47,6 +50,29 @@ export function vfxWindowAllocate(w: VfxWindow, width: number, height: number): 
  */
 export function vfxWindowClear(w: VfxWindow): void {
   w.drawn.fill(0);
+  w.layer.fill(0);
+}
+
+/**
+ * The parts of the HUD a headset draws apart from the rest (render/xr): the
+ * ones that mark something in the world - the reticle on the aim point, the
+ * brackets or marker on the target - which a flat HUD plane in front of the
+ * eye would put at the wrong depth. Pixels are tagged with the layer they
+ * were written in; the flat view draws them all as one. @portOnly
+ */
+export const HUD_LAYER = { rest: 0, reticle: 1, targetMarker: 2 } as const;
+
+/** @portOnly the layer pixels are written in now (HUD_LAYER); 0 outside hudDrawInLayer */
+let drawLayer = 0;
+
+/** Runs `draw` with every pixel it writes tagged `layer`. @portOnly */
+export function hudDrawInLayer(layer: number, draw: () => void): void {
+  drawLayer = layer;
+  try {
+    draw();
+  } finally {
+    drawLayer = 0;
+  }
 }
 
 /** The pane's clip rectangle in window pixels, or the -1 / -2 every routine returns. */
@@ -86,6 +112,7 @@ function paneClip(pane: ViewWindow): number {
 function put(win: VfxWindow, at: number, c: number): void {
   win.buffer[at] = c;
   win.drawn[at] = 1;
+  win.layer[at] = drawLayer;
 }
 
 const u32 = (b: Uint8Array, o: number): number => (b[o]! | (b[o + 1]! << 8) | (b[o + 2]! << 16) | (b[o + 3]! << 24)) >>> 0;
@@ -478,7 +505,10 @@ export function vfxStringDraw(pane: ViewWindow, x: number, y: number, font: Uint
 export function vfxWindowClearPane(pane: ViewWindow): void {
   if (paneClip(pane)) return;
   const { win, pitch, cl, ct, cr, cb } = clip;
-  for (let y = ct; y <= cb; y++) win.drawn.fill(0, y * pitch + cl, y * pitch + cr + 1);
+  for (let y = ct; y <= cb; y++) {
+    win.drawn.fill(0, y * pitch + cl, y * pitch + cr + 1);
+    win.layer.fill(0, y * pitch + cl, y * pitch + cr + 1);
+  }
 }
 
 /**

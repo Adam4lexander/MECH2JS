@@ -20,6 +20,19 @@ export const projectionGlobals = registerGlobals(
   {
     /** 0x970c4: detail setting; lodScale = focalScale / (lodQuality * 160); floored at 1 */
     lodQuality: 1,
+    /**
+     * @portOnly the host's multiplier on lodScale - how far every LOD step
+     * (the meshes' lodKey thresholds, mech_lod_update's ranges) is pushed out.
+     * 1 is the original. The Modern and VR views raise it: at their resolutions
+     * the original's steps pop close in. Apply a change with viewerRefreshLodScale.
+     */
+    lodDistanceScale: 1,
+    /**
+     * @portOnly the host's switch for mech_lod_update's policy: when set, every
+     * mech inside the nearest range t0 gets level 0, not only the nearest one
+     * (the detail enhancement, render/enhance). 0 is the original.
+     */
+    lodAllNear: 0,
   },
   () => {
     projectionGlobals.lodQuality = imageI32(LABEL.lodQuality, 1);
@@ -47,6 +60,7 @@ function normalise(product: number): [number, number] {
  * @mw2 viewer_update_projection 0x0003ef30
  * @fidelity partial
  * @divergence the fields +0xa8 and +0xac (secant terms from the atan tables) are not computed
+ * @divergence lodScale is multiplied by the host's lodDistanceScale when that is not 1 (the Modern and VR views' detail setting, render/viewSettings.ts)
  */
 export function viewerUpdateProjection(v: Viewer): void {
   let zoom = v.zoom | 0;
@@ -77,7 +91,26 @@ export function viewerUpdateProjection(v: Viewer): void {
   v.focalScale = focal;
   v.focalScaleY = ((zAspect >>> 0) * hw) % 4294967296 | 0;
   if (projectionGlobals.lodQuality < 1) projectionGlobals.lodQuality = 1;
-  v.lodScale = cdiv(focal, Math.imul(projectionGlobals.lodQuality, 0xa0));
+  v.lodScale = lodScaleFor(focal);
+}
+
+/** focal / (lodQuality * 160), times the host's lodDistanceScale when it is not 1. */
+function lodScaleFor(focal: number): number {
+  const base = cdiv(focal, Math.imul(projectionGlobals.lodQuality, 0xa0));
+  const k = projectionGlobals.lodDistanceScale;
+  return k === 1 ? base : Math.min(0x7fffffff, Math.max(1, Math.round(base * k))) | 0;
+}
+
+/**
+ * viewer_update_projection's last step alone: lodScale from the viewer's
+ * focal length, after lodDistanceScale changes (the rest of the projection,
+ * the near clip among it, stays as the game left it).
+ *
+ * @portOnly
+ */
+export function viewerRefreshLodScale(v: Viewer): void {
+  if (projectionGlobals.lodQuality < 1) projectionGlobals.lodQuality = 1;
+  v.lodScale = lodScaleFor(v.focalScale);
 }
 
 const scratch = newTransform();

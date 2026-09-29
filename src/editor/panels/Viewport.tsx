@@ -9,12 +9,19 @@
  *          object's scene node, or the object itself for static scenery), and
  *          the gizmo moves the selected node through the engine's own setter
  *          (scene_node_set_origin + scene_node_walk). Edit mode only; no HUD
- *          or cockpit, which belong to the game's camera.
+ *          or cockpit shell, which belong to the game's camera.
  *
  * In Edit the bar picks which one to look through (the game camera shows the
- * paused frame). The scene camera keeps its own place across Play. The bar
- * also fixes the palette to a day phase and picks Faithful (VGA resolution,
- * nearest upscale) or Modern (native resolution).
+ * paused frame). The scene camera keeps its own place across Play.
+ *
+ * The bar also sets how the screen draws: a fixed day phase for the palette,
+ * Faithful (VGA resolution, nearest upscale, the original's distances) or
+ * Modern (native resolution, drawn further out), the enhancements, Fill (the
+ * view alone over the browser window, for recording) and VR where the
+ * browser has a headset - the game's camera with the pilot's head inside it,
+ * never the scene camera. All of it is remembered, Modern with the
+ * enhancements and the hand-built cockpits at first, and the game
+ * (GameView) draws with the same choices.
  *
  * @portOnly
  */
@@ -24,7 +31,7 @@ import { TransformControls } from 'three/examples/jsm/controls/TransformControls
 import type { SceneNode } from '../../generated/classes.gen.ts';
 import { SceneNode as SceneNodeClass, Viewer } from '../../generated/classes.gen.ts';
 import type { Game } from '../../app/Game.ts';
-import { GameScreen } from '../../app/gameScreen.ts';
+import { GameScreen, mechOwning, type ScreenSettings } from '../../app/gameScreen.ts';
 import { fromThree, toThree, CM_TO_UNITS } from '../../render/bridge/space.ts';
 import { viewerFromCamera } from '../../render/bridge/cameraViewer.ts';
 import { sceneNodeSetOrigin, sceneNodeWalk } from '../../engine/scene/sceneGraph.ts';
@@ -37,6 +44,11 @@ import { select, selected } from '../store/selection.ts';
 import { FreeFly } from '../viewport/freeFly.ts';
 import { syncFieldsFromNode } from '../inspector/poseSync.ts';
 import { structOf } from './Inspector.tsx';
+import { recallXrSettings, storeXrSettings, type XrSettings } from '../../render/xr/xrSettings.ts';
+import { recallFaithful, recallViewSettings, storeFaithful, storeViewSettings, type ViewSettings } from '../../render/viewSettings.ts';
+import { recallSpectatorSettings, storeSpectatorSettings, type SpectatorMode, type SpectatorSettings } from '../../render/xr/spectator.ts';
+import { DESIGNS } from '../../render/cockpit/designs/index.ts';
+import { ENHANCE_LABELS, recallEnhanceSettings, storeEnhanceSettings, type EnhanceSettings } from '../../render/enhance/enhanceSettings.ts';
 
 /** which camera Edit looks through */
 type EditView = 'scene' | 'game';
@@ -45,14 +57,46 @@ export function Viewport({ game }: { game: Game }) {
   useRevision(engineStore);
   const host = useRef<HTMLDivElement>(null);
   const screen = useRef<GameScreen | null>(null);
-  const [faithful, setFaithful] = useState(true);
+  const [faithful, setFaithful] = useState(recallFaithful);
   const [editView, setEditView] = useState<EditView>('scene');
   const [info, setInfo] = useState('');
-  const faithfulRef = useRef(faithful);
   const editViewRef = useRef(editView);
+  const [xrSupported, setXrSupported] = useState(false);
+  const [xrOn, setXrOn] = useState(false);
+  /** the view alone over the whole browser window, for recording (the bar's Fill) */
+  const [filled, setFilled] = useState(false);
+  /** VR asked for and the headset not yet given it (the browser and the XR runtime can take a minute) */
+  const [xrPending, setXrPending] = useState(false);
+  const [xrSettings, setXrSettings] = useState<XrSettings>(recallXrSettings);
+  const [viewSettings, setViewSettings] = useState<ViewSettings>(recallViewSettings);
+  const [spectatorSettings, setSpectatorSettings] = useState<SpectatorSettings>(recallSpectatorSettings);
+  const [enhance, setEnhance] = useState<EnhanceSettings>(recallEnhanceSettings);
+  const [enhanceOpen, setEnhanceOpen] = useState(false);
+  /** how the screen draws, read by it every frame */
+  const settingsRef = useRef<ScreenSettings>({ faithful, view: viewSettings, enhance, xr: xrSettings, spectator: spectatorSettings });
   useEffect(() => {
-    faithfulRef.current = faithful;
-  }, [faithful]);
+    settingsRef.current = { faithful, view: viewSettings, enhance, xr: xrSettings, spectator: spectatorSettings };
+  }, [faithful, viewSettings, enhance, xrSettings, spectatorSettings]);
+  useEffect(() => storeFaithful(faithful), [faithful]);
+  useEffect(() => storeEnhanceSettings(enhance), [enhance]);
+  useEffect(() => storeXrSettings(xrSettings), [xrSettings]);
+  useEffect(() => storeViewSettings(viewSettings), [viewSettings]);
+  useEffect(() => storeSpectatorSettings(spectatorSettings), [spectatorSettings]);
+  // Esc leaves the filled view - unless the game is playing, when Esc is the game's (its main menu)
+  useEffect(() => {
+    if (!filled) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && game.mode !== 'play') setFilled(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [filled, game]);
+  useEffect(() => {
+    navigator.xr
+      ?.isSessionSupported('immersive-vr')
+      .then(setXrSupported)
+      .catch(() => setXrSupported(false));
+  }, []);
   useEffect(() => {
     editViewRef.current = editView;
   }, [editView]);
@@ -65,6 +109,14 @@ export function Viewport({ game }: { game: Game }) {
     /** true while the editor's scene camera is the one shown (Edit, scene view) */
     const sceneView = () => game.mode === 'edit' && editViewRef.current === 'scene';
     const editorViewer = new Viewer();
+    /**
+     * The hand-built cockpit through the scene camera too, where it stands: at the game's eye. In the
+     * cockpit view the player's mech is built at its cockpit level, so round it there is only the head's
+     * arms and guns - the cockpit is a box standing in the air above the legs, which is what it is.
+     */
+    let cockpitOutside = true;
+    /** debug: the scene camera sees the cockpit through the mech round it (drawn after a depth clear) */
+    let cockpitXray = false;
     const fly = new FreeFly(sceneCam, el, sceneView);
     // start at the player's mech, else the mission's start view (VWST)
     const player = mechs.mechTable[mechs.playerMechIndex];
@@ -77,17 +129,27 @@ export function Viewport({ game }: { game: Game }) {
     let gizmoNode: SceneNode | null = null;
     let lastInfo = 0;
     const gs = new GameScreen(el, game, {
-      faithful: () => faithfulRef.current,
-      lookThrough: (dt) => {
-        const scene = sceneView();
+      settings: () => settingsRef.current,
+      vr: true,
+      onVrState: (s) => {
+        setXrOn(s.on);
+        setXrPending(s.pending);
+      },
+      lookThrough: (dt, presenting) => {
+        // a headset always looks through the game's camera
+        const scene = sceneView() && !presenting;
         // the gizmo is the scene camera's alone
         gizmo.enabled = scene;
         gizmoHelper.visible = scene && gizmoNode !== null;
         if (scene) {
           fly.update(dt);
           viewUpdateFrom(sceneCam.position);
-          // the game's viewer, standing at the scene camera
-          return { camera: sceneCam, viewer: () => viewerFromCamera(sceneCam, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer) };
+          return {
+            camera: sceneCam,
+            // the game's viewer, standing at the scene camera
+            viewer: () => viewerFromCamera(sceneCam, cameraGlobals.viewerPosition ?? cameraGlobals.mainViewer, editorViewer),
+            cockpit: !cockpitOutside ? 'hidden' : cockpitXray ? 'xray' : 'shown',
+          };
         }
         if (game.mode !== 'play') {
           // the paused game view: the detail the game's own viewer would choose
@@ -108,9 +170,30 @@ export function Viewport({ game }: { game: Game }) {
     screen.current = gs;
     const canvas = gs.webgl.domElement;
 
-    // debug handle: window.mw2.view.camera (the scene camera) / .gameCamera / .fly (setting fly.yaw / fly.pitch aims it) / .renderer / .views
+    // debug handle: window.mw2.view.camera (the scene camera) / .gameCamera / .fly (setting fly.yaw / fly.pitch aims it) / .renderer / .views / .cockpit / .hudOverlay; window.mw2.vrMirror
     const dbg = (window as unknown as { mw2?: Record<string, unknown> }).mw2;
-    if (dbg) dbg.view = { camera: sceneCam, gameCamera: gs.gameCamera, fly, renderer: gs.sr, views: gs.views };
+    const cockpitDebug = {
+      keys: Object.keys(DESIGNS),
+      /** draws `key`'s cockpit whatever the player's chassis (null: the player's own) */
+      preview(key: string | null) {
+        gs.cockpitPreview = key;
+      },
+      get current() {
+        return gs.cockpitShown;
+      },
+      /** whether the scene camera sees the cockpit (on by default) */
+      set outside(on: boolean) {
+        cockpitOutside = on;
+      },
+      /** whether the scene camera sees the cockpit through the mech round it (off by default) */
+      set xray(on: boolean) {
+        cockpitXray = on;
+      },
+    };
+    if (dbg) {
+      dbg.view = { camera: sceneCam, gameCamera: gs.gameCamera, fly, renderer: gs.sr, views: gs.views, cockpit: cockpitDebug, hudOverlay: gs.hudOverlay };
+      dbg.vrMirror = gs.mirror;
+    }
 
     const gizmo = new TransformControls(sceneCam, canvas);
     gizmo.setSpace('world');
@@ -203,7 +286,12 @@ export function Viewport({ game }: { game: Game }) {
   const playing = game.mode === 'play';
   const view: EditView = playing ? 'game' : editView;
   return (
-    <div className={`viewport${playing ? ' playing' : ''}`} ref={host}>
+    <div className={`viewport${playing ? ' playing' : ''}${filled ? ' filled' : ''}`} ref={host}>
+      {filled && (
+        <button className="unfill" onClick={() => setFilled(false)} title="back to the editor">
+          ×
+        </button>
+      )}
       <div className="viewport-overlay">
         {playing ? 'PLAY' : 'EDIT'} · {view === 'game' ? 'game camera' : 'scene camera'} · {info}
         <div className="hint">
@@ -214,6 +302,13 @@ export function Viewport({ game }: { game: Game }) {
               : "the paused game, through the game's camera"}
         </div>
       </div>
+      {xrPending && (
+        <div className="xr-pending">
+          <div className="title">Starting VR…</div>
+          <div>Put the headset on. The mission is paused and carries on once the headset is showing it.</div>
+          <div className="hint">The browser and the VR runtime (SteamVR, Quest Link) can take a minute to start the first time; leaving the runtime running makes it quick.</div>
+        </div>
+      )}
       <div className="viewport-bar">
         {!playing && (
           <>
@@ -243,24 +338,95 @@ export function Viewport({ game }: { game: Game }) {
         <button className={faithful ? 'active' : ''} onClick={() => setFaithful(true)} title="VGA resolution, nearest upscale">
           Faithful
         </button>
-        <button className={!faithful ? 'active' : ''} onClick={() => setFaithful(false)} title="native resolution">
+        <button className={!faithful ? 'active' : ''} onClick={() => setFaithful(false)} title="native resolution, drawn further out">
           Modern
         </button>
+        {(!faithful || xrOn) && (
+          <>
+            <Slider label="view" title="Modern and VR: how far out things are drawn, as a multiple of the mission's far distance (1 = the original's)" value={viewSettings.viewDistance} min={1} max={8} step={0.5} unit="x" onChange={(v) => setViewSettings((s) => ({ ...s, viewDistance: v }))} />
+            <Slider label="detail" title="Modern and VR: how far out the detail steps are pushed (1 = the original's)" value={viewSettings.detail} min={1} max={8} step={0.5} unit="x" onChange={(v) => setViewSettings((s) => ({ ...s, detail: v }))} />
+          </>
+        )}
+        <div className="enhance">
+          <button className={enhanceOpen ? 'active' : ''} onClick={() => setEnhanceOpen((o) => !o)} title="detail added in the game's own palette terms (the inset displays stay the original's)">
+            Enhance
+          </button>
+          {enhanceOpen && (
+            <div className="enhance-menu">
+              {(Object.keys(ENHANCE_LABELS) as Array<keyof EnhanceSettings>).map((k) => (
+                <label key={k}>
+                  <input type="checkbox" checked={enhance[k]} onChange={(e) => setEnhance((s) => ({ ...s, [k]: e.target.checked }))} />
+                  {ENHANCE_LABELS[k]}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        <button onClick={() => setFilled(true)} title="the view alone over the whole browser window, without this bar - for recording. Esc, or the corner button, leaves">
+          Fill
+        </button>
+        {xrSupported && (
+          <button
+            className={xrOn ? 'active' : xrPending ? 'pending' : ''}
+            disabled={xrPending || (!playing && !xrOn)}
+            onClick={() => screen.current?.toggleVr()}
+            title={xrOn ? 'leave VR' : xrPending ? 'waiting for the headset' : "VR: sit in the cockpit with a headset (Play). Left stick throttle and turn, right stick torso, triggers fire, A/B targets, X view, Y menu"}
+          >
+            {xrPending ? 'VR…' : 'VR'}
+          </button>
+        )}
+        {xrSupported && (
+          <>
+            <Slider label="cockpit" title="the cockpit's size about your eye (1 = the mech's own scale)" value={xrSettings.cockpitScale} min={0.15} max={1.5} step={0.05} unit="x" onChange={(v) => setXrSettings((s) => ({ ...s, cockpitScale: v }))} />
+            <Slider label="HUD" title="the HUD's width as a share of the game's view (the reticle and target brackets are drawn in the world, not on it)" value={xrSettings.hudScale} min={0.3} max={1} step={0.05} unit="%" onChange={(v) => setXrSettings((s) => ({ ...s, hudScale: v }))} />
+            <Slider label="seat" title="VR cockpit: how far the cockpit sits below its place (a taller or shorter pilot)" value={xrSettings.dashDrop} min={-0.3} max={0.3} step={0.02} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, dashDrop: v }))} />
+            <Slider label="at" title="how far ahead of your eye the HUD stands" value={xrSettings.hudDistance} min={0.5} max={5} step={0.1} unit="m" onChange={(v) => setXrSettings((s) => ({ ...s, hudDistance: v }))} />
+            <select
+              title="what the page shows while you play in the headset, for recording: the left eye as you see it, your view with the head's shake eased out, or a camera behind the mech"
+              value={spectatorSettings.mode}
+              onChange={(e) => setSpectatorSettings((s) => ({ ...s, mode: e.target.value as SpectatorMode }))}
+            >
+              <option value="mirror">page: eye</option>
+              <option value="smooth">page: smooth</option>
+              <option value="chase">page: chase</option>
+            </select>
+            {spectatorSettings.mode !== 'mirror' && (
+              <>
+                <Slider label="fov" title="the page camera's horizontal field of view" value={spectatorSettings.fov} min={50} max={120} step={5} unit="deg" onChange={(v) => setSpectatorSettings((s) => ({ ...s, fov: v }))} />
+                <Slider label="ease" title="how slowly the page camera turns after your head (or the mech, chasing it): seconds" value={spectatorSettings.smooth} min={0} max={1.5} step={0.05} unit="s" onChange={(v) => setSpectatorSettings((s) => ({ ...s, smooth: v }))} />
+              </>
+            )}
+          </>
+        )}
       </div>
     </div>
+  );
+}
+
+/** One of the view's or the VR sizes: a slider and its value. */
+function Slider(p: { label: string; title: string; value: number; min: number; max: number; step: number; unit: 'x' | '%' | 'm' | 'deg' | 's'; onChange: (v: number) => void }) {
+  const shown =
+    p.unit === '%'
+      ? `${Math.round(p.value * 100)}%`
+      : p.unit === 'x'
+        ? `${p.value.toFixed(2)}x`
+        : p.unit === 'deg'
+          ? `${Math.round(p.value)}°`
+          : p.unit === 's'
+            ? `${p.value.toFixed(2)} s`
+            : `${p.value.toFixed(1)} m`;
+  return (
+    <label className="xr-slider" title={p.title}>
+      {p.label}
+      <input type="range" min={p.min} max={p.max} step={p.step} value={p.value} onChange={(e) => p.onChange(Number(e.target.value))} />
+      <span>{shown}</span>
+    </label>
   );
 }
 
 function isTextField(t: EventTarget | null): boolean {
   const tag = (t as HTMLElement | null)?.tagName;
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
-}
-
-/** The mech whose scene node is the root above `n`, or -1. */
-function mechOwning(n: SceneNode): number {
-  const root = rootOf(n);
-  for (let i = 0; i < mechs.mechCount; i++) if (mechs.mechTable[i]!.node === root) return i;
-  return -1;
 }
 
 /**
