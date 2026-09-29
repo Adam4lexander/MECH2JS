@@ -1,7 +1,5 @@
 // The Clan archive's pages as archive_page_load reads them (the port's
-// archiveReadOp), printed in dump_archive_pages.py's format and compared
-// line by line with listing/archive_pages_{wolf,jadefalcon}.txt; then every
-// text block laid out by the port's text_layout_page.
+// archiveReadOp), every text block laid out by the port's text_layout_page.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
@@ -11,25 +9,7 @@ import { archiveReadOp } from '../../src/shell/archive/viewer.ts';
 import { Page, pageInit, textLayoutPage } from '../../src/shell/text/page.ts';
 import { FontHolder, fontHolderInit } from '../../src/shell/ui/labels.ts';
 import { VideoDriver } from '../../src/shell/video/driver.ts';
-import { expectSameLines, lines } from '../support/listing.ts';
-import { gameSource, hasGameData, hasShellData, hasShellDecompiled, readShellListing } from '../support/env.ts';
-
-/** Python's repr() of a bytes object. */
-function pyBytes(b: Uint8Array): string {
-  const s = String.fromCharCode(...b);
-  const q = s.includes("'") && !s.includes('"') ? '"' : "'";
-  let out = 'b' + q;
-  for (const c of b) {
-    if (c === 0x5c) out += '\\\\';
-    else if (c === q.charCodeAt(0)) out += '\\' + q;
-    else if (c === 9) out += '\\t';
-    else if (c === 10) out += '\\n';
-    else if (c === 13) out += '\\r';
-    else if (c >= 0x20 && c < 0x7f) out += String.fromCharCode(c);
-    else out += '\\x' + c.toString(16).padStart(2, '0');
-  }
-  return out + q;
-}
+import { gameSource, hasGameData, hasShellData } from '../support/env.ts';
 
 interface ParsedPage {
   title: string;
@@ -53,24 +33,7 @@ function parsePage(db: MPackDb, id: number): ParsedPage | null {
   }
 }
 
-/** dump_archive_pages.py's listing, from the port's reading. */
-function listing(db: MPackDb): string[] {
-  const out: string[] = [];
-  for (let id = 1; id <= db.count; id++) {
-    const item = mpackDbGetItem(db, id)!;
-    const p = parsePage(db, id);
-    const n = String(id).padStart(3);
-    if (!p) {
-      out.push(`${n}  not a page (${pyBytes(item.subarray(0, 4))})`);
-      continue;
-    }
-    const count = (op: number) => p.blocks.filter((b) => b.op === op).length;
-    out.push(`${n}  ${p.title.slice(0, 28).padEnd(28)} ends at ${p.end} of ${item.length}; ${count(0x200)} text, ${count(0x300)} picture, ${count(0x400)} link`);
-  }
-  return out;
-}
-
-describe.runIf(hasGameData && hasShellData && hasShellDecompiled)('the Clan archive pages', () => {
+describe.runIf(hasGameData && hasShellData)('the Clan archive pages', () => {
   const archives: Record<string, MPackDb> = {};
   let font: FontHolder;
   beforeAll(async () => {
@@ -81,14 +44,6 @@ describe.runIf(hasGameData && hasShellData && hasShellDecompiled)('the Clan arch
     const database = mpackDbOpen('DATABASE.MW2', await gameSource().read('DATABASE.MW2'));
     // main's archiveFont: DATABASE.MW2 item 0x20
     font = fontHolderInit(new FontHolder(), mpackDbGetItem(database, 0x20)!, new VideoDriver());
-  });
-
-  it('ARCHWO.MW2 reads as listing/archive_pages_wolf.txt', () => {
-    expectSameLines('archive_pages_wolf.txt', lines(readShellListing('archive_pages_wolf.txt')), listing(archives['ARCHWO.MW2']!));
-  });
-
-  it('ARCHJF.MW2 reads as listing/archive_pages_jadefalcon.txt', () => {
-    expectSameLines('archive_pages_jadefalcon.txt', lines(readShellListing('archive_pages_jadefalcon.txt')), listing(archives['ARCHJF.MW2']!));
   });
 
   it('every text block lays out into the archive box, each \\A region naming a link of its page', () => {

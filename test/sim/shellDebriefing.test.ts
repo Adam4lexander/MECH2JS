@@ -1,12 +1,10 @@
 // Phase S6: the debriefing (state 3), headless. main is resumed by MECH2
 // ('sim') with mw2prm.cfg parked at state 3 and the files a mission leaves
-// on the disk. The golden case scores the install's MW2MSN.CFG and
-// MW2CAR.CFG - what the original MW2.EXE wrote after a won Jade Falcon
-// mission - for a registry pilot, and the expected text, honor, rank and
-// missionIndex are the README's formula worked by hand below. A failed
-// mission and dishonourable options (MW2DIF.CFG bytes) score nothing.
-import fs from 'node:fs';
-import path from 'node:path';
+// on the disk. The golden case scores a won Jade Falcon mission (Trial 1:
+// three objectives succeeded, 7 enemy 'Mechs down, 704 hits of 778 shots)
+// for a registry pilot, and the expected text, honor, rank and missionIndex
+// are the README's formula worked by hand below. A failed mission and
+// dishonourable options (MW2DIF.CFG bytes) score nothing.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
@@ -17,7 +15,7 @@ import { shellMain } from '../../src/shell/main.ts';
 import { ShellPump } from '../../src/shell/host/pump.ts';
 import { hardware, hwMouseButtons, hwMouseMove } from '../../src/shell/host/hardware.ts';
 import { shell } from '../../src/shell/state.ts';
-import { mem } from '../../src/shell/memory.ts';
+import { fieldOffset, mem, structSize } from '../../src/shell/memory.ts';
 import { careerRegistrySave, pilotRecord } from '../../src/shell/career/registry.ts';
 import { PILOT, setCurrentPilot } from '../../src/shell/career/missions.ts';
 import { prmCommandLine, prmSave } from '../../src/shell/handoff/prm.ts';
@@ -33,7 +31,7 @@ import { missionEnd } from '../../src/mission/end.ts';
 import { bootMission } from '../../src/mission/load.ts';
 import { mainLoopFrame, mainLoopRunning } from '../../src/mission/mainLoop.ts';
 import { cheatHandleCommand } from '../../src/sim/ui/cheats.ts';
-import { gameSource, hasGameData, hasShellData, installShellFixtures, MW2_ROOT } from '../support/env.ts';
+import { firstRunDisk, gameSource, hasGameData, hasShellData } from '../support/env.ts';
 
 /** Runs the pump a frame at a time, calling `script` before each frame. */
 async function run(pump: ShellPump, script: (frame: number) => void, maxFrames = 1500): Promise<number> {
@@ -67,6 +65,40 @@ function pilotAt(reg: Uint8Array, i: number) {
   };
 }
 
+/**
+ * What MW2.EXE leaves on the disk after the won Trial 1 the golden case
+ * scores: MW2MSN.CFG (a MissionRecord: result 2 and the three objectives, as
+ * mission_save_results writes them) and MW2CAR.CFG (the MissionTallies).
+ * Only the fields the debriefing reads are set.
+ */
+function wonTrial(): { msn: Uint8Array; car: Uint8Array } {
+  const msn = new Uint8Array(structSize('MissionRecord'));
+  const m = new DataView(msn.buffer);
+  msn.set([0x4d, 0x57, 0x32, 0x4d]); // 'MW2M'
+  m.setInt32(fieldOffset('MissionRecord', 'result'), 2, true);
+  const objectives: [number, number, string][] = [
+    [1, 451, 'Defend Firebase At Nav Gamma'], // Primary
+    [8, 505, 'Firebase: Nav Gamma'], // Return
+    [2, 453, 'Destroy All Attacking Units'], // Secondary
+  ];
+  m.setInt32(fieldOffset('MissionRecord', 'objectiveCount'), objectives.length, true);
+  objectives.forEach(([category, changedAt, text], i) => {
+    const at = fieldOffset('MissionRecord', 'objectives') + i * structSize('MissionObjectiveRecord');
+    m.setUint32(at + fieldOffset('MissionObjectiveRecord', 'succeeded'), 1, true);
+    m.setUint32(at + fieldOffset('MissionObjectiveRecord', 'category'), category, true);
+    m.setInt32(at + fieldOffset('MissionObjectiveRecord', 'changedAt'), changedAt, true);
+    for (let k = 0; k < text.length; k++) msn[at + fieldOffset('MissionObjectiveRecord', 'text') + k] = text.charCodeAt(k);
+  });
+  const car = new Uint8Array(structSize('MissionTallies'));
+  const c = new DataView(car.buffer);
+  const tally = (f: string, v: number) => c.setInt32(fieldOffset('MissionTallies', f), v, true);
+  tally('playerKillsEnemyMech', 5);
+  tally('shotsFired', 778);
+  tally('enemyMechHits', 704);
+  tally('enemyMechsDestroyed', 7);
+  return { msn, car };
+}
+
 /** MW2DIF.CFG: unlimitedAmmo, invulnerability, splashDamage, collisionDamage, heatTracking, difficulty, 2 unused. */
 const dif = (o: Partial<{ ammo: number; invuln: number; collision: number; heat: number; difficulty: number }>) =>
   new Uint8Array([o.ammo ?? 0, o.invuln ?? 0, 1, o.collision ?? 1, o.heat ?? 1, o.difficulty ?? 1, 0, 0]);
@@ -81,9 +113,7 @@ describe.runIf(hasGameData && hasShellData)('shell debriefing', () => {
     exe = ExeImage.fromExe(await gameSource().read('MW2SHELL.EXE'));
     prj = new ProjectFile(await gameSource().read('MW2.PRJ'));
     db = await gameSource().read('DATABASE.MW2');
-    const f = installShellFixtures(['MW2MSN.CFG', 'MW2CAR.CFG']);
-    msn = f.get('MW2MSN.CFG')!;
-    car = f.get('MW2CAR.CFG')!;
+    ({ msn, car } = wonTrial());
   });
 
   /**
@@ -157,12 +187,12 @@ describe.runIf(hasGameData && hasShellData)('shell debriefing', () => {
   /** '\g350\b<width>n': a number right-aligned at x 350 (the width is the font's, not the formula's). */
   const at350 = (n: number) => `\\g350\\b${String(textWidth(shell.pageFont!, String(n))).padStart(3, '0')}${n}`;
 
-  it("golden: the install's MW2MSN.CFG / MW2CAR.CFG on Trial 1 (cindSCN1), HARD - the README's formula by hand", async () => {
+  it("golden: a won Trial 1 (cindSCN1), HARD - the README's formula by hand", async () => {
     park('cindSCN1', 4, dif({ difficulty: 2 }));
     const tbr = chassisEntry(chassisIndexOf('tbr00std')).tonnage;
     const r = await debrief();
 
-    // The files (listed by hand from their bytes):
+    // The files (wonTrial):
     //   MW2MSN.CFG: result 2, three objectives -
     //     0 succeeded, category 1 (Primary),   changedAt 451, 'Defend Firebase At Nav Gamma'
     //     1 succeeded, category 8 (Return),    changedAt 505, 'Firebase: Nav Gamma'
@@ -312,10 +342,9 @@ describe.runIf(hasGameData && hasShellData)('MECH2 loop through the debriefing, 
   });
 
   it('register -> hall -> ready room -> briefing -> LAUNCH -> the sim, won -> debriefing -> EXIT -> the next mission launches', async () => {
-    // the read-only layer: DATABASE.MW2, the input maps and GIDDI drivers the sim reads
-    const assets = new Map<string, Uint8Array>([['DATABASE.MW2', db]]);
-    for (const f of fs.readdirSync(MW2_ROOT)) if (/\.MAP$/i.test(f)) assets.set(f.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(MW2_ROOT, f))));
-    for (const f of fs.readdirSync(path.join(MW2_ROOT, 'GIDDI'))) assets.set('GIDDI/' + f.toUpperCase(), new Uint8Array(fs.readFileSync(path.join(MW2_ROOT, 'GIDDI', f))));
+    // the read-only layer: DATABASE.MW2, and the drivers and controls files the port has on a first run
+    const assets = firstRunDisk();
+    assets.set('DATABASE.MW2', db);
     setDosFiles(assets);
     setOwnFiles(new Map());
     setOverlayFiles(null);

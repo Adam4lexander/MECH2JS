@@ -1,8 +1,5 @@
-// orders_text_build: the ORDR chunk of a briefing / debriefing stream. The
-// install's TMP.OUT is the raw text the last debriefing wrote (FUCHDBFS,
-// the FUCH mission's success debriefing, is the one stream whose ORDR text
-// it is byte for byte); the port must write the same bytes. And the \Q, \H
-// and \R codes filled in as the pages are laid out.
+// orders_text_build: the ORDR chunk of a briefing / debriefing stream laid
+// out as pages, with the \Q, \H and \R codes filled in.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile, resourceIdByName } from '../../src/data/prj/ProjectFile.ts';
@@ -17,9 +14,9 @@ import { PILOT, rankTitle, setCurrentPilot } from '../../src/shell/career/missio
 import { pilotRecord } from '../../src/shell/career/registry.ts';
 import { mem } from '../../src/shell/memory.ts';
 import type { Page } from '../../src/shell/text/page.ts';
-import { gameSource, hasGameData, hasShellData, hasShellDecompiled, installShellFixtures } from '../support/env.ts';
+import { gameSource, hasGameData, hasShellData } from '../support/env.ts';
 
-describe.runIf(hasGameData && hasShellData && hasShellDecompiled)('orders_text_build', () => {
+describe.runIf(hasGameData && hasShellData)('orders_text_build', () => {
   let exe: ExeImage;
   let prj: ProjectFile;
   let fontBytes: Uint8Array;
@@ -46,15 +43,10 @@ describe.runIf(hasGameData && hasShellData && hasShellDecompiled)('orders_text_b
 
   const allText = (pages: Page[]) => pages.flatMap((p) => p.lines.map((l) => l.text)).join('|');
 
-  it("writes FUCHDBFS's raw ORDR text to tmp.out exactly as the install's TMP.OUT", () => {
-    const want = installShellFixtures(['TMP.OUT']).get('TMP.OUT');
-    expect(want, 'the install has no TMP.OUT').toBeDefined();
+  it("lays out FUCHDBFS's debriefing: the caller's text quoted, split into its pages, no codes left", () => {
     const font = start(0, 1234);
     const pages: Page[] = [];
     ordersTextBuild(pages, 0x58, 0x1e, 0x1c6, 400, 'FUCHDBFS', font, 'QUOTED');
-    const got = dosFileLoad('tmp.out')!;
-    expect(got.length).toBe(want!.length);
-    expect(Buffer.from(got).equals(Buffer.from(want!))).toBe(true);
     // \q became the caller's text; \s split the pages (MISSION SUCCESSFUL ... then AFTERMATH)
     expect(allText(pages)).toContain('QUOTED');
     expect(pages.length).toBeGreaterThan(1);

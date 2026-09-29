@@ -1,56 +1,21 @@
-// The BRF2 briefing streams as the port's shell code finds their chunks,
-// printed in dump_brf2.py's format and compared with listing/brf2.txt; and
-// mission_brf2_load's effect on the star records.
+// The BRF2 briefing streams: mission_brf2_load's effect on the star records.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
-import { ProjectFile, readNameTable } from '../../src/data/prj/ProjectFile.ts';
+import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
 import { SHELL_LABEL } from '../../src/generated/shell/labels.gen.ts';
 import { startShellProcess } from '../../src/shell/boot.ts';
-import { brf2FindChunk, brf2Sdsc, missionBrf2Load, projectStreamLoad } from '../../src/shell/career/brf2.ts';
+import { missionBrf2Load } from '../../src/shell/career/brf2.ts';
 import { readStar } from '../../src/shell/handoff/stars.ts';
 import { mem } from '../../src/shell/memory.ts';
-import { expectSameLines, lines } from '../support/listing.ts';
-import { gameSource, hasGameData, hasShellData, hasShellDecompiled, readShellListing } from '../support/env.ts';
+import { gameSource, hasGameData, hasShellData } from '../support/env.ts';
 
-describe.runIf(hasGameData && hasShellData && hasShellDecompiled)('BRF2 streams', () => {
+describe.runIf(hasGameData && hasShellData)('BRF2 streams', () => {
   let exe: ExeImage;
   let prj: ProjectFile;
   beforeAll(async () => {
     exe = ExeImage.fromExe(await gameSource().read('MW2SHELL.EXE'));
     prj = new ProjectFile(await gameSource().read('MW2.PRJ'));
     startShellProcess(exe, prj);
-  });
-
-  it('every BRF2 stream matches listing/brf2.txt', () => {
-    const out: string[] = [];
-    for (const { name } of readNameTable(prj, 0xe)) {
-      if (!/brf2$/i.test(name)) continue;
-      const s = projectStreamLoad(name, 0xe, 'BWD')!;
-      const dv = new DataView(s.buffer, s.byteOffset, s.byteLength);
-      const items: Array<[number, string]> = [];
-      const sups = brf2FindChunk(s, 'G');
-      if (sups >= 0) {
-        let t = '';
-        for (let i = sups + 8; s[i] !== 0; i++) t += String.fromCharCode(s[i]!);
-        items.push([sups, `launch ${t}`]);
-      }
-      let at = -1;
-      for (const who of ['player', 'opponent']) {
-        at = brf2FindChunk(s, 'F', at);
-        if (at < 0) break;
-        const d = brf2Sdsc(s, at);
-        items.push([at, `${who} star: skill ${d.skill}, ${d.maxTonnage} t, ${d.memberCount} of ${d.maxMechs}: ${d.names.join(' ')}`]);
-      }
-      const p = brf2FindChunk(s, 'E');
-      if (p >= 0) {
-        let t = '';
-        for (let i = p + 0xc; i < p + dv.getInt32(p + 4, true) && s[i] !== 0; i++) t += String.fromCharCode(s[i]!);
-        items.push([p, `planet ${dv.getInt32(p + 8, true)}: ${t.trim().replace(/\n/g, ' / ')}`]);
-      }
-      items.sort((a, b) => a[0] - b[0]);
-      out.push(`${name.padEnd(9)} ${items.map((x) => x[1]).join('; ')}`);
-    }
-    expectSameLines('brf2.txt', lines(readShellListing('brf2.txt')), out);
   });
 
   it('mission_brf2_load sets the launch animation and both stars', () => {

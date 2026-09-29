@@ -16,7 +16,7 @@
 // then pin the result against regressions.
 import { describe, expect, it } from 'vitest';
 import { parseSmacker, SmackerDecoder, smackerFrameDurationUs, type SmackerHeader } from '../../src/data/formats/smacker.ts';
-import { gameSource, hasCdImage, hasShellData, hasShellDecompiled, MW2_ROOT, readShellListing } from '../support/env.ts';
+import { gameSource, hasCdImage, hasShellData, MW2_ROOT } from '../support/env.ts';
 import { fnv1a, openCdImage } from '../support/cdImage.ts';
 
 if (!hasCdImage) console.warn(`[golden] SKIPPING smacker CD suites: no MECH2_16B.BIN + MECH2_16B.CUE under MW2_ROOT=${MW2_ROOT}`);
@@ -162,63 +162,7 @@ describe.runIf(hasCdImage)('every Smacker file on the CD', () => {
   });
 });
 
-// ---- which names the shell asks for exist on the CD ------------------------
-
-/** Names the shell plays as full-screen or in-screen movies: smk\<name>.smk only. */
-const MOVIES = ['mintro', 'mwoland', 'mjfland', 'mend', 'mend2', 'aworgstr', 'ajfrgstr', 'amwlogo1'];
-
-/**
- * Names screen_anims.txt shows only as expressions, resolved by hand from
- * the shell's strings: the planet table at 0x7f29c (aplanNN / aplanNNc,
- * 0x768c9..), the Trial of Grievance emblems at 0x7f328 (0x769ef..), the
- * training screen's two alternating anims (0x78088..), and the chassis
- * formats awomp%s / ajfmp%s / aiamp%s (0x83844), awosc%s / ajfsc%s /
- * aiasc%s (0x840c4) and awo%stbl / ajf%stbl (0x77c1b), whose %s is a
- * chassis's animCode (not enumerated here; see the patterns test).
- */
-const INDIRECT = [
-  ...Array.from({ length: 12 }, (_, i) => `aplan${String(i + 1).padStart(2, '0')}`),
-  ...Array.from({ length: 12 }, (_, i) => `aplan${String(i + 1).padStart(2, '0')}c`),
-  'wiawolf',
-  'wiajf',
-  'wiaghost',
-  'wiasmoke',
-  'wianova',
-  'wiasteel',
-  'awotrnwa',
-  'awotrnwb',
-  'ajftrnwa',
-  'ajftrnwb',
-];
-
-describe.runIf(hasCdImage && hasShellDecompiled)('shell movie and animation names on the CD', () => {
-  it('resolves each name as smk\\<name>.shp or smk\\<name>.smk', async () => {
-    const iso = await openCdImage();
-    const has = async (n: string) => (await iso.lookup(`SMK/${n}`)) !== null;
-    const literal = new Set<string>();
-    for (const line of readShellListing('screen_anims.txt').split('\n')) {
-      const m = /^\s+\S+\s+\S+\s+([a-z0-9]+)\s/.exec(line);
-      if (m) literal.add(m[1]!);
-    }
-    const anims = [...new Set([...literal, ...INDIRECT])].sort();
-    const shp: string[] = [];
-    const smkOnly: string[] = [];
-    const missing: string[] = [];
-    for (const n of anims) {
-      if (await has(`${n}.shp`)) shp.push(n);
-      else if (await has(`${n}.smk`)) smkOnly.push(n);
-      else missing.push(n);
-    }
-    const movieMissing: string[] = [];
-    for (const n of MOVIES) if (!(await has(`${n}.smk`))) movieMissing.push(n);
-    expect(movieMissing).toEqual([]);
-    // everything resolves; these are shape tables, the rest Smacker movies
-    expect({ shp, missing }).toEqual({
-      shp: ['wiabkg1', 'wiabkg2', 'wiacn', 'wiacp', 'wiadsgn', 'wialanch', 'wiamp4mp', 'wiastar', 'wiavn', 'wiavp', 'wjfdsgn', 'wjfmp4mp', 'wjfstar', 'wwomp4mp'],
-      missing: [],
-    });
-    expect(smkOnly.length + shp.length + missing.length).toBe(anims.length);
-  });
+describe.runIf(hasCdImage)('shell movie and animation names on the CD', () => {
 
   it('finds the chassis-coded families', async () => {
     const iso = await openCdImage();

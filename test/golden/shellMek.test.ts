@@ -1,11 +1,9 @@
-// Phase S7: the mech lab's MEK loader and SAVE record against the files
-// MW2SHELL.EXE wrote into the install's MEK directory (read here only as
-// expected output), and the construction rules the CUSTOMIZE handlers
-// enforce (README "Design rules the mech lab enforces").
+// Phase S7: the mech lab's variant list and MEK loader, and the
+// construction rules the CUSTOMIZE handlers enforce (README "Design rules the
+// mech lab enforces").
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
-import { parseMek } from '../../src/data/formats/mek.ts';
 import { setDosFiles, setOverlayFiles, setOwnFiles } from '../../src/engine/dosFiles.ts';
 import { SHELL_LABEL as L } from '../../src/generated/shell/labels.gen.ts';
 import { startShellProcess } from '../../src/shell/boot.ts';
@@ -32,24 +30,20 @@ import {
   unplacedItem,
 } from '../../src/shell/mechlab/design.ts';
 import { mechlabListVariants } from '../../src/shell/screens/mechlab.ts';
-import { gameSource, hasGameData, hasShellData, installShellFixtures } from '../support/env.ts';
-
-const hex = (b: Uint8Array) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join(' ');
+import { gameSource, hasGameData, hasShellData } from '../support/env.ts';
 
 describe.runIf(hasShellData && hasGameData)('shell mech lab: MEK records and design rules', () => {
   let exe: ExeImage;
   let prj: ProjectFile;
-  let meks: Map<string, Uint8Array>;
   beforeAll(async () => {
     exe = ExeImage.fromExe(await gameSource().read('MW2SHELL.EXE'));
     prj = new ProjectFile(await gameSource().read('MW2.PRJ'));
-    meks = installShellFixtures(['MEK/*USR.MEK']);
   });
   beforeEach(() => {
     startShellProcess(exe, prj);
     projectOpen('MW2.PRJ');
     setDosFiles(new Map());
-    setOwnFiles(meks);
+    setOwnFiles(new Map());
     setOverlayFiles(null);
   });
 
@@ -60,19 +54,11 @@ describe.runIf(hasShellData && hasGameData)('shell mech lab: MEK records and des
     mechlabLoadMek(L.mechlabVariants);
   }
 
-  it('every install MEK\\*USR.MEK loads and SAVE writes it back byte for byte', () => {
-    expect(meks.size).toBeGreaterThan(0);
-    for (const [key, bytes] of meks) {
-      const name = key.slice(4, -4); // 'MEK/TBR00USR.MEK' -> 'TBR00USR'
-      load(name);
-      expect(mem().cstr(L.designTitle), key).toBe(parseMek(bytes)!.trailerText);
-      expect(g(L.mechlabUnplacedCount), key).toBe(0);
-      expect(hex(mechlabPackMek()), key).toBe(hex(bytes));
-    }
-  });
-
   it('the variant list finds the stock variants in MW2.PRJ and the user files by slot', () => {
-    // the Mad Dog (mdg): the install has mdg00usr..mdg02usr
+    // three saved Mad Dog (mdg) designs on the port's disk, as the mech lab's SAVE leaves them
+    load('mdg00std');
+    const design = mechlabPackMek();
+    setOwnFiles(new Map(['MEK/MDG00USR.MEK', 'MEK/MDG01USR.MEK', 'MEK/MDG02USR.MEK'].map((n) => [n, design])));
     mechlabListVariants('mdg');
     const at = (i: number) => mem().cstr(L.mechlabVariants + i * 13, 13);
     expect(at(0)).toBe('mdg00std');

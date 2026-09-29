@@ -1,6 +1,5 @@
 // fixed_sin / fixed_atan2 / fixed_asin against BigInt transcriptions of the
-// decompiled bodies, over the same tables. The tables themselves are checked
-// against the decompilation's listing in test/golden/trig.test.ts.
+// decompiled bodies, over the same tables.
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import { atanTable, fixedAsin, fixedAtan2, fixedCos, fixedSin, sinTable } from '../../src/core/angle/trig.ts';

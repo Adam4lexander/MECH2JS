@@ -18,10 +18,10 @@
  * open/read inside the interpreter. The port's FileSource is async, so the
  * loose files a mission needs are read BEFORE the load into an in-memory map
  * (setLooseFiles, keyed by the upper-cased file name, e.g. 'USERSTAR.BWD')
- * and project_open_stream reads that map synchronously. preloadLooseFiles
- * fills the map from a FileSource; SHIPPED_LOOSE_STREAMS are the names
- * MW2.PRJ's id -2 INCLs use (test/golden/missionStreams.test.ts checks the
- * list against the data). A file missing from the map is a missing file, as
+ * and project_open_stream reads that map synchronously; the mission load
+ * fills it from the port's disk (mission/load.ts). SHIPPED_LOOSE_STREAMS are
+ * the names MW2.PRJ's id -2 INCLs use (test/golden/missionStreams.test.ts
+ * checks the list against the data). A file missing from the map is a missing file, as
  * res_load_file failing would be.
  *
  * The seen-stream list ("file ID list", SYSERR_CANTMALLOCFILEIDLIST) lives
@@ -33,7 +33,6 @@ import { log } from '../../core/log.ts';
 import { i16 } from '../../core/int/cint.ts';
 import { systemError } from '../../core/systemError.ts';
 import { type Chunk, ProjectItem, projectItemFromStream, type StreamRef } from '../../data/bwd/stream.ts';
-import type { FileSource } from '../../data/source/FileSource.ts';
 import { readProjectTags, type ProjectTag } from '../../data/exe/tables/projectTags.ts';
 import { LABEL } from '../../generated/labels.gen.ts';
 import { registerGlobals } from '../../engine/globals.ts';
@@ -92,19 +91,6 @@ export function setLooseFiles(files: Map<string, Uint8Array>): void {
  * against every INCL in MW2.PRJ by the golden test.
  */
 export const SHIPPED_LOOSE_STREAMS = ['USERSTAR.BWD', 'EN01STAR.BWD', 'EN02STAR.BWD', 'EN03STAR.BWD', 'EN04STAR.BWD', 'EN05STAR.BWD', 'INSTMAP1.BWD'];
-
-/**
- * Reads the named files that exist in `source` into a map for setLooseFiles.
- * Missing files are left out (project_open_stream then reports them the way
- * a failed res_load_file does).
- *
- * @portOnly async preload for the synchronous loose-file map
- */
-export async function preloadLooseFiles(source: FileSource, names: readonly string[] = SHIPPED_LOOSE_STREAMS): Promise<Map<string, Uint8Array>> {
-  const m = new Map<string, Uint8Array>();
-  for (const n of names) if (await source.exists(n)) m.set(n.toUpperCase(), await source.read(n));
-  return m;
-}
 
 /**
  * A loose file's bytes from the pre-loaded map, or null - res_load_file

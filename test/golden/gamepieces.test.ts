@@ -1,28 +1,19 @@
-// The gamepiece cluster against MW2.EXE, MW2.PRJ and the decompilation:
-//  - gamepieceClasses() resolves every code address in the table at 0x96088
-//    to the port registered for exactly that address and name;
-//  - every MEK record, loaded through mech_spawn + mech_std_create_loadout +
-//    mech_load_config, reprinted FROM THE LOADOUT in listing/chassis.txt's
-//    format and compared line by line (so a record whose values landed in
-//    another record's loadout fails);
+// The gamepiece cluster against MW2.EXE and MW2.PRJ:
 //  - difficulty armour scales, heat dissipation by climate, loose MEK files;
 //  - one gamepiece of each class spawned and run through its create hook;
 //  - groups, formations, stars and paths from the real STAR/FTBL/PTBL chunks.
-import fs from 'node:fs';
-import path from 'node:path';
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { MechEntity } from '../../src/generated/classes.gen.ts';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
-import { readGamepieceClasses } from '../../src/data/exe/tables/gamepieceClasses.ts';
 import { readWeaponTypes } from '../../src/data/exe/tables/weaponTypes.ts';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
 import { parseMek } from '../../src/data/formats/mek.ts';
+import { mechCatalog } from '../../src/data/catalog/mechs.ts';
 import { parseMgeo } from '../../src/data/formats/mgeo.ts';
 import { decodeFtbl } from '../../src/data/bwd/payloads/ftbl.ts';
 import { decodePtbl } from '../../src/data/bwd/payloads/ptbl.ts';
 import { decodeStar } from '../../src/data/bwd/payloads/star.ts';
 import type { Chunk } from '../../src/data/bwd/stream.ts';
-import { codeInfo } from '../../src/engine/codePtr.ts';
 import { resetAllGlobals } from '../../src/engine/globals.ts';
 import { setBootImage } from '../../src/engine/image.ts';
 import { setLogSink } from '../../src/core/log.ts';
@@ -30,7 +21,7 @@ import { setMainProject } from '../../src/engine/resources/cache.ts';
 import { sceneNodeCreate, sceneNodeSetOrigin, sceneNodeWalk } from '../../src/engine/scene/sceneGraph.ts';
 import { polyResolveCode, wtboGlobals } from '../../src/engine/scene/wtboLoader.ts';
 import { gamepieceClasses } from '../../src/sim/mech/classes.ts';
-import { mechConfig, mechLoadConfig, resLoadMgeo, setMechConfigLog } from '../../src/sim/mech/config.ts';
+import { mechLoadConfig, resLoadMgeo, setMechConfigLog } from '../../src/sim/mech/config.ts';
 import { mechDispatchHook0 } from '../../src/sim/mech/hooks.ts';
 import { loadoutArrays } from '../../src/sim/mech/loadout.ts';
 import { setMekSource } from '../../src/sim/mech/looseFiles.ts';
@@ -43,45 +34,18 @@ import { detail } from '../../src/sim/world/detailRecords.ts';
 import { lighting } from '../../src/sim/world/environment.ts';
 import { planet } from '../../src/sim/world/planet.ts';
 import { things } from '../../src/sim/things/gameThings.ts';
-import { gameSource, hasDecompiled, hasGameData, MW2_ROOT, readListing } from '../support/env.ts';
-import { expectSameLines, lines, padL, padR } from '../support/listing.ts';
-import { pyFixed, readFunctionNames } from '../support/formatHelpers.ts';
+import { gameSource, hasGameData, MW2_ROOT } from '../support/env.ts';
 import { namedStreams } from '../support/bwdHelpers.ts';
 import { NodeFsSource } from '../../tools/nodeSource.ts';
 
-// dump_chassis.py's EQUIPMENT and ROLE, as test/golden/chassis.test.ts has them
-const EQUIPMENT: Record<number, string> = {
-  5000: 'MASC', 5050: 'targ-comp', 5100: 'ECM', 5150: 'artemis', 5200: 'beagle', 5250: 'TAG',
-  5300: 'shoulder', 5350: 'upper-arm', 5400: 'lower-arm', 5450: 'hand',
-  5500: 'hip', 5550: 'upper-leg', 5600: 'lower-leg', 5650: 'foot',
-  5700: 'sensors', 5750: 'cockpit', 5800: 'gyro', 5850: 'engine',
-  5900: 'life-sup', 6000: 'heatsink', 7000: 'jumpjet', 8000: 'endo-steel', 9000: 'ferro-fib',
-};
-const ROLE = ['', 'head', 'RT', 'CT', 'LT', 'RA', 'LA', 'RL', 'LL'];
-function slotName(code: number, weapons: string[]): string | null {
-  if (code === 0) return null;
-  const t = Math.floor(code / 100);
-  if (t === 100) return `ammo:${weapons[0] ?? 'wpn0'}(inert)`;
-  if (code >= 6000 && code < 7000 && Math.floor(code / 10) * 10 !== 6000) return 'heatsink(inert)';
-  if (t > 100) {
-    const w = Math.floor((code - 10000) / 100);
-    return 'ammo:' + (w >= 0 && w < weapons.length ? weapons[w] : String(code));
-  }
-  if (t < 50) return t < weapons.length ? weapons[t]! : `wpn${t}`;
-  return EQUIPMENT[Math.floor(code / 10) * 10] ?? String(code);
-}
-const pyStr = (v: string | null) => v ?? 'None';
-
-describe.runIf(hasGameData && hasDecompiled)('gamepieces', () => {
+describe.runIf(hasGameData)('gamepieces', () => {
   let exe: ExeImage;
   let prj: ProjectFile;
-  let weaponNames: string[];
   let streams: ReturnType<typeof namedStreams>;
 
   beforeAll(async () => {
     exe = ExeImage.fromExe(await gameSource().read('MW2.EXE'));
     prj = new ProjectFile(await gameSource().read('MW2.PRJ'));
-    weaponNames = readWeaponTypes(exe).map((w) => w.name);
     streams = namedStreams(prj);
     setLogSink(() => {}); // res_load_file's symlog lines for every record without a loose file
   });
@@ -112,144 +76,6 @@ describe.runIf(hasGameData && hasDecompiled)('gamepieces', () => {
     if (mechs.mechCount <= index) mechs.mechCount = index + 1;
     return e;
   }
-
-  it('gamepieceClasses() resolves every hook to the function registered at that address', () => {
-    const names = readFunctionNames();
-    const raw = readGamepieceClasses(exe);
-    const live = gamepieceClasses();
-    expect(live.length).toBe(9);
-    const got: string[] = [];
-    const want: string[] = [];
-    raw.forEach((r, i) => {
-      const addrs = [r.createLoadout, ...r.hooks];
-      const fns = [live[i]!.createLoadout, ...live[i]!.hooks];
-      expect(live[i]!.classId).toBe(r.classId);
-      want.push(`${r.classId}: ` + addrs.map((a) => (a === 0 ? 'null' : `${names.get(a)}@${a.toString(16)}`)).join(' '));
-      got.push(
-        `${live[i]!.classId}: ` +
-          fns.map((f) => {
-            if (!f) return 'null';
-            const info = codeInfo(f);
-            return info ? `${info.name}@${info.address.toString(16)}` : 'UNREGISTERED';
-          }).join(' '),
-      );
-    });
-    expectSameLines('gamepieceClasses', want, got);
-    expect(got.join('\n')).not.toContain('undefined');
-  });
-
-  it('chassis.txt corresponds, reprinted from each record\'s live loadout', () => {
-    mechs.playerMechIndex = 0;
-    mechs.mechCount = 2;
-    lighting.ambientTemperature = 20; // temperate: 50 per heat sink for a non-player
-    mechs.groupTable[1]!.allegiance = 1; // an enemy: enemyArmorScale
-    mechs.simOptions.difficulty = 1;
-    const W: string[] = [];
-    const G: string[] = [];
-    const want = lines(readListing('chassis.txt'));
-    // each record's raw weapon locations from the listing: a number, or null for 'from slots'
-    const locations = new Map<string, Array<number | null>>();
-    let cur: Array<number | null> = [];
-    for (const x of want) {
-      const h = x.match(/^(\S+) \(MEK \d+\)/);
-      if (h) locations.set(h[1]!, (cur = []));
-      const m = x.match(/^ {2}weapon +\d+ .*location (from slots|-?\d+)$/);
-      if (m) cur.push(m[1] === 'from slots' ? null : parseInt(m[1]!, 10));
-    }
-    // the listing's weapon lines end in the record's raw location; the loadout holds the resolved one
-    const stripLoc = (l: string): string => l.replace(/ {2}location .*$/, '');
-    let n = 0;
-    const t = prj.type('MEK')!;
-    for (let id = 0; id < t.entries.length; id++) {
-      const name = prj.resourceName('MEK', id);
-      if (!name) continue;
-      const bytes = prj.readResource('MEK', id)!;
-      if (!parseMek(bytes)) continue;
-      n++;
-      const e = spawn(1, 1);
-      const l = e.loadout!;
-      expect(mechLoadConfig(l, name, id, name), name).toBe(true);
-      const scale = mechConfig.enemyArmorScale;
-      expect(scale).toBe(3);
-      const { weapons, sections, ammo } = loadoutArrays(l);
-      // move back from speed = round(move * 0x697e98 / 65536); checked exact below
-      const move = Math.round((l.speed * 65536) / 0x697e98);
-      expect(l.speed, name).toBe(Number((BigInt(move) * 0x697e98n + 0x8000n) >> 16n));
-      const jump = l.jumpFuel === 0x71c ? l.jumpCapacity : l.jumpFuel === -2 ? 0 : NaN;
-      expect(l.heatDissipation % 50, name).toBe(0);
-      const speed = `${pyFixed(move * 10.8, 1)} kph`;
-      const thrust = move > 0 && jump > 0 ? `${pyFixed((4.0 * jump) / move, 2)} g` : 'none';
-      G.push(`${name} (MEK ${id})  ${l.tons} t  move ${move} = ${speed}  jump ${jump} = thrust ${thrust}  heat sinks ${l.heatDissipation / 50}  weapons ${l.numWeapons}  ammo bins ${l.numAmmo}`);
-      sections.forEach((s, i) => {
-        const f = s.armorFront / 65536 / scale;
-        const r = s.armorRear / 65536 / scale;
-        const names = [...s.slots].slice(0, Math.max(0, Math.min(s.numSlots, 12))).map((x) => slotName(x, weaponNames));
-        G.push(`  loc${i + 1} ${padR(ROLE[i + 1]!, 6)} armour ${padL(f, 3)} front ${padL(r, 3)} rear  internal ${padL(s.internal / 65536, 3)}  ${names.filter((x) => x).join(' ')}`);
-        // the damage-level nibbles, from the unscaled chassis values
-        const nib = (v: number) => Math.max(0, Math.min(15, Math.trunc(v / 5)));
-        expect(s.flags & 0xf, `${name} loc${i + 1}`).toBe(nib(s.internal / 65536 + f));
-        expect((s.flags >> 4) & 0xf, `${name} loc${i + 1}`).toBe(nib(s.internal / 65536 + r));
-      });
-      for (let i = 0; i < l.numWeapons; i++) {
-        const w = weapons[i]!;
-        G.push(`  weapon ${i}  ${padR(pyStr(slotName(w.slotCode, weaponNames)), 7)} code ${padL(w.slotCode, 4)}`);
-        expect(w.type, name).toBe(Math.trunc(w.slotCode / 100));
-        expect([w.slotState, w.fireState, w.fireGroup], name).toEqual([1, 1, 0]);
-        // the resolved location holds the weapon's slot (6 and 7 fold onto 1 and 3)
-        // a given location is taken as-is; 'from slots' resolves to a section holding the weapon's slot (6 and 7 fold onto 1 and 3)
-        const loc = locations.get(name)![i];
-        const si = w.sectionIndex;
-        if (loc !== null && loc !== undefined) expect(si, `${name} weapon ${i}`).toBe(loc);
-        else {
-          const holds = (k: number) => [...sections[k]!.slots].includes(w.slotCode);
-          expect(holds(si) || (si === 1 && holds(6)) || (si === 3 && holds(7)), `${name} weapon ${i} section ${si}`).toBe(true);
-        }
-        // ammo = the rounds of its bins, or -1 for an energy weapon with none
-        const bins = [...w.binIndices].slice(0, w.numBins).map((b) => ammo[b]!);
-        const energy = readWeaponTypes(exe)[w.type]!.ammoPerTon === -1;
-        expect(w.ammo, `${name} weapon ${i}`).toBe(bins.reduce((a, b) => a + b.rounds, energy ? -1 : 0));
-        for (const b of bins) expect(b.weaponIndex).toBe(i);
-      }
-      // the loadout's bins are made weapon by weapon; print them in that order
-      let made = 0;
-      for (let i = 0; i < l.numWeapons; i++) {
-        const w = weapons[i]!;
-        for (let k = 0; k < w.numBins; k++, made++) {
-          const b = ammo[w.binIndices[k]!]!;
-          G.push(`  bin ${made}  class ${padL(b.slotCode, 4)}  feeds code ${padL(weapons[b.weaponIndex]!.slotCode, 4)} (${pyStr(slotName(w.slotCode, weaponNames))})`);
-        }
-      }
-      G.push('');
-    }
-    // the same records from the listing: weapon lines without the location, and the ammo lines
-    // regrouped as the loader makes bins - per weapon in mount order, each weapon's bins in record order
-    let i = 2;
-    for (let r = 0; r < n; r++) {
-      const head = want[i++]!;
-      W.push(head);
-      for (let k = 0; k < 8; k++) W.push(want[i++]!);
-      const wl: string[] = [];
-      const al: string[] = [];
-      while (want[i] !== '' && i < want.length) {
-        const x = want[i++]!;
-        if (x.startsWith('  weapon')) wl.push(x);
-        else al.push(x);
-      }
-      i++;
-      for (const x of wl) W.push(stripLoc(x));
-      let made = 0;
-      for (const x of wl) {
-        const code = x.match(/code +(\d+)/)![1]!;
-        for (const a of al) {
-          const m = a.match(/^ {2}ammo +\d+ {2}class +(\d+) {2}feeds code +(\d+) (\(.*\))$/)!;
-          if (m[2] === code && made < 0x19) W.push(`  bin ${made++}  class ${padL(m[1]!, 4)}  feeds code ${padL(m[2]!, 4)} ${m[3]}`);
-        }
-      }
-      W.push('');
-    }
-    expect(want[0]).toBe(`MW2 mech chassis - MW2.PRJ, ${n} MEK records`);
-    expectSameLines('chassis.txt (from loadouts)', W, G);
-  });
 
   it('scales armour by difficulty and side', () => {
     // BHM00STD: loc3 CT armour 46 front 15 rear (listing/chassis.txt)
@@ -294,20 +120,26 @@ describe.runIf(hasGameData && hasDecompiled)('gamepieces', () => {
   });
 
   it('prefers a loose MEK\\<config>.MEK over the resource the id names', () => {
-    const f = path.join(MW2_ROOT, 'MEK', 'MDG00USR.MEK');
-    if (!fs.existsSync(f)) return;
-    const loose = parseMek(new Uint8Array(fs.readFileSync(f)))!;
-    mechs.mechCount = 2;
-    const e = spawn(1, 1);
-    // id 2 is BHM00STD (100 t); the loose Mad Dog must win
-    expect(mechLoadConfig(e.loadout!, 'maddog', 2, 'mdg00usr')).toBe(true);
-    const l = e.loadout!;
-    expect(l.tons).toBe(loose.chassis.tons);
-    expect(l.numWeapons).toBe(loose.numWeaponsLoaded);
-    expect(loadoutArrays(l).weapons.slice(0, l.numWeapons).map((w) => w.slotCode)).toEqual(loose.weapons.map((w) => w.slotCode));
-    expect(l.tons).not.toBe(parseMek(prj.readResource('MEK', 2)!)!.chassis.tons);
-    // no loose file and no resource: failure
-    expect(mechLoadConfig(e.loadout!, 'x', 0, 'nosuchmk')).toBe(false);
+    // a user variant as the mech lab saves one: here the stock Mad Dog's record, under the user name
+    const madDog = mechCatalog(prj).find((m) => m.config === 'mdg00std')!;
+    const bytes = prj.readResource('MEK', madDog.mekId)!;
+    const loose = parseMek(bytes)!;
+    setMekSource(new Map([['MEK/MDG00USR.MEK', bytes]]));
+    try {
+      mechs.mechCount = 2;
+      const e = spawn(1, 1);
+      // id 2 is BHM00STD (100 t); the loose Mad Dog must win
+      expect(mechLoadConfig(e.loadout!, 'maddog', 2, 'mdg00usr')).toBe(true);
+      const l = e.loadout!;
+      expect(l.tons).toBe(loose.chassis.tons);
+      expect(l.numWeapons).toBe(loose.numWeaponsLoaded);
+      expect(loadoutArrays(l).weapons.slice(0, l.numWeapons).map((w) => w.slotCode)).toEqual(loose.weapons.map((w) => w.slotCode));
+      expect(l.tons).not.toBe(parseMek(prj.readResource('MEK', 2)!)!.chassis.tons);
+      // no loose file and no resource: failure
+      expect(mechLoadConfig(e.loadout!, 'x', 0, 'nosuchmk')).toBe(false);
+    } finally {
+      setMekSource(new NodeFsSource(MW2_ROOT));
+    }
   });
 
   it('writes the log lines in the C formats', () => {

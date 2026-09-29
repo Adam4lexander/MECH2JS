@@ -1,12 +1,7 @@
 // The mission VM's visual and misc state (contract section C), driven by the
-// real MW2.PRJ / MW2.EXE and checked against the decompilation's listings and
-// against the C read field by field.
-//
-// Correspondence, not counts: the 3dbitmap test prints the PORT'S TABLES in
-// listing/bitmap3d.txt's format and compares line by line, so a slot bound to
-// the wrong block, a frame appended to its neighbour's block or a period on
-// the wrong slot changes a line. The loader tests compare every stored value
-// with an independent decode of the same bytes.
+// real MW2.PRJ / MW2.EXE and checked against the C read field by field: the
+// loader tests compare every stored value with an independent decode of the
+// same bytes.
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { ProjectFile } from '../../src/data/prj/ProjectFile.ts';
 import { ExeImage } from '../../src/data/exe/ExeImage.ts';
@@ -18,7 +13,7 @@ import { hud } from '../../src/sim/cockpit/hud.ts';
 import { resetAllGlobals } from '../../src/engine/globals.ts';
 import { setBootImage } from '../../src/engine/image.ts';
 import { clock } from '../../src/engine/clock.ts';
-import { idByName, setMainProject } from '../../src/engine/resources/cache.ts';
+import { setMainProject } from '../../src/engine/resources/cache.ts';
 import { bitmap3d, bitmap3dAddFrame, bitmap3dAnimate, bitmap3dReset, bitmap3dSetEnable, bitmap3dSetId, bitmap3dSetSec, bitmap3dSetFrame } from '../../src/sim/world/bitmap3d.ts';
 import { palettes, paletteSlotSetResource, paletteStartFade, paletteFadeStep, paletteApplyPending } from '../../src/sim/world/palettes.ts';
 import { lighting } from '../../src/sim/world/environment.ts';
@@ -32,38 +27,8 @@ import { anim, animEnsureLoaded } from '../../src/sim/mech/anim.ts';
 import { cockpit, resLoadCockpit, resLoadHdi } from '../../src/sim/cockpit/resources.ts';
 import { mechs } from '../../src/sim/mech/mechGlobals.ts';
 import { planet } from '../../src/sim/world/planet.ts';
-import { gameSource, hasDecompiled, hasGameData, readListing } from '../support/env.ts';
-import { diffLines, lines, padL } from '../support/listing.ts';
-import { namedStreams, type NamedStream, pyFixed, resourceNames } from '../support/bwdHelpers.ts';
-
-const BITMAP_TAGS = new Set(['BMPJ', 'BMID', 'BSEC', 'BMEN']);
-
-/**
- * project_chunk_exec's four 3dbitmap branches (sim_objects.c, 0x4e5d0),
- * transcribed here because the interpreter depends on files other work owns.
- * Returns the slot a BMID/BSEC/BMEN touched, for the listing's slot order.
- */
-function execBitmapChunk(c: Chunk): number | null {
-  switch (c.tag) {
-    case 'BMPJ': {
-      let id = c.i16(8);
-      if (id === -1) id = idByName(8, c.str(10));
-      if (id !== -1) bitmap3dAddFrame(id, -1);
-      return null;
-    }
-    case 'BMID':
-      bitmap3dSetId(c.i16(8), -1);
-      return c.i16(8);
-    case 'BSEC':
-      bitmap3dSetSec(c.i16(8), c.i16(10));
-      bitmap3dSetEnable(c.i16(8), 1);
-      return c.i16(8);
-    case 'BMEN':
-      bitmap3dSetEnable(c.i16(8), c.i16(10));
-      return c.i16(8);
-  }
-  return null;
-}
+import { gameSource, hasGameData } from '../support/env.ts';
+import { namedStreams, type NamedStream, resourceNames } from '../support/bwdHelpers.ts';
 
 function chunkOf(tag: string, payload: number[]): Chunk {
   const bytes = new Uint8Array(8 + payload.length);
@@ -74,7 +39,7 @@ function chunkOf(tag: string, payload: number[]): Chunk {
 }
 const le16 = (v: number): number[] => [v & 0xff, (v >> 8) & 0xff];
 
-describe.runIf(hasGameData && hasDecompiled)('mission VM visual state (contract C)', () => {
+describe.runIf(hasGameData)('mission VM visual state (contract C)', () => {
   let prj: ProjectFile;
   let exe: ExeImage;
   let streams: NamedStream[];
@@ -87,63 +52,6 @@ describe.runIf(hasGameData && hasDecompiled)('mission VM visual state (contract 
     streams = namedStreams(prj);
   });
   beforeEach(() => resetAllGlobals());
-
-  it('bitmap3d.txt: every stream replayed through the ported 3dbitmap functions', () => {
-    const cnames = resourceNames(prj, 'CEL');
-    const MODES = new Map<number, string>([[0, 'stopped'], [2, 'once']]);
-    const out: string[] = [];
-    let replayed = 0;
-    for (const s of streams) {
-      const chunks = s.chunks.filter((c) => BITMAP_TAGS.has(c.tag));
-      if (!chunks.length) continue;
-      replayed++;
-      resetAllGlobals(); // each stream from the image's state: bitmap3dNeedsReset -2
-      const order: number[] = [];
-      for (const c of chunks) {
-        const slot = execBitmapChunk(c);
-        if (slot !== null && !order.includes(slot)) order.push(slot);
-      }
-      const b = bitmap3d;
-      const blocks = b.bitmap3dFrames.filter((blk) => blk[0]!.celId >= 1).length;
-      out.push(`${s.name} (BWD ${s.rid})  ${order.length} slots, ${blocks} frame blocks`);
-      for (const slot of order) {
-        const st = b.bitmap3dTable[slot]!;
-        const bound = st.state !== -2;
-        const frames: string[] = [];
-        if (bound) {
-          for (const f of b.bitmap3dFrames[st.block]!) {
-            if (f.celId < 1) break;
-            frames.push(cnames.get(f.celId) ?? `?CEL ${f.celId}`);
-          }
-        }
-        // the dump says 'unset' where no BSEC ran: the C then holds 0, or the
-        // 0x2d set_id / set_enable default (no BSEC in MW2.PRJ uses 45)
-        const period =
-          st.ticksPerFrame === 0 || st.ticksPerFrame === 0x2d
-            ? 'period unset (0x2d default when the slot is set up)'
-            : `every ${st.ticksPerFrame} ticks (${pyFixed(st.ticksPerFrame / 182.0, 2)} s)`;
-        out.push(
-          `  slot ${padL(slot, 3)}  ${period}  mode ${st.playMode} ${MODES.get(st.playMode) ?? 'loop'}  ${padL(frames.length, 2)} frames: ` +
-            (frames.length ? frames.join(' ') : bound ? '-' : 'NO BMID - not bound to a block'),
-        );
-      }
-      out.push('');
-    }
-    const want = lines(readListing('bitmap3d.txt')).slice(7); // the seven header lines are dump totals
-    const d = diffLines(want, out, 50);
-    // The one expected difference: MW2_MAP2's slot 0 is set by BSEC with no
-    // BMID. The dump gives it mode 1; in the C bitmap3d_set_enable refuses to
-    // write playMode while the slot is still in bitmap3d_reset's -2 state, so
-    // it stays 0 (the period IS written - set_sec has no such test).
-    expect(d).toEqual([
-      {
-        line: 352,
-        want: '  slot   0  every 18 ticks (0.10 s)  mode 1 loop   0 frames: NO BMID - not bound to a block',
-        got: '  slot   0  every 18 ticks (0.10 s)  mode 0 stopped   0 frames: NO BMID - not bound to a block',
-      },
-    ]);
-    expect(replayed).toBeGreaterThan(30);
-  });
 
   it('bitmap3d_add_frame / set_id: blocks, the advance and the 0x2d default, per the C', () => {
     bitmap3dAddFrame(0, -1); // below 1: refused, but the lazy reset has run

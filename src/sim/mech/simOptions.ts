@@ -24,8 +24,8 @@ export interface SimRules {
  * The port's MW2DIF.CFG when its disk has none (simOptionsFileEnsure): the
  * full rules at difficulty 1 (MEDIUM). These are the shell's own boot
  * values (simOptions at 0x7d40c in MW2SHELL.EXE: 0,0,1,1,1,1,0,0) - what
- * its options panel writes when the file was missing - and the bytes of
- * the install's MW2DIF.CFG (test/sim/shellOptions.test.ts checks both).
+ * its options panel writes when the file was missing
+ * (test/sim/shellOptions.test.ts checks it).
  */
 export const DEFAULT_RULES: SimRules = {
   unlimitedAmmo: false,
