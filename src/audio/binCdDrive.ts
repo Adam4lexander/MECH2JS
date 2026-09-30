@@ -1,7 +1,7 @@
 /**
  * A CD drive backed by the install's CD image (a BIN/CUE pair, raw 2352-byte
  * sectors): the audio tracks are Redbook - 16-bit little-endian stereo at
- * 44100 Hz - and are fetched from the BIN by byte range when first played.
+ * 44100 Hz - and are read from the BIN by byte range when first played.
  * It answers the game's requests as MSCDEX would (engine/miles/cdDrive.ts):
  * playing until the track runs out, a pause that keeps the position, and a
  * resume from it. Without audio on, a track plays silently and never ends,
@@ -30,6 +30,8 @@ export class BinCdDrive implements CdDrive {
 
   constructor(
     readonly sheet: CueSheet,
+    /** bytes [start, end) of the BIN, end null for the rest of it */
+    private readonly readBin: (start: number, end: number | null) => Promise<Uint8Array>,
     private readonly audio: () => { ctx: AudioContext; out: AudioNode } | null,
   ) {}
 
@@ -109,10 +111,9 @@ export class BinCdDrive implements CdDrive {
       p = (async () => {
         const a = this.audio();
         if (!a) return null;
-        const range = t.end !== null ? `bytes=${t.start}-${t.end - 1}` : `bytes=${t.start}-`;
-        const r = await fetch(`/mw2/${this.sheet.file}`, { headers: { Range: range } });
-        if (!r.ok) return null;
-        const bytes = new Int16Array(await r.arrayBuffer());
+        const bin = await this.readBin(t.start, t.end).catch(() => null);
+        if (!bin) return null;
+        const bytes = new Int16Array(bin.buffer, bin.byteOffset, bin.byteLength >> 1);
         const frames = bytes.length >> 1;
         const buf = a.ctx.createBuffer(2, frames, 44100);
         const l = buf.getChannelData(0);

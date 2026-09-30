@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { installConsoleSinks } from '../editor/store/consoleLog.ts';
 import { globalGroups } from '../engine/globals.ts';
 import { EditorRoot } from '../editor/EditorRoot.tsx';
@@ -11,6 +11,10 @@ import { seedControlFiles } from '../shell/controls/seed.ts';
 import { simOptionsFileEnsure } from '../sim/mech/simOptions.ts';
 import { soundConfigFileEnsure } from '../sim/sound/soundConfigFile.ts';
 import { GameShell } from './GameShell.tsx';
+import { serverInstall } from './fetchSource.ts';
+import { DroppedInstall } from './droppedInstall.ts';
+import { InstallDrop } from './InstallDrop.tsx';
+import type { InstallSource } from '../data/source/FileSource.ts';
 
 /** The developer's route: the mission picker and the editor (?dev in the address). */
 const DEV = new URLSearchParams(window.location.search).has('dev');
@@ -45,6 +49,10 @@ installConsoleSinks();
 };
 
 export function App() {
+  // where the install comes from: the dev server's (MW2_ROOT), or - with none - a folder the player drops
+  const [install, setInstall] = useState<InstallSource | null>(null);
+  const [asking, setAsking] = useState(false);
+  const [dropFailed, setDropFailed] = useState<string | null>(null);
   const [data, setData] = useState<GameData | null>(null);
   const [status, setStatus] = useState('starting');
   const [failed, setFailed] = useState<string | null>(null);
@@ -52,7 +60,20 @@ export function App() {
   const [inMission, setInMission] = useState(false);
 
   useEffect(() => {
-    loadGameData((m) => setStatus(`loading ${m}`))
+    let live = true;
+    void serverInstall().then((s) => {
+      if (!live) return;
+      if (s) setInstall(s);
+      else setAsking(true);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!install) return;
+    loadGameData(install, (m) => setStatus(`loading ${m}`))
       .then(async (d) => {
         setStatus('restoring your files');
         await attachDiskStore();
@@ -60,16 +81,27 @@ export function App() {
         setData(d);
         setGame(new Game(d));
       })
-      .catch((e: unknown) => setFailed(String(e)));
+      .catch((e: unknown) => {
+        if (!(install instanceof DroppedInstall)) return setFailed(String(e));
+        // a dropped folder that would not load: back to the drop, saying why
+        setDropFailed(`${install.name} could not be loaded: ${String(e)}`);
+        setInstall(null);
+      });
+  }, [install]);
+
+  const onDropped = useCallback((i: DroppedInstall) => {
+    setDropFailed(null);
+    setInstall(i);
   }, []);
 
   if (failed)
     return (
       <div className="boot error">
         Could not load the game data: {failed}
-        <div className="hint">The dev server serves the game from MW2_ROOT: copy .env.example to .env.local, set it to your install, and restart the dev server.</div>
+        <div className="hint">The dev server serves the game from MW2_ROOT (.env.local): check it is your install, the directory holding MW2.PRJ, and restart the dev server.</div>
       </div>
     );
+  if (!install && asking) return <InstallDrop key={dropFailed ?? ''} onInstall={onDropped} error={dropFailed} />;
   if (!data || !game) return <div className="boot">{status}…</div>;
   // The game, as MECH2 runs it; ?dev opens the mission picker and the editor instead.
   if (!DEV) return <GameShell data={data} game={game} />;

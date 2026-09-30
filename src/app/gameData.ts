@@ -1,5 +1,6 @@
 /**
- * Everything the port reads from the install, fetched once: MW2.PRJ, MW2.EXE,
+ * Everything the port reads from the install, read once - from the dev
+ * server or a dropped folder (app/fetchSource.ts, app/droppedInstall.ts): MW2.PRJ, MW2.EXE,
  * MW2SHELL.EXE, MW2.INI and the loose content beside them - the GIDDI input
  * drivers (their .DLL, .STD and .CAL files) - which become the disk's
  * read-only layer (engine/dosFiles.ts). And whether the game CD is there,
@@ -14,10 +15,12 @@
 import { ExeImage } from '../data/exe/ExeImage.ts';
 import { IniFile } from '../data/config/ini.ts';
 import { ProjectFile, readNameTable, TABL } from '../data/prj/ProjectFile.ts';
-import { FetchSource } from './fetchSource.ts';
+import type { InstallSource } from '../data/source/FileSource.ts';
 import { walkStream } from '../data/bwd/stream.ts';
 
 export interface GameData {
+  /** where the install's files come from: the CD is read from it as the game goes */
+  install: InstallSource;
   prj: ProjectFile;
   exe: ExeImage;
   /** MW2SHELL.EXE, the front end */
@@ -54,14 +57,7 @@ export interface MissionEntry {
   needs: 'ready' | 'star' | 'opponents';
 }
 
-/** The served files in one install directory ('' for the root), as 'DIR/NAME' paths. */
-export async function listDir(dir: string): Promise<string[]> {
-  const r = await fetch(`/mw2/__list/${dir}`);
-  return r.ok ? ((await r.json()) as string[]) : [];
-}
-
-export async function loadGameData(progress: (msg: string) => void = () => {}): Promise<GameData> {
-  const src = new FetchSource('/mw2/');
+export async function loadGameData(src: InstallSource, progress: (msg: string) => void = () => {}): Promise<GameData> {
   progress('MW2.PRJ');
   const prj = new ProjectFile(await src.read('MW2.PRJ'));
   progress('MW2.EXE');
@@ -76,7 +72,7 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
     /* the INI only supplies error texts */
   }
   const loose = new Map<string, Uint8Array>();
-  for (const n of await listDir('GIDDI')) {
+  for (const n of await src.list('GIDDI')) {
     progress(n);
     loose.set(n.toUpperCase(), await src.read(n));
   }
@@ -98,10 +94,10 @@ export async function loadGameData(progress: (msg: string) => void = () => {}): 
     }
   }
   let cd: GameCd | null = null;
-  const cueName = (await listDir('')).find((n) => /\.CUE$/i.test(n));
+  const cueName = (await src.list('')).find((n) => /\.CUE$/i.test(n));
   if (cueName) cd = { kind: 'image', cue: { name: cueName, text: new TextDecoder().decode(await src.read(cueName)) } };
-  else if ((await Promise.all(CD_DIRS.map(listDir))).some((l) => l.length > 0)) cd = { kind: 'files' };
-  return { prj, exe, shellExe, ini, loose, cd };
+  else if ((await Promise.all(CD_DIRS.map((d) => src.list(d)))).some((l) => l.length > 0)) cd = { kind: 'files' };
+  return { install: src, prj, exe, shellExe, ini, loose, cd };
 }
 
 /**

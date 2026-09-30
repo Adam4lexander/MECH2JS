@@ -36,7 +36,7 @@ export function GameShell({ data, game }: { data: GameData; game: Game }) {
     started.current = true;
     setOverlayFiles(null);
     console.info('[shell] mounting the CD');
-    await mountCd(data.cd);
+    await mountCd(data.install, data.cd);
     console.info('[shell] sound');
     await attachShellAudio(game);
     console.info('[shell] starting');
