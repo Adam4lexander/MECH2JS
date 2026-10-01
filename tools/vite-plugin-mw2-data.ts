@@ -14,27 +14,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Connect, Plugin } from 'vite';
 import { mw2Decompiled, mw2Root, unsetMessage } from './paths.ts';
+import { INSTALL_WHITELIST } from '../src/data/source/installFiles.ts';
 
-// The game's content only. The install's config and player files (the star
-// BWDs, MW2*.CFG, MEK\ variants) and its controls files (INPUT.MAP,
-// GAMEKEY.MAP and the other *.MAP, GIDDI\*.CPC) are never served: the port
-// writes its own (engine/dosFiles.ts, app/diskStore.ts, shell/controls/seed.ts).
-const GAME_WHITELIST = [
-  /^MW2\.PRJ$/i,
-  /^MW2\.EXE$/i,
-  /^MW2SHELL\.EXE$/i,
-  /^(DATABASE|ARCHWO|ARCHJF)\.MW2$/i,
-  /^MW2\.INI$/i,
-  /^GIDDI\/[A-Z0-9_]+\.(DLL|STD|CAL)$/i,
-  // the two pictures MW2.EXE's fifth cheat code shows (cheat_credits_render_hook)
-  /^VFX\/VFX(JK|HD)\.BIN$/i,
-  // the game CD's image: its audio tracks are the mission music (read by byte range)
-  /^[A-Z0-9_]+\.(CUE|BIN)$/i,
-  // or the CD's files, copied off it into the install (a ripped CD): the directories the programs read from X:\
-  /^SMK\/[A-Z0-9_]+\.(SMK|SHP)$/i,
-  /^LAUNCH\/[A-Z0-9_]+\.SHP$/i,
-  /^KEATING\/[A-Z0-9_]+\.SFL$/i,
-];
+// The game's content only (src/data/source/installFiles.ts): never the
+// install's config, player or controls files - the port writes its own.
+const GAME_WHITELIST = INSTALL_WHITELIST;
 
 const REF_WHITELIST = [/^mw2\/src\/.+\.[ch]$/i, /^mw2\/include\/.+\.h$/i, /^mw2\/listing\/[^/]+\.(txt|csv)$/i];
 
@@ -57,7 +41,7 @@ export function resolveCaseInsensitive(root: string, rel: string): string | null
 }
 
 /** GET /mw2/__list/<dir>: the whitelisted files in one install directory ('' for the root), as JSON. */
-function listDir(root: string, whitelist: RegExp[], rel: string): string[] {
+function listDir(root: string, whitelist: readonly RegExp[], rel: string): string[] {
   const dir = rel === '' ? root : resolveCaseInsensitive(root, rel);
   if (!dir || !fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return [];
   return fs
@@ -66,7 +50,7 @@ function listDir(root: string, whitelist: RegExp[], rel: string): string[] {
     .filter((f) => whitelist.some((re) => re.test(f)));
 }
 
-function serveFrom(root: string, whitelist: RegExp[]): Connect.NextHandleFunction {
+function serveFrom(root: string, whitelist: readonly RegExp[]): Connect.NextHandleFunction {
   return (req, res, next) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') return next();
     const rel = decodeURIComponent((req.url ?? '').split('?')[0]!.replace(/^\/+/, ''));

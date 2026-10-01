@@ -14,6 +14,7 @@ import { ail, ailMidiListen, DIG_OUTPUT_RATE, digTakeOutput } from '../engine/mi
 import { setCdDrive } from '../engine/miles/cdDrive.ts';
 import { BinCdDrive, parseCue, type CueSheet } from './binCdDrive.ts';
 import type { GameCd } from '../app/gameData.ts';
+import type { InstallSource } from '../data/source/FileSource.ts';
 import { EngineSynth } from './engineSynth.ts';
 
 /** how far ahead of the audio clock a frame's PCM is queued */
@@ -30,10 +31,9 @@ export class AudioHost {
   readonly cd: BinCdDrive | null;
   enabled = false;
 
-  constructor(cd: GameCd | null) {
-    let sheet: CueSheet | null = null;
-    if (cd?.kind === 'image') sheet = parseCue(cd.cue.text);
-    this.cd = sheet ? new BinCdDrive(sheet, () => this.context()) : null;
+  constructor(cd: GameCd | null, install: InstallSource) {
+    const sheet: CueSheet | null = cd?.kind === 'image' ? parseCue(cd.cue.text) : null;
+    this.cd = sheet ? new BinCdDrive(sheet, (start, end) => install.readRange(sheet.file, start, end), () => this.context()) : null;
     // the drive is plugged in from the start, as a CD in the drive would be; it only sounds once audio is on
     setCdDrive(this.cd);
   }

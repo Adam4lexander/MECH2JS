@@ -23,7 +23,12 @@ First say where the game is: copy `.env.example` to `.env.local` (git
 ignores it) and set `MW2_ROOT` to the MechWarrior 2 install (`MW2.PRJ`,
 `MW2.EXE`, ...). The dev server and the tests read that file
 (`tools/paths.ts`); a variable set in the environment wins over it. Unset,
-the dev server says what to set.
+the dev server says what to set, and the page asks for the install instead:
+drop the install folder on it, or choose it (`src/app/droppedInstall.ts`).
+The files stay on your disk and are read as the game asks for them - only
+the game's content, never the install's saved files, as with `MW2_ROOT`. In
+Chrome and Edge the page remembers the folder across reloads (the browser may
+ask again for leave to read it); elsewhere, drop it again after a reload.
 
 ```sh
 npm install
