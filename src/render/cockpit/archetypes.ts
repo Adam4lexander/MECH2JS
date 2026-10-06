@@ -8,6 +8,7 @@
  *
  * @portOnly
  */
+import { PANELS, type ControlDef } from './controls.ts';
 import { add, dir, facingEye, frameAt, Kit, Mat, norm, on, scale, sub, type Frame, type Glass, type SlotName, type V3 } from './kit.ts';
 
 const RAD = Math.PI / 180;
@@ -187,6 +188,12 @@ export function decorate(k: Kit, a: FaceArea, l: ScreenLayout, style: 'clan' | '
   if (cols > 0) k.switches(a.f, 1, cols, 0.022, l.decorW / 2 - (cols * 0.022) / 2, l.decorY, style === 'is' ? Mat.trim : Mat.frame);
 }
 
+/** A row of switches (controls.ts) along a face's decor strip, spread to its width. */
+export function controlStrip(k: Kit, a: FaceArea, l: ScreenLayout, defs: readonly ControlDef[]): void {
+  const pitch = Math.min(0.036, l.decorW / defs.length);
+  k.panel(a.f, defs, defs.length, pitch, 0, l.decorY);
+}
+
 /** A trim line along a face's top edge, in its margin: hazard stripes for the Inner Sphere, a lamp strip for the Clans. */
 export function topTrim(k: Kit, a: FaceArea, style: 'clan' | 'is'): void {
   const y = a.h / 2 - 0.009;
@@ -225,6 +232,25 @@ export function seat(k: Kit, o: { armX: number; armY: number; floor: number; sty
     k.box([x, o.armY + 0.005, -0.1], [0.13, 0.01, 0.42], Mat.panel);
   }
   controls(k, o.armX, o.armY, o.style);
+  sideConsoles(k, o.armX, o.armY, o.floor);
+}
+
+/**
+ * A console outboard of each armrest, turned up towards the pilot, within
+ * reach of a hand resting on the throttle or the stick: the left one the
+ * reactor, navigation and vision switches and the bail-out under their
+ * covers, the right one weapons, the torso, the view and orders.
+ */
+function sideConsoles(k: Kit, armX: number, armY: number, floor: number): void {
+  for (const side of [-1, 1] as const) {
+    const c: V3 = [side * (armX + 0.16), armY + 0.05, -0.17];
+    const f = frameAt(c, norm([-side * 0.55, 1, 0.3]));
+    k.slab(f, 0.2, 0.2, -0.05, Mat.hull);
+    k.slab(f, 0.21, 0.21, 0.004, Mat.frame, 0, 0, -0.002);
+    const base = on(f, 0, 0, -0.05);
+    k.box([base[0], (base[1] + floor) / 2, base[2]], [0.12, Math.max(0.02, base[1] - floor), 0.12], Mat.panel);
+    k.panel(f, side < 0 ? PANELS.left : PANELS.right, 4, 0.044, 0, 0, 0.034);
+  }
 }
 
 /** The throttle quadrant on the left armrest and the stick on the right, each moving about its pivot. */
@@ -232,6 +258,7 @@ function controls(k: Kit, armX: number, armY: number, style: 'clan' | 'is'): voi
   // the throttle's gate: two rails either side of its slot
   const tz = -0.2;
   for (const dx of [-0.022, 0.022]) k.box([-armX + dx, armY + 0.02, tz], [0.012, 0.03, 0.2], Mat.frame);
+  k.grips.set('throttle', [0, 0.18, -0.01]);
   k.part('throttle', [-armX, armY + 0.02, tz], (p) => {
     p.box([0, 0.08, 0], [0.028, 0.16, 0.028], Mat.frame);
     p.box([0, 0.18, -0.01], [0.075, 0.06, 0.07], Mat.trim);
@@ -240,6 +267,7 @@ function controls(k: Kit, armX: number, armY: number, style: 'clan' | 'is'): voi
   });
   // the stick: a boot, the shaft, a grip leaning forward, the trigger and a hat
   k.box([armX, armY + 0.02, -0.18], [0.08, 0.04, 0.08], Mat.dark);
+  k.grips.set('stick', [0, 0.25, -0.01]);
   k.part('stick', [armX, armY + 0.02, -0.18], (p) => {
     p.box([0, 0.1, 0], [0.03, 0.2, 0.03], Mat.frame);
     p.box([0, 0.25, -0.01], [0.05, 0.11, 0.055], Mat.trim);

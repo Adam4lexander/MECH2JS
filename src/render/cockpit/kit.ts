@@ -21,10 +21,15 @@
  * the recess; the renderer puts the game's pixels in.
  *
  * MOVING PARTS (the throttle lever, the stick) are sub-kits with a pivot,
- * posed each frame.
+ * posed each frame; a part with a grip (Kit.grips) can be taken hold of.
+ *
+ * SWITCHES (controls.ts) are slots too: the kit makes the recess each sits
+ * in, and records where its cap goes (Kit.controls); the renderer draws the
+ * caps, which move and light, and the VR hands press them (touch.ts).
  *
  * @portOnly
  */
+import type { ControlDef } from './controls.ts';
 
 export type V3 = [number, number, number];
 
@@ -119,6 +124,18 @@ export interface Slot {
   corners: [V3, V3, V3, V3];
 }
 
+/** A switch's cap: its control, the frame at the cap's foot (normal out towards the pilot), its width and height. */
+export interface ControlSlot {
+  def: ControlDef;
+  f: Frame;
+  w: number;
+  h: number;
+}
+
+/** how high a switch's cap stands off its recess, and how far a press pushes it in (metres) */
+export const CAP_HEIGHT = 0.01;
+export const CAP_TRAVEL = 0.006;
+
 /** the interior light, from above, a little ahead and to the left */
 const LIGHT: V3 = norm([-0.25, 1, -0.45]);
 
@@ -200,6 +217,9 @@ export class Kit {
   readonly shade: number[] = [];
   readonly slots: Slot[] = [];
   readonly parts = new Map<string, { pivot: V3; kit: Kit }>();
+  readonly controls: ControlSlot[] = [];
+  /** where a part is taken hold of, in its own space (about its pivot) */
+  readonly grips = new Map<string, V3>();
   private screens = 0;
 
   /** `eye`: where the pilot is in this kit's space (the origin, or minus a part's pivot) */
@@ -351,6 +371,22 @@ export class Kit {
   switches(f: Frame, rows: number, cols: number, pitch: number, x = 0, y = 0, m: Mat = Mat.trim): void {
     for (let i = 0; i < rows; i++)
       for (let j = 0; j < cols; j++) this.slab(f, pitch * 0.45, pitch * 0.45, pitch * 0.35, m, x + (j - (cols - 1) / 2) * pitch, y + (i - (rows - 1) / 2) * pitch, 0.001);
+  }
+
+  /**
+   * Switches on a frame: `defs` in a grid of `cols` columns, `pitch` apart,
+   * centred at (x, y), row by row down the frame's up axis. Each cap is
+   * `cap` wide and 0.8 of that high, in a dark recess.
+   */
+  panel(f: Frame, defs: readonly ControlDef[], cols: number, pitch: number, x = 0, y = 0, cap = pitch * 0.78): void {
+    const rows = Math.ceil(defs.length / cols);
+    const h = cap * 0.8;
+    defs.forEach((def, i) => {
+      const bx = x + ((i % cols) - (cols - 1) / 2) * pitch;
+      const by = y - (Math.floor(i / cols) - (rows - 1) / 2) * pitch * 0.85;
+      this.slab(f, cap + 0.006, h + 0.006, 0.002, Mat.dark, bx, by, 0.001);
+      this.controls.push({ def, f: { c: on(f, bx, by, 0.003), r: f.r, u: f.u, n: f.n }, w: cap, h });
+    });
   }
 
   /** A row of lamps on a frame. */

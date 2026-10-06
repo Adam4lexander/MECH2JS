@@ -28,6 +28,7 @@ import { taskGlobals, taskListRun } from '../engine/tasks/taskList.ts';
 import { cameraUpdate } from '../sim/camera/cameraUpdate.ts';
 import { inputPollControls } from '../sim/controls/input.ts';
 import { inputGlobals } from '../sim/controls/inputGlobals.ts';
+import { pilotCommandsDrain, pilotIntentApply, pilotPressEndsPause } from '../sim/controls/pilotIntent.ts';
 import { commandGlobals, keyPauseEnd } from '../sim/ui/commands.ts';
 import { mechDispatchHook1, mechDispatchHook2, mechDispatchHook3, mechDispatchHook4 } from '../sim/mech/hooks.ts';
 import { netplayFrameExchange } from '../sim/net/netSession.ts';
@@ -104,8 +105,10 @@ export function mainLoopFrame(): void {
   netplayFrameExchange();
   simClockStep();
   inputPollControls();
+  pilotIntentApply();
   menuPollKey();
   keyCommandUpdate();
+  pilotCommandsDrain();
   taskListRun(taskGlobals.missionTaskList);
   mechDispatchHook1();
   cameraUpdate();
@@ -144,7 +147,8 @@ export function mainLoopStep(): void {
   if (commandGlobals.keyPauseActive !== 0) {
     inputPollControls();
     soundFrameUpdate();
-    if ((inputGlobals.controlKey & 0xffff) !== 0) {
+    // a key ends the wait - or a press of the VR controls (sim/controls/pilotIntent.ts), which has no key
+    if ((inputGlobals.controlKey & 0xffff) !== 0 || pilotPressEndsPause()) {
       inputGlobals.controlKey = 0;
       keyPauseEnd();
     }

@@ -751,6 +751,25 @@ export function inputPollControls(): void {
   if (!kb) divergence('no keyboard device is open, so no keystroke is read', 'input_poll_controls');
 }
 
+/**
+ * Sets an analog channel's playerControls slot outright, and its sink to
+ * match, so the keys and axes bound to it carry on from there.
+ *
+ * @portOnly the VR controls' way in (sim/controls/pilotIntent.ts)
+ */
+export function inputSetAnalogSlot(name: string, value: number): void {
+  const ch = channel(name);
+  const sl = slotOf(ch);
+  if (!ch || !sl) return;
+  slotSet(sl, value);
+  const off = ch.slot - PLAYER_CONTROLS;
+  for (const s of input.sinks) {
+    if (!s.slot || slotOffset(s.slot) !== off || s.velIsValue) continue;
+    s.value = setValue(s);
+    s.setVel(0);
+  }
+}
+
 function channelsOrEmpty(): ControlChannel[] {
   if (input.channels.length === 0) channel('');
   return input.channels;

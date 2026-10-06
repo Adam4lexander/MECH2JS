@@ -20,7 +20,10 @@
  * Screens are laid out on their faces (archetypes.ts layoutScreens): in rows,
  * sized by their shapes, always inside the face with a margin; lamps and
  * switches keep to a strip along each face's foot, trim to its top edge, so
- * nothing sits on a screen.
+ * nothing sits on a screen. The strips under the radar and target screens
+ * and under the weapon list and damage display carry those displays'
+ * switches (controls.ts sensors, mfd); the rest are on the side consoles by
+ * the armrests (archetypes.ts seat).
  *
  * STYLES
  *   clan   smooth faces, a lamp strip along each console's top, few switches
@@ -29,7 +32,8 @@
  *
  * @portOnly
  */
-import { boxHit, dash, decorate, glassCabin, layoutScreens, pedalsAndFloor, pod, seat, topTrim, wallDetail, type CabinBox, type Dash, type FaceArea } from './archetypes.ts';
+import { PANELS, type PanelName } from './controls.ts';
+import { boxHit, controlStrip, dash, decorate, glassCabin, layoutScreens, pedalsAndFloor, pod, seat, topTrim, wallDetail, type CabinBox, type Dash, type FaceArea } from './archetypes.ts';
 import { dir, facingEye, Kit, Mat, norm, type Glass, type SlotName, type V3 } from './kit.ts';
 
 export interface StandardSpec {
@@ -61,7 +65,8 @@ export interface Standard {
 export function standard(k: Kit, glass: Glass, s: StandardSpec): Standard {
   const b = s.box;
   glassCabin(k, glass, b);
-  const faces: Array<[FaceArea, SlotName[][]]> = [];
+  // each face, its screens in rows, and the switches along its foot (lamps and a switch bank without)
+  const faces: Array<[FaceArea, SlotName[][], PanelName | null]> = [];
   let d: Dash | null = null;
   let left: FaceArea | null = null;
   let right: FaceArea | null = null;
@@ -77,7 +82,7 @@ export function standard(k: Kit, glass: Glass, s: StandardSpec): Standard {
     const sill = boxHit(b, norm(dir(0, -Math.min(glass.down, 60) - 2, 1)));
     d = dash(k, { top: [top[1], top[2]], bottom: [bottom[1], bottom[2]], halfWidth: c.halfWidth ?? 0.22, wing: { width: c.wing ?? 0.28, turn: c.turn ?? 42 }, sill: Math.min(sill[1], top[1] - 0.02), depth: -sill[2], floor: b.floor });
     // the target display and the radar on the centre face to themselves, where the flat view keeps them whole
-    faces.push([d.centre, [['target', 'radar']]], [d.left!, [['status']]], [d.right!, [['weapons'], ['damage', 'throttle']]]);
+    faces.push([d.centre, [['target', 'radar']], 'sensors'], [d.left!, [['status']], null], [d.right!, [['weapons'], ['damage', 'throttle']], 'mfd']);
   } else {
     const p = s.pods ?? {};
     const yaw = p.yaw ?? 30;
@@ -86,11 +91,12 @@ export function standard(k: Kit, glass: Glass, s: StandardSpec): Standard {
     left = pod(k, -yaw, pitch, dist, 0.42, 0.26, 0.12, b.floor, 22);
     right = pod(k, yaw, pitch, dist, 0.42, 0.26, 0.12, b.floor, 22);
     // the target display and the radar on the left pod to themselves, the radar inboard
-    faces.push([left, [['target', 'radar']]], [right, [['weapons', 'throttle'], ['damage', 'status']]]);
+    faces.push([left, [['target', 'radar']], 'sensors'], [right, [['weapons', 'throttle'], ['damage', 'status']], 'mfd']);
   }
-  for (const [a, rows] of faces) {
+  for (const [a, rows, panel] of faces) {
     const l = layoutScreens(k, a, rows);
-    decorate(k, a, l, s.style);
+    if (panel) controlStrip(k, a, l, PANELS[panel]);
+    else decorate(k, a, l, s.style);
     topTrim(k, a, s.style);
   }
   const arms = s.arms ?? {};

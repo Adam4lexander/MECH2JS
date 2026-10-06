@@ -370,7 +370,7 @@ export function Viewport({ game }: { game: Game }) {
             className={xrOn ? 'active' : xrPending ? 'pending' : ''}
             disabled={xrPending || (!playing && !xrOn)}
             onClick={() => screen.current?.toggleVr()}
-            title={xrOn ? 'leave VR' : xrPending ? 'waiting for the headset' : "VR: sit in the cockpit with a headset (Play). Left stick throttle and turn, right stick torso, triggers fire, A/B targets, X view, Y menu"}
+            title={xrOn ? 'leave VR' : xrPending ? 'waiting for the headset' : "VR: sit in the cockpit with a headset (Play). Left stick throttle and turn, right stick torso, right trigger fire, left trigger jets, A/B targets, X cycle weapon, Y menu; press the cockpit's switches with your fingertip, grip the throttle lever or the stick"}
           >
             {xrPending ? 'VR…' : 'VR'}
           </button>

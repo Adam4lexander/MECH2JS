@@ -6,6 +6,7 @@ import { canopyOf, fittedTris } from '../../src/render/cockpit/canopy.ts';
 import { CANOPY } from '../../src/render/cockpit/glass.ts';
 import { anglesOf, cropRect, dir, fitRect, Kit, Mat, SCREENS, type V3 } from '../../src/render/cockpit/kit.ts';
 import { buildDesign, DESIGNS } from '../../src/render/cockpit/designs/index.ts';
+import { PANELS } from '../../src/render/cockpit/controls.ts';
 
 /** Whether the ray from the eye along `d` meets triangle abc (Moller-Trumbore). */
 function rayHits(d: V3, a: V3, b: V3, c: V3): boolean {
@@ -22,6 +23,10 @@ function rayHits(d: V3, a: V3, b: V3, c: V3): boolean {
   if (v < 0 || u + v > 1) return false;
   return (e2[0]! * q[0]! + e2[1]! * q[1]! + e2[2]! * q[2]!) / det > 0;
 }
+
+const sub3 = (a: V3, b: V3): V3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const dot3 = (a: V3, b: V3) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross3 = (a: V3, b: V3): V3 => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 
 const tris = (k: Kit) => Array.from({ length: k.pos.length / 9 }, (_, i) => [0, 1, 2].map((j) => k.pos.slice(i * 9 + j * 3, i * 9 + j * 3 + 3) as V3) as [V3, V3, V3]);
 
@@ -79,6 +84,45 @@ describe('cockpit designs', () => {
             expect(blocked, `blocked at ${yaw}, ${pitch}`).toBe(false);
           }
         expect(probes).toBeGreaterThan(10);
+      });
+
+      it('carries every switch once, within arm\'s reach', () => {
+        const ids = k.controls.map((c) => c.def.id).sort();
+        expect(ids).toEqual(Object.values(PANELS).flatMap((p) => p.map((d) => d.id)).sort());
+        for (const c of k.controls) {
+          const a = anglesOf(c.f.c);
+          expect(a.dist, c.def.id).toBeLessThan(0.9);
+          // below the eye: on the console and the side consoles, never across the view
+          expect(a.pitch, c.def.id).toBeLessThan(-14);
+        }
+      });
+
+      it('keeps its switches apart, and off its screens', () => {
+        const cs = k.controls;
+        for (let i = 0; i < cs.length; i++)
+          for (let j = i + 1; j < cs.length; j++) {
+            const a = cs[i]!;
+            const b = cs[j]!;
+            const d = sub3(a.f.c, b.f.c);
+            // side by side on their face, never closer than a cap's width
+            expect(Math.hypot(...d), `${a.def.id} ${b.def.id}`).toBeGreaterThan(Math.min(a.w, b.w));
+          }
+        for (const c of cs)
+          for (const s of k.slots) {
+            const [tl, tr, , bl] = s.corners;
+            const r = sub3(tr, tl);
+            const u = sub3(bl, tl);
+            const p = sub3(c.f.c, tl);
+            const n = cross3(r, u);
+            // only a screen in the cap's own plane can sit under it
+            if (Math.abs(dot3(p, n) / Math.hypot(...n)) > 0.02) continue;
+            const x = dot3(p, r) / dot3(r, r);
+            const y = dot3(p, u) / dot3(u, u);
+            const mx = c.w / 2 / Math.hypot(...r);
+            const my = c.h / 2 / Math.hypot(...u);
+            const over = x > -mx && x < 1 + mx && y > -my && y < 1 + my;
+            expect(over, `${c.def.id} on ${s.name}`).toBe(false);
+          }
       });
 
       it('colours every face with a known material and a shade on the ramp', () => {

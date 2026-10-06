@@ -268,22 +268,69 @@ Three things are specific to stereo:
 When a headset is present, sliders next to **VR** tune these sizes live:
 cockpit size, HUD width, seat height and HUD distance. They are remembered.
 
-In a mission the controllers (`src/app/xrInput.ts`) press the game's own keys:
+In a mission the controllers are your hands (`src/app/xrInput.ts`). It's a
+hybrid. The sticks, triggers and buttons drive what you do all the time.
+Everything else is a switch in the cockpit that you reach out and press.
+They don't pretend to be keys: they set the player's controls directly,
+once per pass of the game's loop (`src/sim/controls/pilotIntent.ts`, a
+divergence). So the throttle, the turn and the torso are analog.
 
-| Control | Action |
-|---|---|
-| Left stick | throttle `=` / `-` and turn |
-| Left stick click | reverse |
-| Left trigger | cycle weapon |
-| Left grip | throttle stop |
-| X / Y | cockpit view / main menu |
-| Right stick | the mouse, which steers the torso |
-| Right stick click | feet to torso |
-| Right trigger | fire |
-| Right grip | fire the selected group |
-| A / B | nearest enemy / next target |
+| Control | Left hand (moving) | Right hand (aim and fire) |
+|---|---|---|
+| Stick up / down | throttle up / down; it stays where you leave it | torso pitch |
+| Stick left / right | turn, in proportion | torso twist; it stays where you leave it |
+| Stick click | all stop | feet to torso |
+| Trigger | jump jets (hold) | fire the selected weapon |
+| Grip | hold the throttle lever | hold the stick; elsewhere, fire the selected group |
+| X / Y, A / B | cycle weapon / main menu | nearest enemy / next target |
 
-The keyboard still works. Recentre with the headset's own recentre.
+Pulling the throttle back stops at zero. Let go of the stick and pull again
+to go into reverse.
+
+While an in-game menu (lance orders, the main menu) is up, the sticks move
+through it, a trigger or A picks, and B or Y backs out.
+
+The keyboard and mouse still work alongside, and pick up from wherever the
+controllers left the throttle and torso. Recentre with the headset's own
+recentre.
+
+### Cockpit controls
+
+The hand-built cockpits (the **Cockpits** enhancement, below) carry the
+switches, so it has to be on. Each controller shows as a gauntlet with a
+pointing finger. To press a switch, push your fingertip down on it; the cap
+sinks and the controller clicks. A switch out of reach works too: raise
+your hand, point at it, and pull the trigger. A short ray shows while
+you're pointing at one. That pull goes to the switch, not the guns, and a
+hand resting in your lap never points. Close your grip on the throttle
+lever or the stick to take hold of it.
+
+- **Under the radar and target screens:** radar mode, range + / -, the
+  satellite map, target display mode, next / previous target, nearest
+  enemy, friendly, at reticle, inspect.
+- **Under the weapon list and damage display:** the F-key modes. These are
+  MFD cycle, damage, heat / armour, rear and down views, the weapon display,
+  and the missile camera.
+- **Left side console, by the throttle:**
+  - power (lit while shut down), heat override, MASC
+  - jettison ammunition
+  - next / previous nav point, autopilot, punch-in heading
+  - infrared, enhanced vision, HUD, objectives
+  - auto-eject, eject, self-destruct
+  - the main menu
+- **Right side console, by the stick:**
+  - cycle weapon, next group, chain / group fire, target last shot
+  - add the weapon to group 1, 2 or 3
+  - clear targeting, centre torso, feet to torso
+  - cockpit / outside view, next objective
+  - lance orders, all-lance orders, pause (while paused, any button or
+    switch carries on, as any key does)
+
+Lamps show what's on: chain fire, MASC, autopilot, infrared and so on. The
+jettison, eject and self-destruct switches sit under red covers. Press once
+to lift the cover, then press again to fire the switch. The cover drops
+again after four seconds. The switches and their layout are in
+`src/render/cockpit/controls.ts`, and the hands' logic is in `touch.ts`.
 
 WebXR needs a secure origin:
 
@@ -393,8 +440,11 @@ back (target display, damage views, map) stay the original's.
     switches keep to a strip along each face's foot and trim to its top
     edge, so nothing sits on a screen.
   - **Controls and details.** Armrests carry a throttle lever and a stick
-    that follow the controls. Inner Sphere mechs get pipes and switch banks;
-    Clan mechs get cleaner panels and lamp strips.
+    that follow the controls. A side console stands outboard of each
+    armrest. The strips under the screens and the side consoles carry
+    working switches (see Cockpit controls, under VR). Inner Sphere mechs
+    get pipes and switch banks; Clan mechs get cleaner panels and lamp
+    strips.
   - **Modes.** The satellite map (F3) takes over the whole view as in the
     original. The large radar (F2) draws across the glass. The missile
     camera (F10) leaves the cockpit.

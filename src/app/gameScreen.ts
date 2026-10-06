@@ -14,8 +14,8 @@
  * VR (WebXR, with `vr`): the game's camera with the pilot's head inside it -
  * the world, the cockpit shell and the HUD drawn through a rig that follows
  * the game's viewer (render/xr/xrRig.ts), the sky on a sphere
- * (render/xr/xrSky.ts), the controllers as the game's keys and mouse
- * (app/xrInput.ts). The frame runs from the renderer's animation loop, which
+ * (render/xr/xrSky.ts), the controllers as the pilot's hands on the sticks
+ * and the cockpit's switches (app/xrInput.ts). The frame runs from the renderer's animation loop, which
  * is the headset's while a session is on; the page shows the left eye or a
  * spectator camera (render/xr/spectator.ts).
  *
@@ -36,6 +36,7 @@ import { Viewer } from '../generated/classes.gen.ts';
 import type { Game } from './Game.ts';
 import { attachHostInput } from './hostInput.ts';
 import { XrInput } from './xrInput.ts';
+import { cockpitLit } from './cockpitLamps.ts';
 import type { XrHost } from './xrHost.ts';
 import { SceneRenderer } from '../render/SceneRenderer.ts';
 import { fromThree, toThree } from '../render/bridge/space.ts';
@@ -60,6 +61,8 @@ import { ENHANCE_DEFAULTS, recallEnhanceSettings, type EnhanceSettings } from '.
 import { commonRamps, CockpitRenderer, darkestIndex, nearestIndex, slotPanes } from '../render/cockpit/cockpit.ts';
 import { cockpitChassis } from '../render/cockpit/chassis.ts';
 import { buildDesign, DESIGNS } from '../render/cockpit/designs/index.ts';
+import { throttleLever } from '../render/cockpit/touch.ts';
+import { pilotThrottle } from '../sim/controls/pilotIntent.ts';
 import { HUD_LAYER } from '../engine/vfx/vfx.ts';
 import { cameraGlobals, viewer } from '../sim/camera/viewer.ts';
 import { projectionGlobals, viewerRefreshLodScale } from '../sim/camera/projection.ts';
@@ -365,8 +368,12 @@ export class GameScreen {
     // a session that ended (the host's, which this view does not hear end) lets go of the controllers' keys
     if (!xr && this.xrWas) this.xrInput.release();
     this.xrWas = xr;
-    // the controllers are read before the pass, as the keyboard's interrupts arrive before it
-    if (session) this.xrInput.poll(session, game.mode === 'play');
+    // the controllers are read before the pass, as the keyboard's interrupts arrive before it - with the
+    // hand-built cockpit's switches and levers as the last frame left them, for the hands to press and hold
+    if (session) {
+      const reach = cockpit.current && cockpit.scene.visible ? { controls: cockpit.controls, grabs: cockpit.grabPoints(), seatLift: s.xr.dashDrop, lever: throttleLever(pilotThrottle()) } : null;
+      this.xrInput.poll(session, game.mode === 'play', renderer.xr.getFrame(), renderer.xr.getReferenceSpace(), reach, now / 1000);
+    }
     // the draw and LOD distances: pushed out in Modern and in a headset, the original's in Faithful - set
     // before the pass, whose mech_lod_update reads them
     const en = s.enhance;
@@ -592,7 +599,10 @@ export class GameScreen {
       cockpit.setColours({ hull, trim: this.hullRamps[1] ?? hull, ...this.lampColours });
       const pc = mechs.mechTable[mechs.playerMechIndex]?.control;
       const n = (v: number | undefined) => (v ?? 0) / 0x400;
-      const throttle = pc ? (pc.reverseDirection !== 0 ? -0.5 : 1) * n(pc.throttle) : 0;
+      // the lever and the stick follow the controls, or the hand holding them
+      const held = xr ? this.xrInput.heldLever : null;
+      const stick = xr ? this.xrInput.heldStick : null;
+      const throttle = held ?? (pc ? (pc.reverseDirection !== 0 ? -0.5 : 1) * n(pc.throttle) : 0);
       // each widget's pane is its window - where it draws (the radar lays its own over widget 0's)
       const panes = slotPanes((i) => {
         const win = hud.hudWidgets[i]?.window as { left: number; top: number; right: number; bottom: number } | null | undefined;
@@ -602,7 +612,11 @@ export class GameScreen {
       // view as the original draws it
       if (radar.mode !== 1) panes.radar = null;
       const seat = new THREE.Matrix4().makeTranslation(0, -s.xr.dashDrop, 0);
-      cockpit.update((xr ? rig.rig.matrixWorld : gameCam.matrixWorld).clone().multiply(seat), panes, { throttle, turn: n(pc?.legsPan), tilt: n(pc?.torso_tilt) });
+      // the stick leans with the turn (legsPan: 1024 << 16 at full) and the torso's pitch (torso_tilt: 60 degrees, 16.16, at full)
+      const controls = { throttle, turn: stick ? stick[0] : (pc?.legsPan ?? 0) / (1024 * 0x10000), tilt: stick ? -stick[1] : (pc?.torso_tilt ?? 0) / (60 * 0x10000) };
+      // the switches' lamps on the flat screen too; the hands and presses are the headset's
+      const look = xr ? this.xrInput.look(cockpitLit()) : { controls: new Map(), lit: cockpitLit(), hands: [null, null] as const };
+      cockpit.update((xr ? rig.rig.matrixWorld : gameCam.matrixWorld).clone().multiply(seat), panes, controls, look);
       if (xr) xrPass((c) => renderer.render(cockpit.scene, c));
       else if (scene) {
         if (outside.cockpit === 'xray') renderer.clearDepth();

@@ -70,7 +70,7 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x000103c0 | vfx_video_sub_0103c0 | vfx_video | exact | `vfxVideoSub0103c0` src/sim/world/viewScene.ts:46 |
 | 0x00010490 | vfx_video_sub_010490 | vfx_video | partial | `vfxVideoSub010490` src/sim/display/mainView.ts:44 |
 | 0x000106c0 | viewport_select_main | vfx_video | exact | `vfxVideoSub0106c0` src/sim/cockpit/radar.ts:1224 |
-| 0x000106d0 | vfx_video_sub_0106d0 | vfx_video | partial | `vfxVideoSub0106d0` src/mission/mainLoop.ts:85 |
+| 0x000106d0 | vfx_video_sub_0106d0 | vfx_video | partial | `vfxVideoSub0106d0` src/mission/mainLoop.ts:86 |
 | 0x00010b50 | frame_prj_add | vfx_video | exact | `framePrjAdd` src/sim/world/framePrj.ts:48 |
 | 0x00010bd0 | frame_prj_reset | vfx_video | exact | `framePrjReset` src/sim/world/framePrj.ts:69 |
 | 0x00010c10 | frame_prj_slot_clear | vfx_video | exact | `framePrjSlotClear` src/sim/world/framePrj.ts:82 |
@@ -893,9 +893,9 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x000486e0 | input_step_analog | input | exact | `inputStepAnalog` src/sim/controls/input.ts:655 |
 | 0x00048870 | input_init | input | partial | `inputInit` src/sim/controls/input.ts:610 |
 | 0x00048970 | input_poll_controls | input | exact | `inputPollControls` src/sim/controls/input.ts:704 |
-| 0x00048c50 | input_sub_048c50 | input | exact | `inputSub048c50` src/sim/controls/input.ts:770 |
-| 0x00048c60 | input_sub_048c60 | input | exact | `inputSub048c60` src/sim/controls/input.ts:778 |
-| 0x00048ca0 | input_sub_048ca0 | input | exact | `inputSub048ca0` src/sim/controls/input.ts:762 |
+| 0x00048c50 | input_sub_048c50 | input | exact | `inputSub048c50` src/sim/controls/input.ts:789 |
+| 0x00048c60 | input_sub_048c60 | input | exact | `inputSub048c60` src/sim/controls/input.ts:797 |
+| 0x00048ca0 | input_sub_048ca0 | input | exact | `inputSub048ca0` src/sim/controls/input.ts:781 |
 | 0x00048cb0 | input_sub_048cb0 | input | exact | `inputSub048cb0` src/sim/ui/menuCallbacks.ts:489 |
 | 0x00049b40 | ramp_start | main | exact | `rampStart` src/core/ramp.ts:39 |
 | 0x00049b80 | ramp_step | main | exact | `rampStep` src/core/ramp.ts:51 |
@@ -1552,8 +1552,8 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/mission/devDir.ts:42 - the 101-bucket hash chains are a Map: the lookup's result is the same
 - src/mission/devDir.ts:60 - the directory is read through the host, which lists and fetches it off the CD ahead of the mission (dosFilePrefetchDir)
 - src/mission/load.ts:187 - static_arena_init: no arena pre-pass; tables are allocated on demand
-- src/mission/mainLoop.ts:87 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
-- src/mission/mainLoop.ts:91 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
+- src/mission/mainLoop.ts:88 - input_sub_048ed0 and the driver's flip (DAT_0009fd74) are the presentation layer's; the message bars, the palette steps and the map transition's restore (0xa46d0) run here
+- src/mission/mainLoop.ts:92 - the page flip and input housekeeping of vfx_video_sub_0106d0 are the host renderer\
 - src/mission/objectives.ts:62 - ${what} longer than its ${destSize}-byte field; the original overruns into the next field
 - src/mission/objectives.ts:78 - a record index past the 48 Objective slots is not written (the original writes into the next table); MW2.PRJ has none
 - src/mission/objectives.ts:96 - MTBL table ${group} has ${n} records, past the 48 objective slots
@@ -1648,6 +1648,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/controls/input.ts:265 - the driver's methods are the port's implementations of the shipped DLL (sim/controls/giddi.ts), bound to the loaded module; a device without one fails as a module that will not load
 - src/sim/controls/input.ts:612 - a driver asking for calibration (install returns 4) would open the calibration screen (calibration_menu_run), which is not ported
 - src/sim/controls/input.ts:751 - no keyboard device is open, so no keystroke is read
+- src/sim/controls/pilotIntent.ts:126 - the VR controls write playerControls directly
 - src/sim/display/insetView.ts:70 - viewer_latch_globals (before and after the draw) is the render layer's, which latches the viewer itself when it draws; empty_stub_37e70 is empty
 - src/sim/display/launchScreen.ts:109 - the timer that runs launch_anim_tick is the host's (MW2.EXE's start-up is synchronous in the port)
 - src/sim/display/mainView.ts:46 - the drawing - sky and ground, backdrop, world, cockpit - is the host's, beneath the 2D window (renderPort.mainView): the viewport's window pixels are handed back to it (vfxWindowClearPane) where the original paints them, and a wipe instead of sky and ground becomes the host view's background rather than window pixels. viewer_latch_globals and the draw counter at 0x95510 are the render layer's. mainViewWindow's memset of the buffer at 0xa46fc (a window the shipped game never selects) and vfx_video_sub_010a50 (the cheat at 0x954e0) are not ported
