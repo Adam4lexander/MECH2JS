@@ -25,7 +25,7 @@ import { registerGlobals } from '../../engine/globals.ts';
 import { imageI32s } from '../../engine/image.ts';
 import { cacheLoadResource, cacheUnlock } from '../../engine/resources/cache.ts';
 import { objectGetPosRadius } from '../../engine/scene/worldObject.ts';
-import { vfxShapeOrigin, vfxShapeSize } from '../../engine/vfx/vfx.ts';
+import { HUD_LAYER, hudDrawInLayer, vfxShapeOrigin, vfxShapeSize } from '../../engine/vfx/vfx.ts';
 import { cameraGlobals } from '../camera/viewer.ts';
 import { viewerProjectPoint } from '../camera/projection.ts';
 import { display } from '../display/video.ts';
@@ -444,8 +444,9 @@ export const hudOverlayDraw = registerCode(
       hudCompassTapeDraw(0x73, 0x10, legsDeg, torsoDeg);
       hudCompassMarkersDraw(l, 0x73, 0x10, bearing, bearingTorso, tilt);
     }
-    if (pilotView !== 0 && h.hudReticleOn !== 0) hudReticleDraw(l, bearingTorso, tilt, range);
-    if (h.hudTargetMarkerOn !== 0) hudTargetMarkerDraw(l);
+    // @portOnly the reticle and the target marker are tagged as their own HUD layers (a headset draws them into the world)
+    if (pilotView !== 0 && h.hudReticleOn !== 0) hudDrawInLayer(HUD_LAYER.reticle, () => hudReticleDraw(l, bearingTorso, tilt, range));
+    if (h.hudTargetMarkerOn !== 0) hudDrawInLayer(HUD_LAYER.targetMarker, () => hudTargetMarkerDraw(l));
     if (h.hudAltitudeOn !== 0) hudAltitudeTapeDraw(l);
   },
 );

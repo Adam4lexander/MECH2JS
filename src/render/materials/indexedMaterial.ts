@@ -23,8 +23,13 @@
  * 0x5a01f, 0x5a218..0x5a24c, 0x5a310). DIVERGENCES: the checkerboard's phase
  * follows the screen, where the filler starts it at each polygon's top
  * scanline; float interpolation stands in for its 16.16 stepping, taken back
- * to 16.16 per fragment with values within 4/65536 of an index snapped onto
- * it (float error would otherwise tip exact indices either way); with
+ * to 16.16 per fragment with values within 1/512 of an index snapped onto
+ * it. Float error would otherwise tip exact indices either way, and the
+ * dither turns any fraction at all into a checkerboard with the next index:
+ * at kilometre ranges (the ground enhancement's far cells) the error passed
+ * the first cut's 4/65536 and speckled a flat colour with its neighbour. A
+ * true fraction under 1/512 now fills flat where the filler would
+ * checkerboard it - a sliver along each iso-line; with
  * shadedFillEnabled clear the filler would fill flat from one vertex - here
  * the dither is dropped instead.
  *
@@ -63,6 +68,27 @@
  * index / 255, alpha 1), for a render whose pixels are read back into the
  * game's 8-bit window (render/passes/indexedView.ts); otherwise its colour.
  *
+ * ARMOUR PANELS (uPanels, the port's enhancement; the mech material only,
+ * uPanel): a flat-lit or textured face of a mech part is divided into plates
+ * on a grid in the part's own space, on the plane of the face's dominant
+ * axis (its normal from the derivatives of the model-space position - exact,
+ * the faces being flat). Each plate's shade is moved a step up or down or
+ * left, by a hash of the plate, and the plates' borders go two steps down as
+ * seams: ramp * 16 + shade for flat-lit faces, the LUMA row for textured ones
+ * - so a plate is always a colour the face's own ramp has. Plates under about
+ * ten pixels are left plain, so a distant mech is the original's, and seams
+ * are drawn only on plates over about sixteen (thinner, they crawl).
+ * @portOnly the enhancement, not the original's
+ *
+ * SHADOWS (uShadowOn, the port's enhancement, render/enhance/shadows.ts): a
+ * fragment of a face turned towards the light that lies behind a caster in
+ * the shadow map takes its index's shadow index (uShadowTable: the darker
+ * colour of the same 16-colour ramp, from the palette on screen - the LUMA
+ * tables leave whole ramps, the ground's among them, unchanged), with a
+ * dithered edge (four map samples against a 2x2 ordered threshold). Sprites
+ * take none.
+ * @portOnly the enhancement, not the original's
+ *
  * Mode 0x5000 is perspective-correct unless textureAffine is set; 0x6000 is
  * always affine (render_asm_sub_03bb80's dispatch, per polygon_resolve_colour's
  * note). WebGL interpolates perspective-correctly; affine is reproduced by
@@ -84,7 +110,11 @@ flat out int vDraw;
 out vec3 vUvw;
 out vec2 vUvPersp;
 out float vIdxW;   // vIdx * w: divided by the interpolated w, it is linear in screen space
+out vec3 vModel;   // the vertex in model space (world space for baked scenery), metres
+out vec3 vWorld;   // the vertex in world space, metres (the shadow enhancement)
 void main() {
+  vModel = position;
+  vWorld = (modelMatrix * vec4(position, 1.0)).xyz;
   vDraw = aDraw < 0.0 ? -1 : int(aDraw + 0.5);
   float vIdx = 0.0;
   if (vDraw >= 0 && (vDraw & 0x7000) == 0x4000 && uMapFill != 0) {
@@ -96,6 +126,22 @@ void main() {
     vIdx = u < 0x300000 ? float(u) / 65536.0 : float(u >> 20) * 16.0 + float((u >> 16) & 15) * float(shade + 1) / 16.0;
   }
   vec4 clip = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  // A sprite is a square made on the screen from its points' projections, so both must lie in front of the
+  // eye: one behind it (w <= 0) turns the square inside out and it fills the view. The game's clipper drops
+  // such sprites before they reach here (spriteVertices); what it never saw does not pass it - the scrounge
+  // field's copies (enhance/groundField.ts), and in a headset each eye, which stands a few centimetres off
+  // the viewer the clipper culled for. Such a sprite is sent outside the clip volume, all four corners at once.
+  const float SPRITE_NEAR = 0.05;
+  if (aSprite.w >= 0.0 && uMapFill == 0) {
+    vec4 cq = projectionMatrix * modelViewMatrix * vec4(aSprite.xyz, 1.0);
+    if (clip.w < SPRITE_NEAR || cq.w < SPRITE_NEAR) {
+      vUvw = vec3(0.0);
+      vIdxW = 0.0;
+      vUvPersp = aUv;
+      gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+      return;
+    }
+  }
   if (aSprite.w >= 0.0 && uMapFill != 0) {
     // render_asm_sub_03b990, last argument 1: a square upright on the screen about Q, half the x distance from R to Q, at R's depth
     vec4 cr = projectionMatrix * modelViewMatrix * vec4(aSpriteR, 1.0);
@@ -139,28 +185,87 @@ uniform int uShadedFill;
 uniform int uSprites;         // DAT_00097030 bit 0: mode 0x3000 sprites are drawn
 uniform int uMapFill;
 uniform int uIndexOut;        // write the palette index, not its colour
+uniform int uPanels;          // the armour-panel enhancement is on (the main view only)
+uniform int uPanel;           // this material draws mech parts
+uniform int uShadeMap;        // this material's mode-0x4000 indices are shade levels 0..4, looked up in uShades (the ground grid)
+uniform int uShades[5];
 flat in int vDraw;
 in vec3 vUvw;
 in vec2 vUvPersp;
 in float vIdxW;
+in vec3 vModel;
+in vec3 vWorld;
+uniform int uShadowOn;          // the shadow enhancement is on (the main view only)
+uniform sampler2D uShadowMap;   // depth along the light, 0..1
+uniform mat4 uShadowMatrix;     // world to the map's 0..1 cube
+uniform vec3 uShadowDir;        // towards the light
+uniform float uShadowTexel;
+uniform sampler2D uShadowTable; // 256 x 1 R8: each index's shadow index
 out vec4 outColor;
 
 vec3 pal(int i) { return texelFetch(uPalette, ivec2(i & 255, 0), 0).rgb; }
 vec4 outFor(int i) { return uIndexOut != 0 ? vec4(float(i & 255) / 255.0, 0.0, 0.0, 1.0) : vec4(pal(i), 1.0); }
 
+// SHADOWS: whether this fragment (face normal n, world space) lies in a caster's shadow, dithered at the edge
+bool inShadow(vec3 n, ivec2 px) {
+  if (dot(n, uShadowDir) <= 0.0) return false;   // turned away from the light: its own shade already says so
+  vec4 s = uShadowMatrix * vec4(vWorld, 1.0);
+  vec3 p = s.xyz / s.w;
+  if (p.x <= 0.0 || p.y <= 0.0 || p.x >= 1.0 || p.y >= 1.0 || p.z >= 1.0) return false;
+  int n4 = 0;
+  for (int i = 0; i < 4; i++) {
+    vec2 o = (vec2(float(i & 1), float(i >> 1)) - 0.5) * uShadowTexel;
+    if (texture(uShadowMap, p.xy + o).r < p.z - 0.0004) n4++;
+  }
+  // 2x2 ordered threshold [0 2; 3 1]: none in shadow never, all always, between on a checker
+  int b = ((px.y & 1) << 1) | (px.x & 1);
+  int t = b == 0 ? 0 : b == 1 ? 2 : b == 2 ? 3 : 1;
+  return n4 > t;
+}
+
+// ARMOUR PANELS: the shade steps this fragment's plate moves by (0 when plain)
+const vec2 PANEL = vec2(1.1, 0.75);   // plate size, metres
+float hash21(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+int panelShift() {
+  vec3 n = abs(cross(dFdx(vModel), dFdy(vModel)));
+  int axis = n.x >= n.y && n.x >= n.z ? 0 : n.y >= n.z ? 1 : 2;
+  vec2 p = (axis == 0 ? vModel.zy : axis == 1 ? vModel.xz : vModel.xy) / PANEL;
+  vec2 w = fwidth(p);
+  // plates under about ten pixels: plain; seams only on plates over about sixteen - thin lines on small
+  // plates alias, and crawl as the mech moves
+  float m = max(w.x, w.y);
+  if (m > 0.1) return 0;
+  vec2 cell = floor(p);
+  vec2 f = p - cell;
+  if (m < 0.06 && (f.x < w.x * 1.5 || f.y < w.y * 1.5)) return -2;
+  float h = hash21(cell + float(axis) * 17.31);
+  return h < 0.3 ? -1 : h > 0.75 ? 1 : 0;
+}
+
 void main() {
   if (vDraw < 0) discard; // not queued by the clipper
   int mode = vDraw & 0x7000;
   int idx = vDraw & 255;
+  // the face's world normal for the shadow test (derivatives: uniform control flow, every fragment)
+  vec3 faceN = normalize(cross(dFdx(vWorld), dFdy(vWorld)));
+  // the derivatives panelShift takes need uniform control flow: taken for every fragment, used by mode
+  int panel = 0;
+  if (uPanels != 0 && uPanel != 0) {
+    int shift = panelShift();
+    if (mode == 0x1000 || mode >= 0x5000) panel = shift;
+  }
+  if (mode == 0x1000 && panel != 0) idx = (idx & 0xf0) | clamp((idx & 15) + panel, 0, 15);
   if (mode == 0x4000) {
     ivec2 px = ivec2(gl_FragCoord.xy);
     bool up = uShadedFill != 0 && ((px.x + px.y) & 1) == 1;
     float vIdx = vIdxW / vUvw.z;
     // back to 16.16, snapping float error off exact indices, then the filler's own integer step
     float r = floor(vIdx + 0.5);
-    if (abs(vIdx - r) < 4.0 / 65536.0) vIdx = r;
+    if (abs(vIdx - r) < 1.0 / 512.0) vIdx = r;
     int V = int(floor(vIdx * 65536.0 + 0.5));
     idx = (V + (up ? 0xffff : 0)) >> 16;
+    // the ground grid's levels, dithered like indices, then each to its palette shade (enhance/groundField.ts)
+    if (uShadeMap != 0) idx = uShades[clamp(idx, 0, 4)];
   }
   if (mode == 0x3000) {
     int k = vDraw & 15;
@@ -173,7 +278,7 @@ void main() {
   }
   if ((mode == 0x5000 || mode == 0x6000 || mode == 0x7000)) {
     int slot = (vDraw & 255) + 256;
-    int shade = (vDraw >> 8) & 15;
+    int shade = clamp(((vDraw >> 8) & 15) + panel, 0, 15);
     vec4 r = texelFetch(uSlots, ivec2(slot, 0), 0);
     // render_asm_sub_03bb80 hands modes 0x5000..0x7000 to bitmap3d_draw only while DAT_0009702c is set,
     // and bitmap3d_draw draws nothing for a slot without a frame (stopped, not running, celId < 1): in
@@ -188,6 +293,11 @@ void main() {
       idx = shade < 15 ? int(texelFetch(uLuma, ivec2(texel, shade), 0).r * 255.0 + 0.5) : texel;
       if (idx == 0xff) discard;      // the span loops skip 0xff after the shade lookup
     }
+  }
+  if (uShadowOn != 0 && mode != 0x3000) {
+    // a face's derivative normal points either way: face it towards the eye, as the side seen is the one lit
+    vec3 n = dot(faceN, cameraPosition - vWorld) < 0.0 ? -faceN : faceN;
+    if (inShadow(n, ivec2(gl_FragCoord.xy))) idx = int(texelFetch(uShadowTable, ivec2(idx & 255, 0), 0).r * 255.0 + 0.5);
   }
   outColor = outFor(idx);
 }
@@ -233,6 +343,14 @@ export interface IndexedUniforms {
   uViewport: { value: THREE.Vector2 };
   uMapFill: { value: number };
   uIndexOut: { value: number };
+  /** the enhancements (render/enhance), on in the main view only */
+  uPanels: { value: number };
+  uShadowOn: { value: number };
+  uShadowMap: { value: THREE.Texture | null };
+  uShadowMatrix: { value: THREE.Matrix4 };
+  uShadowDir: { value: THREE.Vector3 };
+  uShadowTexel: { value: number };
+  uShadowTable: { value: THREE.DataTexture };
   [k: string]: { value: unknown };
 }
 
@@ -259,6 +377,16 @@ export function makeUniforms(): IndexedUniforms {
     uViewport: { value: new THREE.Vector2(640, 480) },
     uMapFill: { value: 0 },
     uIndexOut: { value: 0 },
+    uPanels: { value: 0 },
+    uPanel: { value: 0 },
+    uShadeMap: { value: 0 },
+    uShades: { value: [0, 0, 0, 0, 0] },
+    uShadowOn: { value: 0 },
+    uShadowMap: { value: null },
+    uShadowMatrix: { value: new THREE.Matrix4() },
+    uShadowDir: { value: new THREE.Vector3(0, 1, 0) },
+    uShadowTexel: { value: 1 / 2048 },
+    uShadowTable: { value: dataTex(new Uint8Array(256), 256, 1, THREE.RedFormat, THREE.UnsignedByteType) },
   };
 }
 
@@ -276,6 +404,9 @@ export function makeViewUniforms(shared: IndexedUniforms, indexOut: boolean, map
     uViewport: { value: new THREE.Vector2(1, 1) },
     uMapFill: { value: mapFill ? 1 : 0 },
     uIndexOut: { value: indexOut ? 1 : 0 },
+    // the views the game reads back are the original's: no enhancements
+    uPanels: { value: 0 },
+    uShadowOn: { value: 0 },
   };
 }
 
@@ -296,10 +427,14 @@ export function setLuma(u: IndexedUniforms, rows: Uint8Array): void {
   u.uLuma.value.needsUpdate = true;
 }
 
-export function makeIndexedMaterial(u: IndexedUniforms, opts: { behind?: boolean } = {}): THREE.ShaderMaterial {
+/**
+ * `panel`: the material draws mech parts (the armour-panel enhancement's uPanel); `shades`: its mode-0x4000
+ * indices are levels into its own uShades table (the ground grid). It shares every other uniform holder with `u`.
+ */
+export function makeIndexedMaterial(u: IndexedUniforms, opts: { behind?: boolean; panel?: boolean; shades?: boolean } = {}): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     glslVersion: THREE.GLSL3,
-    uniforms: u,
+    uniforms: opts.panel ? { ...u, uPanel: { value: 1 } } : opts.shades ? { ...u, uShadeMap: { value: 1 }, uShades: { value: [0, 0, 0, 0, 0] } } : u,
     vertexShader,
     fragmentShader,
     side: THREE.DoubleSide, // the clipper's back-face test (polyDepthKey) is the original's; the GPU does not add its own

@@ -13,6 +13,7 @@ import { registerCode } from '../../engine/codePtr.ts';
 import { registerGlobals } from '../../engine/globals.ts';
 import { imageI32 } from '../../engine/image.ts';
 import { cacheLoadResource, cacheUnlock, projectResourceSize } from '../../engine/resources/cache.ts';
+import { projectionGlobals } from '../camera/projection.ts';
 import { objectLink, objectMoveToAltList, objectMoveToWorldList, objectRemoveFromWorld } from '../../engine/scene/objectLists.ts';
 import { sceneNodeCreate, sceneNodeInitInPlace, sceneNodeSetOrigin, sceneNodeSetUserdata, sceneNodeWalk, sceneSubtreeSetObjectType } from '../../engine/scene/sceneGraph.ts';
 import { objectDestroy, objectGetStateFlags, objectSetClass, objectSetHitLocation, objectSetIndex, objectSetNode, objectSetStateFlags, objectSetType } from '../../engine/scene/worldObject.ts';
@@ -281,6 +282,7 @@ function scaled(lodScale: number, k: number): number {
  *
  * @mw2 mech_lod_update 0x00037580
  * @fidelity exact
+ * @divergence with the host's projectionGlobals.lodAllNear set, every mech inside t0 gets level 0 (the detail enhancement)
  */
 export function mechLodUpdate(): void {
   const v = viewer();
@@ -318,7 +320,8 @@ export function mechLodUpdate(): void {
   }
   for (const row of rows) {
     if (row.level === -2) {
-      if (first === row.index && row.range < t0) row.level = 0;
+      // @portOnly lodAllNear (the host's detail enhancement): every mech inside t0 at level 0, not only the nearest
+      if ((first === row.index || projectionGlobals.lodAllNear !== 0) && row.range < t0) row.level = 0;
       else if (row.index === second || (row.index === third && row.range < t1)) {
         row.level = 1;
         onesGiven++;

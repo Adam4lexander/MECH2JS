@@ -12,13 +12,14 @@ import { defaultCanvas } from '../../sim/display/video.ts';
 import { palettes } from '../../sim/world/palettes.ts';
 import { LAUNCH_TICK_MS, launchAnimTick } from '../../sim/display/launchScreen.ts';
 import { divergence } from '../../core/provenance.ts';
+import type { XrHost } from '../xrHost.ts';
 
 /** How long the launch screen stays up (the original's load took several seconds). */
 export const LAUNCH_MIN_MS = 2500;
 
 const dac8 = (v: number) => ((v & 0x3f) << 2) | ((v & 0x3f) >> 4);
 
-export function LaunchView({ onDone }: { onDone: () => void }) {
+export function LaunchView({ onDone, host }: { onDone: () => void; host?: XrHost | null }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     divergence(`the launch screen is held up for ${LAUNCH_MIN_MS} ms: the port's start-up is near instant`, 'boot_load_launch_anims');
@@ -45,10 +46,13 @@ export function LaunchView({ onDone }: { onDone: () => void }) {
       paint();
     }, LAUNCH_TICK_MS);
     const done = setTimeout(onDone, LAUNCH_MIN_MS);
+    // in a headset, on its panel (app/xrHost.ts)
+    host?.showScreen(cv);
     return () => {
+      host?.hideScreen(cv);
       clearInterval(tick);
       clearTimeout(done);
     };
-  }, [onDone]);
+  }, [onDone, host]);
   return <canvas ref={canvas} className="shell-screen" />;
 }

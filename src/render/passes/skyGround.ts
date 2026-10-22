@@ -32,6 +32,7 @@
  */
 import * as THREE from 'three';
 import type { IndexedUniforms } from '../materials/indexedMaterial.ts';
+import { SKY_DETAIL_GLSL, type SkyChoice } from '../enhance/skyDetail.ts';
 
 const vertexShader = /* glsl */ `
 void main() {
@@ -50,15 +51,22 @@ uniform int uGround;
 uniform int uSkyOn;
 uniform int uGroundOn;
 uniform int uIndexOut;     // write the palette index (a render read back into the game's window)
+uniform mat3 uCamRot;      // the camera's right, up, back in world space (the enhancements' world ray)
+uniform vec4 uRay;         // camera-space ray per pixel: x * uRay.x - uRay.z, y * uRay.y - uRay.w, -1
 out vec4 outColor;
+${SKY_DETAIL_GLSL}
 void main() {
+  vec3 dir = normalize(uCamRot * vec3(gl_FragCoord.x * uRay.x - uRay.z, gl_FragCoord.y * uRay.y - uRay.w, -1.0));
+  float starR = skyStarRadius(dir);
   float up = dot(uUpPlane, vec3(gl_FragCoord.xy, 1.0));
   bool below = up < 0.0;
   if ((below && uGroundOn == 0) || (!below && uSkyOn == 0)) discard;
   int idx = below ? uGround : uSky;
+  bool inBand = false;
   if (!below && uBand > 0.0) {
     // pixels above the horizon, straight up this column
     float dist = up / uUpPlane.y;
+    inBand = dist <= uBand;
     if (dist <= uBand) {
       float t = dist / uBand;   // 0 on the line, 1 at the top edge
       int v = int(floor((float((uGround - 1) << 16) + t * float((uSky - (uGround - 1)) << 16)) + 0.5));
@@ -67,6 +75,8 @@ void main() {
       idx = (v + 0x8000 + (upStep ? 0x7fff : -0x8000)) >> 16;
     }
   }
+  // the sky enhancement above the band (render/enhance/skyDetail.ts)
+  if (!below && !inBand && uSkyEnh != 0) idx = skyDetail(dir, uSky, ivec2(gl_FragCoord.xy), starR);
   outColor = uIndexOut != 0 ? vec4(float(idx & 255) / 255.0, 0.0, 0.0, 1.0) : vec4(texelFetch(uPalette, ivec2(idx & 255, 0), 0).rgb, 1.0);
 }
 `;
@@ -97,6 +107,11 @@ export class SkyGround {
     uSkyOn: { value: 1 },
     uGroundOn: { value: 1 },
     uIndexOut: { value: 0 },
+    uCamRot: { value: new THREE.Matrix3() },
+    uRay: { value: new THREE.Vector4() },
+    uSkyEnh: { value: 0 },
+    uSkyTop: { value: 0 },
+    uStar: { value: -1 },
   };
 
   constructor(indexed: IndexedUniforms, indexOut = false) {
@@ -120,6 +135,8 @@ export class SkyGround {
     const b = (m[5]! * tanY * 2) / height;
     const c = -m[1]! * tanX - m[5]! * tanY - m[9]!;
     this.u.uUpPlane.value.set(a, b, c);
+    this.u.uCamRot.value.setFromMatrix4(camera.matrixWorld);
+    this.u.uRay.value.set((2 * tanX) / width, (2 * tanY) / height, tanX, tanY);
     // screen pixels to render-target pixels, then transform_point's cos(roll)
     const scaled = (s.bandHeight * width) / s.screenWidth;
     e.setFromQuaternion(camera.quaternion, 'YXZ');
@@ -128,5 +145,14 @@ export class SkyGround {
     this.u.uGround.value = s.ground;
     this.u.uSkyOn.value = s.skyOn ? 1 : 0;
     this.u.uGroundOn.value = s.groundOn ? 1 : 0;
+  }
+
+  /** The sky enhancement (render/enhance/skyDetail.ts): off with null. */
+  setDetail(choice: SkyChoice | null): void {
+    this.u.uSkyEnh.value = choice ? 1 : 0;
+    if (choice) {
+      this.u.uSkyTop.value = choice.top;
+      this.u.uStar.value = choice.star;
+    }
   }
 }

@@ -29,6 +29,8 @@ export const defaultCanvas = new VfxWindow();
 function bootDisplay() {
   defaultCanvas.buffer = new Uint8Array(0);
   defaultCanvas.drawn = new Uint8Array(0);
+  defaultCanvas.layer = new Uint8Array(0);
+  defaultCanvas.inset = new Uint8Array(0);
   defaultCanvas.xMax = -1;
   defaultCanvas.yMax = -1;
   const currentViewport = new ViewWindow();

@@ -73,9 +73,11 @@ import { clipLerp, clipRecordCount, clipRecords, meshResetClipState, objectCullB
 import { objectCullCockpit, objectCullHook, polygonDrawHook, type ColourFn } from './pipeline/hooks.ts';
 import { FillKind, polyFillDispatch, type PolyDraw } from './pipeline/fillDispatch.ts';
 import { makeIndexedMaterial, makeLineMaterial, makeUniforms, NOT_DRAWN, setLuma, setPalette, type IndexedUniforms } from './materials/indexedMaterial.ts';
+import { isShadowCaster, SHADOW_LAYER } from './enhance/shadows.ts';
+import type { OwnChassisDraw } from './enhance/ownChassis.ts';
 
 /** A polygon's outline slots: (vertex count + 1) segments, enough for a near-clipped shape. */
-interface LineEntry {
+export interface LineEntry {
   mesh: THREE.LineSegments;
   pos: Float32Array;
   draw: Float32Array;
@@ -85,7 +87,7 @@ interface LineEntry {
   on: Uint8Array;
 }
 
-interface MeshEntry {
+export interface MeshEntry {
   block: MeshBlock;
   mesh: THREE.Mesh;
   /** whether positions are world (baked, no scene node) or model space */
@@ -120,7 +122,7 @@ const SPRITE_UV = [
   [0, 1],
 ] as const;
 
-interface ObjEntry {
+export interface ObjEntry {
   obj: WorldObject;
   group: THREE.Group;
   meshes: MeshEntry[];
@@ -143,6 +145,8 @@ export class SceneRenderer {
   readonly uniforms: IndexedUniforms;
   private readonly material: THREE.ShaderMaterial;
   private readonly behindMaterial: THREE.ShaderMaterial;
+  /** mech parts: the same material with uPanel set, for the armour-panel enhancement */
+  private readonly mechMaterial: THREE.ShaderMaterial;
   private readonly lineMaterial: THREE.ShaderMaterial;
   /**
    * drawn last, over everything, with the depth buffer cleared before it: in
@@ -154,6 +158,11 @@ export class SceneRenderer {
   private readonly cockpitEntries = new Map<WorldObject, ObjEntry>();
   private readonly byMesh = new Map<THREE.Object3D, WorldObject>();
   readonly stats: FrameStats = { objects: 0, polygons: 0 };
+  /**
+   * @portOnly the enhancements (render/enhance/ownChassis.ts): the player's mech at level 0 round the
+   * cockpit view, drawn in the world pass in place of its level-4 parts; null for none. Set before sync.
+   */
+  ownChassis: OwnChassisDraw | null = null;
   private pass = 0;
 
   /** `uniforms`: a view's own set (makeViewUniforms) sharing the textures of the main one; the main view makes its own. */
@@ -161,6 +170,7 @@ export class SceneRenderer {
     this.uniforms = uniforms ?? makeUniforms();
     this.material = makeIndexedMaterial(this.uniforms);
     this.behindMaterial = makeIndexedMaterial(this.uniforms, { behind: true });
+    this.mechMaterial = makeIndexedMaterial(this.uniforms, { panel: true });
     this.lineMaterial = makeLineMaterial(this.uniforms);
     this.scene.matrixAutoUpdate = false;
     this.backdropScene.matrixAutoUpdate = false;
@@ -185,6 +195,30 @@ export class SceneRenderer {
     return this.byMesh.get(hit) ?? null;
   }
 
+  /** @portOnly the enhancements (render/enhance): an object's main-view meshes as built, or null when it has none */
+  entryOf(obj: WorldObject): Readonly<ObjEntry> | null {
+    return this.entries.get(obj) ?? null;
+  }
+
+  /** @portOnly the enhancements (render/cockpit): an object's cockpit-pass meshes as built, or null */
+  cockpitEntryOf(obj: WorldObject): Readonly<ObjEntry> | null {
+    return this.cockpitEntries.get(obj) ?? null;
+  }
+
+  /**
+   * @portOnly the VR view (render/xr/xrRig.ts): mech `owner`'s parts in the world pass - its own mech's
+   * arms and guns, seen from the cockpit - moved by `m` (the pass's eye to the interpolated rig), so they
+   * stay with the cockpit rather than a pass ahead of it. Until the next sync, which poses them afresh.
+   */
+  carryOwned(owner: number, m: THREE.Matrix4): void {
+    for (const [obj, e] of this.entries) {
+      // a mech's part: type 0x1xx, its index the mech (detail_record_build)
+      if (((obj.type >> 8) & 0xf) !== 1 || (obj.index & 0xffff) !== owner || e.group.parent !== this.scene) continue;
+      e.group.matrix.premultiply(m);
+      e.group.matrixWorldNeedsUpdate = true;
+    }
+  }
+
   pickables(): THREE.Object3D[] {
     return [...this.byMesh.keys()].filter((m) => m.visible && m.parent?.visible);
   }
@@ -202,6 +236,7 @@ export class SceneRenderer {
     this.clear();
     this.material.dispose();
     this.behindMaterial.dispose();
+    this.mechMaterial.dispose();
     this.lineMaterial.dispose();
   }
 
@@ -285,10 +320,13 @@ export class SceneRenderer {
       g.setAttribute('aSprite', new THREE.BufferAttribute(spr, 4));
       g.setAttribute('aSpriteR', new THREE.BufferAttribute(sprR, 3));
       g.computeBoundingSphere();
-      const mesh = new THREE.Mesh(g, behind ? this.behindMaterial : this.material);
+      // a mech's parts (type 0x100, as world_raycast tells them) take the mech material
+      const mesh = new THREE.Mesh(g, behind ? this.behindMaterial : (obj.type & 0x100) !== 0 ? this.mechMaterial : this.material);
       mesh.matrixAutoUpdate = false;
       mesh.frustumCulled = true;
       if (behind) mesh.renderOrder = -1;
+      // the shadow enhancement's casters (render/enhance/shadows.ts), in the main view
+      if (into === this.scene && isShadowCaster(obj)) mesh.layers.enable(SHADOW_LAYER);
       group.add(mesh);
       this.byMesh.set(mesh, obj);
       meshes.push({
@@ -396,6 +434,7 @@ export class SceneRenderer {
       renderView.polySortFlags = obj.flags & 0xffff;
       polys += this.drawObject(obj, e, L, colour);
     }
+    if (this.ownChassis) this.drawOwnChassis(this.ownChassis, seen, L, colour);
     // the cockpit shell: while cockpitViewActive, after the world, cockpitHeadNode's tree with
     // the near clip at 8 (viewer_set_near_clip) and the cull hook at 0x3f970, which rejects an
     // object with flags bit 0x1000 and nothing else - no depth, far or side test, and it does
@@ -486,6 +525,33 @@ export class SceneRenderer {
     };
     walk(root);
     this.endViewPass(drawn, polys);
+  }
+
+  /**
+   * @portOnly the player's mech at level 0 (render/enhance/ownChassis.ts): its level-4 parts in the world
+   * pass hidden (and so casting nothing), and each copy drawn in their place at the finest mesh - on the
+   * shadow layer only, or in view too. It leaves the globals the cockpit pass reads from the world pass
+   * (objectViewDepth, polySortFlags) as the world pass left them, and is not counted in the stats.
+   */
+  private drawOwnChassis(own: OwnChassisDraw, seen: Set<WorldObject>, L: LightLatch, colour: ColourFn): void {
+    const copies = new Set(own.parts.map((p) => p.obj));
+    for (const [obj, e] of this.entries) {
+      if (e.group.parent === this.scene && !copies.has(obj) && ((obj.type >> 8) & 0xf) === 1 && (obj.index & 0xffff) === own.owner) e.group.visible = false;
+    }
+    const depth = renderView.objectViewDepth;
+    renderView.objectViewDepth = 0;
+    for (const p of own.parts) {
+      seen.add(p.obj);
+      const e = this.entry(p.obj, this.scene);
+      e.group.visible = true;
+      const mask = p.view ? 1 | (1 << SHADOW_LAYER) : 1 << SHADOW_LAYER;
+      for (const m of e.meshes) {
+        m.mesh.layers.mask = mask;
+        if (m.lines) m.lines.mesh.layers.mask = p.view ? 1 : 0;
+      }
+      this.drawObject(p.obj, e, L, colour);
+    }
+    renderView.objectViewDepth = depth;
   }
 
   /** Hides what this pass did not draw; forgets what no pass has drawn for a while. */

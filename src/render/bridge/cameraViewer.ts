@@ -23,12 +23,14 @@ const right = new Vector3();
 const up = new Vector3();
 const back = new Vector3();
 
-function copyViewer(src: Viewer, out: Viewer): void {
+/** `src` copied field by field into `out`. */
+export function copyViewer(src: Viewer, out: Viewer): Viewer {
   for (const k of Object.keys(src) as Array<keyof Viewer>) {
     const v = src[k];
     if (v instanceof Int32Array) (out[k] as Int32Array).set(v);
     else (out as unknown as Record<string, unknown>)[k] = v;
   }
+  return out;
 }
 
 export function viewerFromCamera(camera: Camera, src: Viewer, out: Viewer): Viewer {

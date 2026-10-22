@@ -65,7 +65,7 @@ Library groups left out of the totals: `clib`, `miles`.
 
 | address | original | module | fidelity | port |
 |---|---|---|---|---|
-| 0x00010210 | video_init | vfx_video | partial | `videoInit` src/sim/display/video.ts:133 |
+| 0x00010210 | video_init | vfx_video | partial | `videoInit` src/sim/display/video.ts:135 |
 | 0x00010320 | vfx_video_sub_010320 | vfx_video | partial | `vfxVideoSub010320` src/sim/display/mainView.ts:84 |
 | 0x000103c0 | vfx_video_sub_0103c0 | vfx_video | exact | `vfxVideoSub0103c0` src/sim/world/viewScene.ts:46 |
 | 0x00010490 | vfx_video_sub_010490 | vfx_video | partial | `vfxVideoSub010490` src/sim/display/mainView.ts:44 |
@@ -133,23 +133,23 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00013a40 | hud_text_underline | vfx_font | exact | `vfxFontSub013a40` src/sim/cockpit/objectivesHud.ts:96 |
 | 0x00013ad0 | vfx_text_box_draw | vfx_font | exact | `vfxFontSub013ad0` src/sim/cockpit/targetDisplay.ts:265 |
 | 0x00014020 | vfx_font_sub_014020 | vfx_font | exact | `vfxFontSub014020` src/sim/display/layout.ts:230 |
-| 0x000140f0 | pane_edge_at_angle | vfx_font | exact | `vfxFontSub0140f0` src/sim/cockpit/radar.ts:1498 |
+| 0x000140f0 | pane_edge_at_angle | vfx_font | exact | `vfxFontSub0140f0` src/sim/cockpit/radar.ts:1500 |
 | 0x00014240 | vfx_font_sub_014240 | vfx_font | exact | `vfxFontSub014240` src/sim/display/layout.ts:259 |
-| 0x00014410 | radar_ellipse_frame | vfx_font | exact | `vfxFontSub014410` src/sim/cockpit/radar.ts:1365 |
-| 0x00014530 | radar_ellipse_contains | vfx_font | exact | `vfxFontSub014530` src/sim/cockpit/radar.ts:1381 |
-| 0x000145a0 | radar_ellipse_clamp | vfx_font | exact | `vfxFontSub0145a0` src/sim/cockpit/radar.ts:1455 |
-| 0x00014670 | radar_ellipse_edge_at | vfx_font | exact | `vfxFontSub014670` src/sim/cockpit/radar.ts:1481 |
-| 0x000147c0 | ellipse_point | vfx_font | exact | `vfxFontSub0147c0` src/sim/cockpit/radar.ts:1398 |
-| 0x000148a0 | viewer_set_aspect_from_screen | vfx_font | exact | `viewerSetAspectFromScreen` src/sim/display/video.ts:88 |
-| 0x000148d0 | screen_select_asset_variant | vfx_font | exact | `screenSelectAssetVariant` src/sim/display/video.ts:70 |
+| 0x00014410 | radar_ellipse_frame | vfx_font | exact | `vfxFontSub014410` src/sim/cockpit/radar.ts:1367 |
+| 0x00014530 | radar_ellipse_contains | vfx_font | exact | `vfxFontSub014530` src/sim/cockpit/radar.ts:1383 |
+| 0x000145a0 | radar_ellipse_clamp | vfx_font | exact | `vfxFontSub0145a0` src/sim/cockpit/radar.ts:1457 |
+| 0x00014670 | radar_ellipse_edge_at | vfx_font | exact | `vfxFontSub014670` src/sim/cockpit/radar.ts:1483 |
+| 0x000147c0 | ellipse_point | vfx_font | exact | `vfxFontSub0147c0` src/sim/cockpit/radar.ts:1400 |
+| 0x000148a0 | viewer_set_aspect_from_screen | vfx_font | exact | `viewerSetAspectFromScreen` src/sim/display/video.ts:90 |
+| 0x000148d0 | screen_select_asset_variant | vfx_font | exact | `screenSelectAssetVariant` src/sim/display/video.ts:72 |
 | 0x00014950 | layout_rescale_all | vfx_font | partial | `layoutRescaleAll` src/sim/display/rescale.ts:56 |
-| 0x00014a80 | vfx_colour_table_identity | vfx_font | exact | `vfxColourTableIdentity` src/sim/display/video.ts:102 |
+| 0x00014a80 | vfx_colour_table_identity | vfx_font | exact | `vfxColourTableIdentity` src/sim/display/video.ts:104 |
 | 0x00014aa0 | pane_transition_restart | vfx_font | exact | `paneTransitionRestart` src/sim/cockpit/hud.ts:246 |
 | 0x00014ae0 | pane_lerp | vfx_font | exact | `paneLerp` src/sim/cockpit/hud.ts:261 |
 | 0x00014b80 | pane_transition_step | vfx_font | exact | `paneTransitionStep` src/sim/cockpit/hud.ts:289 |
 | 0x00014c50 | pane_transition_step_split | vfx_font | exact | `paneTransitionStepSplit` src/sim/cockpit/hud.ts:323 |
 | 0x00014d90 | brightness_tables_build | vfx_font | exact | `brightnessTablesBuild` src/sim/world/brightness.ts:23 |
-| 0x00014e70 | palette_apply_brightness | vfx_font | exact | `paletteApplyBrightness` src/sim/world/palettes.ts:168 |
+| 0x00014e70 | palette_apply_brightness | vfx_font | exact | `paletteApplyBrightness` src/sim/world/palettes.ts:171 |
 | 0x00014ee0 | day_cycle_init | vfx_font | exact | `dayCycleInit` src/sim/world/dayCycle.ts:57 |
 | 0x00014f80 | day_cycle_tick | vfx_font | exact | `dayCycleTick` src/sim/world/dayCycle.ts:78 |
 | 0x00015070 | day_cycle_set_phase | vfx_font | exact | `dayCycleSetPhase` src/sim/world/dayCycle.ts:111 |
@@ -666,17 +666,17 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00036d30 | debris_teardown | geom_poly | exact | `debrisTeardown` src/sim/world/worldRecords.ts:615 |
 | 0x00036d60 | debris_enabled | geom_poly | exact | `debrisEnabled` src/sim/world/worldRecords.ts:624 |
 | 0x00036d70 | debris_set_enabled | geom_poly | partial | `debrisSetEnabled` src/sim/world/worldRecords.ts:632 |
-| 0x00036d90 | mech_create_part_nodes | geom_poly | exact | `mechCreatePartNodes` src/sim/world/detailRecords.ts:46 |
-| 0x00036e60 | detail_record_set | geom_poly | exact | `detailRecordSet` src/sim/world/detailRecords.ts:68 |
-| 0x00036f70 | detail_records_reset | geom_poly | exact | `detailRecordsReset` src/sim/world/detailRecords.ts:107 |
-| 0x00037000 | detail_records_claim | geom_poly | exact | `detailRecordsClaim` src/sim/world/detailRecords.ts:135 |
-| 0x00037060 | mech_apply_detail_level | geom_poly | exact | `mechApplyDetailLevel` src/sim/world/detailRecords.ts:153 |
-| 0x00037190 | detail_record_build | geom_poly | exact | `detailRecordBuild` src/sim/world/detailRecords.ts:178 |
-| 0x000374a0 | detail_record_drop_level | geom_poly | exact | `detailRecordDropLevel` src/sim/world/detailRecords.ts:242 |
-| 0x000374f0 | detail_record_node | geom_poly | exact | `detailRecordNode` src/sim/world/detailRecords.ts:255 |
-| 0x00037550 | detail_record_set_location | geom_poly | exact | `detailRecordSetLocation` src/sim/world/detailRecords.ts:265 |
-| 0x00037580 | mech_lod_update | geom_poly | exact | `mechLodUpdate` src/sim/world/detailRecords.ts:282 |
-| 0x000377e0 | detail_record_release_node | geom_poly | exact | `detailRecordReleaseNode` src/sim/world/detailRecords.ts:340 |
+| 0x00036d90 | mech_create_part_nodes | geom_poly | exact | `mechCreatePartNodes` src/sim/world/detailRecords.ts:47 |
+| 0x00036e60 | detail_record_set | geom_poly | exact | `detailRecordSet` src/sim/world/detailRecords.ts:69 |
+| 0x00036f70 | detail_records_reset | geom_poly | exact | `detailRecordsReset` src/sim/world/detailRecords.ts:108 |
+| 0x00037000 | detail_records_claim | geom_poly | exact | `detailRecordsClaim` src/sim/world/detailRecords.ts:136 |
+| 0x00037060 | mech_apply_detail_level | geom_poly | exact | `mechApplyDetailLevel` src/sim/world/detailRecords.ts:154 |
+| 0x00037190 | detail_record_build | geom_poly | exact | `detailRecordBuild` src/sim/world/detailRecords.ts:179 |
+| 0x000374a0 | detail_record_drop_level | geom_poly | exact | `detailRecordDropLevel` src/sim/world/detailRecords.ts:243 |
+| 0x000374f0 | detail_record_node | geom_poly | exact | `detailRecordNode` src/sim/world/detailRecords.ts:256 |
+| 0x00037550 | detail_record_set_location | geom_poly | exact | `detailRecordSetLocation` src/sim/world/detailRecords.ts:266 |
+| 0x00037580 | mech_lod_update | geom_poly | exact | `mechLodUpdate` src/sim/world/detailRecords.ts:283 |
+| 0x000377e0 | detail_record_release_node | geom_poly | exact | `detailRecordReleaseNode` src/sim/world/detailRecords.ts:343 |
 | 0x00037a60 | bitmap3d_animate | geom_luma | exact | `bitmap3dAnimate` src/sim/world/bitmap3d.ts:77 |
 | 0x00037b60 | bitmap3d_add_frame | geom_luma | exact | `bitmap3dAddFrame` src/sim/world/bitmap3d.ts:116 |
 | 0x00037c70 | bitmap3d_set_id | geom_luma | exact | `bitmap3dSetId` src/sim/world/bitmap3d.ts:153 |
@@ -761,24 +761,24 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x0003cda0 | object_draw_lod_mesh | render_asm | partial | `objectSelectLodMesh` src/render/pipeline/drawPipeline.ts:160 |
 | 0x0003e086 | poly_light_intensity | render_asm | exact | `polyLightIntensity` src/render/shading/polygonColour.ts:54 |
 | 0x0003e1de | poly_clip_and_queue | render_asm | partial | `polyDepthKey` src/render/pipeline/drawPipeline.ts:274 |
-| 0x0003e5b0 | viewport_windows_reset | render_asm | exact | `viewportWindowsReset` src/sim/display/video.ts:114 |
-| 0x0003e600 | viewport_select | render_asm | exact | `viewportSelect` src/sim/display/video.ts:168 |
-| 0x0003e6d0 | palette_apply_pending | render_asm | exact | `paletteApplyPending` src/sim/world/palettes.ts:354 |
-| 0x0003e710 | palette_apply_slot | render_asm | exact | `paletteApplySlot` src/sim/world/palettes.ts:203 |
-| 0x0003e760 | palette_fade_step | render_asm | exact | `paletteFadeStep` src/sim/world/palettes.ts:333 |
-| 0x0003e7d0 | palette_start_fade | render_asm | exact | `paletteStartFade` src/sim/world/palettes.ts:284 |
-| 0x0003e950 | palette_fade_for_effect | render_asm | exact | `paletteFadeForEffect` src/sim/world/palettes.ts:370 |
-| 0x0003eaa0 | palette_slot_set_resource | render_asm | exact | `paletteSlotSetResource` src/sim/world/palettes.ts:184 |
-| 0x0003eae0 | palette_fade_to_new_base | render_asm | exact | `paletteFadeToNewBase` src/sim/world/palettes.ts:380 |
-| 0x0003eb10 | screen_fade_in | render_asm | partial | `screenFadeIn` src/sim/world/palettes.ts:481 |
-| 0x0003ecd0 | palette_fade_steps_left | render_asm | exact | `paletteFadeStepsLeft` src/sim/world/palettes.ts:390 |
+| 0x0003e5b0 | viewport_windows_reset | render_asm | exact | `viewportWindowsReset` src/sim/display/video.ts:116 |
+| 0x0003e600 | viewport_select | render_asm | exact | `viewportSelect` src/sim/display/video.ts:170 |
+| 0x0003e6d0 | palette_apply_pending | render_asm | exact | `paletteApplyPending` src/sim/world/palettes.ts:357 |
+| 0x0003e710 | palette_apply_slot | render_asm | exact | `paletteApplySlot` src/sim/world/palettes.ts:206 |
+| 0x0003e760 | palette_fade_step | render_asm | exact | `paletteFadeStep` src/sim/world/palettes.ts:336 |
+| 0x0003e7d0 | palette_start_fade | render_asm | exact | `paletteStartFade` src/sim/world/palettes.ts:287 |
+| 0x0003e950 | palette_fade_for_effect | render_asm | exact | `paletteFadeForEffect` src/sim/world/palettes.ts:373 |
+| 0x0003eaa0 | palette_slot_set_resource | render_asm | exact | `paletteSlotSetResource` src/sim/world/palettes.ts:187 |
+| 0x0003eae0 | palette_fade_to_new_base | render_asm | exact | `paletteFadeToNewBase` src/sim/world/palettes.ts:383 |
+| 0x0003eb10 | screen_fade_in | render_asm | partial | `screenFadeIn` src/sim/world/palettes.ts:485 |
+| 0x0003ecd0 | palette_fade_steps_left | render_asm | exact | `paletteFadeStepsLeft` src/sim/world/palettes.ts:393 |
 | 0x0003ece0 | viewer_latch_globals | render_asm | partial | `viewerLatchGlobals` src/render/pipeline/viewLatch.ts:60 |
-| 0x0003ef30 | viewer_update_projection | render_asm | partial | `viewerUpdateProjection` src/sim/camera/projection.ts:47 |
-| 0x0003f230 | viewer_build_transform | render_asm | exact | `viewerBuildTransform` src/sim/camera/projection.ts:90 |
-| 0x0003f320 | viewer_project_point | render_asm | exact | `viewerProjectPoint` src/sim/camera/projection.ts:117 |
+| 0x0003ef30 | viewer_update_projection | render_asm | partial | `viewerUpdateProjection` src/sim/camera/projection.ts:60 |
+| 0x0003f230 | viewer_build_transform | render_asm | exact | `viewerBuildTransform` src/sim/camera/projection.ts:123 |
+| 0x0003f320 | viewer_project_point | render_asm | exact | `viewerProjectPoint` src/sim/camera/projection.ts:150 |
 | 0x0003f500 | object_cull_main_view | code label, no Ghidra function | partial | `objectCullMainView` src/render/pipeline/drawPipeline.ts:42 |
-| 0x0003f990 | lod_quality_is_high | render_asm | exact | `lodQualityIsHigh` src/sim/camera/projection.ts:158 |
-| 0x0003f9b0 | lod_quality_set | render_asm | exact | `lodQualitySet` src/sim/camera/projection.ts:150 |
+| 0x0003f990 | lod_quality_is_high | render_asm | exact | `lodQualityIsHigh` src/sim/camera/projection.ts:191 |
+| 0x0003f9b0 | lod_quality_set | render_asm | exact | `lodQualitySet` src/sim/camera/projection.ts:183 |
 | 0x0003fa50 | vec3_normalise | render_asm | exact | `vec3Normalise` src/engine/collision/ray.ts:229 |
 | 0x0003fbc0 | camera_keys_init | render_asm | exact | `cameraKeysInit` src/sim/camera/cameraUpdate.ts:158 |
 | 0x0003fc00 | camera_keys_update | render_asm | exact | `cameraKeysUpdate` src/sim/camera/cameraUpdate.ts:272 |
@@ -1011,19 +1011,19 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00053330 | weapon_get_aim_direction | weapons | exact | `weaponGetAimDirection` src/sim/weapons/aim.ts:34 |
 | 0x000533c0 | effect_align_to_mount | weapons | exact | `effectAlignToMount` src/sim/effects/effects.ts:276 |
 | 0x00053410 | projectile_place_on_fire | weapons | exact | `projectilePlaceOnFire` src/sim/weapons/weapons.ts:379 |
-| 0x00053821 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:313 |
-| 0x0005435c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:155 |
-| 0x00054760 | vfx_shape_draw_unclipped | vfx_lib | exact | `vfxShapeDrawUnclipped` src/engine/vfx/vfx.ts:174 |
-| 0x00054827 | vfx_shape_remap_set | vfx_lib | exact | `vfxShapeRemapSet` src/engine/vfx/vfx.ts:187 |
-| 0x00054846 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:197 |
-| 0x00054d1e | vfx_shape_remap_draw_unclipped | vfx_lib | exact | `vfxShapeRemapDrawUnclipped` src/engine/vfx/vfx.ts:214 |
-| 0x000561f0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:270 |
+| 0x00053821 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:348 |
+| 0x0005435c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:190 |
+| 0x00054760 | vfx_shape_draw_unclipped | vfx_lib | exact | `vfxShapeDrawUnclipped` src/engine/vfx/vfx.ts:209 |
+| 0x00054827 | vfx_shape_remap_set | vfx_lib | exact | `vfxShapeRemapSet` src/engine/vfx/vfx.ts:222 |
+| 0x00054846 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:232 |
+| 0x00054d1e | vfx_shape_remap_draw_unclipped | vfx_lib | exact | `vfxShapeRemapDrawUnclipped` src/engine/vfx/vfx.ts:249 |
+| 0x000561f0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:305 |
 | 0x00056868 | vfx_ellipse_draw | vfx_lib | exact | `vfxEllipseDraw` src/sim/cockpit/radar.ts:1290 |
-| 0x00057e60 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:376 |
-| 0x00057e73 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:387 |
-| 0x00057e93 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:401 |
-| 0x00058026 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:459 |
-| 0x0005805d | vfx_pane_write_row | vfx_lib | exact | `vfxPaneWriteRow` src/engine/vfx/vfx.ts:491 |
+| 0x00057e60 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:411 |
+| 0x00057e73 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:422 |
+| 0x00057e93 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:436 |
+| 0x00058026 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:494 |
+| 0x0005805d | vfx_pane_write_row | vfx_lib | exact | `vfxPaneWriteRow` src/engine/vfx/vfx.ts:550 |
 | 0x000584a7 | gif_lzw_table_reset | vfx_lib | exact | `gifLzwTableReset` src/engine/vfx/gif.ts:163 |
 | 0x000584ef | gif_read_byte | vfx_lib | exact | `gifReadByte` src/engine/vfx/gif.ts:182 |
 | 0x00058508 | gif_read_bits | vfx_lib | exact | `gifReadBits` src/engine/vfx/gif.ts:196 |
@@ -1032,12 +1032,12 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00058611 | gif_decode | vfx_lib | exact | `gifDecode` src/engine/vfx/gif.ts:274 |
 | 0x0005882a | gif_palette_read | vfx_lib | exact | `gifPaletteRead` src/engine/vfx/gif.ts:141 |
 | 0x0005888b | gif_image_size | vfx_lib | exact | `gifImageSize` src/engine/vfx/gif.ts:129 |
-| 0x000588c3 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:259 |
-| 0x000588e5 | vfx_shape_origin | vfx_lib | exact | `vfxShapeOrigin` src/engine/vfx/vfx.ts:249 |
-| 0x00058908 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:235 |
+| 0x000588c3 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:294 |
+| 0x000588e5 | vfx_shape_origin | vfx_lib | exact | `vfxShapeOrigin` src/engine/vfx/vfx.ts:284 |
+| 0x00058908 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:270 |
 | 0x00058966 | vfx_lib_sub_058966 | vfx_lib | exact | `vfxLibSub058966` src/sim/display/launchScreen.ts:69 |
-| 0x00058a43 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:224 |
-| 0x00058e0d | palette_fade_used_colours | vfx_lib | partial | `paletteFadeUsedColours` src/sim/world/palettes.ts:403 |
+| 0x00058a43 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:259 |
+| 0x00058e0d | palette_fade_used_colours | vfx_lib | partial | `paletteFadeUsedColours` src/sim/world/palettes.ts:406 |
 | 0x0005dc10 | AIL_install_DIG_driver_file | miles_ail | stub | `ailInstallDigDriverFile` src/engine/miles/ail.ts:168 |
 | 0x0005dd90 | AIL_allocate_sample_handle | miles_ail | partial | `ailAllocateSampleHandle` src/engine/miles/ail.ts:186 |
 | 0x0005de90 | AIL_allocate_file_sample | miles_ail | partial | `ailAllocateFileSample` src/engine/miles/ail.ts:242 |
@@ -1071,9 +1071,9 @@ Library groups left out of the totals: `clib`, `miles`.
 | 0x00061fb0 | timer_set_paused | clib_start | exact | `timerSetPaused` src/engine/timer.ts:128 |
 | 0x00062cc3 | qsort_median3 | clib | exact | `median3` src/engine/qsort.ts:23 |
 | 0x00062d1b | qsort | clib | exact | `watcomQsort` src/engine/qsort.ts:54 |
-| 0x00063860 | palette_set_entries | clib | exact | `paletteSetEntries` src/sim/world/palettes.ts:145 |
-| 0x00063a70 | palette_fade_state_build | clib | exact | `paletteFadeStateBuild` src/sim/world/palettes.ts:221 |
-| 0x00063b50 | palette_fade_state_step | clib | exact | `paletteFadeStateStep` src/sim/world/palettes.ts:251 |
+| 0x00063860 | palette_set_entries | clib | exact | `paletteSetEntries` src/sim/world/palettes.ts:148 |
+| 0x00063a70 | palette_fade_state_build | clib | exact | `paletteFadeStateBuild` src/sim/world/palettes.ts:224 |
+| 0x00063b50 | palette_fade_state_step | clib | exact | `paletteFadeStateStep` src/sim/world/palettes.ts:254 |
 | 0x0007617f | miles_driver_sub_07617f | miles_driver | exact | `milesRand` src/core/random.ts:32 |
 | 0x000761a3 | miles_driver_sub_0761a3 | miles_driver | exact | `milesSrand` src/core/random.ts:24 |
 
@@ -1482,20 +1482,20 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 | 0x0003ee80 | labels_clear | video_driver | exact | `labelsClear` src/shell/ui/labels.ts:345 |
 | 0x0003f4a0 | timer_start | sound_detect | partial | `timerStart` src/shell/host/timer.ts:12 |
 | 0x0003f508 | timer_read | sound_detect | exact | `timerRead` src/shell/host/timer.ts:23 |
-| 0x000432f1 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:314 |
-| 0x00043e2c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:156 |
-| 0x00044316 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:198 |
-| 0x00045cc0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:271 |
+| 0x000432f1 | vfx_line_draw | vfx_lib | partial | `vfxLineDraw` src/engine/vfx/vfx.ts:349 |
+| 0x00043e2c | vfx_shape_draw | vfx_lib | exact | `vfxShapeDraw` src/engine/vfx/vfx.ts:191 |
+| 0x00044316 | vfx_shape_remap_draw | vfx_lib | exact | `vfxShapeRemapDraw` src/engine/vfx/vfx.ts:233 |
+| 0x00045cc0 | vfx_pane_wipe | vfx_lib | exact | `vfxPaneWipe` src/engine/vfx/vfx.ts:306 |
 | 0x00045d9f | vfx_lib_sub_045d9f | vfx_lib | exact | `vfxPaneCopy` src/shell/video/driver.ts:252 |
-| 0x00047930 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:377 |
-| 0x00047943 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:388 |
-| 0x00047963 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:402 |
-| 0x00047af6 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:460 |
+| 0x00047930 | vfx_font_height | vfx_lib | exact | `vfxFontHeight` src/engine/vfx/vfx.ts:412 |
+| 0x00047943 | vfx_character_width | vfx_lib | exact | `vfxCharacterWidth` src/engine/vfx/vfx.ts:423 |
+| 0x00047963 | vfx_character_draw | vfx_lib | exact | `vfxCharacterDraw` src/engine/vfx/vfx.ts:437 |
+| 0x00047af6 | vfx_string_draw | vfx_lib | exact | `vfxStringDraw` src/engine/vfx/vfx.ts:495 |
 | 0x00047ea3 | vfx_lib_sub_047ea3 | vfx_lib | exact | `pcxDecode` src/data/formats/pcx.ts:38 |
 | 0x00047f25 | vfx_lib_sub_047f25 | vfx_lib | exact | `pcxPalette` src/data/formats/pcx.ts:24 |
-| 0x00048393 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:260 |
-| 0x000483d8 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:236 |
-| 0x00048513 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:225 |
+| 0x00048393 | vfx_shape_bounds | vfx_lib | exact | `vfxShapeBounds` src/engine/vfx/vfx.ts:295 |
+| 0x000483d8 | vfx_shape_size | vfx_lib | exact | `vfxShapeSize` src/engine/vfx/vfx.ts:271 |
+| 0x00048513 | vfx_shape_count | vfx_lib | exact | `vfxShapeCount` src/engine/vfx/vfx.ts:260 |
 | 0x00048d69 | qsort_median3 | clib | exact | `median3` src/engine/qsort.ts:24 |
 | 0x00048dc1 | qsort | clib | exact | `watcomQsort` src/engine/qsort.ts:55 |
 | 0x0004bc39 | rand | miles_driver | exact | `rand` src/shell/clib.ts:15 |
@@ -1505,7 +1505,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 
 ## Divergences (deliberate differences)
 
-- src/app/shell/LaunchView.tsx:24 - the launch screen is held up for ${LAUNCH_MIN_MS} ms: the port's start-up is near instant
+- src/app/shell/LaunchView.tsx:25 - the launch screen is held up for ${LAUNCH_MIN_MS} ms: the port's start-up is near instant
 - src/core/provenance.ts:8 - <why>                  a deliberate difference, and its reason
 - src/core/random.ts:56 - the seed is a parameter; the original's is the argv pointer
 - src/data/config/ini.ts:95 - reads the INI from memory instead of opening mw2.ini
@@ -1543,10 +1543,10 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/tasks/taskList.ts:53 - the node is a JS object rather than static_malloc(0x18) from the TLIS arena
 - src/engine/timer.ts:71 - the scan stops at the table's 64 entries; the original scans on for a zero or -1 word, which only matters past 64 live stopwatches
 - src/engine/vfx/gif.ts:276 - the original's 1-bit output path (EDX == 1), which its own code never takes (EDX is always 8), is not ported; a corrupt GIF whose codes run past the table stops where the original would read or write past its work block
-- src/engine/vfx/vfx.ts:176 - takes window coordinates and the clip vfx_shape_draw has set up, not (pane, shape, x, y, pitch)
-- src/engine/vfx/vfx.ts:216 - takes window coordinates and the clip vfx_shape_remap_draw has set up
-- src/engine/vfx/vfx.ts:316 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
-- src/engine/vfx/vfx.ts:493 - past the clip checks the original returns whatever EAX last held (a difference, or the end of the copy), which its one caller (gif_put_pixel) ignores; the port returns 0
+- src/engine/vfx/vfx.ts:211 - takes window coordinates and the clip vfx_shape_draw has set up, not (pane, shape, x, y, pitch)
+- src/engine/vfx/vfx.ts:251 - takes window coordinates and the clip vfx_shape_remap_draw has set up
+- src/engine/vfx/vfx.ts:351 - a vertical or horizontal line that is drawn returns 0: the original returns the uninitialised local at [ebp-0x34] tested >= 1 there (its paths at 0x54037 / 0x540c2 skip the store at 0x5393f); mode above 1 (a callback) is not ported
+- src/engine/vfx/vfx.ts:552 - past the clip checks the original returns whatever EAX last held (a difference, or the end of the copy), which its one caller (gif_put_pixel) ignores; the port returns 0
 - src/mission/commandLine.ts:89 - -M / -X's mono display, -Q's quadtree switch-off, -E's mw2debug.txt and the version text are not ported; their flags are still set
 - src/mission/commandLine.ts:93 - This program must be launched from MECH2.EXE
 - src/mission/devDir.ts:42 - the 101-bucket hash chains are a Map: the lookup's result is the same
@@ -1624,8 +1624,9 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/shell/video/driver.ts:99 - the VFX display driver (DATABASE.MW2 item 0x21) is the port’s own 640x480 screen
 - src/sim/ai/behaviours.ts:344 - a gamething with a node leaves the caller's y uninitialised in the C; the port gives 0. A handle that is neither a mech nor a gamething transforms by an uninitialised node pointer; the port reports it and answers [0, 0, 0]
 - src/sim/camera/cameraUpdate.ts:670 - the video-state-4 case (radar_map_up: a fixed yaw of 180 and pitch of -45) is not reproduced; the port is never in that state
-- src/sim/camera/projection.ts:49 - the fields +0xa8 and +0xac (secant terms from the atan tables) are not computed
-- src/sim/camera/projection.ts:119 - the original reads the globals viewer_latch_globals left at the last draw (viewTranslation, the premultiplied rows, viewDepthRow, projShift, centre and bounds, viewNearClipScaled); the port computes the same values from the viewer passed in, which callers make viewerPosition - the viewer the last draw latched, except while the cockpit shell pass had its near clip at 8
+- src/sim/camera/projection.ts:62 - the fields +0xa8 and +0xac (secant terms from the atan tables) are not computed
+- src/sim/camera/projection.ts:63 - lodScale is multiplied by the host's lodDistanceScale when that is not 1 (the Modern and VR views' detail setting, render/viewSettings.ts)
+- src/sim/camera/projection.ts:152 - the original reads the globals viewer_latch_globals left at the last draw (viewTranslation, the premultiplied rows, viewDepthRow, projShift, centre and bounds, viewNearClipScaled); the port computes the same values from the viewer passed in, which callers make viewerPosition - the viewer the last draw latched, except while the cockpit shell pass had its near clip at 8
 - src/sim/cockpit/damageDisplay.ts:208 - region 15 shows section 0, which reads sections[-1] - the tail of the last weapon record, including half of a pointer; what the original draws there depends on its memory layout (the region is a 1x1 pane at the diagram's corner), so the port skips it
 - src/sim/cockpit/damageDisplay.ts:292 - the arguments (loadout EAX, pane EDX) and every call in the body are read from the disassembly (0x2f790..0x2fa7f); the exported C loses most of them
 - src/sim/cockpit/hud.ts:447 - the +0x14 dword of each MechWeapon (no port field) is not carried over
@@ -1636,7 +1637,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/cockpit/radar.ts:1209 - viewer_latch_globals is the render layer's, which latches the viewer itself when it draws
 - src/sim/cockpit/radar.ts:1247 - reads the viewer, which ortho_view_begin set up, instead of the globals viewer_latch_globals copies from it
 - src/sim/cockpit/radar.ts:1292 - returns 0 where the original's EAX holds the last value it computed (no caller reads it)
-- src/sim/cockpit/radar.ts:1500 - a steep ray leaves the original's slope uninitialised (and negates it); the port passes 0, which the steep cases (4..7) never read
+- src/sim/cockpit/radar.ts:1502 - a steep ray leaves the original's slope uninitialised (and negates it); the port passes 0, which the steep cases (4..7) never read
 - src/sim/cockpit/resources.ts:170 - the 'Couldn't load' line appended to symlog.txt is not written
 - src/sim/cockpit/resources.ts:175 - res_load_cockpit: couldn't load ${ref.name} (symlog.txt not written)
 - src/sim/cockpit/resources.ts:179 - res_load_cockpit: CPIT shorter than 164 bytes; the original reads past it
@@ -1654,7 +1655,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/display/mainView.ts:89 - vfx_video_sub_010320: no render arenas or polygon budget (render_buffers_init, polysDrawnLimit)
 - src/sim/display/rescale.ts:58 - hud_debug_sub_049a90 (the debug text's layout) is not ported yet
 - src/sim/display/rescale.ts:89 - hud_debug_sub_049a90 (the debug text layout) is not ported
-- src/sim/display/video.ts:135 - vfx_load_drivers and the driver's set-up call (DAT_0009fd4c) are the host's; the mode is display.screenMode rather than the driver's record; the VGA/data selectors and the copy of the pane at 0xa4694 are not kept
+- src/sim/display/video.ts:137 - vfx_load_drivers and the driver's set-up call (DAT_0009fd4c) are the host's; the mode is display.screenMode rather than the driver's record; the VGA/data selectors and the copy of the pane at 0xa4694 are not kept
 - src/sim/display/videoText.ts:37 - the text is decoded into a copy (the port's MW2.PRJ outlives the process, and the original negates the cached copy in place, so a second call in one run would re-encode it); vfx_video_font_handler's drawing is the host's: the text is left in videoText.shown
 - src/sim/display/videoText.ts:44 - vfx_video_font_handler is not ported: the host shows the text
 - src/sim/effects/simTables.ts:151 - the dword at +0x28 (pad_028, zeroed here) has no field in the live Projectile class
@@ -1732,14 +1733,15 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/world/anim2d.ts:102 - a play-once animation that finishes without bit 1 leaves the frame variable unset in the original; nothing is drawn in that state, so it is never read
 - src/sim/world/bitmap3d.ts:67 - ${fn}: slot ${slot} is outside bitmap3dTable; the original reads/writes past the table
 - src/sim/world/bitmap3d.ts:181 - the CEL pointers are dropped without release, as in the original (the port's cache has nothing to release)
-- src/sim/world/detailRecords.ts:48 - nodes are JS objects rather than one static_malloc'd pool
-- src/sim/world/detailRecords.ts:180 - no cache purge-and-retry loop: the in-memory container cannot run out
+- src/sim/world/detailRecords.ts:49 - nodes are JS objects rather than one static_malloc'd pool
+- src/sim/world/detailRecords.ts:181 - no cache purge-and-retry loop: the in-memory container cannot run out
+- src/sim/world/detailRecords.ts:285 - with the host's projectionGlobals.lodAllNear set, every mech inside t0 gets level 0 (the detail enhancement)
 - src/sim/world/groundQuadtree.ts:21 - a JS object; the 'Not enough memory' path cannot happen
 - src/sim/world/groundQuadtree.ts:273 - nothing to free in JS; kept so object_free_bounds' class-5 branch has its callee
 - src/sim/world/objectTasks.ts:265 - INIT's two products are evaluated in doubles, not the x87's 80 bits (0x1b66e..0x1b6ae); every shipped lap is a small integer, which leaves them far from a rounding boundary
 - src/sim/world/objectTasks.ts:424 - the -1 arm: task_list_notify_rebuilt neither sets currentTask nor passes an argument (0x17450..0x17477), so the C works on whatever task last ran (usually none: address 4) and atoi's a null pointer; the port answers 0 with the task untouched when there is no current task, and otherwise keeps the object slot rather than atoi'ing nothing
-- src/sim/world/palettes.ts:405 - the port's window holds only the 2D; wherever a pixel is not drawn the GPU's 3D view shows, so when any is undrawn every colour not seen in the drawn ones counts as used, in ascending order. The waits are the host's: each pass's DAC is kept in dacPlayback with the waits that follow it
-- src/sim/world/palettes.ts:483 - a non-zero mode (calibration_menu_run's dissolve) is not ported
+- src/sim/world/palettes.ts:408 - the port's window holds only the 2D; wherever a pixel is not drawn (or an inset view stands over it) the GPU's 3D view shows, so when any is undrawn every colour not seen in the drawn ones counts as used, in ascending order. The waits are the host's: each pass's DAC is kept in dacPlayback with the waits that follow it
+- src/sim/world/palettes.ts:487 - a non-zero mode (calibration_menu_run's dissolve) is not ported
 - src/sim/world/projectMaps.ts:41 - capacities are fixed and large; the original takes them from arena_budget_bytes (the DTBL totals the pre-pass sums)
 - src/sim/world/projectMaps.ts:45 - project id maps sized to a fixed large capacity instead of the DTBL arena budget
 - src/sim/world/scrounge.ts:79 - scrounge_install: vertexCount beyond the vertices the port holds
@@ -1757,7 +1759,7 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/mission/tables/missionTables.ts:86 - the marking loops read all 48 records, past the table copy
 - src/mission/vm/chunkExec.ts:346 - GP with no object: the original clears the PREVIOUS gamepiece node
 - src/mission/vm/streams.ts:183 - '.BWD' is appended in the caller's own reference buffer
-- src/render/SceneRenderer.ts:406 - the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled
+- src/render/SceneRenderer.ts:445 - the cockpit pass picks LOD meshes by the view depth of the last object the world pass culled
 - src/shell/controls/config.ts:189 - controls_renumber_devices: strncpy of 16 bytes into record 15\
 - src/shell/controls/config.ts:289 - controls_save_config: fclose is called a second time on the closed file
 - src/shell/controls/inputMap.ts:80 - controls_write_map_entry: a NULL input name prints as (null)
@@ -1821,10 +1823,11 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/engine/vfx/gif.ts:110 - gif_decode: the table grew past 0x1000 codes (no clear code) - the original writes past the work block
 - src/engine/vfx/gif.ts:335 - gif_decode: a code chain longer than the stack (a corrupt GIF) runs over the tables in the original
 - src/engine/vfx/gif.ts:344 - gif_decode: the data ran out before the end code; the original reads on past the file
-- src/engine/vfx/vfx.ts:322 - vfx_line_draw: a callback mode (above 1) is not ported
+- src/engine/vfx/vfx.ts:357 - vfx_line_draw: a callback mode (above 1) is not ported
 - src/mission/commandLine.ts:118 - -E: mw2debug.txt is not opened; the trace goes to the port log
 - src/mission/end.ts:134 - mission_save_results: an objective text runs past the end of the record, onto the stack
 - src/mission/vm/objExec.ts:45 - OBJ with no POLY id loads a loose .wtb file; not ported
+- src/render/passes/indexedView.ts:183 - an inset view in viewport ${key}, past the ${INSET_SLOTS} the window's shaders hold; it shares slot ${slot % INSET_SLOTS}
 - src/render/pipeline/fillDispatch.ts:76 - polygonFillHook 0x${h.toString(16)} is not ported; render_asm_sub_03bb80 used
 - src/render/pipeline/hooks.ts:43 - objectCullHook 0x${a.toString(16)} is not ported; object_cull_main_view used
 - src/render/pipeline/hooks.ts:52 - polygonDrawHook 0x${a.toString(16)} is not ported; polygon_resolve_colour used
@@ -1932,6 +1935,6 @@ Library groups left out of the totals: `clib`, `miles`, `smacker`; dead code lef
 - src/sim/world/objectTasks.ts:441 - task_object_track: REBUILT looks its object up by atoi(NULL); the port keeps the slot it has
 - src/sim/world/objectTasks.ts:465 - task_object_track: fewer than three words - the rest are uninitialised stack buffers in the C (empty here)
 - src/sim/world/objectTasks.ts:528 - task_object_track: a point with duration 0 faults the divide in the C
-- src/sim/world/palettes.ts:190 - palette_slot_set_resource: a slot outside the 20-entry table writes past it in the original; ignored
-- src/sim/world/palettes.ts:347 - palette_fade_step: paletteCycleActive is set, and palette_cycle_step is not ported
-- src/sim/world/palettes.ts:496 - screen_fade_in: the dissolve (a non-zero mode) is not ported
+- src/sim/world/palettes.ts:193 - palette_slot_set_resource: a slot outside the 20-entry table writes past it in the original; ignored
+- src/sim/world/palettes.ts:350 - palette_fade_step: paletteCycleActive is set, and palette_cycle_step is not ported
+- src/sim/world/palettes.ts:500 - screen_fade_in: the dissolve (a non-zero mode) is not ported
